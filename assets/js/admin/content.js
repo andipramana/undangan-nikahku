@@ -132,6 +132,18 @@
           ${textarea("Teks quote", "f-quote-text", 3)}
         `)}
 
+        ${section("Live Streaming & Video Galeri", `
+          <div class="form-grid">
+            ${field("YouTube (URL)", "f-live-youtube", "url")}
+            ${field("Instagram (URL)", "f-live-instagram", "url")}
+            ${field("TikTok (URL)", "f-live-tiktok", "url")}
+            ${field("Video galeri (YouTube)", "f-gallery-video", "url")}
+          </div>
+          <p class="muted">Kosongkan URL untuk menyembunyikan platform itu.
+          Section Live Streaming ikut hilang kalau ketiganya kosong. Video galeri
+          tampil sebagai thumbnail di atas foto galeri.</p>
+        `)}
+
         ${section("Love Story (tiap babak)", `
           <div id="love-story-list"></div>
         `)}
@@ -140,12 +152,28 @@
           <div id="gift-accounts-list"></div>
         `)}
 
+        ${section("Gift — kontak WhatsApp", `
+          <div class="form-grid">
+            ${field("CPW — nomor WA (62…)", "f-gift-contact-cpw")}
+            ${field("CPP — nomor WA (62…)", "f-gift-contact-cpp")}
+          </div>
+          <p class="muted">Dituju tombol "Konfirmasi Pengiriman", dipilih otomatis
+          dari field <code>owner</code> tiap rekening. Kosong = rekening itu tidak
+          ikut di dropdown.</p>
+        `)}
+
         ${section("Gift — alamat kado", `
           <div class="form-grid">
             ${field("Penerima", "f-gift-recipient")}
             ${field("Telepon", "f-gift-phone")}
             ${field("Detail alamat", "f-gift-detail")}
           </div>
+        `)}
+
+        ${section("Gift — rekomendasi kado", `
+          <div id="gift-recs-list"></div>
+          <p class="muted">Foto kado diunggah di tab Foto (folder "Rekomendasi
+          Kado") — foto ke-i dipasangkan dengan baris ke-i di sini.</p>
         `)}
 
         ${section("Lainnya", `
@@ -199,6 +227,12 @@
     set("f-venue-maps", v("event.venue.mapsUrl"));
     set("f-dresscode-text", v("dresscode.text"));
     set("f-quote-text", v("quotePhoto.quote"));
+    set("f-live-youtube", v("livestream.youtube"));
+    set("f-live-instagram", v("livestream.instagram"));
+    set("f-live-tiktok", v("livestream.tiktok"));
+    set("f-gallery-video", v("galleryVideo.youtube"));
+    set("f-gift-contact-cpp", v("gift.contactCPP"));
+    set("f-gift-contact-cpw", v("gift.contactCPW"));
     set("f-gift-recipient", v("gift.address.recipient"));
     set("f-gift-phone", v("gift.address.phone"));
     set("f-gift-detail", v("gift.address.detail"));
@@ -210,6 +244,7 @@
     renderColors();
     renderList("loveStory", "love-story-list");
     renderList("accounts", "gift-accounts-list");
+    renderList("giftRecommendations", "gift-recs-list");
 
     document.getElementById("content-form").addEventListener("submit", onSave);
   }
@@ -286,13 +321,27 @@
     });
   }
 
-  /** Render daftar berulang (loveStory / gift.accounts) dengan tombol
-   * naik/turun + hapus. Value input langsung ditulis ke state (bukan dibaca
-   * saat simpan) — dirender ulang penuh tiap aksi sehingga urutan state
-   * dan DOM tidak pernah berbeda. */
+  /** Render daftar berulang (loveStory / gift.accounts / giftRecommendations)
+   * dengan tombol naik/turun + hapus. Value input langsung ditulis ke state
+   * (bukan dibaca saat simpan) — dirender ulang penuh tiap aksi sehingga
+   * urutan state dan DOM tidak pernah berbeda. */
   function renderList(kind, containerId) {
     const container = document.getElementById(containerId);
-    const items = kind === "loveStory" ? content.loveStory : content.gift.accounts;
+    // || [] — content dari DB lama belum punya giftRecommendations (atau
+    // akun kontak baru); tanpa ini form patah di tengah render.
+    const items =
+      kind === "loveStory" ? content.loveStory
+        : kind === "accounts" ? content.gift.accounts
+        : content.giftRecommendations || [];
+
+    // Pilihan pemilik rekening — menentukan nomor WA tujuan di tombol
+    // "Konfirmasi Pengiriman" (lihat gift.js); "" = rekening itu tidak ikut.
+    const ownerOptions = (item) => `
+      <select data-item-i="__I__" data-key="owner">
+        <option value="">Tidak ikut</option>
+        <option value="cpw" ${item.owner === "cpw" ? "selected" : ""}>CPW (wanita)</option>
+        <option value="cpp" ${item.owner === "cpp" ? "selected" : ""}>CPP (pria)</option>
+      </select>`;
 
     container.innerHTML = items
       .map((item, i) => {
@@ -302,14 +351,20 @@
           <input type="text" data-item-i="${i}" data-key="date" value="${escAttr(item.date)}" placeholder="Tahun">
           <input type="text" data-item-i="${i}" data-key="title" value="${escAttr(item.title)}" placeholder="Judul babak">
           <textarea data-item-i="${i}" data-key="text" rows="2" placeholder="Cerita…">${escAttr(item.text)}</textarea>`
-            : `
+            : kind === "accounts"
+            ? `
           <input type="text" data-item-i="${i}" data-key="bank" value="${escAttr(item.bank)}" placeholder="Bank">
           <input type="text" data-item-i="${i}" data-key="number" value="${escAttr(item.number)}" placeholder="Nomor rekening">
           <input type="text" data-item-i="${i}" data-key="holder" value="${escAttr(item.holder)}" placeholder="Atas nama">
+          ${ownerOptions(item).replace("__I__", String(i))}
           <label class="check-row">
             <input type="checkbox" data-item-i="${i}" data-key="placeholder" ${item.placeholder ? "checked" : ""}>
             Sembunyikan nomor (placeholder)
-          </label>`;
+          </label>`
+            : `
+          <input type="text" data-item-i="${i}" data-key="name" value="${escAttr(item.name)}" placeholder="Nama kado">
+          <input type="text" data-item-i="${i}" data-key="price" value="${escAttr(item.price)}" placeholder="Harga, mis. Rp 250.000">
+          <input type="url" data-item-i="${i}" data-key="link" value="${escAttr(item.link)}" placeholder="Link beli (Shopee/Tokopedia/…)">`;
         return `
         <div class="list-item">
           <div class="list-item__controls">
@@ -322,16 +377,20 @@
       })
       .join("") +
       `<button type="button" class="btn btn--ghost" id="${kind}-add">+ tambah ${
-        kind === "loveStory" ? "babak" : "rekening"
+        kind === "loveStory" ? "babak"
+          : kind === "accounts" ? "rekening"
+          : "rekomendasi"
       }</button>`;
 
-    // Tulis nilai ke state saat mengetik
+    // Tulis nilai ke state saat mengetik (select memakai 'change' — ia tidak
+    // memicu 'input' di semua browser)
     container.querySelectorAll("[data-key]").forEach((input) => {
-      input.addEventListener("input", () => {
+      const write = () => {
         const item = items[Number(input.dataset.itemI)];
-        const key = input.dataset.key;
-        item[key] = input.type === "checkbox" ? input.checked : input.value;
-      });
+        item[input.dataset.key] = input.type === "checkbox" ? input.checked : input.value;
+      };
+      input.addEventListener("input", write);
+      input.addEventListener("change", write);
     });
     container.querySelectorAll("[data-move]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -350,7 +409,11 @@
     });
     document.getElementById(`${kind}-add`).addEventListener("click", () => {
       items.push(
-        kind === "loveStory" ? { date: "", title: "", text: "" } : { bank: "", number: "", holder: "", placeholder: false }
+        kind === "loveStory"
+          ? { date: "", title: "", text: "" }
+          : kind === "accounts"
+          ? { bank: "", number: "", holder: "", owner: "", placeholder: false }
+          : { name: "", price: "", link: "" }
       );
       renderList(kind, containerId);
     });
@@ -398,6 +461,12 @@
     grab("f-venue-maps", "event.venue.mapsUrl");
     grab("f-dresscode-text", "dresscode.text");
     grab("f-quote-text", "quotePhoto.quote");
+    grab("f-live-youtube", "livestream.youtube");
+    grab("f-live-instagram", "livestream.instagram");
+    grab("f-live-tiktok", "livestream.tiktok");
+    grab("f-gallery-video", "galleryVideo.youtube");
+    grab("f-gift-contact-cpp", "gift.contactCPP");
+    grab("f-gift-contact-cpw", "gift.contactCPW");
     grab("f-gift-recipient", "gift.address.recipient");
     grab("f-gift-phone", "gift.address.phone");
     grab("f-gift-detail", "gift.address.detail");

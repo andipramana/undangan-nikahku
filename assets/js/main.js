@@ -261,6 +261,11 @@
     if (window.initWeFoundLove) window.initWeFoundLove();
     if (window.initCoupleSliders) window.initCoupleSliders();
     if (window.initEventCards) window.initEventCards();
+    // Modul yang merender/menghapus elemen (livestream, QR check-in) WAJIB
+    // sebelum initReveal: tombol/section yang baru dibuat harus ikut
+    // terdaftar ke observer reveal pada pemindaian awal.
+    if (window.initLivestream) window.initLivestream();
+    if (window.initQrCheckin) window.initQrCheckin();
     if (window.initReveal) window.initReveal();
 
     window.addEventListener("load", hidePreloader);

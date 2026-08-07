@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- noindex: halaman ini bukan untuk dicari mesin — yang menjaganya adalah
+     Supabase Auth + RLS, bukan "bersembunyi", tapi tidak ada alasan untuk
+     menampilkannya di hasil pencarian. -->
+<meta name="robots" content="noindex">
+<title>Check-in — Mita &amp; Andi</title>
+<link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+
+<!-- ============ LAYAR LOGIN ============ -->
+<!-- Struktur id sama persis dengan admin.html — shared.js menanganinya.
+     Akun admin-qr dibuat manual via SQL Editor (lihat migration 0004). -->
+<div id="login-screen" class="login-screen">
+  <form id="login-form" class="login-card">
+    <h1>Check-in Tamu</h1>
+    <p class="login-hint">Mita &amp; Andi — The Wedding</p>
+    <label>
+      Nama pengguna
+      <input type="text" id="login-username" autocomplete="username" required>
+    </label>
+    <label>
+      Kata sandi
+      <input type="password" id="login-password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn btn--primary" id="login-submit">Masuk</button>
+    <p id="login-error" class="login-error" role="alert"></p>
+  </form>
+</div>
+
+<!-- ============ APLIKASI ============ -->
+<div id="app" hidden>
+  <header class="topbar">
+    <h1>Check-in — Mita &amp; Andi</h1>
+    <div class="topbar__actions">
+      <button type="button" class="btn btn--ghost" id="btn-logout">Keluar</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button type="button" class="tab tab--active" data-tab="checkin">Scan QR</button>
+    <button type="button" class="tab" data-tab="livestream">Live Streaming</button>
+  </nav>
+
+  <!-- ============ TAB SCAN QR ============ -->
+  <main id="tab-checkin" class="panel">
+    <div class="scan-toolbar">
+      <button type="button" class="btn btn--primary" id="btn-scan">Mulai scan</button>
+      <button type="button" class="btn btn--ghost" id="btn-scan-stop" hidden>Hentikan scan</button>
+      <button type="button" class="btn btn--ghost" id="btn-checkins-refresh">Muat ulang daftar</button>
+    </div>
+    <!-- Video kamera belakang + status scan. Canvas sengaja tersembunyi —
+         hanya dipakai membaca frame untuk jsQR, bukan untuk ditampilkan. -->
+    <video id="scan-video" class="scan-video" playsinline muted></video>
+    <p id="scan-status" class="scan-status" role="status">Kamera belum dinyalakan.</p>
+    <canvas id="scan-canvas" hidden></canvas>
+    <div id="checkins-root" style="margin-top:1.25rem"></div>
+  </main>
+
+  <!-- ============ TAB LIVE STREAMING ============ -->
+  <!-- Form ini satu-satunya yang boleh diubah akun admin-qr (RLS migration
+       0004: dengan check hanya mengizinkan key `livestream` berubah).
+       Disimpan via shared.saveLivestream — SELECT → ubah → UPSERT. -->
+  <main id="tab-livestream" class="panel" hidden>
+    <fieldset class="form-section">
+      <legend>Link siaran langsung</legend>
+      <p class="muted" style="margin-top:.25rem">URL kosong = platform itu tidak
+      ditampilkan; kosongkan semuanya untuk menyembunyikan section Live
+      Streaming di undangan.</p>
+      <div class="form-grid">
+        <label class="form-field">
+          <span>YouTube</span>
+          <input type="url" id="f-live-youtube" placeholder="https://youtube.com/…">
+        </label>
+        <label class="form-field">
+          <span>Instagram</span>
+          <input type="url" id="f-live-instagram" placeholder="https://instagram.com/…">
+        </label>
+        <label class="form-field">
+          <span>TikTok</span>
+          <input type="url" id="f-live-tiktok" placeholder="https://tiktok.com/…">
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn--primary" id="btn-save-livestream">Simpan</button>
+      </div>
+    </fieldset>
+  </main>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/js/admin/shared.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="assets/js/admin/admin-qr.js"></script>
+</body>
+</html>

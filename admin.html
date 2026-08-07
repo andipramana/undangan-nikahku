@@ -108,6 +108,9 @@
      memakainya untuk membentuk bingkai pratinjau sesuai kotak asli tiap foto. -->
 <script src="assets/js/gallery-layout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- shared.js WAJIB sebelum admin.js — client Supabase, AdminAPI, dan initAdminAuth
+     diekstrak ke sini, dipakai bersama admin-qr.html (perbaikan bug cukup sekali). -->
+<script src="assets/js/admin/shared.js"></script>
 <script src="assets/js/admin/admin.js"></script>
 <script src="assets/js/admin/content.js"></script>
 <script src="assets/js/admin/photos.js"></script>

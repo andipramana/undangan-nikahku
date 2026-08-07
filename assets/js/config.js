@@ -62,6 +62,22 @@ window.WEDDING_CONFIG = {
     colors: ["#c9a668", "#b5c4a8", "#93a9c2", "#e6c3c0", "#f1ead9"]
   },
 
+  livestream: {
+    // URL siaran langsung per platform. Kosong = platform itu tidak
+    // ditampilkan; semuanya kosong = section Live Streaming tidak dirender
+    // sama sekali (bukan kotak kosong yang disembunyikan).
+    youtube: "",
+    instagram: "",
+    tiktok: ""
+  },
+
+  galleryVideo: {
+    // Video YouTube opsional di atas galeri: thumbnail dulu, baru diputar
+    // saat diklik. Kosong = tidak dirender. BUKAN bagian dari foto galeri —
+    // tidak menggeser pan/zoom yang sudah diatur admin.
+    youtube: ""
+  },
+
   quotePhoto: {
     // Foto full-width 1:1 di bawah kartu dresscode. Ganti isi folder
     // foto_quote (jpg + webp, nama photo) untuk memakai foto lain.
@@ -97,11 +113,18 @@ window.WEDDING_CONFIG = {
   ],
 
   gift: {
+    // Nomor WA tujuan tombol "Konfirmasi Pengiriman" — format 62812xxxxxxx
+    // (tanpa awalan 0 atau +; JS menormalisasi otomatis, tapi lebih aman
+    // diisi rapi). Dipilih otomatis dari field `owner` tiap rekening.
+    contactCPP: "", // calon pengantin pria
+    contactCPW: "", // calon pengantin wanita
     // Selama masih placeholder (placeholder: true), nomor rekening TIDAK ditampilkan
     // ke tamu. Isi nomor asli lalu hapus "placeholder: true" agar nomor + tombol Salin muncul.
+    // `owner: "cpp" | "cpw"` menandai rekening milik siapa — menentukan nomor WA
+    // tujuan di modal konfirmasi pengiriman ("" = tidak ikut di dropdown).
     accounts: [
-      { bank: "Bank BCA", number: "1234567890", holder: "Mita Meliana" },
-      { bank: "Bank Mandiri", number: "0987654321", holder: "Andi Pramana" }
+      { bank: "Bank BCA", number: "1234567890", holder: "Mita Meliana", owner: "cpw" },
+      { bank: "Bank Mandiri", number: "0987654321", holder: "Andi Pramana", owner: "cpp" }
     ],
     address: {
       recipient: "Mita Meliana",
@@ -109,6 +132,14 @@ window.WEDDING_CONFIG = {
       detail: "Alamat pengiriman kado — silakan diperbarui sesuai kebutuhan."
     },
   },
+
+  giftRecommendations: [
+    // Rekomendasi kado (modal kartu + tombol Beli). Foto kado diunggah di
+    // panel admin, folder "Rekomendasi Kado" (gift_item) — foto ke-i
+    // dipasangkan dengan rekomendasi ke-i: jumlah & urutan keduanya harus
+    // sinkron (admin diingatkan lewat hint di tab Foto).
+    // { name: "Perabot Rumah Tangga", price: "Rp 250.000", link: "https://shopee.co.id/..." }
+  ],
 
   hero: {
     // Slideshow cover / opening / closing — di-fetch dari manifest per folder

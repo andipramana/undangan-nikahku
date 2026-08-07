@@ -47,6 +47,16 @@ window.initGallery = async function () {
     })
     .join("");
 
+  // Slot video galeri — sengaja BUKAN bagian dari photos/PATTERN: menyisipkan
+  // video ke array foto akan menggeser indeks semua foto dan merusak bentuk
+  // kotak yang sudah dihitung MAUPUN pan/zoom yang sudah diatur admin untuk
+  // foto-foto itu. Slot ini berdiri sendiri sebagai baris pertama grid;
+  // foto-foto tetap menempati kotak sesuai polanya masing-masing.
+  const videoId = parseYouTubeId(
+    window.WEDDING_CONFIG.galleryVideo && window.WEDDING_CONFIG.galleryVideo.youtube
+  );
+  if (videoId) wrapper.prepend(buildVideoSlot(videoId));
+
   const lightbox = document.getElementById("lightbox");
   const lightboxImg = document.getElementById("lightbox-img");
 
@@ -56,6 +66,9 @@ window.initGallery = async function () {
   }
 
   wrapper.addEventListener("click", (e) => {
+    // Slot video punya tombol putar sendiri — jangan biarkan kliknya membuka
+    // lightbox (data-full-nya tidak ada, akan membuka lightbox kosong).
+    if (e.target.closest(".gallery-video")) return;
     const item = e.target.closest(".gallery-item");
     if (!item) return;
     lightboxImg.src = item.dataset.full;
@@ -70,3 +83,40 @@ window.initGallery = async function () {
 
   if (window.revealScan) window.revealScan(wrapper);
 };
+
+/** Ambil ID video dari URL YouTube — mendukung format watch?v=, youtu.be/,
+ * dan embed/. Mengembalikan "" kalau URL kosong atau bukan video YouTube. */
+function parseYouTubeId(url) {
+  if (!url) return "";
+  const m = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/.exec(url);
+  return m ? m[1] : "";
+}
+
+/** Thumbnail dulu (hqdefault dari img.youtube.com — tanpa memuat YouTube IFrame
+ * API di awal), iframe baru dibuat saat tombol putar diklik. Selaras dengan
+ * fokus performa HP proyek ini: tidak ada beban video sebelum diminta. */
+function buildVideoSlot(videoId) {
+  const slot = document.createElement("div");
+  slot.className = "gallery-item gallery-item--landscape gallery-video";
+  slot.dataset.reveal = "pop";
+  slot.innerHTML = `
+    <button type="button" class="gallery-video__launcher" aria-label="Putar video galeri">
+      <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="Video galeri" loading="lazy">
+      <span class="gallery-video__play">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+    </button>`;
+
+  const launcher = slot.querySelector(".gallery-video__launcher");
+  launcher.addEventListener("click", () => {
+    if (slot.querySelector("iframe")) return;
+    const frame = document.createElement("iframe");
+    frame.className = "gallery-video__frame";
+    frame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+    frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+    frame.setAttribute("allowfullscreen", "");
+    launcher.remove();
+    slot.appendChild(frame);
+  });
+  return slot;
+}

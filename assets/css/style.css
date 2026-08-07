@@ -89,6 +89,18 @@ a { color: inherit; }
 }
 .audio-fab.playing .audio-fab__disc { animation-play-state: running; }
 
+/* Tombol QR check-in — kembar kiri dari audio FAB. Muncul hanya untuk tamu
+   perorangan (URL ber-?to=), diatur qr-checkin.js. Kiri vs kanan supaya kedua
+   tombol tidak bertumpuk di HP sempit. */
+.qr-fab {
+  position: fixed; left: 1.1rem; bottom: 1.1rem; z-index: 500;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--color-dark); border: 1.5px solid var(--color-gold);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--color-gold);
+}
+.qr-fab svg { width: 22px; height: 22px; }
+
 /* ---------- Hero sections (cover / opening / closing) ---------- */
 .section-hero {
   position: relative;
@@ -682,6 +694,24 @@ a { color: inherit; }
 .gallery-item--third { grid-column: span 4; }
 .gallery-item--twothirds { grid-column: span 8; }
 
+/* Slot video galeri (baris pertama, opsional): thumbnail dulu, iframe baru
+   dibuat saat tombol putar diklik — tidak ada beban YouTube sebelum diminta. */
+.gallery-video { cursor: default; }
+.gallery-video__launcher {
+  position: relative; display: block; width: 100%; height: 100%;
+  padding: 0; border: 0; cursor: pointer; background: #000;
+}
+.gallery-video__launcher img { width: 100%; height: 100%; object-fit: cover; opacity: .85; }
+.gallery-video__play {
+  position: absolute; inset: 0; margin: auto;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(20, 18, 15, .65); border: 2px solid var(--color-gold);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-gold-soft); pointer-events: none;
+}
+.gallery-video__play svg { width: 26px; height: 26px; margin-left: 3px; }
+.gallery-video__frame { display: block; width: 100%; height: 100%; border: 0; }
+
 .lightbox {
   position: fixed; inset: 0; background: rgba(10,9,8,.94); z-index: 900;
   display: flex; align-items: center; justify-content: center;
@@ -694,6 +724,51 @@ a { color: inherit; }
   background: none; border: none; color: var(--color-gold-soft);
   font-size: 2.2rem; cursor: pointer; line-height: 1;
 }
+
+/* ---------- Modal (overlay + panel) ----------
+   Pola yang sama dengan .lightbox: fixed inset-0, konten di tengah, panel
+   gelap berbingkai emas supaya konsisten di atas section terang maupun gelap.
+   Dibuka/ditutup lewat atribut `hidden` (lihat aturan [hidden] di atas). */
+.modal {
+  position: fixed; inset: 0; z-index: 950;
+  background: rgba(10, 9, 8, .9);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.25rem;
+}
+.modal__panel {
+  width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto;
+  background: var(--color-dark-2); border: 1px solid var(--color-gold);
+  border-radius: 14px; padding: 1.5rem;
+  color: var(--color-text-light);
+  animation: fadeUp .35s ease;
+}
+.modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+.modal__header h3 { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; margin: 0; letter-spacing: .03em; }
+.modal__close {
+  background: none; border: none; color: var(--color-gold-soft);
+  font-size: 1.8rem; line-height: 1; cursor: pointer; padding: .1rem .35rem;
+}
+.modal__field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; text-align: left; }
+.modal__field > span { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
+.modal__field select, .modal__field textarea {
+  font-family: var(--font-sans); font-size: .92rem; color: var(--color-text-light);
+  background: transparent; border: 1px solid var(--color-gold); border-radius: 8px;
+  padding: .6rem .7rem; resize: vertical;
+}
+.modal__field select option { color: var(--color-text); background: var(--color-bg); }
+.modal__field select:focus, .modal__field textarea:focus { outline: none; border-color: var(--color-gold-soft); }
+.modal__panel .btn-primary { width: 100%; }
+.modal__hint { font-size: .7rem; opacity: .6; margin: .9rem 0 0; text-align: center; }
+
+/* Kanvas QR check-in tamu — kotak putih supaya kontras QR-nya jelas saat
+   dipindai petugas (QR itu di atas panel gelap). */
+.qr-container {
+  background: #fff; border-radius: 12px; padding: 1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.qr-modal__canvas-wrap { max-width: 250px; margin: 0 auto; }
+.qr-modal__canvas-wrap canvas { display: block; width: 100%; height: auto; }
+.qr-modal__hint { font-size: .72rem; opacity: .65; margin-top: 1rem; text-align: center; }
 
 /* ---------- Gift ---------- */
 .gift-panel { max-width: 480px; margin: 2rem auto 0; opacity: 0; animation: fadeUp .4s ease forwards; }
@@ -713,8 +788,41 @@ a { color: inherit; }
 .gift-address {
   border: 1px dashed var(--color-gold); border-radius: 10px; padding: 1rem 1.25rem;
   text-align: left; font-size: .88rem; line-height: 1.6;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
 }
+.gift-address__text { flex: 1; min-width: 0; }
+.gift-address__copy { align-self: flex-end; flex: none; }
 .gift-note { font-size: .7rem; opacity: .6; margin-top: .75rem; }
+
+/* Dua tombol amplop digital sejajar di section Tanda Kasih */
+.gift-actions { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
+.gift-confirm-btn { display: block; margin: 1.1rem auto 0; }
+
+/* Rekomendasi kado (modal): dua kolom di HP, foto dipasangkan by-index
+   dengan entri giftRecommendations[] oleh gift.js */
+.gift-recs { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.gift-rec-card {
+  border: 1px solid var(--color-gold); border-radius: 12px; overflow: hidden;
+  display: flex; flex-direction: column; text-align: left;
+}
+.gift-rec-card__img { aspect-ratio: 1; background: var(--color-dark); }
+.gift-rec-card__img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gift-rec-card__placeholder {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; height: 100%;
+}
+.gift-rec-card__body { padding: .7rem .8rem .85rem; display: flex; flex-direction: column; gap: .3rem; }
+.gift-rec-card__name { font-family: var(--font-serif); font-size: .9rem; color: var(--color-gold-soft); }
+.gift-rec-card__price { font-size: .78rem; opacity: .8; }
+.gift-rec-card__body .btn-outline {
+  margin-top: .4rem; padding: .5rem 1rem; font-size: .68rem; text-align: center;
+}
+.gift-rec-card__nobuy { font-size: .68rem; opacity: .4; letter-spacing: .12em; text-transform: uppercase; margin-top: .4rem; }
+
+/* Tombol platform live streaming — ikon + label sejajar */
+.livestream-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .8rem; margin-top: 1.75rem; }
+.livestream-actions .btn-outline { display: inline-flex; align-items: center; gap: .45rem; }
+.livestream-actions svg { width: 15px; height: 15px; }
 
 /* ---------- RSVP ---------- */
 .rsvp-form {

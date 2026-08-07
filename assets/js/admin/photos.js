@@ -23,7 +23,8 @@
     ["event", "Slider kartu event"],
     ["gallery", "Galeri foto"],
     ["quote", "Quote foto (1:1)"],
-    ["story", "Our Story (16:10)"]
+    ["story", "Our Story (16:10)"],
+    ["gift_item", "Rekomendasi Kado (1:1)"]
   ];
 
   // Lebar maks unggahan per folder — sama dengan TARGETS di compress-images.py
@@ -33,7 +34,8 @@
     event: 1200, gallery: 1200,
     story: 960,
     wfl: 560,
-    quote: 1280
+    quote: 1280,
+    gift_item: 800
   };
 
   // Folder yang ditaruh di slider Swiper dengan loop: true
@@ -89,9 +91,19 @@
     // Peringatan ambang Swiper loop
     if (LOOP_FOLDERS.has(currentFolder) && photos.length < MIN_LOOP_PHOTOS) {
       warning.hidden = false;
+      warning.classList.remove("warning--info");
       warning.textContent =
         `Folder ini dipakai slider dengan loop — butuh minimal ${MIN_LOOP_PHOTOS} foto agar ` +
         `loop Swiper mulus (sekarang ${photos.length}). Tambahkan lebih dulu.`;
+    } else if (currentFolder === "gift_item") {
+      // Foto kado dipasangkan by-index dengan rekomendasi kado di tab Teks —
+      // jumlah & urutannya harus sinkron. Angka rekomendasi dibaca dari DB
+      // (bukan config lokal) supaya tidak menyesatkan saat admin sudah
+      // menyimpan daftar di Supabase.
+      warning.hidden = false;
+      warning.classList.add("warning--info");
+      warning.textContent = "Membandingkan jumlah foto dengan rekomendasi kado…";
+      updateGiftHint();
     } else {
       warning.hidden = true;
     }
@@ -227,6 +239,25 @@
 
   function clamp(v, min, max) {
     return Math.min(max, Math.max(min, v));
+  }
+
+  /** Hint sinkron foto↔rekomendasi kado (folder gift_item): bandingkan jumlah
+   * foto terunggah dengan entri giftRecommendations di site_content. */
+  async function updateGiftHint() {
+    const { data } = await window.AdminAPI.query(
+      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      "Permintaan teks"
+    );
+    if (currentFolder !== "gift_item") return; // pengguna sudah pindah folder
+    const warning = document.getElementById("photo-warning");
+    const recs = (data && data.content && data.content.giftRecommendations) || [];
+    warning.hidden = false;
+    warning.classList.add("warning--info");
+    warning.innerHTML =
+      recs.length === photos.length
+        ? `Foto kado: ${photos.length} — jumlah & urutan sinkron dengan rekomendasi kado di tab Teks.`
+        : `Foto kado: ${photos.length}, rekomendasi kado di tab Teks: ${recs.length}. ` +
+          `Foto ke-<em>i</em> tampil untuk rekomendasi ke-<em>i</em> — sesuaikan urutan/jumlahnya agar berpasangan.`;
   }
 
   // -------------------------------------------------------------------------

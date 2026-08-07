@@ -32,7 +32,8 @@
     // hanya cadangan kalau indeksnya tidak diketahui.
     gallery: 16 / 10,
     quote: 1,          // 1:1
-    story: 16 / 10
+    story: 16 / 10,
+    gift_item: 1       // kartu kado 1:1
   };
 
   let item = null;   // baris photos yang sedang diedit
