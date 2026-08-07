@@ -21,6 +21,13 @@
 
 * { box-sizing: border-box; }
 
+/* Atribut `hidden` cuma bernilai `display: none` di stylesheet BAWAAN browser,
+   dan deklarasi `display` apa pun dari stylesheet ini mengalahkannya. Tanpa
+   aturan ini, `.rsvp-form label { display: flex }` membuat kolom "Jumlah Tamu"
+   tetap terlihat walau sudah di-`hidden` lewat JS. Dipasang sebagai aturan
+   umum supaya setiap elemen ber-`hidden` berikutnya otomatis aman. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -847,6 +854,12 @@ body::after {
 .wfl-slider {
   overflow: hidden;
   padding-bottom: 1.5rem; /* ruang pagination */
+  /* Aliran pita harus berkecepatan RATA. Dengan easing bawaan Swiper, tiap foto
+     melambat di ujung perpindahannya dan hanyutan yang seharusnya mulus jadi
+     tersendat berdenyut. Variabel ini disediakan Swiper untuk menimpa timing
+     function .swiper-wrapper. Berpasangan dengan autoplay delay:0 di
+     we-found-love.js — keduanya harus ada, satu saja tidak cukup. */
+  --swiper-wrapper-transition-timing-function: linear;
 }
 .wfl-slider .swiper-wrapper { align-items: center; }
 .wfl-slide {

@@ -16,12 +16,18 @@ window.initRsvp = function () {
 
   // Pilihan kehadiran pakai tombol capsule (bukan dropdown): default "Hadir"
   const attendanceBox = document.getElementById("rsvp-attendance");
+  const guestsInput = document.getElementById("rsvp-guests");
+  // Kolom "Jumlah Tamu" hanya masuk akal kalau tamunya datang. Menanyakannya
+  // pada yang memilih "Tidak Hadir" membuat formulir terasa tidak menyimak.
+  const guestsField = guestsInput && guestsInput.closest("label");
   let attendanceValue = "hadir";
+
   function selectPill(btn) {
     attendanceBox.querySelectorAll(".rsvp-pill").forEach((b) => {
       b.classList.toggle("is-selected", b === btn);
     });
     attendanceValue = btn.dataset.value;
+    if (guestsField) guestsField.hidden = attendanceValue !== "hadir";
   }
   attendanceBox.querySelectorAll(".rsvp-pill").forEach((btn) => {
     btn.addEventListener("click", () => selectPill(btn));
@@ -83,7 +89,10 @@ window.initRsvp = function () {
     const payload = {
       name: nameInput.value.trim(),
       attendance: attendanceValue,
-      guest_count: Number(document.getElementById("rsvp-guests").value) || 1,
+      // Yang tidak hadir selalu terkirim 1, bukan angka sisa yang sempat
+      // diketik sebelum berpindah pilihan — kalau tidak, rekap "total orang"
+      // di panel admin ikut menghitung tamu yang justru menyatakan tidak datang.
+      guest_count: attendanceValue === "hadir" ? Number(guestsInput.value) || 1 : 1,
       message: document.getElementById("rsvp-message").value.trim()
     };
 
