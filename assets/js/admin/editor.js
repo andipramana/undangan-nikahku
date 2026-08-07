@@ -132,9 +132,15 @@
    * ruangnya nol di zoom 1: seret tidak melakukan apa pun sampai admin
    * menaikkan zoom lebih dulu.
    *
-   * Rumusnya: gambar di-cover dengan skala s, sisa yang terpotong = ukuran
-   * ter-render − ukuran bingkai. transform: scale(zoom) tidak mengubah ruang
-   * potong itu, hanya memperbesar tampilannya di layar — makanya dikali zoom. */
+   * Rumusnya: gambar di-cover dengan skala s lalu diperbesar lagi oleh
+   * transform: scale(zoom) — ukuran ter-render sebenarnya jadi nw*s*zoom
+   * dan nh*s*zoom, BUKAN (slack di zoom 1) × zoom. Bedanya penting: kalau
+   * satu sumbu pas persis dengan bingkai di zoom 1 (slack = 0, sumbu itu
+   * tidak bisa digeser sama sekali), mengalikan slack-nol itu dengan zoom
+   * tetap menghasilkan nol untuk selamanya — sumbu itu terkunci walau sudah
+   * di-zoom. Menghitung ukuran ter-render dulu (nw*s*zoom) baru dikurangi
+   * bingkai membuat KEDUA sumbu ikut melebar begitu zoom naik, sesuai yang
+   * terlihat di layar. */
   function panRange() {
     const img = document.getElementById("editor-img");
     const rect = preview.getBoundingClientRect();
@@ -143,8 +149,8 @@
     if (!nw || !nh) return { x: 0, y: 0 };
     const s = Math.max(rect.width / nw, rect.height / nh); // skala object-fit: cover
     return {
-      x: Math.max(0, nw * s - rect.width) * zoom,
-      y: Math.max(0, nh * s - rect.height) * zoom
+      x: Math.max(0, nw * s * zoom - rect.width),
+      y: Math.max(0, nh * s * zoom - rect.height)
     };
   }
 

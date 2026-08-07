@@ -14,13 +14,15 @@ window.initRsvp = function () {
 
   const statusLabel = { hadir: "Hadir", tidak_hadir: "Tidak Hadir", ragu: "Ragu-ragu" };
 
-  // Pilihan kehadiran pakai tombol capsule (bukan dropdown): default "Hadir"
+  // Pilihan kehadiran pakai tombol capsule (bukan dropdown). Belum ada yang
+  // terpilih di awal — tamu harus klik dulu, jangan diasumsikan "Hadir".
   const attendanceBox = document.getElementById("rsvp-attendance");
   const guestsInput = document.getElementById("rsvp-guests");
-  // Kolom "Jumlah Tamu" hanya masuk akal kalau tamunya datang. Menanyakannya
-  // pada yang memilih "Tidak Hadir" membuat formulir terasa tidak menyimak.
+  // Kolom "Jumlah Tamu" hanya masuk akal kalau tamunya datang, DAN kalau
+  // kehadirannya sudah dipilih sama sekali — sebelum diklik, sembunyikan.
   const guestsField = guestsInput && guestsInput.closest("label");
-  let attendanceValue = "hadir";
+  let attendanceValue = "";
+  if (guestsField) guestsField.hidden = true;
 
   function selectPill(btn) {
     attendanceBox.querySelectorAll(".rsvp-pill").forEach((b) => {
@@ -32,7 +34,6 @@ window.initRsvp = function () {
   attendanceBox.querySelectorAll(".rsvp-pill").forEach((btn) => {
     btn.addEventListener("click", () => selectPill(btn));
   });
-  selectPill(attendanceBox.querySelector('[data-value="hadir"]'));
 
   function escapeHtml(str) {
     const div = document.createElement("div");
@@ -77,6 +78,11 @@ window.initRsvp = function () {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const submitBtn = document.getElementById("rsvp-submit");
+
+    if (!attendanceValue) {
+      statusEl.textContent = "Pilih dulu kehadiranmu ya.";
+      return;
+    }
 
     if (!window.sb) {
       statusEl.textContent = "Gagal terhubung ke server. Coba lagi nanti.";
