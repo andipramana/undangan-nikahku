@@ -14,15 +14,15 @@ window.initGallery = async function () {
   /** Gerak masuk per foto, ditentukan posisinya dalam baris grid:
    *  - baris berisi DUA foto -> yang kiri meluncur dari kiri, yang kanan dari
    *    kanan, keduanya bersamaan sehingga terlihat seperti pintu yang menutup.
-   *    Ada dua bentuk baris begini: portrait+portrait, dan quarter+threequarter.
+   *    Ada dua bentuk baris begini: portrait+portrait, dan third+twothirds.
    *  - baris satu foto selebar grid (landscape) -> mengembang di tempat.
    * Pasangan portrait dibedakan lewat item sebelumnya, bukan sesudahnya, supaya
    * penentuannya tetap benar dibaca berurutan dari atas. */
   function motionFor(i) {
     const cur = PATTERN[i] || "landscape";
     if (cur === "portrait") return PATTERN[i - 1] === "portrait" ? "slide-right" : "slide-left";
-    if (cur === "quarter") return "slide-left";
-    if (cur === "threequarter") return "slide-right";
+    if (cur === "third") return "slide-left";
+    if (cur === "twothirds") return "slide-right";
     return "pop";
   }
 

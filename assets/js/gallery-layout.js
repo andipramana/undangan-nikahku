@@ -17,8 +17,8 @@
     "portrait",
     "portrait",
     "landscape",
-    "quarter",
-    "threequarter",
+    "third",
+    "twothirds",
     "landscape",
     "portrait",
     "portrait",
@@ -27,22 +27,24 @@
     "portrait",
     "portrait",
     "landscape",
-    "quarter",
-    "threequarter",
+    "third",
+    "twothirds",
     "landscape",
     "portrait",
     "portrait",
     "landscape"
   ];
 
-  // Berapa kolom (dari 4) yang ditempati tiap bentuk — sesuai .gallery-item--*
-  // di style.css.
-  const SPAN = { landscape: 4, threequarter: 3, portrait: 2, quarter: 1 };
+  // Berapa kolom (dari 12) yang ditempati tiap bentuk — sesuai .gallery-item--*
+  // di style.css. Grid memakai 12 kolom supaya pembagian perdua (potret) DAN
+  // pertiga (baris campur) sama-sama bisa dibentuk; dengan 4 kolom, sepertiga
+  // tidak mungkin.
+  const SPAN = { landscape: 12, twothirds: 8, portrait: 6, third: 4 };
 
   // Tetapan geometri grid, disalin dari .gallery-grid di style.css. Rasio
   // dihitung dari sini (bukan angka rasio yang ditulis tangan) supaya kalau
   // salah satu tetapan berubah, keempat rasionya ikut benar sendiri.
-  const COLUMNS = 4;
+  const COLUMNS = 12;
   const GAP = 8; // .5rem
   const MAX_WIDTH = 720; // max-width .gallery-grid
   const ROW_HEIGHT = 450; // grid-auto-rows: min(450px, 60vw)
@@ -51,9 +53,9 @@
 
   const LABEL = {
     landscape: "selebar grid",
-    threequarter: "3/4 lebar",
+    twothirds: "2/3 lebar",
     portrait: "1/2 lebar",
-    quarter: "1/4 lebar — sempit & tinggi"
+    third: "1/3 lebar — sempit & tinggi"
   };
 
   /** Bentuk kotak untuk foto ke-i (0-based) dalam folder galeri. */
