@@ -17,11 +17,10 @@
     formRoot = document.getElementById("content-form-root");
     formRoot.innerHTML = "<p class='muted'>Memuat teks…</p>";
 
-    const { data, error } = await sb
-      .from("site_content")
-      .select("content")
-      .eq("id", 1)
-      .maybeSingle();
+    const { data, error } = await window.AdminAPI.query(
+      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      "Permintaan teks"
+    );
     if (error && error.code !== "PGRST116") {
       // Jangan tinggalkan layar di "Memuat teks…" selamanya — toast hilang
       // dalam 2,5 detik dan tamu-admin tidak punya petunjuk apa pun soal

@@ -23,8 +23,39 @@
     throw new Error("Supabase client tidak bisa diinisialisasi");
   }
 
+  /** Bungkus query Supabase agar TIDAK bisa menggantung selamanya.
+   *
+   * Menunda pemanggilan keluar dari callback auth sudah sangat mengurangi
+   * peluang macet, tapi tidak menghapusnya: kalau kunci auth tetap tertahan,
+   * permintaan diam tanpa pernah menolak, dan layar berhenti di "Memuat…"
+   * tanpa error, tanpa jalan keluar. Jaring ini mengubah kondisi itu jadi
+   * kegagalan biasa yang bisa ditampilkan lengkap dengan tombol "Coba lagi".
+   *
+   * Bentuk kembaliannya sengaja disamakan dengan supabase-js ({ data, error })
+   * supaya pemanggilnya tidak perlu menangani dua pola berbeda. */
+  async function query(builder, label) {
+    const TIMEOUT_MS = 12000;
+    let timer;
+    try {
+      return await Promise.race([
+        builder,
+        new Promise((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error(`${label} tidak dijawab dalam 12 detik. Coba lagi.`)),
+            TIMEOUT_MS
+          );
+        })
+      ]);
+    } catch (err) {
+      return { data: null, error: err, count: null };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   window.AdminAPI = {
     sb,
+    query,
     // URL publik foto di bucket 'photos' (path relatif, mis. 'bride/01.webp')
     photoUrl: (path) => sb.storage.from("photos").getPublicUrl(path).data.publicUrl,
     toast,
@@ -124,8 +155,15 @@
     if (event === "SIGNED_OUT") setTimeout(showLogin, 0);
   });
 
+  // Jalur INI yang dipakai saat halaman dimuat ulang dengan sesi tersimpan
+  // (SIGNED_IN tidak menyala; yang menyala INITIAL_SESSION). Penundaannya sama
+  // pentingnya dengan di atas: saat memuat ulang, supabase-js kerap sedang
+  // menyegarkan token dan masih memegang kunci auth ketika .then() ini
+  // dijalankan. Gejalanya persis seperti yang dilaporkan — tab Teks diam di
+  // "Memuat teks…", lalu tiba-tiba terisi setelah browser di-minimize dan
+  // dibuka lagi, karena visibilitychange memaksa supabase-js melepas kuncinya.
   sb.auth.getSession().then(({ data }) => {
-    if (data.session) showApp();
+    if (data.session) setTimeout(showApp, 0);
   });
 
   document.getElementById("login-form").addEventListener("submit", async (e) => {

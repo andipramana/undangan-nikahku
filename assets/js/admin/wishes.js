@@ -24,10 +24,10 @@
     root.innerHTML = "<p class='muted'>Memuat ucapan…</p>";
 
     const table = (window.WEDDING_CONFIG.supabase && window.WEDDING_CONFIG.supabase.wishesTable) || "wishes";
-    const { data, error, count } = await sb
-      .from(table)
-      .select("*", { count: "exact" })
-      .order("created_at", { ascending: false });
+    const { data, error, count } = await window.AdminAPI.query(
+      sb.from(table).select("*", { count: "exact" }).order("created_at", { ascending: false }),
+      "Permintaan ucapan"
+    );
 
     if (error) {
       root.innerHTML =

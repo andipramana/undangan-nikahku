@@ -58,15 +58,23 @@
     const grid = document.getElementById("photo-grid");
     grid.innerHTML = "<p class='muted'>Memuat foto…</p>";
 
-    const { data, error } = await sb
-      .from("photos")
-      .select("*")
-      .eq("folder", currentFolder)
-      .order("sort_order", { ascending: true })
-      .order("id", { ascending: true });
+    const { data, error } = await window.AdminAPI.query(
+      sb
+        .from("photos")
+        .select("*")
+        .eq("folder", currentFolder)
+        .order("sort_order", { ascending: true })
+        .order("id", { ascending: true }),
+      "Permintaan foto"
+    );
 
     if (error) {
-      grid.innerHTML = "";
+      // Jangan mengosongkan grid tanpa jejak — toast lenyap dalam 2,5 detik dan
+      // yang tersisa cuma layar kosong tanpa cara mencoba lagi.
+      grid.innerHTML =
+        `<p class="warning">Gagal memuat foto: ${esc(error.message)}</p>` +
+        `<button type="button" class="btn btn--primary" id="photos-retry">Coba lagi</button>`;
+      document.getElementById("photos-retry").addEventListener("click", render);
       toast("Gagal memuat foto: " + error.message, true);
       return;
     }
