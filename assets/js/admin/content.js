@@ -57,7 +57,13 @@
 
   function render() {
     const c = content;
-    const esc = (v) => (v ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+    // String() WAJIB: heroSlideInterval bernilai angka (4500), dan tanpa
+    // pemaksaan tipe ini `.replace` melempar TypeError di tengah pengisian form.
+    // Akibatnya semua yang dijalankan SESUDAHNYA ikut mati diam-diam — warna
+    // dresscode, daftar Love Story, daftar rekening, sampai pemasangan listener
+    // tombol "Simpan semua" (yang lalu memuat ulang halaman alih-alih menyimpan).
+    // Bandingkan escAttr() di bawah yang sejak awal sudah memakai String().
+    const esc = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
     const v = (path) => esc(getPath(c, path));
 
     // Kartu berulang dirender dari state — lihat renderList() di bawah.

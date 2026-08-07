@@ -124,7 +124,12 @@
   }
 
   preview.addEventListener("pointerdown", (e) => {
-    if (e.target !== document.getElementById("editor-img")) return;
+    // Jangan menyaring berdasarkan e.target === img: CSS memberi
+    // `.editor__preview img { pointer-events: none }`, jadi sasaran pointer
+    // SELALU .editor__preview dan tidak pernah <img> — syarat lama membuat
+    // seret tidak pernah dimulai sama sekali. Cukup pastikan pointernya
+    // mendarat di dalam bingkai pratinjau.
+    if (!document.getElementById("editor-img").src) return;
     dragging = true;
     lastX = e.clientX;
     lastY = e.clientY;
