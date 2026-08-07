@@ -35,7 +35,34 @@
     content = data && data.content
       ? JSON.parse(JSON.stringify(data.content))
       : window.AdminAPI.contentFromConfig(window.WEDDING_CONFIG);
+    seedDefaults(content);
     render();
+  }
+
+  /** Tanam default untuk key yang belum ada di site_content versi lama (DB
+   * diisi sebelum field-field baru ditambahkan). Form — terutama renderList —
+   * membaca struktur state ini LANGSUNG: kalau key-nya hilang, guard `|| []`
+   * di renderList mencegah crash, TAPI array hasilnya array lepas — tombol
+   * "+ tambah rekomendasi" mendorong item ke array itu, lalu render ulang
+   * menghitung ulang dari `undefined || []` dan itemnya HILANG (bug:
+   * tombol terlihat hidup, hasilnya tidak pernah bertahan, ketikannya tidak
+   * ikut tersimpan). Seed dijalankan DI SINI — sebelum render — supaya
+   * state-nya benar sejak awal, bukan diperbaiki parsial di renderList. */
+  function seedDefaults(c) {
+    c.livestream = Object.assign(
+      { youtube: "", instagram: "", tiktok: "" },
+      isPlainObject(c.livestream) ? c.livestream : {}
+    );
+    c.galleryVideo = Object.assign({ youtube: "" }, isPlainObject(c.galleryVideo) ? c.galleryVideo : {});
+    if (!isPlainObject(c.gift)) c.gift = {};
+    if (!Array.isArray(c.gift.accounts)) c.gift.accounts = [];
+    if (c.gift.contactCPP === undefined) c.gift.contactCPP = "";
+    if (c.gift.contactCPW === undefined) c.gift.contactCPW = "";
+    if (!Array.isArray(c.giftRecommendations)) c.giftRecommendations = [];
+  }
+
+  function isPlainObject(v) {
+    return v !== null && typeof v === "object" && !Array.isArray(v);
   }
 
   // -------------------------------------------------------------------------
@@ -327,8 +354,9 @@
    * urutan state dan DOM tidak pernah berbeda. */
   function renderList(kind, containerId) {
     const container = document.getElementById(containerId);
-    // || [] — content dari DB lama belum punya giftRecommendations (atau
-    // akun kontak baru); tanpa ini form patah di tengah render.
+    // || [] jaring pengaman kedua — key-nya seharusnya sudah dijamin ada
+    // oleh seedDefaults() di load(); kalau pun lepas, setidaknya form tidak
+    // patah di tengah render.
     const items =
       kind === "loveStory" ? content.loveStory
         : kind === "accounts" ? content.gift.accounts
