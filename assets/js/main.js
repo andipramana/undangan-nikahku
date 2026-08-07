@@ -76,6 +76,9 @@
         requestAnimationFrame(() => {
           requestAnimationFrame(() => opening.classList.add("section-revealed"));
         });
+        // Teks/tombol/countdown baru animasi masuk SETELAH foto section selesai
+        // (durasi transisi section = 2.6s, lihat #opening.section-revealed di CSS).
+        setTimeout(() => opening.classList.add("text-revealed"), 2700);
       }
       if (window.refreshReveal) window.refreshReveal();
     }

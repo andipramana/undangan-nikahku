@@ -58,20 +58,22 @@
   <div class="invitation-body">
 
     <!-- ============ COUNTDOWN (section biasa, tetap bisa di-scroll ulang, foto auto-slide seperti cover) ============ -->
-    <section id="opening" class="section-hero">
+    <section id="opening" class="section-hero section-hero--anchor-right-bottom">
       <div class="hero-media" id="opening-media">
         <div class="hero-overlay hero-overlay--flat"></div>
       </div>
       <div class="section-fade-bottom section-fade-bottom--dark"></div>
       <div class="hero-content">
-        <p class="eyebrow" data-aos="fade-down">The Wedding Of</p>
-        <p class="script-names script-names--small" data-aos="zoom-in" data-aos-delay="80">Mita <span class="amp">&amp;</span> Andi</p>
-        <p class="cover-countdown__date" data-aos="fade-up" data-aos-delay="150" id="event-date-label"></p>
-        <a id="btn-add-calendar" class="btn-outline btn-outline--light" data-aos="fade-up" data-aos-delay="220" href="#" target="_blank" rel="noopener">
+        <div class="countdown-heading">
+          <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
+          <p class="script-names script-names--small text-enter text-enter--left">Mita <span class="amp">&amp;</span> Andi</p>
+          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"></p>
+        </div>
+        <a id="btn-add-calendar" class="btn-outline btn-outline--light text-enter text-enter--left" href="#" target="_blank" rel="noopener">
           <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
           Save The Date
         </a>
-        <div class="countdown" data-aos="zoom-in">
+        <div class="countdown countdown--plain text-enter text-enter--up">
           <div class="countdown__item"><span id="cd-days">00</span><small>Hari</small></div>
           <div class="countdown__item"><span id="cd-hours">00</span><small>Jam</small></div>
           <div class="countdown__item"><span id="cd-minutes">00</span><small>Menit</small></div>

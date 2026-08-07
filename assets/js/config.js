@@ -106,7 +106,7 @@ window.WEDDING_CONFIG = {
       { jpg: "assets/img/hero/closing-2.jpg", webp: "assets/img/hero/closing-2.webp" }
     ]
   },
-  heroSlideInterval: 4500,
+  heroSlideInterval: 7000,
 
   gallery: {
     manifestUrl: "assets/img/gallery/manifest.json"

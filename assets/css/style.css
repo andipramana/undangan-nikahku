@@ -85,13 +85,18 @@ a { color: inherit; }
 
 .hero-media { position: absolute; inset: 0; overflow: hidden; }
 .hero-media img { width: 100%; height: 100%; object-fit: cover; }
+/* Slide bergeser dari kiri ke kanan (filmstrip) saat berganti, bukan crossfade opacity —
+   foto baru masuk dari kiri, foto lama keluar ke kanan, sempat bersebelahan. */
 .hero-slide {
   position: absolute; inset: 0; overflow: hidden;
-  opacity: 0; transition: opacity 1.4s ease;
+  transform: translateX(-100%);
+  transition: transform 3.2s cubic-bezier(.65,0,.35,1);
 }
-.hero-slide.active { opacity: 1; z-index: 1; }
+.hero-slide.active { transform: translateX(0); z-index: 1; }
+.hero-slide.exiting { transform: translateX(100%); z-index: 1; }
 .kenburns { animation: kenburns 9s ease-in-out infinite alternate; }
 @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.15); } }
+
 
 /* Selaraskan dengan timing asli Elementor (Animate.css): durasi 1s, zoomIn dari scale(.3) */
 [data-aos="zoom-in"] { transform: scale(.3) !important; }
@@ -134,11 +139,20 @@ a { color: inherit; }
 .cover-countdown__date {
   font-family: var(--font-sans); font-weight: 500;
   letter-spacing: .1em; text-transform: uppercase;
-  font-size: .85rem; color: #fff; margin: 0 0 1rem;
+  font-size: .85rem; color: #fff; margin: 0;
 }
-.btn-outline--light { border-color: #fff; color: #fff; margin-bottom: 1.75rem; }
-.btn-outline--light:hover { background: #fff; color: var(--color-dark); }
-.btn-outline--light svg { width: 15px; height: 15px; margin-right: .4rem; vertical-align: -2px; }
+/* Dorong konten section countdown lebih ke kanan-bawah, sesuai posisi di referensi. */
+.section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 2.5rem; }
+.section-hero--anchor-right-bottom .hero-content {
+  width: 100%; max-width: 100%;
+  padding-right: .9rem; padding-left: .9rem; padding-bottom: 0;
+  text-align: right;
+}
+
+.countdown-heading { width: 100%; text-align: right; margin-bottom: .85rem; padding-right: .5rem; }
+.countdown-heading .eyebrow { text-align: right; }
+.countdown-heading .script-names { text-align: right; margin: .1rem 0; }
+
 .scroll-chevron {
   display: block; margin-top: 1.25rem;
   font-size: 1.4rem; color: var(--color-gold-soft);
@@ -262,11 +276,11 @@ a { color: inherit; }
   background: transparent;
   border: 1.5px solid #ffffff;
   color: #ffffff;
-  padding: .9rem 2.2rem;
-  border-radius: 999px;
+  padding: .65rem 1.6rem;
+  border-radius: 10px;
   cursor: pointer;
   transition: background .3s ease, color .3s ease;
-  display: inline-flex; align-items: center; gap: .55rem;
+  display: inline-flex; align-items: center; gap: .5rem;
 }
 .btn-open:hover { background: #ffffff; color: var(--color-dark); }
 .btn-open .icon-envelope { width: 15px; height: 15px; flex: none; }
@@ -281,12 +295,22 @@ a { color: inherit; }
   color: inherit;
   background: transparent;
   padding: .75rem 1.8rem;
-  border-radius: 999px;
+  border-radius: 10px;
   cursor: pointer;
   text-decoration: none;
   transition: background .3s ease, color .3s ease;
 }
 .btn-outline:hover { background: var(--color-gold); color: var(--color-dark); }
+
+/* Tombol di atas foto (cover & countdown) — putih konsisten dengan .btn-open, bukan emas. */
+.btn-outline--light {
+  border-color: #fff; color: #fff;
+  padding: .5rem 1rem; font-size: .68rem;
+  display: inline-flex; align-items: center;
+  margin-bottom: 1.5rem;
+}
+.btn-outline--light:hover { background: #fff; color: var(--color-dark); }
+.btn-outline--light svg { width: 13px; height: 13px; margin-right: .35rem; }
 
 .btn-text {
   background: none; border: none; text-decoration: underline;
@@ -296,8 +320,9 @@ a { color: inherit; }
 
 /* ---------- Invitation lock & open transition ---------- */
 #invitation.is-locked .invitation-body { display: none; }
-#invitation.is-locked #cover .btn-open { display: inline-flex; }
-#invitation:not(.is-locked) #cover .btn-open { display: none; }
+/* Tombol ikut fade/slide keluar bersama seluruh #cover (opacity+transform) —
+   jangan di-display:none mendadak, itu bikin tombol "hilang tiba-tiba" saat cover
+   masih dalam proses transisi keluar. */
 
 #cover {
   position: fixed; inset: 0; z-index: 50;
@@ -314,6 +339,19 @@ a { color: inherit; }
   transition: opacity 2.6s cubic-bezier(.25,.8,.25,1), transform 2.6s cubic-bezier(.25,.8,.25,1);
 }
 #opening.section-revealed { opacity: 1; transform: translate(0, 0); }
+
+/* Teks/tombol/countdown section countdown BARU animasi masuk SETELAH foto section
+   selesai (class .text-revealed ditambahkan lewat JS, bukan lewat AOS — AOS memicu
+   terlalu awal karena section induknya sudah "di viewport" walau masih opacity:0). */
+.text-enter { opacity: 0; transition: opacity 1s ease, transform 1s ease; }
+.text-enter--down { transform: translateY(-24px); }
+.text-enter--left { transform: translateX(34px); }
+.text-enter--up { transform: translateY(28px); }
+#opening.text-revealed .text-enter { opacity: 1; transform: translate(0, 0); }
+#opening.text-revealed .script-names.text-enter { transition-delay: .15s; }
+#opening.text-revealed .cover-countdown__date.text-enter { transition-delay: .28s; }
+#opening.text-revealed #btn-add-calendar.text-enter { transition-delay: .42s; }
+#opening.text-revealed .countdown--plain.text-enter { transition-delay: .58s; }
 
 /* ---------- Opening quote ---------- */
 .arabic-quote { font-size: 1.6rem; margin: 0 0 1rem; color: var(--color-gold-soft); }
@@ -391,6 +429,15 @@ a { color: inherit; }
   display: block; font-family: var(--font-serif); font-size: 1.7rem; color: var(--color-gold);
 }
 .countdown__item small { font-family: var(--font-label); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+
+/* Countdown polos di atas foto (tanpa kartu gelap), dipakai di section countdown —
+   digeser sebagai satu grup ke kanan (bukan space-between), jarak antar item lebar. */
+.countdown--plain { justify-content: flex-end; width: 100%; gap: 1.75rem; margin-bottom: 0; }
+.countdown--plain .countdown__item {
+  background: none; border: none; width: auto; padding: 0; text-align: center;
+}
+.countdown--plain .countdown__item span { color: #fff; font-size: 1.15rem; }
+.countdown--plain .countdown__item small { color: #fff; opacity: .85; font-size: .6rem; }
 
 .event-grid {
   display: grid; gap: 1.25rem;
