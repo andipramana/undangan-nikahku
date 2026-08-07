@@ -13,8 +13,8 @@ window.initGift = function () {
   // nomor asli diisi di config.js dan flag placeholder dihapus.
   accountsEl.innerHTML = cfg.accounts
     .map(
-      (acc) => `
-    <div class="gift-account">
+      (acc, i) => `
+    <div class="gift-account" data-reveal="up" style="--reveal-i:${i % 4}">
       <div>
         <div class="gift-account__bank">${acc.bank}</div>
         ${acc.placeholder ? "" : `<div class="gift-account__number">${acc.number}</div>`}
@@ -34,13 +34,16 @@ window.initGift = function () {
     const note = document.createElement("p");
     note.className = "gift-note";
     note.textContent = cfg.note;
+    note.dataset.reveal = "up";
+    note.style.setProperty("--reveal-i", "4");
     panel.appendChild(note);
   }
 
   toggleBtn.addEventListener("click", () => {
     panel.hidden = false;
     toggleBtn.hidden = true;
-    if (window.refreshReveal) window.refreshReveal();
+    // Isi panel baru "ada" di layar sekarang — daftarkan ke observer reveal.
+    if (window.revealScan) window.revealScan(panel);
   });
 
   hideBtn.addEventListener("click", () => {

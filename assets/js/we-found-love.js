@@ -16,7 +16,7 @@ window.initWeFoundLove = async function () {
   // di-init saat body masih display:none, kontainer berukuran 0 dan autoplay
   // tidak jalan sampai user menyentuh slider.
   window.whenInvitationOpen(() => {
-    new Swiper(".wfl-slider", {
+    const swiper = new Swiper(".wfl-slider", {
       loop: true,
       slidesPerView: 3,
       spaceBetween: 10,
@@ -27,5 +27,6 @@ window.initWeFoundLove = async function () {
         768: { slidesPerView: 5, spaceBetween: 14 }
       }
     });
+    window.pauseAutoplayOffscreen(swiper, document.querySelector(".wfl-slider"));
   });
 };

@@ -1,5 +1,8 @@
 node_modules/
 verification-output/
+
+# Foto asli sebelum dikompres (scripts/compress-images.py) — cadangan lokal saja
+assets/img_backup/
 .env
 *.log
 

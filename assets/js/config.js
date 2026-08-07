@@ -108,7 +108,6 @@ window.WEDDING_CONFIG = {
       phone: "0812-0000-0000",
       detail: "Alamat pengiriman kado — silakan diperbarui sesuai kebutuhan."
     },
-    note: "Nomor rekening akan segera kami lampirkan."
   },
 
   hero: {

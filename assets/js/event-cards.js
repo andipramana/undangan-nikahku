@@ -20,12 +20,13 @@ window.initEventCards = async function () {
     ["event-akad-slider", "event-resepsi-slider"].forEach((id) => {
       const el = document.getElementById(id);
       if (el && el.querySelectorAll(".event-slide").length > 1) {
-        new Swiper(`#${id}`, {
+        const swiper = new Swiper(`#${id}`, {
           loop: true,
           speed: 900,
           observer: true,
           autoplay: { delay: 3000, disableOnInteraction: false }
         });
+        window.pauseAutoplayOffscreen(swiper, el);
       }
     });
   });

@@ -42,14 +42,16 @@ window.initRsvp = function () {
     }
     listEl.innerHTML = items
       .map(
-        (w) => `
-      <div class="wish-card">
+        (w, i) => `
+      <div class="wish-card" data-reveal="${i % 2 ? "slide-left" : "slide-right"}" style="--reveal-i:${i % 4}">
         <span class="wish-card__name">${escapeHtml(w.name)}</span>
         <span class="wish-card__status wish-card__status--${w.attendance || ""}">${statusLabel[w.attendance] || ""}</span>
         <p class="wish-card__message">${escapeHtml(w.message)}</p>
       </div>`
       )
       .join("");
+    // Kartu ucapan baru dirender (juga setelah kirim RSVP) — daftarkan ke observer.
+    if (window.revealScan) window.revealScan(listEl);
   }
 
   async function loadWishes() {

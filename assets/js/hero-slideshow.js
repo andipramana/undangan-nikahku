@@ -45,7 +45,49 @@ window.initHeroSlideshows = async function () {
       const items = container.querySelectorAll(".hero-slide");
       let index = 0;
 
+      // Slideshow yang tidak sedang dilihat tidak perlu berjalan. #closing ada
+      // jauh di bawah halaman, dan #cover tetap tinggal di DOM (position: fixed,
+      // digeser keluar layar) setelah undangan dibuka — keduanya kalau dibiarkan
+      // akan terus berganti slide + menjalankan Ken Burns sampai tab ditutup.
+      let awake = key === "opening";
+      let awakeSince = 0;
+      const setAwake = (on) => {
+        if (on && !awake) awakeSince = performance.now();
+        awake = on;
+        container.classList.toggle("hero-media--paused", !on);
+      };
+
+      if (key === "closing" && "IntersectionObserver" in window) {
+        setAwake(false);
+        new IntersectionObserver(
+          (entries) => entries.forEach((e) => setAwake(e.isIntersecting)),
+          { rootMargin: "25% 0px 25% 0px" }
+        ).observe(document.getElementById("closing"));
+      } else if (key === "cover") {
+        const coverEl = document.getElementById("cover");
+        // Cover jalan sejak awal, lalu berhenti begitu ia keluar layar.
+        setAwake(true);
+        if (coverEl) {
+          coverEl.addEventListener("transitionend", () => {
+            if (coverEl.classList.contains("is-exiting")) setAwake(false);
+          });
+        }
+      } else {
+        setAwake(true);
+      }
+
       function cycle() {
+        if (!awake) {
+          setTimeout(cycle, 1000); // cek lagi nanti, jangan ganti slide dulu
+          return;
+        }
+        // Baru saja terlihat lagi: biarkan foto yang sedang tampil dilihat penuh
+        // dulu, jangan langsung berganti begitu tamu sampai di section ini.
+        const held = performance.now() - awakeSince;
+        if (held < interval) {
+          setTimeout(cycle, interval - held);
+          return;
+        }
         const current = items[index];
         const nextIndex = (index + 1) % items.length;
         const next = items[nextIndex];

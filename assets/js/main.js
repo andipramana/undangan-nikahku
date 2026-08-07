@@ -44,11 +44,13 @@
     const dcBox = document.getElementById("dresscode-swatches");
     if (dcText && dcBox && cfg.dresscode) {
       dcText.textContent = cfg.dresscode.text;
-      cfg.dresscode.colors.forEach((c) => {
+      cfg.dresscode.colors.forEach((c, i) => {
         const s = document.createElement("span");
         s.className = "dresscode-swatch";
         s.style.background = c;
         s.title = c;
+        s.dataset.reveal = "pop"; // mengembang satu per satu, seperti manik berjajar
+        s.style.setProperty("--reveal-i", String(i + 3)); // menyusul label & teks
         dcBox.appendChild(s);
       });
     }
@@ -65,10 +67,13 @@
       qText.textContent = cfg.quotePhoto.quote;
     }
 
+    // Tiap babak cerita masuk bergantian dari kanan lalu kiri — terasa seperti
+    // langkah bergantian menyusuri perjalanan, bukan daftar yang naik seragam.
+    // Satu item = satu unit informasi, jadi tidak perlu dipecah lagi.
     document.getElementById("love-story-list").innerHTML = cfg.loveStory
       .map(
         (item, i) => `
-      <div class="timeline-item" data-aos="fade-up" data-aos-delay="${i * 100}">
+      <div class="timeline-item" data-reveal="${i % 2 ? "slide-left" : "slide-right"}">
         ${item.photo ? `<img class="timeline-item__photo" src="${item.photo}" alt="${item.title}">` : ""}
         <span class="timeline-date">${item.date}</span>
         <h4>${item.title}</h4>
@@ -109,8 +114,10 @@
           requestAnimationFrame(() => opening.classList.add("section-revealed"));
         });
         // Teks/tombol/countdown baru animasi masuk SETELAH slide-in section
-        // selesai (transform 1.1s; fade opacity foto pertama masih lanjut sampai
-        // ~1.8s, lihat #opening di CSS) — teks menyusul sambil foto fade-in.
+        // selesai (transform 1.8s; fade opacity foto pertama masih lanjut sampai
+        // ~2.4s, lihat #opening di CSS) — teks menyusul sambil foto fade-in.
+        // Angka di bawah harus tetap >= durasi transform itu; kalau tidak, teks
+        // muncul saat fotonya masih bergerak.
         // Jeda slideshow section 2 juga baru dihitung mulai saat ini — foto
         // pertama tetap tampil dulu sebelum diganti.
         setTimeout(() => {
@@ -120,9 +127,11 @@
           // langsung jalan begitu fotonya ada.
           if (window.startOpeningSlideshow) window.startOpeningSlideshow();
           else window.__openingStartQueued = true;
-        }, 1200);
+        }, 1900);
       }
-      if (window.refreshReveal) window.refreshReveal();
+      // Isi undangan baru keluar dari display:none — pastikan semua elemen
+      // data-reveal di dalamnya sudah terdaftar ke observer.
+      if (window.revealScan) window.revealScan();
     }
 
     btn.addEventListener("click", () => {

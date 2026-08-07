@@ -23,6 +23,25 @@ window.whenInvitationOpen = function (fn) {
   else (window.__openCallbacks = window.__openCallbacks || []).push(fn);
 };
 
+/** Hentikan autoplay slider saat kontainernya jauh di luar layar, jalankan lagi
+ * saat mendekat. Ada 5 slider di halaman ini — kalau semuanya autoplay terus,
+ * HP membakar frame budget untuk transisi yang tidak dilihat siapa pun, persis
+ * saat animasi reveal butuh frame itu. */
+window.pauseAutoplayOffscreen = function (swiper, el) {
+  if (!swiper || !swiper.autoplay || !el || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) swiper.autoplay.start();
+        else swiper.autoplay.stop();
+      });
+    },
+    // Margin longgar: slider sudah berjalan sebelum benar-benar terlihat, jadi
+    // tamu tidak pernah memergoki slide dalam keadaan diam.
+    { rootMargin: "50% 0px 50% 0px" }
+  ).observe(el);
+};
+
 /** Bangun slide Swiper (picture + webp fallback jpg) dari item manifest. */
 window.buildPhotoSlide = function (item, cls) {
   const slide = document.createElement("div");

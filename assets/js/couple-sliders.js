@@ -27,7 +27,7 @@ window.initCoupleSliders = async function () {
     ["bride-slider", "groom-slider"].forEach((id) => {
       const el = document.getElementById(id);
       if (el && el.querySelectorAll(".couple-slide").length > 1) {
-        new Swiper(`#${id}`, {
+        const swiper = new Swiper(`#${id}`, {
           loop: true,
           speed: 1200, // transisi pelan
           observer: true,
@@ -40,6 +40,7 @@ window.initCoupleSliders = async function () {
             reverseDirection: id === "groom-slider"
           }
         });
+        window.pauseAutoplayOffscreen(swiper, el);
       }
     });
   });
