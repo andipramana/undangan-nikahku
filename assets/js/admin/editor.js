@@ -154,22 +154,7 @@
     };
   }
 
-  preview.addEventListener("pointerdown", (e) => {
-    // Jangan menyaring berdasarkan e.target === img: CSS memberi
-    // `.editor__preview img { pointer-events: none }`, jadi sasaran pointer
-    // SELALU .editor__preview dan tidak pernah <img> — syarat lama membuat
-    // seret tidak pernah dimulai sama sekali. Cukup pastikan pointernya
-    // mendarat di dalam bingkai pratinjau.
-    if (!document.getElementById("editor-img").src) return;
-    dragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-    preview.setPointerCapture(e.pointerId);
-    preview.classList.add("dragging");
-    e.preventDefault();
-  });
-
-  preview.addEventListener("pointermove", (e) => {
+  function onDragMove(e) {
     if (!dragging) return;
     // Selisih dihitung sendiri dari clientX/clientY, bukan e.movementX —
     // movementX tidak terisi untuk pointer sentuh di iOS Safari, jadi seret di
@@ -191,7 +176,7 @@
     if (range.x > 0) fx = clamp(fx - (dx / range.x) * 100, 0, 100);
     if (range.y > 0) fy = clamp(fy - (dy / range.y) * 100, 0, 100);
     applyFocal(fx, fy);
-  });
+  }
 
   function endDrag(e) {
     if (!dragging) return;
@@ -200,11 +185,50 @@
     try {
       preview.releasePointerCapture(e.pointerId);
     } catch (_) {}
+    window.removeEventListener("pointermove", onDragMove);
+    window.removeEventListener("pointerup", endDrag);
+    window.removeEventListener("pointercancel", endDrag);
   }
-  preview.addEventListener("pointerup", endDrag);
-  // pointercancel: sentuhan direbut browser (mis. gestur scroll) — tanpa ini
-  // status dragging tersangkut menyala dan foto ikut bergerak tanpa disentuh.
-  preview.addEventListener("pointercancel", endDrag);
+
+  preview.addEventListener("pointerdown", (e) => {
+    // Jangan menyaring berdasarkan e.target === img: CSS memberi
+    // `.editor__preview img { pointer-events: none }`, jadi sasaran pointer
+    // SELALU .editor__preview dan tidak pernah <img> — syarat lama membuat
+    // seret tidak pernah dimulai sama sekali.
+    const img = document.getElementById("editor-img");
+    // Gambar belum selesai dimuat: naturalWidth = 0 membuat panRange()
+    // mengembalikan {0, 0} dan seret diam tanpa sebab yang terlihat —
+    // di HP jaringan lambat, admin yang langsung menyeret segera mengira
+    // seretnya rusak. Tunggu fotonya benar-benar tampil.
+    if (!img.complete || !img.naturalWidth) return;
+    // Foto yang pas persis dengan bingkai (tidak terpotong sama sekali di
+    // zoom 1) memang tidak punya ruang geser — jelaskan lewat hint,
+    // jangan membiarkan seret diam begitu saja.
+    const range = panRange();
+    if (!range.x && !range.y) {
+      const hint = document.querySelector(".editor__hint");
+      if (hint) hint.textContent = "Foto pas dengan bingkai — naikkan zoom dulu untuk bisa menggeser.";
+      return;
+    }
+    dragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    try {
+      preview.setPointerCapture(e.pointerId);
+    } catch (_) {}
+    preview.classList.add("dragging");
+    e.preventDefault();
+    // pointermove dibaca dari WINDOW, bukan dari preview: dengan pointer
+    // capture, sebagian browser (terutama WebView HP) berhenti meneruskan
+    // event gerakan ke elemen asal — sementara event SELALU membubble ke
+    // window. Mendengarkan di window membuat seret jalan apa pun quirk-nya.
+    window.addEventListener("pointermove", onDragMove);
+    window.addEventListener("pointerup", endDrag);
+    // pointercancel: sentuhan direbut browser (mis. gestur scroll) — tanpa
+    // ini status dragging tersangkut menyala dan foto ikut bergerak tanpa
+    // disentuh.
+    window.addEventListener("pointercancel", endDrag);
+  });
 
   // -------------------------------------------------------------------------
   // Reset & simpan
