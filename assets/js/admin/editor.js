@@ -27,7 +27,10 @@
     // (9/4 = 2.25 yang dipakai sebelumnya membuat pratinjau jauh lebih pipih
     // dari tampilan sebenarnya, jadi hasil crop-nya menyesatkan.)
     event: 1.2,
-    gallery: 16 / 10,  // pola gallery.js (landscape; portrait 1:2 via toggle)
+    // gallery TIDAK dipakai dari sini — bentuk kotaknya berbeda-beda per posisi
+    // (selebar grid / 3-4 / 1-2 / 1-4), lihat ratioFor() di bawah. Nilai ini
+    // hanya cadangan kalau indeksnya tidak diketahui.
+    gallery: 16 / 10,
     quote: 1,          // 1:1
     story: 16 / 10
   };
@@ -39,11 +42,33 @@
 
   window.PhotoEditor = { open };
 
-  function open(photo, folderName) {
+  /** Rasio bingkai pratinjau. Semua folder punya satu bentuk tetap, KECUALI
+   * galeri: di sana tiap foto menempati kotak yang berbeda tergantung
+   * posisinya dalam grid — foto di kotak 1/4 itu sempit dan tinggi, jadi
+   * pemotongan kiri-kanannya justru paling parah dan paling perlu digeser.
+   * Memakai satu rasio 16/10 untuk semuanya membuat pratinjau di sini tidak
+   * ada hubungannya dengan yang benar-benar tampil di undangan. */
+  function ratioFor(folderName, index) {
+    if (folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)) {
+      return window.GalleryLayout.ratioAt(index);
+    }
+    return FOLDER_RATIO[folderName] || 1;
+  }
+
+  function open(photo, folderName, index) {
     item = photo;
     folder = folderName;
-    ratio = FOLDER_RATIO[folderName] || 1;
+    ratio = ratioFor(folderName, index);
     zoom = Number(photo.zoom) || 1;
+
+    // Beri tahu bentuk kotak yang sedang diatur — di galeri, bentuk ini ikut
+    // berubah kalau urutan fotonya diubah.
+    const shape =
+      folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)
+        ? ` — kotak ${window.GalleryLayout.labelAt(index)}`
+        : "";
+    const hint = document.querySelector(".editor__hint");
+    if (hint) hint.textContent = `Seret foto untuk menggeser (pan)${shape}`;
 
     const overlay = document.getElementById("editor");
     const img = document.getElementById("editor-img");

@@ -7,29 +7,10 @@ window.initGallery = async function () {
   const photos = (await window.getPhotos("gallery")) || [];
   if (!photos.length) return;
 
-  // Pola baris (14 baris, 20 foto): pola 7 baris diulang 2×, baris terakhir landscape penutup.
-  const PATTERN = [
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape",
-    "quarter",
-    "threequarter",
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape",
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape",
-    "quarter",
-    "threequarter",
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape"
-  ];
+  // Pola baris dipegang gallery-layout.js — dipakai bersama panel admin supaya
+  // bingkai pratinjau pan/zoom di sana memakai bentuk kotak yang sama persis
+  // dengan yang dirender di sini.
+  const PATTERN = window.GalleryLayout.PATTERN;
   /** Gerak masuk per foto, ditentukan posisinya dalam baris grid:
    *  - baris berisi DUA foto -> yang kiri meluncur dari kiri, yang kanan dari
    *    kanan, keduanya bersamaan sehingga terlihat seperti pintu yang menutup.

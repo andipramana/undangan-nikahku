@@ -152,7 +152,10 @@
 
     grid.querySelectorAll("[data-edit]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        window.PhotoEditor.open(photos[Number(btn.dataset.edit)], currentFolder);
+        // Indeks ikut dikirim: di folder galeri, bentuk kotak yang ditempati
+        // foto ditentukan POSISINYA, bukan sifat fotonya.
+        const i = Number(btn.dataset.edit);
+        window.PhotoEditor.open(photos[i], currentFolder, i);
       });
     });
 
