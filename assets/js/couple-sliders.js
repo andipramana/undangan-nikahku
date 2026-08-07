@@ -20,15 +20,21 @@ window.initCoupleSliders = async function () {
   });
 
   if (!window.Swiper) return;
-  ["bride-slider", "groom-slider"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el && el.querySelectorAll(".couple-slide").length > 1) {
-      new Swiper(`#${id}`, {
-        loop: true,
-        speed: 1200, // transisi pelan
-        autoplay: { delay: 2500, disableOnInteraction: false },
-        rtl: id === "groom-slider" // slide pria berlawanan arah dengan slide wanita
-      });
-    }
+  // Init Swiper ditunda sampai undangan dibuka (klik "Buka Undangan") — kalau
+  // di-init saat body masih display:none, kontainer berukuran 0 dan autoplay
+  // tidak jalan sampai user menyentuh slider.
+  window.whenInvitationOpen(() => {
+    ["bride-slider", "groom-slider"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el && el.querySelectorAll(".couple-slide").length > 1) {
+        new Swiper(`#${id}`, {
+          loop: true,
+          speed: 1200, // transisi pelan
+          observer: true,
+          autoplay: { delay: 2500, disableOnInteraction: false },
+          rtl: id === "groom-slider" // slide pria berlawanan arah dengan slide wanita
+        });
+      }
+    });
   });
 };

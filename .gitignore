@@ -3,5 +3,6 @@ verification-output/
 .env
 *.log
 
-# graphify-axet
+# graphify-axet (tool lokal — tidak ikut repo)
 .graphify/
+.graphifyignore

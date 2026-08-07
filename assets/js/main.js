@@ -108,8 +108,9 @@
         requestAnimationFrame(() => {
           requestAnimationFrame(() => opening.classList.add("section-revealed"));
         });
-        // Teks/tombol/countdown baru animasi masuk SETELAH foto section selesai
-        // (durasi transisi section = 2.6s, lihat #opening.section-revealed di CSS).
+        // Teks/tombol/countdown baru animasi masuk SETELAH slide-in section
+        // selesai (transform 1.1s; fade opacity foto pertama masih lanjut sampai
+        // ~1.8s, lihat #opening di CSS) — teks menyusul sambil foto fade-in.
         // Jeda slideshow section 2 juga baru dihitung mulai saat ini — foto
         // pertama tetap tampil dulu sebelum diganti.
         setTimeout(() => {
@@ -119,13 +120,18 @@
           // langsung jalan begitu fotonya ada.
           if (window.startOpeningSlideshow) window.startOpeningSlideshow();
           else window.__openingStartQueued = true;
-        }, 2700);
+        }, 1200);
       }
       if (window.refreshReveal) window.refreshReveal();
     }
 
     btn.addEventListener("click", () => {
       invitation.classList.remove("is-locked");
+      // Slider (Swiper) baru boleh dibuat sekarang — saat terkunci, kontainer
+      // display:none berukuran 0 sehingga autoplay macet sampai disentuh.
+      window.__invitationOpen = true;
+      (window.__openCallbacks || []).forEach((fn) => fn());
+      window.__openCallbacks = [];
       document.documentElement.classList.remove("no-scroll");
       if (window.playBackgroundAudio) window.playBackgroundAudio();
 
@@ -134,7 +140,7 @@
         // background polos) sebelum section berikutnya mulai fade in.
         cover.addEventListener(
           "transitionend",
-          () => setTimeout(revealOpening, 250),
+          () => setTimeout(revealOpening, 150),
           { once: true }
         );
         cover.classList.add("is-exiting");

@@ -68,19 +68,24 @@ window.initHeroSlideshows = async function () {
         setTimeout(cycle, interval + SLIDE_TRANSITION_MS);
       }
 
-      function start() {
-        // Foto pertama tampil dulu selama `interval` sebelum transisi pertama berjalan.
-        setTimeout(cycle, interval);
+      function start(firstDelay) {
+        // Foto pertama tampil dulu sebelum transisi pertama berjalan.
+        // Opening memakai jeda awal lebih pendek (lihat bawah) supaya foto
+        // cepat berganti setelah section direveal — jeda full `interval`
+        // terasa lama karena perhitungannya dimulai belakangan.
+        setTimeout(cycle, firstDelay);
       }
 
       if (key === "opening") {
         // Slideshow section 2 baru berjalan saat foto pertamanya sudah tampil
         // (dipicu dari main.js lewat window.startOpeningSlideshow). Kalau main.js
         // sudah minta start lebih dulu (fetch manifest masih jalan), langsung jalan.
-        window.startOpeningSlideshow = start;
-        if (window.__openingStartQueued) start();
+        // Foto pertama hanya tampil 2s sebelum berganti (bukan 4.5s penuh).
+        const OPENING_FIRST_DELAY = 2000;
+        window.startOpeningSlideshow = () => start(OPENING_FIRST_DELAY);
+        if (window.__openingStartQueued) start(OPENING_FIRST_DELAY);
       } else {
-        start();
+        start(interval);
       }
     }
   });

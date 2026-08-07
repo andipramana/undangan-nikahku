@@ -15,6 +15,14 @@ window.fetchPhotos = async function (manifestUrl) {
   }
 };
 
+/** Panggil fn begitu undangan "dibuka" (klik Buka Undangan). Dipakai untuk
+ * init Swiper: kalau di-init saat #invitation masih display:none, kontainer
+ * berukuran 0 → autoplay tidak jalan sampai user menyentuh slider. */
+window.whenInvitationOpen = function (fn) {
+  if (window.__invitationOpen) fn();
+  else (window.__openCallbacks = window.__openCallbacks || []).push(fn);
+};
+
 /** Bangun slide Swiper (picture + webp fallback jpg) dari item manifest. */
 window.buildPhotoSlide = function (item, cls) {
   const slide = document.createElement("div");

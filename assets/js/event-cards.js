@@ -13,14 +13,20 @@ window.initEventCards = async function () {
   });
 
   if (!window.Swiper) return;
-  ["event-akad-slider", "event-resepsi-slider"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el && el.querySelectorAll(".event-slide").length > 1) {
-      new Swiper(`#${id}`, {
-        loop: true,
-        speed: 900,
-        autoplay: { delay: 3000, disableOnInteraction: false }
-      });
-    }
+  // Init Swiper ditunda sampai undangan dibuka (klik "Buka Undangan") — kalau
+  // di-init saat body masih display:none, kontainer berukuran 0 dan autoplay
+  // tidak jalan sampai user menyentuh slider.
+  window.whenInvitationOpen(() => {
+    ["event-akad-slider", "event-resepsi-slider"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el && el.querySelectorAll(".event-slide").length > 1) {
+        new Swiper(`#${id}`, {
+          loop: true,
+          speed: 900,
+          observer: true,
+          autoplay: { delay: 3000, disableOnInteraction: false }
+        });
+      }
+    });
   });
 };

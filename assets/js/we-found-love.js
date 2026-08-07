@@ -12,14 +12,20 @@ window.initWeFoundLove = async function () {
   photos.forEach((item) => wrapper.appendChild(window.buildPhotoSlide(item, "wfl-slide")));
 
   if (!window.Swiper) return;
-  new Swiper(".wfl-slider", {
-    loop: true,
-    slidesPerView: 3,
-    spaceBetween: 10,
-    speed: 500,
-    autoplay: { delay: 1800, disableOnInteraction: false },
-    breakpoints: {
-      768: { slidesPerView: 5, spaceBetween: 14 }
-    }
+  // Init Swiper ditunda sampai undangan dibuka (klik "Buka Undangan") — kalau
+  // di-init saat body masih display:none, kontainer berukuran 0 dan autoplay
+  // tidak jalan sampai user menyentuh slider.
+  window.whenInvitationOpen(() => {
+    new Swiper(".wfl-slider", {
+      loop: true,
+      slidesPerView: 3,
+      spaceBetween: 10,
+      speed: 500,
+      observer: true,
+      autoplay: { delay: 1800, disableOnInteraction: false },
+      breakpoints: {
+        768: { slidesPerView: 5, spaceBetween: 14 }
+      }
+    });
   });
 };
