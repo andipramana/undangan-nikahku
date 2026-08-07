@@ -305,6 +305,43 @@ a { color: inherit; }
 .btn-open:hover { background: #ffffff; color: var(--color-dark); }
 .btn-open .icon-envelope { width: 15px; height: 15px; flex: none; }
 
+/* Tombol aksi utama (kirim RSVP, kirim hadiah). Sengaja terisi penuh warna emas,
+   bukan sekadar bergaris seperti .btn-outline: ini satu-satunya aksi yang
+   diharapkan dari tamu di section-nya, jadi harus paling menonjol.
+   Emas pekat ini kontras di dua-duanya — di atas latar krem (#f7f3ea) maupun
+   latar gelap (#14120f) — jadi satu kelas ini cukup untuk kedua section.
+   Jangan pakai .btn-open di latar terang: teks & garisnya putih, dirancang untuk
+   foto gelap di cover, dan di atas krem nyaris tidak terlihat. */
+.btn-primary {
+  font-family: var(--font-sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-size: .82rem;
+  font-weight: 600;
+  background: var(--color-gold);
+  border: 1.5px solid var(--color-gold);
+  color: var(--color-dark);
+  padding: .85rem 2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(201, 166, 104, .35);
+  transition: background .3s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+/* Hover memekatkan emasnya, BUKAN menggelapkannya jadi --color-dark: di section
+   Tanda Kasih yang latarnya gelap, tombolnya akan lenyap menyatu dengan latar. */
+.btn-primary:hover {
+  background: #b8914f;
+  border-color: #b8914f;
+  color: var(--color-dark);
+}
+/* rsvp.js menonaktifkan tombol selama pengiriman — beri tanda yang jelas supaya
+   tamu tidak menekan berulang kali karena mengira tidak ada yang terjadi. */
+.btn-primary:disabled {
+  opacity: .5;
+  cursor: default;
+  box-shadow: none;
+}
+
 .btn-outline {
   display: inline-block;
   font-family: var(--font-sans);
@@ -429,11 +466,13 @@ a { color: inherit; }
 .reveal-ready [data-reveal="enter-right"].is-revealed,
 .reveal-ready [data-reveal="enter-left"].is-revealed { transform: none; }
 
-/* Teks identitas mempelai menunggu fotonya hampir mendarat dulu (2.2s), baru
-   masuk berurutan. Delay-nya ditulis terpisah karena --reveal-i saja (200ms per
-   langkah) tidak cukup panjang untuk menunggu luncuran 2.8s di atas. */
+/* Teks identitas mempelai ikut masuk bersama fotonya, bukan menunggu luncuran
+   2.8s di atas selesai — teksnya ada DI DALAM elemen yang meluncur, jadi ia ikut
+   terbawa masuk sambil memudar tampil. Jeda .5s hanya memberi fotonya kesempatan
+   mengisi layar lebih dulu; kalau dinaikkan mendekati 2.8s, namanya baru muncul
+   setelah tamu biasanya sudah menggulir lewat. */
 .reveal-ready .couple-info [data-reveal] {
-  transition-delay: calc(2.2s + var(--reveal-i, 0) * 200ms);
+  transition-delay: calc(.5s + var(--reveal-i, 0) * 200ms);
 }
 
 /* -- Kartu event: mendarat dari sedikit miring, seperti kartu undangan fisik

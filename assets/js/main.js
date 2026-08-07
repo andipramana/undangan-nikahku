@@ -69,15 +69,23 @@
 
     // Tiap babak cerita masuk bergantian dari kanan lalu kiri — terasa seperti
     // langkah bergantian menyusuri perjalanan, bukan daftar yang naik seragam.
-    // Satu item = satu unit informasi, jadi tidak perlu dipecah lagi.
+    //
+    // Satu babak = satu paket (data-reveal-group): dipicu bersamaan, tapi isinya
+    // punya gerak sendiri-sendiri — tahun turun seperti penanda babak, judulnya
+    // mengembang, ceritanya naik menyusul.
+    //
+    // Fotonya sengaja TIDAK diberi data-reveal: ia ikut terbawa bersama itemnya.
+    // Kalau semua isi disembunyikan, yang meluncur masuk cuma kotak kosong —
+    // .timeline-item sendiri tidak punya latar maupun garis, jadi tak ada yang
+    // terlihat bergerak. Foto inilah yang membuat luncurannya kelihatan.
     document.getElementById("love-story-list").innerHTML = cfg.loveStory
       .map(
         (item, i) => `
-      <div class="timeline-item" data-reveal="${i % 2 ? "slide-left" : "slide-right"}">
+      <div class="timeline-item" data-reveal="${i % 2 ? "slide-left" : "slide-right"}" data-reveal-group>
         ${item.photo ? `<img class="timeline-item__photo" src="${item.photo}" alt="${item.title}">` : ""}
-        <span class="timeline-date">${item.date}</span>
-        <h4>${item.title}</h4>
-        <p>${item.text}</p>
+        <span class="timeline-date" data-reveal="down" style="--reveal-i:1">${item.date}</span>
+        <h4 data-reveal="pop" style="--reveal-i:2">${item.title}</h4>
+        <p data-reveal="up" style="--reveal-i:3">${item.text}</p>
       </div>`
       )
       .join("");

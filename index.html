@@ -114,12 +114,12 @@
            sehingga tidak pernah terpicu — dan tidak akan pernah masuk.
            .couple-reveal juga membungkus root Swiper, bukan menimpanya, supaya
            Swiper tidak salah mengukur slide gara-gara transform. -->
-      <div class="couple-block" data-reveal-group>
+      <div class="couple-block" data-reveal-group data-reveal-early>
         <div class="couple-reveal" data-reveal="enter-right">
           <div class="couple-slider swiper" id="bride-slider">
             <div class="swiper-wrapper" id="bride-slider-wrapper"></div>
             <div class="couple-fade"></div>
-            <!-- menyusul setelah fotonya mendarat; gerak masing-masing berbeda -->
+            <!-- ikut terbawa masuk bersama fotonya; gerak masing-masing berbeda -->
             <div class="couple-info">
               <p class="couple-info__label" data-reveal="down">The Bride</p>
               <h3 class="couple-info__name" id="bride-name" data-reveal="pop" style="--reveal-i:1"></h3>
@@ -131,7 +131,7 @@
 
       <!-- Mempelai pria — DARI LUAR LAYAR SEBELAH KIRI, berlawanan dengan mempelai
            wanita, seolah keduanya meluncur saling mendekat -->
-      <div class="couple-block" data-reveal-group>
+      <div class="couple-block" data-reveal-group data-reveal-early>
         <div class="couple-reveal" data-reveal="enter-left">
           <div class="couple-slider swiper" id="groom-slider">
             <div class="swiper-wrapper" id="groom-slider-wrapper"></div>
@@ -264,7 +264,7 @@
         tanda kasih, kami menyediakan pilihan berikut.
       </p>
 
-      <button id="btn-gift-toggle" class="btn-outline" type="button" data-reveal="up" style="--reveal-i:3">Kirim Hadiah</button>
+      <button id="btn-gift-toggle" class="btn-primary" type="button" data-reveal="up" style="--reveal-i:3">Kirim Hadiah</button>
 
       <!-- Panel rekening: satu paket, muncul utuh begitu dibuka -->
       <div id="gift-panel" class="gift-panel" hidden data-reveal-group>
@@ -303,7 +303,7 @@
           Ucapan &amp; Doa
           <textarea id="rsvp-message" name="message" rows="3" required></textarea>
         </label>
-        <button type="submit" class="btn-open" id="rsvp-submit" data-reveal="pop" style="--reveal-i:4">Kirim</button>
+        <button type="submit" class="btn-primary" id="rsvp-submit" data-reveal="pop" style="--reveal-i:4">Kirim</button>
         <p id="rsvp-status" class="rsvp-status" role="status"></p>
       </form>
 
@@ -322,7 +322,7 @@
         <p class="script-names script-names--small" data-reveal="pop" style="--reveal-i:2">Mita <span class="amp">&amp;</span> Andi</p>
       </div>
       <footer class="site-footer">
-        <p data-reveal="up" style="--reveal-i:2">Dibuat dengan &#10084; — 2026</p>
+        <p data-reveal="up" style="--reveal-i:2">Dibuat dengan &#10084; oleh Mita &amp; Iyow — 2026</p>
       </footer>
     </section>
 

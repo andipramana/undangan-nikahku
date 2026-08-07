@@ -26,5 +26,30 @@ window.initAudioPlayer = function () {
     else pause();
   });
 
+  // Musik berhenti saat tab ditinggalkan / aplikasi di-minimize, lalu jalan lagi
+  // saat dibuka kembali.
+  //
+  // Penandanya penting: HANYA yang kita hentikan sendiri yang boleh dijalankan
+  // lagi. Kalau tamu sengaja mematikan musik lewat tombol FAB lalu berpindah tab,
+  // musiknya tidak boleh menyala sendiri begitu ia kembali — itu melawan
+  // pilihannya. Begitu juga kalau undangan belum dibuka sama sekali: audio memang
+  // masih diam, jadi penanda ini tidak pernah aktif dan tidak ada musik yang
+  // menyala tanpa disentuh lebih dulu (browser pun memblokirnya).
+  //
+  // Dipakai visibilitychange, bukan window.blur — blur ikut menyala saat tamu
+  // sekadar mengklik jendela lain di sebelah, padahal undangannya masih terlihat.
+  let pausedByVisibility = false;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (!audio.paused) {
+        pausedByVisibility = true;
+        pause();
+      }
+    } else if (pausedByVisibility) {
+      pausedByVisibility = false;
+      play();
+    }
+  });
+
   window.playBackgroundAudio = play;
 };

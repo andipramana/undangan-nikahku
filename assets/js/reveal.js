@@ -31,6 +31,7 @@
   const COUNT_DURATION = 1400;
   const seen = new WeakSet(); // elemen yang sudah diserahkan ke observer
   let observer = null; // pemicu utama: tepi atas elemen melewati tengah layar
+  let early = null; // pemicu awal (data-reveal-early): begitu menyentuh layar
   let fullyVisible = null; // jaring pengaman: elemen terlihat utuh di layar
   let started = false; // initReveal sudah jalan?
   let animate = true; // false saat reduced-motion / tanpa IntersectionObserver
@@ -85,13 +86,18 @@
     if (el.matches(GROUP)) revealGroup(el);
     else reveal(el);
     observer.unobserve(el);
+    early.unobserve(el);
     fullyVisible.unobserve(el);
   }
 
   function register(el) {
     if (seen.has(el)) return;
     seen.add(el);
-    observer.observe(el);
+    // Elemen setinggi hampir selayar (blok mempelai) tidak pernah bisa "melewati
+    // tengah layar" tanpa lebih dulu memenuhi pandangan — menunggu ambang tengah
+    // membuatnya terasa telat hidup. `data-reveal-early` memakai ambang yang
+    // menyala begitu elemennya menyentuh layar.
+    (el.hasAttribute("data-reveal-early") ? early : observer).observe(el);
     fullyVisible.observe(el);
   }
 
@@ -143,6 +149,13 @@
     // animasinya sudah selesai sebelum benar-benar masuk pandangan.
     observer = new IntersectionObserver(onIntersect, {
       rootMargin: "0px 0px -45% 0px",
+      threshold: 0
+    });
+
+    // Pemicu awal untuk elemen yang tingginya hampir selayar: menyala begitu
+    // tepi atasnya menyentuh layar, tidak menunggu sampai tengah.
+    early = new IntersectionObserver(onIntersect, {
+      rootMargin: "0px 0px -5% 0px",
       threshold: 0
     });
 
