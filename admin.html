@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- noindex: halaman ini bukan untuk dicari mesin — yang menjaganya adalah
+     Supabase Auth + RLS, bukan "bersembunyi", tapi tidak ada alasan untuk
+     menampilkannya di hasil pencarian. -->
+<meta name="robots" content="noindex">
+<title>Admin — Mita &amp; Andi</title>
+<link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+
+<!-- ============ LAYAR LOGIN ============ -->
+<!-- Field-nya "Nama pengguna" + "Kata sandi" (bukan email) supaya rasanya
+     seperti panel internal. Nama pengguna dipetakan JS ke email tetap;
+     kata sandi TIDAK pernah ada di kode — diverifikasi oleh Supabase Auth. -->
+<div id="login-screen" class="login-screen">
+  <form id="login-form" class="login-card">
+    <h1>Panel Admin</h1>
+    <p class="login-hint">Mita &amp; Andi — The Wedding</p>
+    <label>
+      Nama pengguna
+      <input type="text" id="login-username" autocomplete="username" required>
+    </label>
+    <label>
+      Kata sandi
+      <input type="password" id="login-password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn btn--primary" id="login-submit">Masuk</button>
+    <p id="login-error" class="login-error" role="alert"></p>
+  </form>
+</div>
+
+<!-- ============ APLIKASI ============ -->
+<div id="app" hidden>
+  <header class="topbar">
+    <h1>Admin — Mita &amp; Andi</h1>
+    <div class="topbar__actions">
+      <a class="btn btn--ghost" href="index.html" target="_blank" rel="noopener">Pratinjau undangan</a>
+      <button type="button" class="btn btn--ghost" id="btn-logout">Keluar</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button type="button" class="tab tab--active" data-tab="content">Teks</button>
+    <button type="button" class="tab" data-tab="photos">Foto</button>
+  </nav>
+
+  <!-- ============ TAB TEKS ============ -->
+  <main id="tab-content" class="panel">
+    <div id="content-form-root"></div>
+  </main>
+
+  <!-- ============ TAB FOTO ============ -->
+  <main id="tab-photos" class="panel" hidden>
+    <div class="photos-toolbar">
+      <label>
+        Folder
+        <select id="photo-folder" class="input"></select>
+      </label>
+      <label class="upload-wrap">
+        <span class="btn btn--primary">Unggah foto…</span>
+        <input type="file" id="photo-upload" accept="image/*" multiple hidden>
+      </label>
+    </div>
+    <p id="photo-warning" class="warning" hidden></p>
+    <div id="photo-grid" class="photo-grid"></div>
+  </main>
+</div>
+
+<!-- ============ EDITOR PAN/ZOOM (overlay) ============ -->
+<div id="editor" class="editor" hidden>
+  <div class="editor__panel">
+    <div class="editor__header">
+      <h2>Atur pan &amp; zoom</h2>
+      <button type="button" class="btn btn--ghost" id="editor-close">Tutup</button>
+    </div>
+    <div class="editor__preview-wrap">
+      <div class="editor__preview" id="editor-preview">
+        <img id="editor-img" alt="">
+      </div>
+      <p class="editor__hint">Seret foto untuk menggeser (pan)</p>
+    </div>
+    <label class="editor__zoom">
+      Zoom
+      <input type="range" id="editor-zoom" min="1" max="3" step="0.01">
+      <span id="editor-zoom-value"></span>
+    </label>
+    <div class="editor__footer">
+      <button type="button" class="btn btn--ghost" id="editor-reset">Reset</button>
+      <button type="button" class="btn btn--primary" id="editor-save">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/js/admin/admin.js"></script>
+<script src="assets/js/admin/content.js"></script>
+<script src="assets/js/admin/photos.js"></script>
+<script src="assets/js/admin/editor.js"></script>
+</body>
+</html>

@@ -1,13 +1,10 @@
 /** Section Kedua Mempelai: 2 slideshow foto besar (3/4 layar) — wanita lalu pria.
  * Auto-slide pelan + bisa digeser user, dengan info mempelai di overlay bawah.
- * Foto di-fetch dari manifest folder foto_bride / foto_groom (urutan by name). */
+ * Foto dari payload Supabase (folder 'bride'/'groom'), cadangan manifest lokal. */
 window.initCoupleSliders = async function () {
-  const cfg = window.WEDDING_CONFIG;
-  if (!cfg.coupleSlides) return;
-
   const [bridePhotos, groomPhotos] = await Promise.all([
-    window.fetchPhotos(cfg.coupleSlides.brideManifest),
-    window.fetchPhotos(cfg.coupleSlides.groomManifest)
+    window.getPhotos("bride"),
+    window.getPhotos("groom")
   ]);
 
   [
@@ -15,7 +12,7 @@ window.initCoupleSliders = async function () {
     ["groom", groomPhotos]
   ].forEach(([key, photos]) => {
     const wrapper = document.getElementById(`${key}-slider-wrapper`);
-    if (!wrapper || !photos.length) return;
+    if (!wrapper || !(photos && photos.length)) return;
     photos.forEach((item) => wrapper.appendChild(window.buildPhotoSlide(item, "couple-slide")));
   });
 

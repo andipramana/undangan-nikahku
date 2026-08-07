@@ -1,9 +1,10 @@
-/** Render grid galeri dari manifest folder foto_gallery (urutan by name) + lightbox. */
+/** Render grid galeri dari payload Supabase (folder 'gallery'), cadangan
+ * manifest lokal kalau payload tidak tersedia + lightbox. */
 window.initGallery = async function () {
   const wrapper = document.getElementById("gallery-wrapper");
   if (!wrapper) return;
 
-  const photos = await window.fetchPhotos(window.WEDDING_CONFIG.gallery.manifest);
+  const photos = (await window.getPhotos("gallery")) || [];
   if (!photos.length) return;
 
   // Pola baris (14 baris, 20 foto): pola 7 baris diulang 2×, baris terakhir landscape penutup.
@@ -50,11 +51,16 @@ window.initGallery = async function () {
   wrapper.innerHTML = photos
     .map((item, i) => {
       const cls = PATTERN[i] || "landscape";
+      const src = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
+      const fx = item.focalX ?? 50;
+      const fy = item.focalY ?? 50;
+      const zoom = item.zoom ?? 1;
       return `
-    <div class="gallery-item gallery-item--${cls}" data-full="${item.jpg}" data-reveal="${motionFor(i)}">
+    <div class="gallery-item gallery-item--${cls}" data-full="${src}" data-reveal="${motionFor(i)}">
       <picture>
-        <source srcset="${item.webp}" type="image/webp">
-        <img src="${item.jpg}" alt="Momen ${i + 1}" loading="lazy">
+        <source srcset="${src}" type="image/webp">
+        <img src="${src}" alt="Momen ${i + 1}" loading="lazy"
+             style="--fx:${fx}%; --fy:${fy}%; --zoom:${zoom}">
       </picture>
     </div>`;
     })

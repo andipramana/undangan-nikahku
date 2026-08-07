@@ -1,9 +1,8 @@
 /** Kartu Event (Akad & Resepsi): 4/10 atas = slider foto pasangan (auto + swipe),
- * 6/10 bawah = kanvas informasi acara. Foto di-fetch dari manifest folder
- * foto_slider_section_2 (urutan by name). */
+ * 6/10 bawah = kanvas informasi acara. Foto dari payload Supabase (folder
+ * 'event'), cadangan manifest lokal kalau payload tidak tersedia. */
 window.initEventCards = async function () {
-  const cfg = window.WEDDING_CONFIG;
-  const photos = await window.fetchPhotos(cfg.event && cfg.event.manifest);
+  const photos = (await window.getPhotos("event")) || [];
   if (!photos.length) return;
 
   ["akad", "resepsi"].forEach((key) => {

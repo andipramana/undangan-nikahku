@@ -2,9 +2,9 @@
  * (foto lama geser keluar ke kiri, foto baru masuk dari kanan — sempat kelihatan
  * bersebelahan saat transisi, bukan crossfade opacity).
  *
- * Foto di-fetch dari manifest folder foto_cover / foto_opening / foto_closing
- * (urutan by name) — ganti foto cukup timpa file di folder + jalankan
- * scripts/build-manifests.mjs, tanpa menyentuh config.
+ * Foto diambil dari payload Supabase (folder cover/opening/closing) dengan
+ * cadangan manifest lokal. Zoom per foto (--zoom) diterapkan lewat keyframe
+ * Ken Burns di CSS — transform biasa akan ditimpa animasi (lihat style.css).
  *
  * Timing: foto tampil penuh selama `interval`, lalu transisi pelan (SLIDE_TRANSITION_MS),
  * lalu jeda penuh lagi sebelum foto berikutnya diganti. Section 2 (opening) tidak mulai
@@ -15,11 +15,11 @@ window.initHeroSlideshows = async function () {
   const interval = cfg.heroSlideInterval || 4500;
   const SLIDE_TRANSITION_MS = 3200;
 
-  // Muat manifest ketiga slideshow sekaligus
+  // Muat foto ketiga slideshow sekaligus
   const [coverSlides, openingSlides, closingSlides] = await Promise.all([
-    window.fetchPhotos(cfg.hero && cfg.hero.coverManifest),
-    window.fetchPhotos(cfg.hero && cfg.hero.openingManifest),
-    window.fetchPhotos(cfg.hero && cfg.hero.closingManifest)
+    window.getPhotos("cover"),
+    window.getPhotos("opening"),
+    window.getPhotos("closing")
   ]);
 
   [
@@ -29,14 +29,20 @@ window.initHeroSlideshows = async function () {
   ].forEach(([key, slides]) => {
     const container = document.getElementById(`${key}-media`);
     const overlay = container && container.querySelector(".hero-overlay");
-    if (!container || !slides.length) return;
+    if (!container || !(slides && slides.length)) return;
 
     slides.forEach((slide, i) => {
       const wrap = document.createElement("picture");
       wrap.className = "hero-slide" + (i === 0 ? " active" : "");
+      const src = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
+      // --zoom di baca keyframe kenburns (scale dari --zoom ke --zoom*1.15)
+      const fx = slide.focalX ?? 50;
+      const fy = slide.focalY ?? 50;
+      const zoom = slide.zoom ?? 1;
       wrap.innerHTML = `
-        <source srcset="${slide.webp}" type="image/webp">
-        <img class="kenburns" src="${slide.jpg}" alt="">
+        <source srcset="${src}" type="image/webp">
+        <img class="kenburns" src="${src}" alt=""
+             style="--fx:${fx}%; --fy:${fy}%; --zoom:${zoom}">
       `;
       container.insertBefore(wrap, overlay);
     });

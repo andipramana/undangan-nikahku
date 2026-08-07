@@ -1,6 +1,39 @@
-/** Orkestrasi utama: populate konten dari config.js, buka undangan, init semua modul. */
+/** Orkestrasi utama: populate konten (dari payload Supabase bila ada, fallback
+ * ke config.js), buka undangan, init semua modul.
+ *
+ * Urutan wajib: seluruh konten dirender dulu, BARU initReveal() di paling
+ * akhir — kalau tidak, elemen yang belum ada saat pemindaian tidak akan
+ * pernah dapat animasi masuk (jebakan #8 rencana admin panel). */
 (function () {
-  function populateContent() {
+  /** Gabungkan konten remote (dari Supabase) DI ATAS config lokal: objek
+   * digabung rekursif, array diganti. loveStory ditangani per-indeks supaya
+   * field `photo` lokal tetap bertahan — itu satu-satunya foto yang masih
+   * hidup di dalam config, dipakai kalau payload foto tidak tersedia. */
+  function mergeInvitationContent(local, remote) {
+    if (!remote) return local;
+    const out = { ...local };
+    for (const [key, value] of Object.entries(remote)) {
+      if (key === "loveStory" && Array.isArray(value) && Array.isArray(local[key])) {
+        out[key] = value.map((item, i) =>
+          local[key][i] ? mergeInvitationContent(local[key][i], item) : item
+        );
+      } else if (
+        value &&
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        local[key] &&
+        typeof local[key] === "object" &&
+        !Array.isArray(local[key])
+      ) {
+        out[key] = mergeInvitationContent(local[key], value);
+      } else {
+        out[key] = value;
+      }
+    }
+    return out;
+  }
+
+  async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
     document.title = cfg.siteTitle;
 
@@ -55,12 +88,22 @@
       });
     }
 
-    // Foto quote full-width: sumber dari config (webp + fallback jpg) + teks quote
+    // Foto quote full-width: dari payload Supabase (folder 'quote') bila ada,
+    // fallback ke config lokal (webp + jpg). Pan/zoom diterapkan seperti foto lain.
     const qImg = document.getElementById("quote-img");
     const qWebp = document.getElementById("quote-webp");
     const qText = document.getElementById("quote-text");
+    const quotePhotos = await window.getPhotos("quote");
+    const qp = quotePhotos && quotePhotos[0];
     if (cfg.quotePhoto && qImg && qText) {
-      if (cfg.quotePhoto.photo) {
+      if (qp) {
+        const src = window.photoUrl(qp.path);
+        qImg.src = src;
+        if (qWebp) qWebp.srcset = src;
+        qImg.style.setProperty("--fx", `${qp.focalX ?? 50}%`);
+        qImg.style.setProperty("--fy", `${qp.focalY ?? 50}%`);
+        qImg.style.setProperty("--zoom", String(qp.zoom ?? 1));
+      } else if (cfg.quotePhoto.photo) {
         qImg.src = cfg.quotePhoto.photo;
         if (qWebp) qWebp.srcset = cfg.quotePhoto.photo.replace(/\.jpg$/, ".webp");
       }
@@ -78,16 +121,27 @@
     // Kalau semua isi disembunyikan, yang meluncur masuk cuma kotak kosong —
     // .timeline-item sendiri tidak punya latar maupun garis, jadi tak ada yang
     // terlihat bergerak. Foto inilah yang membuat luncurannya kelihatan.
+    // Foto babak diambil dari payload Supabase (folder 'story', urut = indeks
+    // babak); kalau tidak ada, pakai foto lokal di config. Konten babak
+    // di-escape — kini bisa diedit lewat admin, bukan file yang dipegang sendiri.
+    const storyPhotos = await window.getPhotos("story");
+    const esc = (v) =>
+      String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     document.getElementById("love-story-list").innerHTML = cfg.loveStory
-      .map(
-        (item, i) => `
+      .map((item, i) => {
+        const p = storyPhotos && storyPhotos[i];
+        const imgSrc = p ? window.photoUrl(p.path) : item.photo;
+        const pan = p
+          ? ` style="--fx:${p.focalX ?? 50}%; --fy:${p.focalY ?? 50}%; --zoom:${p.zoom ?? 1}"`
+          : "";
+        return `
       <div class="timeline-item" data-reveal="${i % 2 ? "slide-left" : "slide-right"}" data-reveal-group>
-        ${item.photo ? `<img class="timeline-item__photo" src="${item.photo}" alt="${item.title}">` : ""}
-        <span class="timeline-date" data-reveal="down" style="--reveal-i:1">${item.date}</span>
-        <h4 data-reveal="pop" style="--reveal-i:2">${item.title}</h4>
-        <p data-reveal="up" style="--reveal-i:3">${item.text}</p>
-      </div>`
-      )
+        ${imgSrc ? `<img class="timeline-item__photo" src="${esc(imgSrc)}" alt="${esc(item.title)}"${pan}>` : ""}
+        <span class="timeline-date" data-reveal="down" style="--reveal-i:1">${esc(item.date)}</span>
+        <h4 data-reveal="pop" style="--reveal-i:2">${esc(item.title)}</h4>
+        <p data-reveal="up" style="--reveal-i:3">${esc(item.text)}</p>
+      </div>`;
+      })
       .join("");
 
     document.getElementById("closing-text").textContent = cfg.closing.text;
@@ -183,10 +237,19 @@
     if (pre) pre.classList.add("hide");
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     document.documentElement.classList.add("no-scroll");
 
-    populateContent();
+    // 1) Satu fetch payload dari Supabase (teks + foto). Gagal → pakai
+    //    localStorage; kosong semua → undangan tetap jalan dari config.js +
+    //    manifest lokal (jaring pengaman hari-H, lihat §2.3 rencana admin).
+    const payload = await window.fetchInvitation();
+    if (payload && payload.content) {
+      window.WEDDING_CONFIG = mergeInvitationContent(window.WEDDING_CONFIG, payload.content);
+    }
+    window.__PHOTO_PAYLOAD = payload && payload.photos ? payload.photos : null;
+
+    await populateContent();
     setupOpenButton();
     if (window.initHeroSlideshows) window.initHeroSlideshows();
 

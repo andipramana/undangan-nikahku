@@ -1,12 +1,11 @@
 /** Section "We Found Love": slider foto ratio 1:1 (Swiper) — infinite loop,
- * bisa digeser user ke dua arah. Foto di-fetch dari manifest folder
- * foto_slider_section_1 (urutan by name). */
+ * bisa digeser user ke dua arah. Foto dari payload Supabase (folder 'wfl'),
+ * cadangan manifest lokal kalau payload tidak tersedia. */
 window.initWeFoundLove = async function () {
-  const cfg = window.WEDDING_CONFIG;
   const wrapper = document.getElementById("wfl-slider-wrapper");
-  if (!wrapper || !(cfg.weFoundLove && cfg.weFoundLove.manifest)) return;
+  if (!wrapper) return;
 
-  const photos = await window.fetchPhotos(cfg.weFoundLove.manifest);
+  const photos = (await window.getPhotos("wfl")) || [];
   if (!photos.length) return;
 
   photos.forEach((item) => wrapper.appendChild(window.buildPhotoSlide(item, "wfl-slide")));
