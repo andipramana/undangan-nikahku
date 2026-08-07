@@ -425,8 +425,11 @@
 <script src="assets/js/audio-player.js"></script>
 <script src="assets/js/gift.js"></script>
 <script src="assets/js/rsvp.js"></script>
-<!-- qrcode untuk QR check-in tamu (tanpa API pihak ketiga, semua lokal) -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<!-- QR check-in tamu: qrcode-generator (UMD plain script, global `qrcode`).
+     Paket npm `qrcode` tidak punya build browser (CommonJS mentah di lib/),
+     dan jalur +esm butuh type=module yang tidak dipakai script lain di halaman
+     ini — library ini punya build browser siap pakai, komputasi tetap lokal. -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="assets/js/livestream.js"></script>
 <script src="assets/js/qr-checkin.js"></script>
 <script src="assets/js/main.js"></script>
