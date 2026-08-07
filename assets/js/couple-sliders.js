@@ -31,8 +31,14 @@ window.initCoupleSliders = async function () {
           loop: true,
           speed: 1200, // transisi pelan
           observer: true,
-          autoplay: { delay: 2500, disableOnInteraction: false },
-          rtl: id === "groom-slider" // slide pria berlawanan arah dengan slide wanita
+          autoplay: {
+            delay: 2500,
+            disableOnInteraction: false,
+            // Slide pria jalan berlawanan arah dengan slide wanita (dari kiri ke
+            // kanan). Pakai reverseDirection, bukan rtl, supaya arah swipe user
+            // tetap konsisten (geser kiri = foto berikutnya, sama seperti bride).
+            reverseDirection: id === "groom-slider"
+          }
         });
       }
     });
