@@ -14,6 +14,20 @@ window.initRsvp = function () {
 
   const statusLabel = { hadir: "Hadir", tidak_hadir: "Tidak Hadir", ragu: "Ragu-ragu" };
 
+  // Pilihan kehadiran pakai tombol capsule (bukan dropdown): default "Hadir"
+  const attendanceBox = document.getElementById("rsvp-attendance");
+  let attendanceValue = "hadir";
+  function selectPill(btn) {
+    attendanceBox.querySelectorAll(".rsvp-pill").forEach((b) => {
+      b.classList.toggle("is-selected", b === btn);
+    });
+    attendanceValue = btn.dataset.value;
+  }
+  attendanceBox.querySelectorAll(".rsvp-pill").forEach((btn) => {
+    btn.addEventListener("click", () => selectPill(btn));
+  });
+  selectPill(attendanceBox.querySelector('[data-value="hadir"]'));
+
   function escapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str;
@@ -31,7 +45,7 @@ window.initRsvp = function () {
         (w) => `
       <div class="wish-card">
         <span class="wish-card__name">${escapeHtml(w.name)}</span>
-        <span class="wish-card__status">${statusLabel[w.attendance] || ""}</span>
+        <span class="wish-card__status wish-card__status--${w.attendance || ""}">${statusLabel[w.attendance] || ""}</span>
         <p class="wish-card__message">${escapeHtml(w.message)}</p>
       </div>`
       )
@@ -66,7 +80,7 @@ window.initRsvp = function () {
 
     const payload = {
       name: nameInput.value.trim(),
-      attendance: document.getElementById("rsvp-attendance").value,
+      attendance: attendanceValue,
       guest_count: Number(document.getElementById("rsvp-guests").value) || 1,
       message: document.getElementById("rsvp-message").value.trim()
     };

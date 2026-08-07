@@ -1,15 +1,34 @@
 /** Cover/opening/closing: slideshow foto bergilir dengan efek Ken Burns + slide filmstrip
  * (foto lama geser keluar ke kiri, foto baru masuk dari kanan — sempat kelihatan
- * bersebelahan saat transisi, bukan crossfade opacity). */
-window.initHeroSlideshows = function () {
+ * bersebelahan saat transisi, bukan crossfade opacity).
+ *
+ * Foto di-fetch dari manifest folder foto_cover / foto_opening / foto_closing
+ * (urutan by name) — ganti foto cukup timpa file di folder + jalankan
+ * scripts/build-manifests.mjs, tanpa menyentuh config.
+ *
+ * Timing: foto tampil penuh selama `interval`, lalu transisi pelan (SLIDE_TRANSITION_MS),
+ * lalu jeda penuh lagi sebelum foto berikutnya diganti. Section 2 (opening) tidak mulai
+ * menghitung dari page load — slideshow-nya baru distart main.js saat foto pertamanya
+ * sudah masuk, supaya foto pertama tetap bisa dilihat dulu. */
+window.initHeroSlideshows = async function () {
   const cfg = window.WEDDING_CONFIG;
   const interval = cfg.heroSlideInterval || 4500;
   const SLIDE_TRANSITION_MS = 3200;
 
-  ["cover", "opening", "closing"].forEach((key) => {
+  // Muat manifest ketiga slideshow sekaligus
+  const [coverSlides, openingSlides, closingSlides] = await Promise.all([
+    window.fetchPhotos(cfg.hero && cfg.hero.coverManifest),
+    window.fetchPhotos(cfg.hero && cfg.hero.openingManifest),
+    window.fetchPhotos(cfg.hero && cfg.hero.closingManifest)
+  ]);
+
+  [
+    ["cover", coverSlides],
+    ["opening", openingSlides],
+    ["closing", closingSlides]
+  ].forEach(([key, slides]) => {
     const container = document.getElementById(`${key}-media`);
     const overlay = container && container.querySelector(".hero-overlay");
-    const slides = (cfg.hero && cfg.hero[key]) || [];
     if (!container || !slides.length) return;
 
     slides.forEach((slide, i) => {
@@ -23,9 +42,10 @@ window.initHeroSlideshows = function () {
     });
 
     if (slides.length > 1) {
+      const items = container.querySelectorAll(".hero-slide");
       let index = 0;
-      setInterval(() => {
-        const items = container.querySelectorAll(".hero-slide");
+
+      function cycle() {
         const current = items[index];
         const nextIndex = (index + 1) % items.length;
         const next = items[nextIndex];
@@ -43,7 +63,25 @@ window.initHeroSlideshows = function () {
         }, SLIDE_TRANSITION_MS);
 
         index = nextIndex;
-      }, interval);
+        // Jeda penuh dulu untuk melihat foto yang baru masuk, BARU transisi berikutnya
+        // (tidak pakai setInterval agar pergantian tidak pernah menumpuk).
+        setTimeout(cycle, interval + SLIDE_TRANSITION_MS);
+      }
+
+      function start() {
+        // Foto pertama tampil dulu selama `interval` sebelum transisi pertama berjalan.
+        setTimeout(cycle, interval);
+      }
+
+      if (key === "opening") {
+        // Slideshow section 2 baru berjalan saat foto pertamanya sudah tampil
+        // (dipicu dari main.js lewat window.startOpeningSlideshow). Kalau main.js
+        // sudah minta start lebih dulu (fetch manifest masih jalan), langsung jalan.
+        window.startOpeningSlideshow = start;
+        if (window.__openingStartQueued) start();
+      } else {
+        start();
+      }
     }
   });
 };

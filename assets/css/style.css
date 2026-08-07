@@ -14,6 +14,9 @@
   --font-sans: "Poppins", "Segoe UI", sans-serif;
   --font-label: "Alegreya Sans", "Segoe UI", sans-serif;
   --max-w: 560px;
+  /* Satu sumber overlay gelap closing — dipakai juga oleh background footer
+     supaya warnanya persis sama dengan overlay slideshow. */
+  --overlay-closing: linear-gradient(180deg, rgba(10,9,7,.7) 0%, rgba(10,9,7,.78) 50%, rgba(10,9,7,.88) 100%);
 }
 
 * { box-sizing: border-box; }
@@ -104,6 +107,7 @@ a { color: inherit; }
 
 .hero-overlay {
   position: absolute; inset: 0;
+  z-index: 2; /* di atas foto slideshow (z-index 1), di bawah teks (z-index 2, DOM belakang) */
   background: linear-gradient(180deg,
     rgba(10,9,7,.35) 0%,
     rgba(10,9,7,.08) 22%,
@@ -122,6 +126,10 @@ a { color: inherit; }
    bukan profil gelap-di-tepi/terang-di-tengah seperti cover. */
 .hero-overlay--center {
   background: linear-gradient(180deg, rgba(10,9,7,.4) 0%, rgba(10,9,7,.58) 50%, rgba(10,9,7,.7) 100%);
+}
+/* Closing (footer): gelap transparan lebih pekat agar teks di atas slider terbaca jelas */
+.hero-overlay--closing {
+  background: var(--overlay-closing);
 }
 .hero-content, .hero-content * { text-shadow: 0 2px 14px rgba(0,0,0,.55); }
 
@@ -457,7 +465,7 @@ a { color: inherit; }
 
 /* ---------- Love story timeline ---------- */
 .timeline { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.5rem; }
-.timeline-item { border-left: 1.5px solid var(--color-gold); padding-left: 1.25rem; text-align: left; }
+.timeline-item { text-align: left; } /* tanpa garis timeline di kiri foto */
 .timeline-item__photo {
   width: 100%; aspect-ratio: 16/10; object-fit: cover;
   border-radius: 10px; border: 1px solid var(--color-gold);
@@ -467,17 +475,26 @@ a { color: inherit; }
 .timeline-item h4 { font-family: var(--font-serif); font-size: 1.3rem; margin: .3rem 0; color: var(--color-gold-soft); }
 .timeline-item p { margin: 0; font-size: .9rem; line-height: 1.6; opacity: .85; }
 
-/* ---------- Gallery (grid masonry: kelipatan-3 full-width/landscape, sisanya portrait) ---------- */
+/* ---------- Gallery (grid 4 kolom, pola: landscape / 2 potrait / landscape / 1-4+3-4 / landscape / 2 potrait / landscape) ---------- */
 .gallery-grid {
   max-width: 720px; margin: 0 auto;
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: 190px; gap: .5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .5rem;
+  /* Semua baris sama tinggi = tinggi foto landscape (16:10 dari lebar kontainer ~96vw).
+     min(450px, 60vw) meniru aspek 16/10: 0.96vw / 0.6vw = 1.6, dan 720/450 = 1.6. */
+  grid-auto-rows: min(450px, 60vw);
 }
 .gallery-item { border-radius: 8px; overflow: hidden; cursor: zoom-in; }
-.gallery-item--wide { grid-column: span 2; }
 .gallery-item img, .gallery-item picture { display: block; width: 100%; height: 100%; }
 .gallery-item img { object-fit: cover; }
-@media (min-width: 560px) { .gallery-grid { grid-auto-rows: 240px; } }
+/* 1 foto landscape selebar grid — seukuran foto Our Story (16/10) */
+.gallery-item--landscape { grid-column: 1 / -1; }
+/* 2 foto potrait satu baris, tinggi menyamai foto landscape di atasnya */
+.gallery-item--portrait { grid-column: span 2; }
+/* baris campur: potrait 1/4 lebar + semi-landscape 3/4 lebar, tinggi sama */
+.gallery-item--quarter { grid-column: span 1; }
+.gallery-item--threequarter { grid-column: span 3; }
 
 .lightbox {
   position: fixed; inset: 0; background: rgba(10,9,8,.94); z-index: 900;
@@ -525,6 +542,32 @@ a { color: inherit; }
   background: transparent; padding: .5rem .1rem; color: inherit;
 }
 .rsvp-form input:focus, .rsvp-form select:focus, .rsvp-form textarea:focus { outline: none; border-color: var(--color-dark); }
+
+/* Tombol pilihan kehadiran capsule: Hadir full-width, Tidak Hadir & Ragu setengah */
+.rsvp-attendance {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+  margin-top: .15rem;
+}
+.rsvp-pill {
+  grid-column: span 1;
+  padding: .7rem 1rem;
+  border: 1px solid var(--color-gold);
+  border-radius: 999px; /* capsule */
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: .9rem;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+.rsvp-pill--full { grid-column: 1 / -1; } /* Hadir: lebar penuh */
+.rsvp-pill.is-selected {
+  background: var(--color-gold);
+  color: var(--color-dark);
+  font-weight: 600;
+}
 .rsvp-status { text-align: center; font-size: .85rem; min-height: 1.2em; }
 
 .wishes-list {
@@ -533,7 +576,19 @@ a { color: inherit; }
 }
 .wish-card { border-bottom: 1px solid #e3dcc9; padding-bottom: .9rem; }
 .wish-card__name { font-weight: 600; font-size: .9rem; }
-.wish-card__status { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-gold); margin-left: .5rem; }
+.wish-card__status {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+  margin-left: .5rem;
+  padding: .18rem .55rem;
+  border-radius: 999px;
+}
+/* Badge warna berbeda per status kehadiran */
+.wish-card__status--hadir { background: rgba(61, 132, 89, .16); color: #3d8459; }
+.wish-card__status--tidak_hadir { background: rgba(176, 68, 60, .15); color: #b0443c; }
+.wish-card__status--ragu { background: rgba(190, 133, 51, .18); color: #b6852f; }
 .wish-card__message { font-size: .88rem; line-height: 1.55; margin: .3rem 0 0; opacity: .9; }
 
 /* ---------- Share / QR ---------- */
@@ -544,7 +599,27 @@ a { color: inherit; }
 /* ---------- Closing ---------- */
 .closing-text { line-height: 1.8; font-size: 1rem; margin-bottom: 1.5rem; }
 
-.site-footer { text-align: center; padding: 2rem; font-size: .75rem; opacity: .6; background: var(--color-dark); color: var(--color-text-light); }
+/* Footer punya background sendiri — memakai overlay gelap yang SAMA dengan
+   overlay slideshow (var --overlay-closing) agar warnanya seragam, tanpa
+   menampilkan foto slideshow di belakangnya. */
+.site-footer {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 4.5rem;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 0 1rem;
+  font-size: .75rem; opacity: .6;
+  background: var(--overlay-closing);
+  color: var(--color-text-light);
+  z-index: 3; /* di atas overlay (z-index 2) dan foto slideshow (z-index 1) */
+}
+/* Slideshow full selayar: foto menutupi seluruh section, footer tampil
+   di atasnya dengan background overlay gelap yang sama.
+   100vh (bukan 100dvh) supaya di HP saat discroll penuh — bar browser sudah
+   mengecil — foto tetap pas menutupi layar tanpa sisa piksel. */
+#closing { min-height: 100vh; }
+#closing .hero-media { inset: 0; }
+/* Teks penutup tidak bertabrakan dengan footer di bawahnya */
+#closing .hero-content { padding-bottom: 5.5rem; }
 
 /* ---------- Toast ---------- */
 .toast {
@@ -571,3 +646,334 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .kenburns, .audio-fab__disc, .preloader-ring { animation: none !important; }
 }
+
+/* ---------- We Found Love (slider foto 1:1 + ayat quran kecil) ---------- */
+#we-found-love.section {
+  padding-top: 2.5rem;
+  padding-bottom: 0;
+}
+#we-found-love .section-title--script {
+  margin-bottom: 1.25rem;
+  font-size: clamp(2rem, 6vw, 2.6rem);
+}
+.wfl-slider {
+  overflow: hidden;
+  padding-bottom: 1.5rem; /* ruang pagination */
+}
+.wfl-slider .swiper-wrapper { align-items: center; }
+.wfl-slide {
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.wfl-slide picture,
+.wfl-slide img { width: 100%; height: 100%; display: block; }
+.wfl-slide img { object-fit: cover; }
+.wfl-slider .swiper-pagination { bottom: .25rem; }
+.wfl-slider .swiper-pagination-bullet {
+  background: var(--color-gold);
+  opacity: .35;
+}
+.wfl-slider .swiper-pagination-bullet-active { opacity: 1; }
+
+/* Ayat quran font sangat kecil, di bawah slider (sesuai referensi) */
+.wfl-quote { margin-top: 1rem; }
+.wfl-quote .arabic-quote,
+.wfl-quote .opening-quote,
+.wfl-quote .opening-source {
+  font-size: 10px;
+  line-height: 1.8;
+  margin: 0;
+}
+.wfl-quote .opening-quote {
+  color: var(--color-text-light);
+  opacity: .85;
+  font-size: 10px;
+}
+.wfl-quote .opening-source {
+  margin-top: .25rem;
+  letter-spacing: .15em;
+  opacity: .6;
+}
+
+/* ---------- Kedua Mempelai (slideshow besar 3/4 layar + info overlay) ---------- */
+/* Full-width, tanpa rounded, rapat ke ayat quran di atasnya (tanpa heading). */
+#couple.section {
+  padding: 0 0 1.5rem;
+}
+.couple-block { margin-bottom: 0; }
+.couple-block:last-child { margin-bottom: 0; }
+.couple-slider {
+  position: relative;
+  height: 75vh;
+  max-height: 720px;
+  overflow: hidden;
+}
+.couple-slider .swiper-wrapper,
+.couple-slider .swiper-slide { height: 100%; }
+.couple-slide picture,
+.couple-slide img { width: 100%; height: 100%; display: block; }
+.couple-slide img { object-fit: cover; }
+
+/* Blur-fade band (resep standar): gelap pekat di bottom, makin ke atas makin
+   blur & transparan, ujung atas tidak bertekstur garis (mask arah sama). */
+.couple-fade {
+  position: absolute;
+  left: -2px; right: -2px; bottom: -2px;
+  height: 55%;
+  background: linear-gradient(180deg, transparent 0%, var(--color-dark) 85%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  mask-image: linear-gradient(180deg, transparent 0%, black 70%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.couple-info {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 2rem 1.5rem 1.25rem;
+  text-align: center;
+  z-index: 3;
+}
+.couple-info__label {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: .35em;
+  font-size: .65rem;
+  color: var(--color-gold);
+  margin: 0 0 .35rem;
+}
+.couple-info__name {
+  font-family: var(--font-script);
+  font-size: clamp(2.2rem, 8vw, 3rem);
+  line-height: 1.1;
+  color: #ffffff;
+  font-weight: 400;
+  margin: 0 0 .25rem;
+}
+.couple-info__parents {
+  font-size: .75rem;
+  line-height: 1.6;
+  color: var(--color-text-light);
+  opacity: .85;
+  margin: 0;
+}
+
+/* ---------- Kartu Event (portrait rounded: slider pasangan + kanvas info) ---------- */
+/* Hilangkan padding kiri-kanan section supaya kartu selebar layar, dan padding bawah
+   supaya foto quote langsung menyambung di bawah kartu dresscode. */
+#event.section { padding-left: 0; padding-right: 0; padding-bottom: 0; }
+.event-card {
+  width: min(96%, 720px); /* sangat lebar, sisakan gap kecil kiri-kanan */
+  margin: 0 auto 2.5rem;
+  height: 90vh; /* 9/10 layar */
+  background: #ffffff;
+  border-radius: 24px;
+  overflow: hidden; /* foto tetap terpotong mengikuti sudut rounded */
+  display: flex;
+  flex-direction: column;
+  padding: 0; /* override padding CSS lama agar slider full-bleed ke kiri-atas */
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .18);
+}
+.event-card:last-child { margin-bottom: 0; }
+
+/* ---------- Kartu Dresscode (kartu kecil 1/4 layar, border sama dengan event card) ---------- */
+.dresscode-card {
+  width: min(96%, 720px);
+  margin: 0 auto 2.5rem; /* jarak normal ke foto quote di bawah */
+  height: 25vh; /* 1/4 layar */
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  padding: 1rem;
+}
+.dresscode-label {
+  font-family: var(--font-label);
+  font-size: clamp(1.1rem, 4.5vw, 1.6rem);
+  font-weight: 700;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin: 0;
+}
+.dresscode-text {
+  font-size: .8rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  opacity: .8;
+  max-width: 90%;
+  margin: 0;
+}
+.dresscode-swatches {
+  display: flex;
+  gap: .65rem;
+  margin-top: .35rem;
+}
+.dresscode-swatch {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .2), inset 0 0 0 2px #fff;
+}
+
+/* ---------- Foto Quote (full-width 1:1, tanpa rounded, overlay golden hour gelap) ---------- */
+.quote-section {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1; /* persegi: 1:1 terhadap lebar layar */
+  overflow: hidden;
+  background: var(--color-dark);
+}
+.quote-section picture,
+.quote-section img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.quote-overlay {
+  position: absolute;
+  inset: 0;
+  /* layer golden hour agak gelap agar teks putih tetap terbaca */
+  background: linear-gradient(180deg, rgba(48, 32, 13, .55) 0%, rgba(20, 13, 5, .62) 100%);
+}
+.quote-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 2rem;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(1.15rem, 4.6vw, 1.9rem);
+  line-height: 1.7;
+  color: #ffffff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
+}
+
+/* 4/10 atas kartu: slider foto pasangan, penuh menyentuh tepi kartu */
+.event-card__slider {
+  height: 40%;
+  flex: none;
+  overflow: hidden;
+  width: 100%;
+}
+.event-card__slider .swiper-wrapper,
+.event-card__slider .swiper-slide { height: 100%; }
+.event-slide picture,
+.event-slide img { width: 100%; height: 100%; display: block; }
+.event-slide img { object-fit: cover; }
+
+/* 6/10 bawah kartu: kanvas bersih info acara, 2 kolom — 1/4 label acara, 3/4 detail */
+.event-card__info {
+  flex: 0 0 60%; /* 6/10 dari tinggi kartu, bukan dari layar */
+  display: grid;
+  /* minmax(0, …) agar kolom label tidak ikut melebar saat tulisannya diperbesar —
+     label tetap di 1/4, detail tetap di 3/4 tanpa bergeser */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  color: var(--color-text);
+  background: #ffffff;
+  padding: 1.5rem .75rem 1.5rem 0;
+  min-height: 0;
+}
+
+/* Kolom 1 (1/4): label acara vertikal, center horizontal & vertikal */
+.event-label {
+  font-family: var(--font-label);
+  font-size: clamp(1.35rem, 5vw, 2.2rem); /* label acara dibesarkan */
+  min-width: 0; /* jangan paksa kolom label melebar karena teks nowrap */
+  font-weight: 700;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  white-space: nowrap;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+}
+
+/* Kolom 2: tanggal di atas, lokasi di bawahnya (digabung) */
+.event-detail {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.1rem;
+  min-width: 0;
+  padding-right: .5rem;
+  padding-left: .9rem; /* ruang agar garis pemisah tidak menempel teks */
+  position: relative;
+}
+/* Garis pemisah vertikal antara kolom label acara dan kolom detail */
+.event-detail::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1rem;
+  bottom: 1rem;
+  border-left: 1px solid rgba(201, 166, 104, .4);
+}
+.event-date {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .3rem;
+}
+.event-day { font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; opacity: .7; margin: 0; }
+.event-divider {
+  width: 2.5rem;
+  border: none;
+  border-top: 1px solid var(--color-gold);
+  margin: .35rem auto;
+}
+.event-num {
+  font-family: var(--font-script);
+  font-size: clamp(3rem, 12vw, 4.2rem);
+  line-height: 1;
+  color: var(--color-text);
+  margin: 0;
+}
+.event-month { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; opacity: .7; margin: 0; }
+.event-time { font-size: 1.05rem; font-weight: 600; color: var(--color-gold); margin: .25rem 0 0; letter-spacing: .08em; }
+
+/* Lokasi di bawah tanggal, dipisah garis tipis */
+.event-place {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(201, 166, 104, .35);
+}
+.event-place h3 { font-size: .95rem; margin: 0 0 .3rem; line-height: 1.3; }
+.event-place p { font-size: .7rem; line-height: 1.55; opacity: .75; margin: 0 0 .9rem; }
+.btn-maps {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem .8rem;
+  border: 1px solid var(--color-gold);
+  border-radius: 10px;
+  color: var(--color-text);
+  font-size: .7rem;
+  letter-spacing: .06em;
+  text-decoration: none;
+  transition: background .3s ease, color .3s ease;
+}
+.btn-maps svg { width: .9rem; height: .9rem; color: var(--color-gold); }
+.btn-maps:hover { background: var(--color-gold); color: #ffffff; }
+.btn-maps:hover svg { color: #ffffff; }

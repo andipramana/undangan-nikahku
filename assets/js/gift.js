@@ -9,16 +9,18 @@ window.initGift = function () {
 
   const cfg = window.WEDDING_CONFIG.gift;
 
+  // Nomor rekening placeholder disembunyikan (tidak ditampilkan ke tamu) sampai
+  // nomor asli diisi di config.js dan flag placeholder dihapus.
   accountsEl.innerHTML = cfg.accounts
     .map(
       (acc) => `
     <div class="gift-account">
       <div>
         <div class="gift-account__bank">${acc.bank}</div>
-        <div class="gift-account__number">${acc.number}</div>
+        ${acc.placeholder ? "" : `<div class="gift-account__number">${acc.number}</div>`}
         <div class="gift-account__holder">a.n. ${acc.holder}</div>
       </div>
-      <button class="gift-copy-btn" type="button" data-number="${acc.number}">Salin</button>
+      ${acc.placeholder ? "" : `<button class="gift-copy-btn" type="button" data-number="${acc.number}">Salin</button>`}
     </div>`
     )
     .join("");

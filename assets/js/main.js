@@ -9,29 +9,61 @@
     const guestName = rawGuest ? decodeURIComponent(rawGuest.replace(/\+/g, " ")) : cfg.defaultGuestName;
     document.getElementById("guest-name").textContent = guestName;
 
-    document.getElementById("opening-arabic").textContent = cfg.opening.arabicQuote;
-    document.getElementById("opening-quote").textContent = cfg.opening.quote;
-    document.getElementById("opening-source").textContent = `— ${cfg.opening.source} —`;
+    document.getElementById("wfl-arabic").textContent = cfg.opening.arabicQuote;
+    document.getElementById("wfl-quote").textContent = cfg.opening.quote;
+    document.getElementById("wfl-source").textContent = `— ${cfg.opening.source} —`;
 
-    document.getElementById("bride-photo").src = cfg.couple.bride.photo;
     document.getElementById("bride-name").textContent = cfg.couple.bride.name;
     document.getElementById("bride-parents").textContent =
       `Putri dari Bpk. ${cfg.couple.bride.father} & Ibu ${cfg.couple.bride.mother}`;
 
-    document.getElementById("groom-photo").src = cfg.couple.groom.photo;
     document.getElementById("groom-name").textContent = cfg.couple.groom.name;
     document.getElementById("groom-parents").textContent =
       `Putra dari Bpk. ${cfg.couple.groom.father} & Ibu ${cfg.couple.groom.mother}`;
 
     document.getElementById("event-date-label").textContent = `${cfg.event.dayLabel}, ${cfg.event.dateLabel}`;
     setupCalendarLink(cfg);
-    document.getElementById("akad-label").textContent = cfg.event.akad.label;
-    document.getElementById("akad-time").textContent = `${cfg.event.akad.start} – ${cfg.event.akad.end} WIB`;
-    document.getElementById("resepsi-label").textContent = cfg.event.resepsi.label;
-    document.getElementById("resepsi-time").textContent = `${cfg.event.resepsi.start} – ${cfg.event.resepsi.end} WIB`;
-    document.getElementById("venue-name").textContent = cfg.event.venue.name;
-    document.getElementById("venue-address").textContent = cfg.event.venue.address;
-    document.getElementById("venue-maps-link").href = cfg.event.venue.mapsUrl;
+
+    // Kartu event: tanggal (Selasa / 25 / Agustus 2026 / jam) + venue + tombol maps
+    const parts = cfg.event.dateLabel.split(" ");
+    const dayNum = parts[0];
+    const monthYear = parts.slice(1).join(" ");
+    const fmtTime = (t) => t.replace(".", ":");
+    ["akad", "resepsi"].forEach((key) => {
+      document.getElementById(`${key}-day`).textContent = cfg.event.dayLabel;
+      document.getElementById(`${key}-date`).textContent = dayNum;
+      document.getElementById(`${key}-month`).textContent = monthYear;
+      document.getElementById(`${key}-time`).textContent = fmtTime(cfg.event[key].start);
+      document.getElementById(`venue-name-${key}`).textContent = cfg.event.venue.name;
+      document.getElementById(`venue-address-${key}`).textContent = cfg.event.venue.address;
+      document.getElementById(`${key}-maps`).href = cfg.event.venue.mapsUrl;
+    });
+
+    // Kartu dresscode: teks + 5 bulatan warna dari config
+    const dcText = document.getElementById("dresscode-text");
+    const dcBox = document.getElementById("dresscode-swatches");
+    if (dcText && dcBox && cfg.dresscode) {
+      dcText.textContent = cfg.dresscode.text;
+      cfg.dresscode.colors.forEach((c) => {
+        const s = document.createElement("span");
+        s.className = "dresscode-swatch";
+        s.style.background = c;
+        s.title = c;
+        dcBox.appendChild(s);
+      });
+    }
+
+    // Foto quote full-width: sumber dari config (webp + fallback jpg) + teks quote
+    const qImg = document.getElementById("quote-img");
+    const qWebp = document.getElementById("quote-webp");
+    const qText = document.getElementById("quote-text");
+    if (cfg.quotePhoto && qImg && qText) {
+      if (cfg.quotePhoto.photo) {
+        qImg.src = cfg.quotePhoto.photo;
+        if (qWebp) qWebp.srcset = cfg.quotePhoto.photo.replace(/\.jpg$/, ".webp");
+      }
+      qText.textContent = cfg.quotePhoto.quote;
+    }
 
     document.getElementById("love-story-list").innerHTML = cfg.loveStory
       .map(
@@ -78,7 +110,16 @@
         });
         // Teks/tombol/countdown baru animasi masuk SETELAH foto section selesai
         // (durasi transisi section = 2.6s, lihat #opening.section-revealed di CSS).
-        setTimeout(() => opening.classList.add("text-revealed"), 2700);
+        // Jeda slideshow section 2 juga baru dihitung mulai saat ini — foto
+        // pertama tetap tampil dulu sebelum diganti.
+        setTimeout(() => {
+          opening.classList.add("text-revealed");
+          // Slideshow opening baru distart setelah manifest foto selesai dimuat
+          // (hero-slideshow.js async). Kalau belum siap, tandai queue — nanti
+          // langsung jalan begitu fotonya ada.
+          if (window.startOpeningSlideshow) window.startOpeningSlideshow();
+          else window.__openingStartQueued = true;
+        }, 2700);
       }
       if (window.refreshReveal) window.refreshReveal();
     }
@@ -128,8 +169,10 @@
     if (window.initAudioPlayer) window.initAudioPlayer();
     if (window.initGift) window.initGift();
     if (window.initRsvp) window.initRsvp();
-    if (window.initShare) window.initShare();
     if (window.initGallery) window.initGallery();
+    if (window.initWeFoundLove) window.initWeFoundLove();
+    if (window.initCoupleSliders) window.initCoupleSliders();
+    if (window.initEventCards) window.initEventCards();
     if (window.initReveal) window.initReveal();
 
     window.addEventListener("load", hidePreloader);

@@ -7,12 +7,13 @@
 <meta name="description" content="Undangan pernikahan digital Mita Meliana &amp; Andi Pramana, 25 Agustus 2026">
 <meta property="og:title" content="Mita &amp; Andi — The Wedding">
 <meta property="og:description" content="Dengan penuh syukur, kami mengundang Anda di hari bahagia kami, 25 Agustus 2026.">
-<meta property="og:image" content="assets/img/hero/cover.jpg">
+<meta property="og:image" content="assets/img/foto_cover/01.jpg">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -83,60 +84,125 @@
       </div>
     </section>
 
-    <!-- ============ QUOTE (background gelap solid) ============ -->
-    <section id="quote" class="section section--dark">
-      <p class="arabic-quote" data-aos="fade-up" id="opening-arabic"></p>
-      <p class="opening-quote" data-aos="fade-up" data-aos-delay="150" id="opening-quote"></p>
-      <p class="opening-source" data-aos="fade-up" data-aos-delay="250" id="opening-source"></p>
-    </section>
-
-    <!-- ============ COUPLE ============ -->
-    <section id="couple" class="section section--dark">
-      <p class="section-eyebrow" data-aos="fade-up">Kedua Mempelai</p>
-      <h2 class="section-title" data-aos="fade-up">Yang Berbahagia</h2>
-
-      <div class="couple-grid">
-        <article class="couple-card" data-aos="fade-up">
-          <img id="bride-photo" class="couple-card__img" alt="">
-          <div class="couple-card__info">
-            <h3 id="bride-name" class="couple-name"></h3>
-            <p class="couple-parents" id="bride-parents"></p>
-          </div>
-        </article>
-
-        <div class="couple-divider" data-aos="zoom-in">&amp;</div>
-
-        <article class="couple-card" data-aos="fade-up" data-aos-delay="150">
-          <img id="groom-photo" class="couple-card__img" alt="">
-          <div class="couple-card__info">
-            <h3 id="groom-name" class="couple-name"></h3>
-            <p class="couple-parents" id="groom-parents"></p>
-          </div>
-        </article>
+    <!-- ============ WE FOUND LOVE (slider foto 1:1 infinite + ayat quran kecil) ============ -->
+    <section id="we-found-love" class="section section--dark">
+      <h2 class="section-title--script" data-aos="fade-up">We Found Love</h2>
+      <div class="wfl-slider swiper" data-aos="fade-up" data-aos-delay="150">
+        <div class="swiper-wrapper" id="wfl-slider-wrapper"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+      <div class="wfl-quote" data-aos="fade-up" data-aos-delay="250">
+        <p class="arabic-quote" id="wfl-arabic"></p>
+        <p class="opening-quote" id="wfl-quote"></p>
+        <p class="opening-source" id="wfl-source"></p>
       </div>
     </section>
 
-    <!-- ============ EVENT ============ -->
+    <!-- ============ COUPLE (slideshow foto besar 3/4 layar + info mempelai) ============ -->
+    <section id="couple" class="section section--dark">
+
+      <!-- Mempelai wanita -->
+      <div class="couple-block" data-aos="fade-up">
+        <div class="couple-slider swiper" id="bride-slider">
+          <div class="swiper-wrapper" id="bride-slider-wrapper"></div>
+          <div class="couple-fade"></div>
+          <div class="couple-info">
+            <p class="couple-info__label">The Bride</p>
+            <h3 class="couple-info__name" id="bride-name"></h3>
+            <p class="couple-info__parents" id="bride-parents"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mempelai pria -->
+      <div class="couple-block" data-aos="fade-up">
+        <div class="couple-slider swiper" id="groom-slider">
+          <div class="swiper-wrapper" id="groom-slider-wrapper"></div>
+          <div class="couple-fade"></div>
+          <div class="couple-info">
+            <p class="couple-info__label">The Groom</p>
+            <h3 class="couple-info__name" id="groom-name"></h3>
+            <p class="couple-info__parents" id="groom-parents"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EVENT (2 kartu portrait: slider pasangan + info acara) ============ -->
     <section id="event" class="section">
       <p class="section-eyebrow" data-aos="fade-up">Wedding</p>
       <h2 class="section-title--script" data-aos="fade-up">Event</h2>
 
-      <div class="event-grid">
-        <article class="event-card" data-aos="zoom-in">
-          <p class="event-card__label" id="akad-label"></p>
-          <p class="event-card__time" id="akad-time"></p>
-        </article>
-        <article class="event-card" data-aos="zoom-in" data-aos-delay="150">
-          <p class="event-card__label" id="resepsi-label"></p>
-          <p class="event-card__time" id="resepsi-time"></p>
-        </article>
-      </div>
+      <!-- Akad Nikah -->
+      <article class="event-card" data-aos="zoom-in">
+        <div class="event-card__slider swiper" id="event-akad-slider">
+          <div class="swiper-wrapper" id="event-akad-wrapper"></div>
+        </div>
+        <div class="event-card__info">
+          <p class="event-label">Akad Nikah</p>
+          <div class="event-detail">
+            <div class="event-date">
+              <p class="event-day" id="akad-day"></p>
+              <hr class="event-divider">
+              <p class="event-num" id="akad-date"></p>
+              <p class="event-month" id="akad-month"></p>
+              <p class="event-time" id="akad-time"></p>
+            </div>
+            <div class="event-place">
+              <h3 id="venue-name-akad"></h3>
+              <p id="venue-address-akad"></p>
+              <a id="akad-maps" class="btn-maps" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                Google Maps
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
 
-      <div class="venue" data-aos="fade-up">
-        <h3 id="venue-name"></h3>
-        <p id="venue-address"></p>
-        <a id="venue-maps-link" class="btn-outline" href="#" target="_blank" rel="noopener">Lihat Lokasi</a>
-      </div>
+      <!-- Resepsi -->
+      <article class="event-card" data-aos="zoom-in" data-aos-delay="150">
+        <div class="event-card__slider swiper" id="event-resepsi-slider">
+          <div class="swiper-wrapper" id="event-resepsi-wrapper"></div>
+        </div>
+        <div class="event-card__info">
+          <p class="event-label">Resepsi</p>
+          <div class="event-detail">
+            <div class="event-date">
+              <p class="event-day" id="resepsi-day"></p>
+              <hr class="event-divider">
+              <p class="event-num" id="resepsi-date"></p>
+              <p class="event-month" id="resepsi-month"></p>
+              <p class="event-time" id="resepsi-time"></p>
+            </div>
+            <div class="event-place">
+              <h3 id="venue-name-resepsi"></h3>
+              <p id="venue-address-resepsi"></p>
+              <a id="resepsi-maps" class="btn-maps" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                Google Maps
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Dresscode (kartu kecil 1/4 layar) -->
+      <article class="dresscode-card" data-aos="zoom-in">
+        <p class="dresscode-label">Dresscode</p>
+        <p class="dresscode-text" id="dresscode-text"></p>
+        <div class="dresscode-swatches" id="dresscode-swatches"></div>
+      </article>
+    </section>
+
+    <!-- ============ QUOTE (foto full-width 1:1 + overlay golden hour + teks quote) ============ -->
+    <section id="quote" class="quote-section">
+      <picture id="quote-picture">
+        <source id="quote-webp" srcset="" type="image/webp">
+        <img id="quote-img" src="" alt="">
+      </picture>
+      <div class="quote-overlay"></div>
+      <p class="quote-text" id="quote-text"></p>
     </section>
 
     <!-- ============ LOVE STORY ============ -->
@@ -189,11 +255,11 @@
         </label>
         <label>
           Kehadiran
-          <select id="rsvp-attendance" name="attendance" required>
-            <option value="hadir">Hadir</option>
-            <option value="tidak_hadir">Tidak Hadir</option>
-            <option value="ragu">Ragu-ragu</option>
-          </select>
+          <div class="rsvp-attendance" id="rsvp-attendance" role="radiogroup" aria-label="Kehadiran">
+            <button type="button" class="rsvp-pill rsvp-pill--full" data-value="hadir">Hadir</button>
+            <button type="button" class="rsvp-pill" data-value="tidak_hadir">Tidak Hadir</button>
+            <button type="button" class="rsvp-pill" data-value="ragu">Ragu-ragu</button>
+          </div>
         </label>
         <label>
           Jumlah Tamu
@@ -210,33 +276,19 @@
       <div id="wishes-list" class="wishes-list" aria-live="polite"></div>
     </section>
 
-    <!-- ============ SHARE / QR ============ -->
-    <section id="share" class="section section--dark">
-      <p class="section-eyebrow" data-aos="fade-up">Bagikan</p>
-      <h2 class="section-title" data-aos="fade-up">Sebarkan Undangan</h2>
-      <div class="share-box" data-aos="zoom-in">
-        <div id="qr-container" class="qr-container"></div>
-        <div class="share-actions">
-          <button id="btn-copy-link" class="btn-outline" type="button">Salin Tautan</button>
-          <button id="btn-download-card" class="btn-outline" type="button">Unduh Undangan</button>
-        </div>
-      </div>
-    </section>
-
     <!-- ============ CLOSING ============ -->
-    <section id="closing" class="section-hero section-hero--short">
+    <section id="closing" class="section-hero">
       <div class="hero-media" id="closing-media">
-        <div class="hero-overlay hero-overlay--center"></div>
+        <div class="hero-overlay hero-overlay--closing"></div>
       </div>
       <div class="hero-content">
         <p class="closing-text" data-aos="fade-up" id="closing-text"></p>
         <p class="script-names script-names--small" data-aos="fade-up" data-aos-delay="150">Mita <span class="amp">&amp;</span> Andi</p>
       </div>
+      <footer class="site-footer">
+        <p>Dibuat dengan &#10084; — 2026</p>
+      </footer>
     </section>
-
-    <footer class="site-footer">
-      <p>Dibuat dengan &#10084; — 2026</p>
-    </footer>
 
   </div>
 </main>
@@ -244,20 +296,21 @@
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
 <script src="assets/js/config.js"></script>
+<script src="assets/js/photos.js"></script>
 <script src="assets/js/supabase-client.js"></script>
 <script src="assets/js/hero-slideshow.js"></script>
 <script src="assets/js/reveal.js"></script>
 <script src="assets/js/countdown.js"></script>
 <script src="assets/js/gallery.js"></script>
+<script src="assets/js/we-found-love.js"></script>
+<script src="assets/js/couple-sliders.js"></script>
+<script src="assets/js/event-cards.js"></script>
 <script src="assets/js/audio-player.js"></script>
 <script src="assets/js/gift.js"></script>
 <script src="assets/js/rsvp.js"></script>
-<script src="assets/js/share.js"></script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>

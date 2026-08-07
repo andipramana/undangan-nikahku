@@ -1,23 +1,39 @@
-/** Muat manifest galeri, render grid masonry (selang-seling landscape/portrait) + lightbox. */
+/** Render grid galeri dari manifest folder foto_gallery (urutan by name) + lightbox. */
 window.initGallery = async function () {
   const wrapper = document.getElementById("gallery-wrapper");
   if (!wrapper) return;
 
-  let manifest = [];
-  try {
-    const res = await fetch(window.WEDDING_CONFIG.gallery.manifestUrl);
-    manifest = await res.json();
-  } catch (err) {
-    console.error("Gagal memuat galeri:", err);
-    return;
-  }
+  const photos = await window.fetchPhotos(window.WEDDING_CONFIG.gallery.manifest);
+  if (!photos.length) return;
 
-  // Pola selang-seling: tiap kelipatan-3 tampil full-width (landscape), sisanya setengah (portrait).
-  wrapper.innerHTML = manifest
+  // Pola baris (14 baris, 20 foto): pola 7 baris diulang 2×, baris terakhir landscape penutup.
+  const PATTERN = [
+    "landscape",
+    "portrait",
+    "portrait",
+    "landscape",
+    "quarter",
+    "threequarter",
+    "landscape",
+    "portrait",
+    "portrait",
+    "landscape",
+    "landscape",
+    "portrait",
+    "portrait",
+    "landscape",
+    "quarter",
+    "threequarter",
+    "landscape",
+    "portrait",
+    "portrait",
+    "landscape"
+  ];
+  wrapper.innerHTML = photos
     .map((item, i) => {
-      const wide = i % 3 === 0;
+      const cls = PATTERN[i] || "landscape";
       return `
-    <div class="gallery-item${wide ? " gallery-item--wide" : ""}" data-full="${item.jpg}">
+    <div class="gallery-item gallery-item--${cls}" data-full="${item.jpg}">
       <picture>
         <source srcset="${item.webp}" type="image/webp">
         <img src="${item.jpg}" alt="Momen ${i + 1}" loading="lazy">

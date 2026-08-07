@@ -14,7 +14,7 @@ window.WEDDING_CONFIG = {
       instagram: "",
       father: "Yayan Taryana",
       mother: "Ani Kuswati",
-      photo: "assets/img/hero/profile-bride.jpg"
+      photo: "assets/img/foto_profile/bride.jpg"
     },
     groom: {
       name: "Andi Pramana",
@@ -22,7 +22,7 @@ window.WEDDING_CONFIG = {
       instagram: "",
       father: "Nandar Suhendar",
       mother: "Elin Herlina",
-      photo: "assets/img/hero/profile-groom.jpg"
+      photo: "assets/img/foto_profile/groom.jpg"
     }
   },
 
@@ -40,6 +40,9 @@ window.WEDDING_CONFIG = {
     countdownTarget: "2026-08-25T08:00:00+07:00",
     akad: { label: "Akad Nikah", start: "08.00", end: "10.00" },
     resepsi: { label: "Resepsi", start: "11.00", end: "14.00" },
+    // Slider foto pasangan di kartu event (4/10 atas kartu) — di-fetch dari
+    // manifest folder foto_slider_section_2, urutan by name. Minimal 6 foto utk loop.
+    manifest: "assets/img/foto_slider_section_2/manifest.json",
     venue: {
       name: "Gedung Serba Guna Mayang Arum",
       address:
@@ -52,34 +55,50 @@ window.WEDDING_CONFIG = {
     }
   },
 
+  dresscode: {
+    // Kartu kecil 1/4 layar di bawah kartu event. Ubah warna sesuka hati (5 warna).
+    text:
+      "Dengan hormat, kami mengundang Anda untuk mengenakan warna pilihan ini di hari pernikahan kami.",
+    colors: ["#c9a668", "#b5c4a8", "#93a9c2", "#e6c3c0", "#f1ead9"]
+  },
+
+  quotePhoto: {
+    // Foto full-width 1:1 di bawah kartu dresscode. Ganti isi folder
+    // foto_quote (jpg + webp, nama photo) untuk memakai foto lain.
+    photo: "assets/img/foto_quote/photo.jpg",
+    quote: "Marriage is not about age; it's about finding the right person."
+  },
+
   loveStory: [
     {
       date: "2022",
       title: "Awal Perkenalan",
-      photo: "assets/img/gallery/gallery-001.jpg",
+      photo: "assets/img/foto_story/01.jpg",
       text: "Dipertemukan lewat teman yang sama, obrolan singkat berlanjut jadi kebiasaan menanyakan kabar setiap hari."
     },
     {
       date: "2023",
       title: "Mulai Menjalin Kasih",
-      photo: "assets/img/gallery/gallery-005.jpg",
+      photo: "assets/img/foto_story/02.jpg",
       text: "Setelah saling mengenal lebih dekat, kami memutuskan untuk melangkah bersama dan saling menguatkan."
     },
     {
       date: "2025",
       title: "Lamaran",
-      photo: "assets/img/hero/lamaran.jpg",
+      photo: "assets/img/foto_story/03.jpg",
       text: "Direstui kedua keluarga, hari lamaran menjadi langkah awal menuju jenjang yang lebih serius."
     },
     {
       date: "25 Agustus 2026",
       title: "Hari Bahagia",
-      photo: "assets/img/gallery/gallery-015.jpg",
+      photo: "assets/img/foto_story/04.jpg",
       text: "Dengan mengucap Bismillah, kami memutuskan untuk melanjutkan hubungan ke jenjang pernikahan."
     }
   ],
 
   gift: {
+    // Selama masih placeholder (placeholder: true), nomor rekening TIDAK ditampilkan
+    // ke tamu. Isi nomor asli lalu hapus "placeholder: true" agar nomor + tombol Salin muncul.
     accounts: [
       { bank: "Bank BCA", number: "1234567890", holder: "Mita Meliana" },
       { bank: "Bank Mandiri", number: "0987654321", holder: "Andi Pramana" }
@@ -89,27 +108,40 @@ window.WEDDING_CONFIG = {
       phone: "0812-0000-0000",
       detail: "Alamat pengiriman kado — silakan diperbarui sesuai kebutuhan."
     },
-    note: "Nomor rekening di atas masih contoh (placeholder) — silakan ganti dengan data asli sebelum disebar ke tamu."
+    note: "Nomor rekening akan segera kami lampirkan."
   },
 
   hero: {
-    cover: [
-      { jpg: "assets/img/hero/cover-1.jpg", webp: "assets/img/hero/cover-1.webp" },
-      { jpg: "assets/img/hero/cover-2.jpg", webp: "assets/img/hero/cover-2.webp" }
-    ],
-    opening: [
-      { jpg: "assets/img/hero/opening-1.jpg", webp: "assets/img/hero/opening-1.webp" },
-      { jpg: "assets/img/hero/opening-2.jpg", webp: "assets/img/hero/opening-2.webp" }
-    ],
-    closing: [
-      { jpg: "assets/img/hero/closing-1.jpg", webp: "assets/img/hero/closing-1.webp" },
-      { jpg: "assets/img/hero/closing-2.jpg", webp: "assets/img/hero/closing-2.webp" }
-    ]
+    // Slideshow cover / opening / closing — di-fetch dari manifest per folder
+    // (urutan by name). Ganti foto = timpa file jpg+webp di folder lalu jalankan
+    // scripts/build-manifests.mjs.
+    coverManifest: "assets/img/foto_cover/manifest.json",
+    openingManifest: "assets/img/foto_opening/manifest.json",
+    closingManifest: "assets/img/foto_closing/manifest.json"
   },
-  heroSlideInterval: 7000,
+  heroSlideInterval: 4500,
+
+  coupleSlides: {
+    // Slideshow besar 3/4 layar di section Kedua Mempelai (auto + bisa digeser).
+    // Di-fetch dari manifest folder foto_bride / foto_groom, urutan by name.
+    // Catatan: foto groom masih placeholder dari sesi ENGAGEMENT — tinggal ganti
+    // isi folder assets/img/foto_groom lalu jalankan scripts/build-manifests.mjs.
+    // Minimal 6 foto agar loop Swiper aman.
+    brideManifest: "assets/img/foto_bride/manifest.json",
+    groomManifest: "assets/img/foto_groom/manifest.json"
+  },
+
+  weFoundLove: {
+    // Foto slider "We Found Love" — ratio 1:1 (di-crop otomatis CSS), bisa digeser user,
+    // loop tak terbatas. Di-fetch dari manifest foto_slider_section_1, urutan by name.
+    manifest: "assets/img/foto_slider_section_1/manifest.json"
+  },
 
   gallery: {
-    manifestUrl: "assets/img/gallery/manifest.json"
+    // Galeri foto (pola baris dibangun gallery.js) — di-fetch dari manifest
+    // folder foto_gallery, urutan by name. Tambah foto = taruh file di folder
+    // lalu jalankan scripts/build-manifests.mjs (tanpa ubah config).
+    manifest: "assets/img/foto_gallery/manifest.json"
   },
 
   audio: {
