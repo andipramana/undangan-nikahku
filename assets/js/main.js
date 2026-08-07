@@ -265,6 +265,10 @@
     // sebelum initReveal: tombol/section yang baru dibuat harus ikut
     // terdaftar ke observer reveal pada pemindaian awal.
     if (window.initLivestream) window.initLivestream();
+    // Menu navigasi harus dibangun SETELAH initLivestream: ia mengecek apakah
+    // #livestream masih ada di DOM (livestream.js menghapusnya kalau semua URL
+    // kosong) — kalau terlalu awal, link Live Streaming salah muncul/menghilang.
+    if (window.initNavMenu) window.initNavMenu();
     if (window.initQrCheckin) window.initQrCheckin();
     if (window.initReveal) window.initReveal();
 
