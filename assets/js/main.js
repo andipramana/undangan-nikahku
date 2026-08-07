@@ -113,11 +113,13 @@
         requestAnimationFrame(() => {
           requestAnimationFrame(() => opening.classList.add("section-revealed"));
         });
-        // Teks/tombol/countdown baru animasi masuk SETELAH slide-in section
-        // selesai (transform 1.8s; fade opacity foto pertama masih lanjut sampai
-        // ~2.4s, lihat #opening di CSS) — teks menyusul sambil foto fade-in.
-        // Angka di bawah harus tetap >= durasi transform itu; kalau tidak, teks
-        // muncul saat fotonya masih bergerak.
+        // Teks/tombol/countdown masuk saat slide-in foto (transform 1.8s, lihat
+        // #opening di CSS) tinggal menyisakan sedikit sisa gerak — sengaja
+        // sedikit tumpang tindih, bukan menunggu benar-benar selesai, supaya
+        // tidak terasa ada jeda kosong sebelum teksnya muncul. Fade opacity foto
+        // masih lanjut sampai ~2.4s, jadi teks tetap menyusul sambil foto fade-in.
+        // Jangan turunkan jauh di bawah ~1.2s: teks akan muncul saat fotonya
+        // masih jelas bergerak dan dua gerakan itu jadi saling berebut.
         // Jeda slideshow section 2 juga baru dihitung mulai saat ini — foto
         // pertama tetap tampil dulu sebelum diganti.
         setTimeout(() => {
@@ -127,7 +129,7 @@
           // langsung jalan begitu fotonya ada.
           if (window.startOpeningSlideshow) window.startOpeningSlideshow();
           else window.__openingStartQueued = true;
-        }, 1900);
+        }, 1400);
       }
       // Isi undangan baru keluar dari display:none — pastikan semua elemen
       // data-reveal di dalamnya sudah terdaftar ke observer.

@@ -769,7 +769,7 @@ body::after {
 /* ---------- We Found Love (slider foto 1:1 + ayat quran kecil) ---------- */
 #we-found-love.section {
   padding-top: 2.5rem;
-  padding-bottom: 0;
+  padding-bottom: 1.5rem; /* ruang setelah ayat — padding, bukan margin */
 }
 #we-found-love .section-title--script {
   margin-bottom: 1.25rem;
@@ -796,7 +796,7 @@ body::after {
 .wfl-slider .swiper-pagination-bullet-active { opacity: 1; }
 
 /* Ayat quran font sangat kecil, di bawah slider (sesuai referensi) */
-.wfl-quote { margin-top: 1rem; margin-bottom: 1.5rem; }
+.wfl-quote { margin-top: 1rem; }
 .wfl-quote .arabic-quote,
 .wfl-quote .opening-quote,
 .wfl-quote .opening-source {
