@@ -103,24 +103,44 @@ window.initGift = function () {
 
     function buildOptions() {
       const opts = [];
-      cfg.accounts.forEach((acc, i) => {
+      cfg.accounts.forEach((acc) => {
         if (!acc.owner) return; // tanpa owner tidak ikut dropdown
         const num = normalizeWa(cfg[acc.owner === "cpp" ? "contactCPP" : "contactCPW"]);
         if (!num) return;
         opts.push({
+          type: "bank",
           label: `${acc.bank} — ${acc.holder}`,
           num
         });
       });
+      // Opsi "kado / kirim barang" menuju nomor WA di alamat kado — SELALU
+      // paling akhir supaya urutan dropdown stabil. Tanpa nomor yang valid,
+      // opsi ini dilewati (sama seperti rekening tanpa kontak).
+      const kadoNum = normalizeWa(cfg.address.phone);
+      if (kadoNum) {
+        opts.push({
+          type: "kado",
+          label: "Kado / Kirim Barang",
+          num: kadoNum
+        });
+      }
       return opts;
     }
 
-    /** Teks awal pesan WA — biarkan tamu mengedit. Kalimatnya menyebutkan
-     *  nama tamu (dari ?to=) dan metode yang dipilih supaya yang menerima
-     *  pesan tahu ini konfirmasi pengiriman kado, bukan pertanyaan umum. */
-    function buildMessage(label) {
+    /** Teks awal pesan WA — biarkan tamu mengedit (messageArea textarea).
+     *  Isinya BERBEDA tergantung jenis opsi (type), bukan satu template
+     *  generik: konfirmasi "alamat kirim ke mana" tidak masuk akal setelah
+     *  transfer/kirim sudah dilakukan.
+     *   - bank: konfirmasi SUDAH TRANSFER — nada santai + ucapan selamat;
+     *   - kado: konfirmasi SUDAH KIRIM BARANG ke alamat — nada santai,
+     *     doa selamat yang berbeda. */
+    function buildMessage(type, label) {
       const couple = window.WEDDING_CONFIG.couple;
-      return `Halo, saya ${guestName}.\n\nSaya ingin konfirmasi pengiriman hadiah untuk pernikahan ${couple.bride.nickname} & ${couple.groom.nickname} melalui ${label}.\n\nMohon info alamat pengiriman. Terima kasih.`;
+      const names = `${couple.bride.nickname} & ${couple.groom.nickname}`;
+      if (type === "kado") {
+        return `Halo, saya ${guestName}.\n\nAku mau konfirmasi kalau aku udah kirim kado buat pernikahan ${names} ke alamat kamu ya.\n\nHappy wedding, semoga sakinah mawaddah warahmah!`;
+      }
+      return `Halo, saya ${guestName}.\n\nAku udah transfer ya buat kado pernikahan ${names} lewat ${label}.\n\nHappy wedding, semoga langgeng selalu!`;
     }
 
     function openConfirmModal() {
@@ -132,15 +152,16 @@ window.initGift = function () {
         return;
       }
       methodSel.innerHTML = opts
-        .map((o, i) => `<option value="${o.num}">${o.label}</option>`)
+        .map((o) => `<option value="${o.num}" data-type="${o.type}">${o.label}</option>`)
         .join("");
-      messageArea.value = buildMessage(opts[0].label);
+      messageArea.value = buildMessage(opts[0].type, opts[0].label);
       confirmModal.hidden = false;
     }
 
     methodSel.addEventListener("change", () => {
       const opt = methodSel.selectedOptions[0];
-      if (opt) messageArea.value = buildMessage(opt.textContent);
+      if (!opt) return;
+      messageArea.value = buildMessage(opt.dataset.type || "bank", opt.textContent);
     });
 
     sendBtn.addEventListener("click", () => {
