@@ -1,0 +1,90 @@
+/** Form RSVP -> insert ke Supabase table `wishes`, + render daftar ucapan. */
+window.initRsvp = function () {
+  const form = document.getElementById("rsvp-form");
+  const statusEl = document.getElementById("rsvp-status");
+  const listEl = document.getElementById("wishes-list");
+  const nameInput = document.getElementById("rsvp-name");
+  if (!form) return;
+
+  const params = new URLSearchParams(location.search);
+  const guestParam = window.WEDDING_CONFIG.guestParam;
+  const rawGuest = params.get(guestParam);
+  const guestFromUrl = rawGuest ? decodeURIComponent(rawGuest.replace(/\+/g, " ")) : "";
+  if (guestFromUrl) nameInput.value = guestFromUrl;
+
+  const statusLabel = { hadir: "Hadir", tidak_hadir: "Tidak Hadir", ragu: "Ragu-ragu" };
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function renderWishes(items) {
+    if (!items.length) {
+      listEl.innerHTML =
+        '<p style="opacity:.6;font-size:.85rem;text-align:center;">Jadilah yang pertama memberi ucapan.</p>';
+      return;
+    }
+    listEl.innerHTML = items
+      .map(
+        (w) => `
+      <div class="wish-card">
+        <span class="wish-card__name">${escapeHtml(w.name)}</span>
+        <span class="wish-card__status">${statusLabel[w.attendance] || ""}</span>
+        <p class="wish-card__message">${escapeHtml(w.message)}</p>
+      </div>`
+      )
+      .join("");
+  }
+
+  async function loadWishes() {
+    if (!window.sb) return;
+    const { data, error } = await window.sb
+      .from(window.WEDDING_CONFIG.supabase.wishesTable)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) {
+      console.error(error);
+      return;
+    }
+    renderWishes(data || []);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("rsvp-submit");
+
+    if (!window.sb) {
+      statusEl.textContent = "Gagal terhubung ke server. Coba lagi nanti.";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    statusEl.textContent = "Mengirim...";
+
+    const payload = {
+      name: nameInput.value.trim(),
+      attendance: document.getElementById("rsvp-attendance").value,
+      guest_count: Number(document.getElementById("rsvp-guests").value) || 1,
+      message: document.getElementById("rsvp-message").value.trim()
+    };
+
+    const { error } = await window.sb.from(window.WEDDING_CONFIG.supabase.wishesTable).insert(payload);
+    submitBtn.disabled = false;
+
+    if (error) {
+      console.error(error);
+      statusEl.textContent = "Gagal mengirim. Silakan coba lagi.";
+      return;
+    }
+
+    statusEl.textContent = "Terima kasih atas doa dan ucapannya!";
+    form.reset();
+    if (guestFromUrl) nameInput.value = guestFromUrl;
+    loadWishes();
+  });
+
+  loadWishes();
+};

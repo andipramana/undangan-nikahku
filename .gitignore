@@ -1,0 +1,4 @@
+node_modules/
+verification-output/
+.env
+*.log

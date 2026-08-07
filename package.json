@@ -1,0 +1,16 @@
+{
+  "name": "undangan-nikahku",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Undangan pernikahan digital Mita Meliana & Andi Pramana",
+  "scripts": {
+    "optimize-images": "node scripts/optimize-images.mjs",
+    "serve": "http-server . -p 8080 -c-1",
+    "verify": "node scripts/verify-with-playwright.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "http-server": "^14.1.1",
+    "sharp": "^0.34.2"
+  }
+}
