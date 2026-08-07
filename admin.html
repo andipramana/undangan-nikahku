@@ -46,6 +46,7 @@
   <nav class="tabs">
     <button type="button" class="tab tab--active" data-tab="content">Teks</button>
     <button type="button" class="tab" data-tab="photos">Foto</button>
+    <button type="button" class="tab" data-tab="wishes">Ucapan</button>
   </nav>
 
   <!-- ============ TAB TEKS ============ -->
@@ -67,6 +68,11 @@
     </div>
     <p id="photo-warning" class="warning" hidden></p>
     <div id="photo-grid" class="photo-grid"></div>
+  </main>
+
+  <!-- ============ TAB UCAPAN ============ -->
+  <main id="tab-wishes" class="panel" hidden>
+    <div id="wishes-root"></div>
   </main>
 </div>
 
@@ -103,5 +109,6 @@
 <script src="assets/js/admin/content.js"></script>
 <script src="assets/js/admin/photos.js"></script>
 <script src="assets/js/admin/editor.js"></script>
+<script src="assets/js/admin/wishes.js"></script>
 </body>
 </html>

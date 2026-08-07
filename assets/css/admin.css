@@ -159,8 +159,7 @@ h1, h2 { font-weight: 500; margin: 0; }
 .check-row { display: flex; align-items: center; gap: .5rem; color: var(--text-dim); font-size: .85rem; }
 .check-row input { width: auto; }
 
-.color-row { display: inline-flex; align-items: center; gap: .3rem; margin-right: .4rem; }
-.color-row { margin-bottom: .4rem; }
+.color-row { display: inline-flex; align-items: center; gap: .3rem; margin: 0 .4rem .4rem 0; }
 .color-row input[type=color] {
   width: 44px; height: 32px;
   border: 1px solid var(--border); border-radius: 6px;
@@ -301,3 +300,41 @@ h1, h2 { font-weight: 500; margin: 0; }
   .photo-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
   .topbar { padding: .8rem 1rem; }
 }
+
+/* ---------- Tab Ucapan ---------- */
+.wish-summary {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .6rem;
+  padding: .8rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: .88rem;
+}
+.wish-summary strong { color: var(--gold-soft); font-size: 1.1rem; }
+
+.wish-chip {
+  font-size: .72rem; letter-spacing: .04em;
+  padding: .2rem .55rem; border-radius: 999px;
+  white-space: nowrap;
+}
+.wish-chip--hadir { background: rgba(61, 132, 89, .2); color: #7fc79b; }
+.wish-chip--ragu  { background: rgba(190, 133, 51, .22); color: #d9a95c; }
+.wish-chip--tidak { background: rgba(176, 68, 60, .2); color: #e08b85; }
+
+.wish-list { display: flex; flex-direction: column; gap: .6rem; }
+.wish-row {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem .9rem;
+  background: var(--panel);
+}
+.wish-row__head {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .5rem;
+  margin-bottom: .35rem;
+}
+/* Tombol hapus didorong ke ujung supaya tidak berdempetan dengan nama —
+   salah pencet di sini menghapus ucapan orang, dan tidak bisa dibatalkan. */
+.wish-row__head .btn--danger { margin-left: auto; }
+.wish-row__head time { font-size: .75rem; }
+.wish-row__msg { margin: 0; font-size: .9rem; line-height: 1.55; color: var(--text); }

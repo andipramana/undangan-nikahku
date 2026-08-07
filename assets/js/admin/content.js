@@ -23,6 +23,13 @@
       .eq("id", 1)
       .maybeSingle();
     if (error && error.code !== "PGRST116") {
+      // Jangan tinggalkan layar di "Memuat teks…" selamanya — toast hilang
+      // dalam 2,5 detik dan tamu-admin tidak punya petunjuk apa pun soal
+      // apa yang salah maupun cara mencoba lagi.
+      formRoot.innerHTML =
+        `<p class="warning">Gagal memuat teks: ${escAttr(error.message)}</p>` +
+        `<button type="button" class="btn btn--primary" id="content-retry">Coba lagi</button>`;
+      document.getElementById("content-retry").addEventListener("click", load);
       toast("Gagal memuat teks: " + error.message, true);
       return;
     }

@@ -111,9 +111,17 @@
   // Sesi lama sudah ada → langsung tampil; SIGNED_IN saat login baru → tampil.
   // INITIAL_SESSION tidak ditangani di sini karena getSession() di bawah sudah
   // menampilkan app untuk sesi yang sudah tersimpan.
+  //
+  // setTimeout(..., 0) BUKAN hiasan. Selama callback ini berjalan, supabase-js
+  // memegang kunci internal auth; memanggil query Supabase lain dari dalamnya
+  // membuat query itu menunggu kunci yang tidak akan pernah dilepas — permintaan
+  // menggantung selamanya tanpa error. Itulah sebab tab Teks kadang berhenti di
+  // "Memuat teks…" dan tidak pernah memunculkan apa pun. Menunda satu putaran
+  // event loop membuat callback selesai lebih dulu, kuncinya lepas, baru
+  // ContentPanel.load() menembak query-nya.
   sb.auth.onAuthStateChange((event) => {
-    if (event === "SIGNED_IN") showApp();
-    if (event === "SIGNED_OUT") showLogin();
+    if (event === "SIGNED_IN") setTimeout(showApp, 0);
+    if (event === "SIGNED_OUT") setTimeout(showLogin, 0);
   });
 
   sb.auth.getSession().then(({ data }) => {
@@ -152,7 +160,9 @@
       document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("tab--active", b === btn));
       document.getElementById("tab-content").hidden = btn.dataset.tab !== "content";
       document.getElementById("tab-photos").hidden = btn.dataset.tab !== "photos";
+      document.getElementById("tab-wishes").hidden = btn.dataset.tab !== "wishes";
       if (btn.dataset.tab === "photos" && window.PhotosPanel) window.PhotosPanel.load();
+      if (btn.dataset.tab === "wishes" && window.WishesPanel) window.WishesPanel.load();
     });
   });
 })();
