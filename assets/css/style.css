@@ -33,22 +33,68 @@ html, body {
   padding: 0;
   font-family: var(--font-sans);
   color: var(--color-text);
-  background: var(--color-bg);
+  /* Latar halaman: POLOS GELAP. Di desktop, area kiri-kanan kolom HP
+     (.app-frame) memperlihatkan warna ini; di HP kolom menutup seluruh
+     layar sehingga latar ini tidak pernah terlihat. */
+  background: var(--color-dark);
   scroll-behavior: smooth;
-  /* Pengaman tunggal untuk semua gerak reveal yang menyamping: geseran Our Story,
-     zoom masuk foto mempelai, dan miringnya kartu event sesaat keluar batas layar.
-     Tanpa ini, kartu event setinggi 90vh yang dimiringkan 1.8deg menggeser
-     sudutnya ~25px sementara marginnya cuma ~8px -> muncul scroll horizontal.
-     Dipasang di html DAN body karena iOS Safari mengabaikannya kalau hanya di body.
-     Aman di sini: tidak ada position:sticky maupun layout 100vw di halaman ini. */
+  /* Pengaman tingkat dokumen untuk gerak reveal yang menyamping (geseran Our
+     Story, zoom foto mempelai, kartu event miring). Klip UTAMA kini terjadi di
+     .app-frame (overflow-x: hidden di tepi kolom selebar ponsel) — aturan ini
+     tinggal jaring pengaman terakhir. Dipasang di html DAN body karena iOS
+     Safari mengabaikannya kalau hanya di body. */
   overflow-x: hidden;
 }
+
+/* ---------- Bingkai HP portrait ----------
+   Seluruh halaman dikurung dalam kolom selebar ponsel (430px) yang di-tengah
+   di desktop; di HP (lebar <=430px) kolom = seluruh layar, jadi tampilan
+   persis seperti sebelumnya. Nilai lebar yang sama dipakai admin.html &
+   admin-qr.html (admin.css) supaya ketiga halaman konsisten.
+
+   Kunci teknis (CSS spec): position:fixed membentuk containing block baru
+   terhadap ancestor terdekat yang punya transform — BUKAN ancestor
+   position:relative. `transform: translateZ(0)` di bawah membuat .app-frame
+   menjadi containing block bagi SEMUA descendant position:fixed (FAB audio/QR,
+   menu hamburger, semua .modal, .lightbox, #cover, #preloader, .toast),
+   sehingga semuanya otomatis ikut terkurung ke lebar kolom ini. Tanpa itu,
+   mereka tetap berpatokan ke viewport browser sungguhan dan di layar lebar
+   nempel ke tepi browser, jauh dari kolom.
+
+   KENAPA height:100dvh (bukan min-height): karena transform membuat koordinat
+   fixed (bottom:, inset:) dihitung dari box kolom, containing block harus
+   SETINGGI VIEWPORT. Kalau tingginya mengikuti isi halaman, elemen ber-anchor
+   bottom (FAB, toast) melayang ke dasar dokumen dan overlay inset:0
+   (modal/lightbox/cover/preloader) membentang setinggi seluruh halaman —
+   semua tenggelam di bawah lipatan. Konsekuensinya halaman scroll DI DALAM
+   kolom (overflow-y: auto), bukan di body. Aman: reveal.js memakai
+   IntersectionObserver (relatif viewport) dan tidak ada window.scrollY/
+   scrollTo di proyek, jadi tidak ada logika yang perlu menyesuaikan. */
+.app-frame {
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  height: 100dvh;
+  overflow-x: hidden;   /* klip geseran reveal di tepi kolom — sama seperti di HP */
+  overflow-y: auto;     /* halaman scroll di dalam kolom */
+  overscroll-behavior: contain;
+  background: var(--color-bg);  /* warna asli halaman di dalam kolom */
+  transform: translateZ(0);     /* containing block fixed descendant (lihat atas) */
+  scroll-behavior: smooth;
+  scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
+  scrollbar-color: var(--color-gold) transparent;
+}
+.app-frame::-webkit-scrollbar { width: 6px; }
+.app-frame::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 3px; }
 
 html.no-scroll,
 html.no-scroll body {
   overflow: hidden;
   height: 100%;
 }
+/* Saat undangan terkunci (sebelum Buka Undangan), kolom ikut terkunci — yang
+   discroll adalah .app-frame, bukan body, jadi pembatasan dipasang di sana. */
+html.no-scroll .app-frame { overflow: hidden; }
 
 img { max-width: 100%; display: block; }
 
@@ -731,7 +777,9 @@ a { color: inherit; }
   opacity: 0; pointer-events: none; transition: opacity .3s ease;
 }
 .lightbox.show { opacity: 1; pointer-events: auto; }
-.lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 6px; }
+/* max-width 100% (bukan 92vw): lightbox kini terkurung di kolom 430px; 92vw di
+   desktop bisa lebih lebar dari kolom dan foto terpotong di tepinya. */
+.lightbox img { max-width: 100%; max-height: 88vh; border-radius: 6px; }
 .lightbox__close {
   position: absolute; top: 1rem; right: 1.25rem;
   background: none; border: none; color: var(--color-gold-soft);
@@ -960,8 +1008,11 @@ a { color: inherit; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* Tone overlay global — menyatukan warna semua foto (beda sesi pemotretan)
-   ke satu nuansa hangat konsisten, tanpa menurunkan opacity elemen mana pun. */
-body::after {
+   ke satu nuansa hangat konsisten, tanpa menurunkan opacity elemen mana pun.
+   Dipindah dari body::after ke .app-frame::after: overlay kini hanya menutupi
+   kolom undangan (area polos kiri-kanan di desktop tidak ikut di-warm-up),
+   dan #preloader (z-index 9999, di dalam kolom) tampil di atasnya. */
+.app-frame::after {
   content: "";
   position: fixed; inset: 0;
   background: var(--color-gold);

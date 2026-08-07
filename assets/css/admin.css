@@ -33,6 +33,32 @@ html, body {
   line-height: 1.5;
 }
 
+/* ---------- Bingkai HP portrait ----------
+   Sama dengan index.html (style.css): kolom selebar ponsel 430px di-tengah di
+   desktop, halaman scroll DI DALAM kolom, dan transform translateZ(0)
+   menjadikan kolom ini containing block bagi SEMUA elemen position:fixed di
+   dalamnya (.editor overlay pan/zoom, .toast) — tanpa itu, di layar lebar
+   keduanya tetap berpatokan ke viewport browser sungguhan dan nempel ke tepi
+   browser, jauh dari kolom.
+   height:100dvh (bukan min-height) penting: containing block harus setinggi
+   viewport supaya .toast (anchor bottom) dan .editor (inset:0) tetap pada
+   tempatnya, bukan membentang ke seluruh tinggi dokumen. */
+.app-frame {
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+}
+.app-frame::-webkit-scrollbar { width: 6px; }
+.app-frame::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
 h1, h2 { font-weight: 500; margin: 0; }
 
 .muted { color: var(--text-dim); }
@@ -216,9 +242,13 @@ h1, h2 { font-weight: 500; margin: 0; }
 .scan-status { font-size: .85rem; color: var(--text-dim); margin: .5rem 0 0; }
 .scan-status--error { color: #e6b5b1; }
 
+/* minmax 130px = nilai yang sama dengan @media (max-width: 640px) di bawah:
+   kolom .app-frame selebar 430px di desktop menyisakan ~350px isi, dan 170px
+   akan membuat grid jatuh ke 1 kolom (tidak konsisten dengan HP yang 2 kolom).
+   Dengan 130px, desktop di dalam frame dan HP sama-sama 2 kolom. */
 .photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: .9rem;
 }
 .photo-card {
@@ -304,7 +334,9 @@ h1, h2 { font-weight: 500; margin: 0; }
   opacity: 0; visibility: hidden;
   transition: opacity .25s ease, transform .25s ease, visibility .25s;
   z-index: 200;
-  max-width: min(90vw, 480px);
+  /* 430px = lebar kolom .app-frame: lebih dari itu toast terpotong di tepi
+     kolom (overflow-x hidden) di desktop; di HP 90vw lebih kecil. */
+  max-width: min(90vw, 430px);
   text-align: center;
 }
 .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }

@@ -12,6 +12,11 @@
 </head>
 <body>
 
+<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css (transform +
+     height:100dvh menjadikan kolom ini containing block elemen position:fixed
+     seperti .toast). -->
+<div class="app-frame">
+
 <!-- ============ LAYAR LOGIN ============ -->
 <!-- Struktur id sama persis dengan admin.html — shared.js menanganinya.
      Akun admin-qr dibuat manual via SQL Editor (lihat migration 0004). -->
@@ -93,6 +98,8 @@
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+</div><!-- /app-frame -->
 
 <script src="assets/js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>

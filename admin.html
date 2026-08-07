@@ -12,6 +12,11 @@
 </head>
 <body>
 
+<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css (transform +
+     height:100dvh menjadikan kolom ini containing block elemen position:fixed
+     seperti .editor dan .toast). -->
+<div class="app-frame">
+
 <!-- ============ LAYAR LOGIN ============ -->
 <!-- Field-nya "Nama pengguna" + "Kata sandi" (bukan email) supaya rasanya
      seperti panel internal. Nama pengguna dipetakan JS ke email tetap;
@@ -102,6 +107,8 @@
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+</div><!-- /app-frame -->
 
 <script src="assets/js/config.js"></script>
 <!-- Tata letak grid galeri, dipakai bersama halaman undangan: editor pan/zoom

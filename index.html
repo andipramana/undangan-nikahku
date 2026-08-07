@@ -18,6 +18,13 @@
 </head>
 <body>
 
+<!-- Bingkai kolom HP portrait — semua konten halaman (termasuk elemen
+     position:fixed seperti FAB, modal, lightbox) dikurung dalam kolom selebar
+     ponsel 430px yang di-tengah di desktop; di HP kolom ini = seluruh layar.
+     Teknis: transform translateZ(0) + height:100dvh di .app-frame (style.css)
+     menjadikan kolom ini containing block bagi semua descendant fixed. -->
+<div class="app-frame">
+
 <div id="preloader" aria-hidden="true">
   <div class="preloader-ring"></div>
 </div>
@@ -429,6 +436,8 @@
     <nav id="nav-menu-list" class="nav-menu-list" aria-label="Navigasi undangan"></nav>
   </div>
 </div>
+
+</div><!-- /app-frame -->
 
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
