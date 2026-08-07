@@ -160,12 +160,28 @@ h1, h2 { font-weight: 500; margin: 0; }
 .check-row input { width: auto; }
 
 .color-row { display: inline-flex; align-items: center; gap: .3rem; margin-right: .4rem; }
+.color-row { margin-bottom: .4rem; }
 .color-row input[type=color] {
   width: 44px; height: 32px;
   border: 1px solid var(--border); border-radius: 6px;
   background: var(--bg); padding: 2px;
   cursor: pointer;
 }
+/* Kotak kode hex di sebelah pemilih warna — monospace supaya salah ketik satu
+   karakter langsung kelihatan. */
+.color-hex {
+  width: 6rem;
+  padding: .35rem .45rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: .82rem;
+}
+.color-hex:focus { outline: none; border-color: var(--gold); }
+/* Kode belum sah: ditandai, dan nilainya belum ditulis ke state. */
+.color-hex.is-invalid { border-color: var(--danger); color: var(--danger); }
 
 /* ---------- Tab Foto ---------- */
 .photos-toolbar {

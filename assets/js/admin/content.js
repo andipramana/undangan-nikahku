@@ -214,11 +214,18 @@
     const box = document.getElementById("dresscode-colors");
     if (!box) return;
     const colors = content.dresscode.colors;
+    // Dua cara memasukkan warna yang saling tersinkron: pemilih visual untuk
+    // memilih cepat, dan kotak teks hex untuk menyalin kode persis dari palet
+    // atau undangan lain (memilih #c9a668 dengan mata di pemilih warna nyaris
+    // mustahil).
     box.innerHTML = colors
       .map(
         (color, i) => `
       <span class="color-row">
-        <input type="color" value="${color}" data-color-i="${i}">
+        <input type="color" value="${pickerHex(color)}" data-color-i="${i}" aria-label="Pilih warna ${i + 1}">
+        <input type="text" class="color-hex" value="${escAttr(color)}" data-color-hex="${i}"
+               maxlength="7" spellcheck="false" autocapitalize="off" autocomplete="off"
+               placeholder="#c9a668" aria-label="Kode hex warna ${i + 1}">
         <button type="button" class="btn btn--tiny" data-color-del="${i}" aria-label="Hapus warna">&times;</button>
       </span>`
       )
@@ -227,7 +234,38 @@
 
     box.querySelectorAll("input[type=color]").forEach((input) => {
       input.addEventListener("input", () => {
-        content.dresscode.colors[Number(input.dataset.colorI)] = input.value;
+        const i = Number(input.dataset.colorI);
+        colors[i] = input.value;
+        const hex = box.querySelector(`[data-color-hex="${i}"]`);
+        if (hex) {
+          hex.value = input.value;
+          hex.classList.remove("is-invalid");
+        }
+      });
+    });
+
+    box.querySelectorAll("[data-color-hex]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const i = Number(input.dataset.colorHex);
+        let val = input.value.trim();
+        if (val && !val.startsWith("#")) val = "#" + val; // mengetik "c9a668" pun diterima
+        const ok = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(val);
+        input.classList.toggle("is-invalid", !ok);
+        // Nilai setengah jadi ("#c9a6", "#c9a66") sengaja TIDAK ditulis ke
+        // state — kalau ditulis, satu ketikan di tengah jalan sudah mengubah
+        // warna asli dan nilai lamanya hilang sebelum kodenya utuh.
+        // Catatan: "#c9a" TIDAK termasuk setengah jadi — hex singkat 3 digit
+        // itu sah dan mengembang jadi #cc99aa.
+        if (!ok) return;
+        colors[i] = val;
+        const picker = box.querySelector(`[data-color-i="${i}"]`);
+        if (picker) picker.value = pickerHex(val);
+      });
+      // Selesai mengetik: kembalikan tampilan ke nilai yang benar-benar tersimpan,
+      // supaya kotak tidak ditinggalkan berisi kode tak sah.
+      input.addEventListener("blur", () => {
+        input.value = colors[Number(input.dataset.colorHex)] || "";
+        input.classList.remove("is-invalid");
       });
     });
     box.querySelectorAll("[data-color-del]").forEach((btn) => {
@@ -398,6 +436,16 @@
       o = o[keys[i]];
     }
     o[keys[keys.length - 1]] = value;
+  }
+
+  /** <input type="color"> hanya menerima #rrggbb. Bentuk singkat (#fff) atau
+   * nilai tak sah membuatnya diam-diam jatuh ke hitam, jadi dipanjangkan dulu
+   * di sini — nilai yang DISIMPAN tetap apa adanya seperti yang diketik. */
+  function pickerHex(value) {
+    const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(value || "").trim());
+    if (!m) return "#000000";
+    const h = m[1];
+    return ("#" + (h.length === 3 ? h.split("").map((ch) => ch + ch).join("") : h)).toLowerCase();
   }
 
   function escAttr(v) {
