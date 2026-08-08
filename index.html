@@ -341,34 +341,39 @@
       <p class="section-eyebrow" data-reveal="up">RSVP</p>
       <h2 class="section-title" data-reveal="up" style="--reveal-i:1">Konfirmasi Kehadiran</h2>
 
-      <!-- Satu formulir = satu paket; tamu tidak perlu scroll untuk memunculkan
-           kolom berikutnya -->
-      <form id="rsvp-form" class="rsvp-form" data-reveal-group>
-        <label data-reveal="up">
-          Nama
-          <input type="text" id="rsvp-name" name="name" required autocomplete="name">
-        </label>
-        <label data-reveal="up" style="--reveal-i:1">
-          Kehadiran
-          <div class="rsvp-attendance" id="rsvp-attendance" role="radiogroup" aria-label="Kehadiran">
-            <button type="button" class="rsvp-pill rsvp-pill--full" data-value="hadir">Hadir</button>
-            <button type="button" class="rsvp-pill" data-value="tidak_hadir">Tidak Hadir</button>
-            <button type="button" class="rsvp-pill" data-value="ragu">Ragu-ragu</button>
-          </div>
-        </label>
-        <label data-reveal="up" style="--reveal-i:2">
-          Jumlah Tamu
-          <input type="number" id="rsvp-guests" name="guest_count" min="1" max="10" value="1">
-        </label>
-        <label data-reveal="up" style="--reveal-i:3">
-          Ucapan &amp; Doa
-          <textarea id="rsvp-message" name="message" rows="3" required></textarea>
-        </label>
-        <button type="submit" class="btn-primary" id="rsvp-submit" data-reveal="pop" style="--reveal-i:4">Kirim</button>
-        <p id="rsvp-status" class="rsvp-status" role="status"></p>
-      </form>
+      <!-- Satu paket: form RSVP + daftar ucapan tampil BERSAMAAN begitu section
+           ini masuk layar — tamu tidak perlu scroll lagi cuma untuk memunculkan
+           kartu ucapan satu-satu (data-reveal="fade" di sini murni penanda
+           kapan grup ini sudah tampil, dipakai rsvp.js untuk kartu ucapan yang
+           dirender belakangan — lihat komentar renderWishes()). -->
+      <div class="rsvp-wrap" data-reveal="fade" data-reveal-group>
+        <form id="rsvp-form" class="rsvp-form">
+          <label data-reveal="up">
+            Nama
+            <input type="text" id="rsvp-name" name="name" required autocomplete="name">
+          </label>
+          <label data-reveal="up" style="--reveal-i:1">
+            Kehadiran
+            <div class="rsvp-attendance" id="rsvp-attendance" role="radiogroup" aria-label="Kehadiran">
+              <button type="button" class="rsvp-pill rsvp-pill--full" data-value="hadir">Hadir</button>
+              <button type="button" class="rsvp-pill" data-value="tidak_hadir">Tidak Hadir</button>
+              <button type="button" class="rsvp-pill" data-value="ragu">Ragu-ragu</button>
+            </div>
+          </label>
+          <label data-reveal="up" style="--reveal-i:2">
+            Jumlah Tamu
+            <input type="number" id="rsvp-guests" name="guest_count" min="1" max="10" value="1">
+          </label>
+          <label data-reveal="up" style="--reveal-i:3">
+            Ucapan &amp; Doa
+            <textarea id="rsvp-message" name="message" rows="3" required></textarea>
+          </label>
+          <button type="submit" class="btn-primary" id="rsvp-submit" data-reveal="pop" style="--reveal-i:4">Kirim</button>
+          <p id="rsvp-status" class="rsvp-status" role="status"></p>
+        </form>
 
-      <div id="wishes-list" class="wishes-list" aria-live="polite"></div>
+        <div id="wishes-list" class="wishes-list" aria-live="polite"></div>
+      </div>
     </section>
 
     <!-- ============ CLOSING ============ -->

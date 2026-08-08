@@ -57,8 +57,20 @@ window.initRsvp = function () {
       </div>`
       )
       .join("");
-    // Kartu ucapan baru dirender (juga setelah kirim RSVP) — daftarkan ke observer.
-    if (window.revealScan) window.revealScan(listEl);
+    // Kartu ucapan ikut SATU PAKET dengan form RSVP (data-reveal-group di
+    // .rsvp-wrap, index.html) — begitu grup itu tampil, revealGroup() sendiri
+    // yang mengambil kartu-kartu ini (asal sudah ada di DOM saat itu). Tapi
+    // kalau grup itu SUDAH tampil lebih dulu (fetch lambat, atau render ulang
+    // setelah tamu ini kirim RSVP baru sambil sudah melihat section-nya),
+    // revealScan tidak akan mendaftarkan kartu ini lagi (elemen di dalam grup
+    // sengaja dilewati — lihat insideGroup() di reveal.js) sehingga tidak ada
+    // yang memicunya lagi: reveal LANGSUNG (revealNow) untuk kasus itu.
+    const wrap = listEl.closest("[data-reveal-group]");
+    if (wrap && wrap.classList.contains("is-revealed")) {
+      if (window.revealNow) window.revealNow(listEl);
+    } else if (window.revealScan) {
+      window.revealScan(listEl);
+    }
   }
 
   async function loadWishes() {
