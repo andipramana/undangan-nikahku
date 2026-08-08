@@ -57,6 +57,23 @@
   async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
     document.title = cfg.siteTitle;
+    // Meta share (pratinjau WhatsApp/sosmed) ikut dinamis — kalau nama atau
+    // tanggal diubah lewat admin, tautan yang dibagikan tidak menampilkan
+    // nama/tanggal lama dari HTML statis.
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute(
+        "content",
+        `Undangan pernikahan digital ${cfg.couple.bride.name} & ${cfg.couple.groom.name}, ${cfg.event.dateLabel}`
+      );
+    }
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute("content", cfg.siteTitle);
+
+    // Escape HTML — dipakai konten yang bisa diedit admin (nama, cerita, dsb.).
+    // Didefinisikan di atas karena dipakai blok nama pasangan di bawah.
+    const esc = (v) =>
+      String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
     const params = new URLSearchParams(location.search);
     const rawGuest = params.get(cfg.guestParam);
@@ -80,6 +97,17 @@
     document.getElementById("groom-name").textContent = cfg.couple.groom.name;
     document.getElementById("groom-parents").textContent =
       `Putra dari Bpk. ${cfg.couple.groom.father} & Ibu ${cfg.couple.groom.mother}`;
+
+    // Nama panggilan pasangan di cover / Save The Date / closing — diisi dari
+    // config/Supabase (couple.*.nickname), TIDAK hardcoded. Span .amp dijaga
+    // supaya gaya ampersand (font script) tetap seperti sebelumnya.
+    const fillCoupleNames = (el) => {
+      if (!el) return;
+      el.innerHTML = `${esc(cfg.couple.bride.nickname)} <span class="amp">&amp;</span> ${esc(cfg.couple.groom.nickname)}`;
+    };
+    fillCoupleNames(document.getElementById("couple-names-cover"));
+    fillCoupleNames(document.getElementById("couple-names-opening"));
+    fillCoupleNames(document.getElementById("couple-names-closing"));
 
     setupCalendarLink(cfg);
 
@@ -169,8 +197,6 @@
     // babak); kalau tidak ada, pakai foto lokal di config. Konten babak
     // di-escape — kini bisa diedit lewat admin, bukan file yang dipegang sendiri.
     const storyPhotos = await window.getPhotos("story");
-    const esc = (v) =>
-      String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     document.getElementById("love-story-list").innerHTML = cfg.loveStory
       .map((item, i) => {
         const p = storyPhotos && storyPhotos[i];

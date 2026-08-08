@@ -71,7 +71,9 @@
       <div class="hero-content hero-content--split">
         <div class="hero-content__top">
           <p class="eyebrow" data-aos="fade-down">The Wedding Of</p>
-          <h1 class="script-names" data-aos="zoom-in" data-aos-delay="150">Mita <span class="amp">&amp;</span> Andi</h1>
+          <!-- Nama panggilan pasangan diisi main.js dari couple.*.nickname
+               (config/Supabase), bukan hardcoded -->
+          <h1 class="script-names" data-aos="zoom-in" data-aos-delay="150" id="couple-names-cover">Mita <span class="amp">&amp;</span> Andi</h1>
         </div>
 
         <div class="hero-content__bottom">
@@ -98,7 +100,7 @@
       <div class="hero-content">
         <div class="countdown-heading">
           <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
-          <p class="script-names script-names--small text-enter text-enter--left">Mita <span class="amp">&amp;</span> Andi</p>
+          <p class="script-names script-names--small text-enter text-enter--left" id="couple-names-opening">Mita <span class="amp">&amp;</span> Andi</p>
           <!-- "Selasa, 25 Agustus 2026" dipecah jadi 4 span (hari/tanggal/bulan/
                tahun) supaya angka tanggal & tahunnya bisa count-up. Span ini
                TANPA data-reveal/data-count: animasinya dijalankan countdown.js
@@ -381,7 +383,7 @@
            Namanya mengembang pelan (pop), penutup paling tenang di halaman. -->
       <div class="hero-content" data-reveal-group>
         <p class="closing-text" data-reveal="up" id="closing-text"></p>
-        <p class="script-names script-names--small" data-reveal="pop" style="--reveal-i:2">Mita <span class="amp">&amp;</span> Andi</p>
+        <p class="script-names script-names--small" data-reveal="pop" style="--reveal-i:2" id="couple-names-closing">Mita <span class="amp">&amp;</span> Andi</p>
       </div>
       <footer class="site-footer">
         <p data-reveal="up" style="--reveal-i:2">Dibuat dengan &#10084; oleh Mita &amp; Iyow — 2026</p>
