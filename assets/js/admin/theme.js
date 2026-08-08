@@ -17,6 +17,11 @@
  * atau admin upload sendiri — upload itu blob lokal (URL.createObjectURL,
  * TIDAK disimpan ke Supabase), hilang saat halaman di-reload.
  *
+ * Tiap overlay juga punya slider KEPEKATAN (opacity 0–100, tersimpan 0–1):
+ * alpha di rumus rgba/gradient dihitung dari state itu (bukan angka
+ * hardcoded), dengan skala proporsional — data lama tanpa opacity (sebelum
+ * fitur ini) otomatis memakai alpha asli (fallback).
+ *
  * Butuh migration 0003+ (tabel site_content) — sama seperti tab Teks.
  */
 (function () {
@@ -39,10 +44,12 @@
       textLight: "#f7f3ea"
     },
     overlays: {
-      global: { enabled: true, color: "#c9a668" },
-      flat: { enabled: true, color: "#0a0907" },
-      closing: { enabled: true, color: "#0a0907" },
-      quote: { enabled: true, color: "#30200d" }
+      // opacity = alpha ASLI yang dulu hardcoded di CSS, jadi tanpa
+      // perubahan admin pun tampilan identik dengan sebelum fitur ini.
+      global: { enabled: true, color: "#c9a668", opacity: 0.4 },
+      flat: { enabled: true, color: "#0a0907", opacity: 0.22 },
+      closing: { enabled: true, color: "#0a0907", opacity: 0.78 },
+      quote: { enabled: true, color: "#30200d", opacity: 0.55 }
     }
   };
 
@@ -159,27 +166,39 @@
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(",");
   }
 
+  /** Alpha efektif layer: state opacity (0–1) kalau tersimpan, kalau kosong/
+   * undefined (data tema lama sebelum fitur ini) fallback ke alpha asli yang
+   * dulu hardcoded — jadi tema lama tetap tampil identik. Clamping & rumus
+   * SAMA PERSIS dengan sisi tamu (assets/js/theme.js, overlayOpacity). */
+  function overlayOpacity(layer, fallback) {
+    const o = typeof layer.opacity === "number" && isFinite(layer.opacity) ? layer.opacity : fallback;
+    return Math.min(1, Math.max(0, o));
+  }
+
   /** Background + opacity elemen overlay untuk layer `k` — transform SAMA
-   * PERSIS applyTheme() sisi tamu: flat rgba(.,.22); closing 3 stop
-   * .7/.78/.88; quote 2 stop .55 + turunan ~40% .62; global warna solid +
-   * opacity .4 (alpha soft-light dari .app-frame::after). */
+   * PERSIS applyTheme() sisi tamu: flat rgba(.,o); closing 3 stop asli
+   * .7/.78/.88 di-SKALA proporsional dari o (basis .78); quote stop-1 = o,
+   * stop-2 .62 diskala relatif .55 (turunan gelap ~40% tetap); global warna
+   * solid + opacity o (alpha soft-light dari .app-frame::after). */
   function overlayStyle(k) {
     const layer = theme.overlays[k];
     if (!layer || layer.enabled === false) return { background: "", opacity: "0" };
     const rgb = hexRgb(layer.color);
     if (!rgb) return { background: "", opacity: "" };
-    if (k === "global") return { background: layer.color, opacity: ".4" };
-    if (k === "flat") return { background: `rgba(${rgb},.22)`, opacity: "" };
+    if (k === "global") return { background: layer.color, opacity: String(overlayOpacity(layer, 0.4)) };
+    if (k === "flat") return { background: `rgba(${rgb},${overlayOpacity(layer, 0.22)})`, opacity: "" };
     if (k === "closing") {
+      const o = overlayOpacity(layer, 0.78);
       return {
-        background: `linear-gradient(180deg, rgba(${rgb},.7) 0%, rgba(${rgb},.78) 50%, rgba(${rgb},.88) 100%)`,
+        background: `linear-gradient(180deg, rgba(${rgb},${0.7 * (o / 0.78)}) 0%, rgba(${rgb},${0.78 * (o / 0.78)}) 50%, rgba(${rgb},${0.88 * (o / 0.78)}) 100%)`,
         opacity: ""
       };
     }
     if (k === "quote") {
       const [r, g, b] = rgb.split(",");
+      const o = overlayOpacity(layer, 0.55);
       return {
-        background: `linear-gradient(180deg, rgba(${rgb},.55) 0%, rgba(${Math.round(r * .4)},${Math.round(g * .4)},${Math.round(b * .4)},.62) 100%)`,
+        background: `linear-gradient(180deg, rgba(${rgb},${o}) 0%, rgba(${Math.round(r * .4)},${Math.round(g * .4)},${Math.round(b * .4)},${0.62 * (o / 0.55)}) 100%)`,
         opacity: ""
       };
     }
@@ -208,7 +227,10 @@
       const s = (saved.overlays && saved.overlays[k]) || {};
       cur.overlays[k] = {
         enabled: s.enabled !== false,
-        color: String(s.color || DEFAULT_THEME.overlays[k].color)
+        color: String(s.color || DEFAULT_THEME.overlays[k].color),
+        // opacity 0 itu sengaja (overlay transparan penuh) — cek typeof,
+        // bukan truthiness; kalau belum tersimpan (tema lama) → default.
+        opacity: overlayOpacity(s, DEFAULT_THEME.overlays[k].opacity)
       };
     });
     return cur;
@@ -305,6 +327,12 @@
             <button type="button" class="btn btn--tiny" data-o-reset="${k}"
                     title="Reset ${label} ke default" aria-label="Reset ${label} ke default">&#8634;</button>
           </span>
+          <label class="theme-opacity">
+            <input type="range" min="0" max="100" step="1"
+                   value="${Math.round(theme.overlays[k].opacity * 100)}" data-o-opacity="${k}"
+                   aria-label="Kepekatan ${label}">
+            <span class="theme-opacity__val" data-o-opacity-val="${k}">${Math.round(theme.overlays[k].opacity * 100)}%</span>
+          </label>
         </div>
       </div>`;
       })
@@ -334,6 +362,15 @@
       `</label>` +
       `<div id="theme-overlays">${overlayRows}</div>` +
       `<div class="theme-actions"><button type="button" class="btn btn--primary" id="theme-save">Simpan</button></div>`;
+
+    // Beberapa browser mobile (Android WebView/Chrome) tidak menyinkronkan
+    // atribut HTML `value` dengan state internal popup color-picker native —
+    // popup terbuka di hitam walau atribut sudah benar. Paksa assign ulang
+    // SEMUA picker (7 solid + 4 overlay) agar terbuka di warna saat ini
+    // (pola sama dengan renderColors() dresscode di content.js).
+    root.querySelectorAll("input[type=color]").forEach((el) => {
+      el.value = el.getAttribute("value");
+    });
 
     // Warna solid — pola renderColors() dresscode di content.js: pemilih
     // visual & kotak hex saling tersinkron, hex tak sah ditandai is-invalid.
@@ -412,8 +449,20 @@
         input.classList.remove("is-invalid");
       });
     });
+    // Slider kepekatan (opacity): tampil 0–100 di UI, tersimpan 0–1 di state;
+    // kotak preview ikut seketika tanpa re-render (pola updatePreview).
+    root.querySelectorAll("[data-o-opacity]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const k = input.dataset.oOpacity;
+        theme.overlays[k].opacity = Number(input.value) / 100;
+        const val = root.querySelector(`[data-o-opacity-val="${k}"]`);
+        if (val) val.textContent = input.value + "%";
+        updatePreview(k);
+      });
+    });
     root.querySelectorAll("[data-o-reset]").forEach((btn) => {
       btn.addEventListener("click", () => {
+        // Spread DEFAULT_THEME — ikut mereset opacity ke default juga.
         theme.overlays[btn.dataset.oReset] = {
           ...DEFAULT_THEME.overlays[btn.dataset.oReset]
         };

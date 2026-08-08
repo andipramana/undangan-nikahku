@@ -678,6 +678,21 @@ h1, h2 { font-weight: 500; margin: 0; }
   cursor: pointer; color: var(--text);
 }
 .theme-toggle input { accent-color: var(--gold); }
+/* Slider kepekatan (opacity 0–100%) tiap layer overlay — nilai tersimpan
+   0–1 di theme.js; label % ikut update saat digeser. */
+.theme-opacity {
+  display: flex; align-items: center; gap: .5rem;
+  max-width: 200px;
+}
+.theme-opacity input[type="range"] {
+  flex: 1; min-width: 0;
+  accent-color: var(--gold);
+}
+.theme-opacity__val {
+  flex: none;
+  min-width: 2.8em; text-align: right;
+  font-size: .78rem; color: var(--text-dim);
+}
 .theme-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
 .theme-preview-upload { margin-bottom: .6rem; }
 

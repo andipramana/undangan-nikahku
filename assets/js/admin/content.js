@@ -340,6 +340,14 @@
       .join("") +
       `<button type="button" class="btn btn--tiny" id="color-add">+ warna</button>`;
 
+    // Beberapa browser mobile (Android WebView/Chrome) tidak menyinkronkan
+    // atribut HTML `value` dengan state internal popup color-picker native —
+    // popup terbuka di hitam walau atribut sudah benar. Paksa assign ulang
+    // agar picker terbuka di warna saat ini (pola sama di render() theme.js).
+    box.querySelectorAll("input[type=color]").forEach((el) => {
+      el.value = el.getAttribute("value");
+    });
+
     box.querySelectorAll("input[type=color]").forEach((input) => {
       input.addEventListener("input", () => {
         const i = Number(input.dataset.colorI);
