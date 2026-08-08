@@ -73,6 +73,10 @@
 
   async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
+    // Tema custom (tab "Tampilan" di admin) diterapkan PALING AWAL — sebelum
+    // elemen apa pun diisi, supaya warna custom aktif tanpa kedipan. cfg sudah
+    // termasuk payload Supabase (di-merge sebelum populateContent dipanggil).
+    if (window.applyTheme) window.applyTheme(cfg);
     document.title = cfg.siteTitle;
     // Meta share (pratinjau WhatsApp/sosmed) ikut dinamis — kalau nama atau
     // tanggal diubah lewat admin, tautan yang dibagikan tidak menampilkan

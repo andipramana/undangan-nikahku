@@ -58,6 +58,7 @@
     <button type="button" class="tab" data-tab="photos">Foto</button>
     <button type="button" class="tab" data-tab="wishes">Ucapan</button>
     <button type="button" class="tab" data-tab="wa">Kirim WA</button>
+    <button type="button" class="tab" data-tab="tampilan">Tampilan</button>
   </nav>
 
   <!-- ============ TAB TEKS ============ -->
@@ -125,6 +126,15 @@
     </div>
     <div id="wa-templates"></div>
     <div id="wa-contacts"></div>
+  </main>
+
+  <!-- ============ TAB TAMPILAN ============ -->
+  <!-- Warna situs TAMU (style.css) — 7 warna solid + 4 layer overlay,
+       disimpan ke site_content.theme (TANPA migrasi baru). Isi dirender
+       admin/theme.js; simpan memakai pola saveLivestream (shared.js) supaya
+       field lain di site_content tidak ikut tertimpa. -->
+  <main id="tab-tampilan" class="panel" hidden>
+    <div id="theme-root"></div>
   </main>
 </div>
 </div><!-- /app-frame__scroll -->
@@ -238,5 +248,6 @@
      mengimpor file Excel; tanpa itu library ini tidak dipanggil sama sekali. -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="assets/js/admin/wa-blast.js"></script>
+<script src="assets/js/admin/theme.js"></script>
 </body>
 </html>

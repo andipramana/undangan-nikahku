@@ -31,7 +31,9 @@
       // Kirim WA hanya ada di admin.html — admin-qr.html tidak punya tab ini
       // (fitur broadcast di luar scope check-in), jadi handler ini tidak pernah
       // dipanggil di sana.
-      wa: () => { if (window.WaBlast) window.WaBlast.load(); }
+      wa: () => { if (window.WaBlast) window.WaBlast.load(); },
+      // Tampilan juga khusus admin.html (tema warna di luar scope check-in).
+      tampilan: () => { if (window.ThemePanel) window.ThemePanel.load(); }
     }
   });
 })();

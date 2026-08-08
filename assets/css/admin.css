@@ -645,3 +645,28 @@ h1, h2 { font-weight: 500; margin: 0; }
   color: var(--text);
 }
 .wa-contact-send { white-space: nowrap; }
+
+/* ---------- Tab Tampilan (tema warna situs tamu) ---------- */
+.theme-title {
+  font-size: .8rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-dim);
+  margin: 1.2rem 0 .6rem;
+}
+.theme-title:first-child { margin-top: 0; }
+.theme-hint { font-size: .8rem; margin: 0 0 .6rem; }
+.theme-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .6rem;
+  padding: .3rem 0;
+  border-bottom: 1px solid rgba(51, 46, 36, .6);
+  font-size: .8rem;
+}
+.theme-row:last-child { border-bottom: none; }
+.theme-row .color-row { margin: 0; } /* color-row punya margin sendiri — netralkan di sini */
+.theme-label { color: var(--text-dim); }
+.theme-toggle {
+  display: flex; align-items: center; gap: .4rem;
+  cursor: pointer; color: var(--text);
+}
+.theme-toggle input { accent-color: var(--gold); }
+.theme-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }

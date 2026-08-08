@@ -293,7 +293,9 @@ a { color: inherit; }
 /* Cover (screen pertama): overlay flat & tipis saja — keterbacaan teks bawah
    ditangani terpisah oleh pita .hero-content--split::after, bukan gradient ini,
    supaya tidak ada dua gradient warna yang tumpuk (penyebab "patahan"). */
-.hero-overlay--flat { background: rgba(10,9,7,.22); }
+/* Tema bisa menimpa warna dasarnya lewat var (alpha .22 TETAP dari sini,
+   cuma r,g,b yang diganti) — fallback = warna asli. */
+.hero-overlay--flat { background: var(--overlay-flat, rgba(10,9,7,.22)); }
 
 .opening-thumbs { display: flex; gap: .6rem; justify-content: center; margin-bottom: 1.75rem; }
 .opening-thumbs img { width: 110px; height: 140px; object-fit: cover; border-radius: 8px; }
@@ -1126,9 +1128,13 @@ a { color: inherit; }
 .app-frame::after {
   content: "";
   position: fixed; inset: 0;
-  background: var(--color-gold);
+  /* Warna & opacity boleh di-override tema (theme.js, tab "Tampilan" admin) —
+     fallback inline = nilai asli, jadi tanpa tema tersimpan tampilan tetap
+     persis seperti semula. Mati/hidup lewat --overlay-global-opacity: 0
+     (pseudo-element tidak bisa dipilih querySelector langsung). */
+  background: var(--overlay-global-color, var(--color-gold));
   mix-blend-mode: soft-light;
-  opacity: .4;
+  opacity: var(--overlay-global-opacity, .4);
   pointer-events: none;
   z-index: 9990;
 }
@@ -1355,7 +1361,7 @@ a { color: inherit; }
   position: absolute;
   inset: 0;
   /* layer golden hour agak gelap agar teks putih tetap terbaca */
-  background: linear-gradient(180deg, rgba(48, 32, 13, .55) 0%, rgba(20, 13, 5, .62) 100%);
+  background: var(--overlay-quote, linear-gradient(180deg, rgba(48, 32, 13, .55) 0%, rgba(20, 13, 5, .62) 100%));
 }
 .quote-text {
   position: absolute;
