@@ -704,21 +704,22 @@ a { color: inherit; }
 }
 .countdown__item small { font-family: var(--font-label); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
 
-/* Countdown polos di atas foto (tanpa kartu gelap), dipakai di section countdown —
-   digeser sebagai satu grup ke kanan (bukan space-between), jarak antar item lebar. */
-.countdown--plain { justify-content: flex-end; width: 100%; gap: 1.75rem; margin-bottom: 0; }
+/* Countdown polos di atas foto (tanpa kartu gelap), dipakai di section countdown.
+   Lebarnya SELALU 4/5 (80%) lebar layar di HP mana pun: tiap item flex:1 membagi
+   lebarnya secara merata, jadi jarak antar item otomatis menyesuaikan layar
+   (longgar di HP besar, rapat tanpa meluber di HP sempit) dan keempat item tetap
+   sejajar satu baris. Grup menempel kanan (margin-left auto) mengikuti gaya
+   anchor-right-bottom section countdown. */
+.countdown--plain {
+  width: 80%; margin-left: auto;
+  justify-content: space-between; gap: .6rem; margin-bottom: 0;
+}
 .countdown--plain .countdown__item {
   background: none; border: none; width: auto; padding: 0; text-align: center;
+  flex: 1 1 0; min-width: 0;
 }
 .countdown--plain .countdown__item span { color: #fff; font-size: 1.15rem; }
 .countdown--plain .countdown__item small { color: #fff; opacity: .85; font-size: .6rem; }
-/* Jarak antar item countdown: padding kiri ekstra per item. 40px yang lama
-   terlalu lebar — total 4 item + gap meluber dan sebagian item turun ke baris
-   berikutnya (flex-wrap) di layar HP. 20px tetap memberi jeda visual tapi
-   totalnya ~300px, muat bahkan di layar 320px. */
-.countdown--plain .countdown__item {
-  padding-left: 20px;
-}
 
 .event-grid {
   display: grid; gap: 1.25rem;

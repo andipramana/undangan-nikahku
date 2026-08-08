@@ -61,8 +61,12 @@ window.initGift = function () {
   toggleBtn.addEventListener("click", () => {
     panel.hidden = false;
     toggleBtn.hidden = true;
-    // Isi panel baru "ada" di layar sekarang — daftarkan ke observer reveal.
-    if (window.revealScan) window.revealScan(panel);
+    // Isi panel baru "ada" di layar sekarang — reveal LANGSUNG semuanya,
+    // tidak menunggu reveal point scroll (observer memakai rootMargin -45%:
+    // elemen bawah panel tidak akan muncul sampai discroll melewati tengah
+    // layar, padahal pengunjung baru saja membuka panelnya).
+    if (window.revealNow) window.revealNow(panel);
+    else if (window.revealScan) window.revealScan(panel);
   });
 
   hideBtn.addEventListener("click", () => {

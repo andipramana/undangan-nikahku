@@ -151,6 +151,31 @@
     });
   };
 
+  /** Reveal LANGSUNG semua elemen di dalam root, tanpa menunggu reveal point
+   *  scroll — dipakai konten yang baru tampil di layar lewat aksi pengunjung
+   *  (panel amplop, modal), bukan lewat scroll: tidak masuk akal menyuruh
+   *  pengunjung menggulir dulu untuk melihat isi panel yang baru dibukanya.
+   *  Elemen di-unregister dari observer (fire) supaya tidak double-reveal.
+   *  Ditunda dua frame: elemen baru dirender dari display:none — tanpa jeda,
+   *  class is-revealed menempel di frame yang sama dan transition tidak sempat
+   *  melihat state awalnya (elemen melompat ke akhir tanpa animasi). */
+  window.revealNow = function (root) {
+    const r = root || document;
+    if (!observer) {
+      revealAll(r); // reduced-motion / tanpa IO: langsung, tanpa animasi
+      return;
+    }
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (r.matches && r.matches(GROUP)) fire(r);
+        r.querySelectorAll(GROUP).forEach(fire);
+        r.querySelectorAll(HIDDEN).forEach((el) => {
+          if (!insideGroup(el)) fire(el);
+        });
+      })
+    );
+  };
+
   // Nama lama — beberapa modul memanggilnya setelah me-render konten baru.
   window.refreshReveal = window.revealScan;
 
