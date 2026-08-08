@@ -12,7 +12,15 @@
   const cfg = window.WEDDING_CONFIG && window.WEDDING_CONFIG.supabase;
   let sb = null;
   if (window.supabase && cfg && cfg.url && cfg.anonKey) {
-    sb = window.supabase.createClient(cfg.url, cfg.anonKey);
+    // Halaman tamu TIDAK PERNAH login (selalu anon) — tanpa opsi ini, client
+    // otomatis coba baca & refresh sesi auth dari localStorage (satu domain
+    // dengan admin.html, jadi bisa ketiban sisa sesi admin yang sudah basi),
+    // memicu POST .../token?grant_type=refresh_token 400 di console tiap
+    // load pertama. Client ini cuma dipakai untuk RPC anon + URL storage,
+    // jadi sesi auth tidak relevan sama sekali.
+    sb = window.supabase.createClient(cfg.url, cfg.anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
   } else {
     console.warn("Supabase tidak dikonfigurasi — undangan berjalan penuh dari file lokal.");
   }
