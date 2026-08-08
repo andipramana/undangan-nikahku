@@ -866,11 +866,11 @@ a { color: inherit; }
   padding: .95rem .2rem;
   cursor: pointer;
   text-align: left;
-  animation: navItemIn .55s cubic-bezier(.22,.61,.36,1) both;
+  animation: navItemIn .75s cubic-bezier(.22,.61,.36,1) both;
   transition: color .3s ease, border-color .3s ease, padding-left .3s ease;
 }
 @keyframes navItemIn {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(26px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 /* Jeda berurutan: item ke-N mulai ~60ms setelah item sebelumnya */
