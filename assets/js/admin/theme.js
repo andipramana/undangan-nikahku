@@ -11,10 +11,16 @@
  * Reset (per-field & semua) HANYA mengubah form — perubahan benar-benar
  * tersimpan kalau admin menekan "Simpan".
  *
+ * Tiap baris overlay punya kotak preview kecil (satu foto statis + layer
+ * overlay di atasnya) yang update LIVE tanpa klik apa pun. Foto contoh
+ * diambil dari Storage (folder cover dulu, fallback foto pertama mana pun),
+ * atau admin upload sendiri — upload itu blob lokal (URL.createObjectURL,
+ * TIDAK disimpan ke Supabase), hilang saat halaman di-reload.
+ *
  * Butuh migration 0003+ (tabel site_content) — sama seperti tab Teks.
  */
 (function () {
-  const { sb, toast } = window.AdminAPI;
+  const { sb, photoUrl, toast } = window.AdminAPI;
 
   // Nilai default SAMA PERSIS dengan style.css sebelum fitur ini ada:
   //  - 7 var warna di :root
@@ -60,6 +66,10 @@
   // State form — hasil merge tema tersimpan (kalau ada) di atas default.
   let theme = null;
 
+  // Foto untuk kotak preview overlay. Kosong = belum ada (kotak preview
+  // tampil polos); "blob:" = upload lokal, hilang saat halaman di-reload.
+  let previewPhotoUrl = "";
+
   window.ThemePanel = { load };
 
   /* ---------- Helper ---------- */
@@ -87,6 +97,61 @@
     if (!m) return "#000000";
     const h = m[1];
     return ("#" + (h.length === 3 ? h.split("").map((ch) => ch + ch).join("") : h)).toLowerCase();
+  }
+
+  // -----------------------------------------------------------------------
+  // Kotak preview overlay — rumus & angka alpha HARUS SAMA PERSIS dengan
+  // sisi tamu (assets/js/theme.js, fungsi hexRgb + transform di applyTheme).
+  // Kalau beda, preview BOHONG — tidak mencerminkan tampilan asli.
+  // -----------------------------------------------------------------------
+
+  /** "#c9a668" / "#fff" / "c9a668" -> "r,g,b" string; null kalau tak sah.
+   * Salinan persis hexRgb di assets/js/theme.js (konteks file beda, duplikasi
+   * kecil OK — pola yang sama dengan duplikasi animasi angka reveal.js/
+   * countdown.js). */
+  function hexRgb(hex) {
+    const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(hex || "").trim());
+    if (!m) return null;
+    const h = m[1].length === 3 ? m[1].split("").map((ch) => ch + ch).join("") : m[1];
+    const n = parseInt(h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(",");
+  }
+
+  /** Background + opacity elemen overlay untuk layer `k` — transform SAMA
+   * PERSIS applyTheme() sisi tamu: flat rgba(.,.22); closing 3 stop
+   * .7/.78/.88; quote 2 stop .55 + turunan ~40% .62; global warna solid +
+   * opacity .4 (alpha soft-light dari .app-frame::after). */
+  function overlayStyle(k) {
+    const layer = theme.overlays[k];
+    if (!layer || layer.enabled === false) return { background: "", opacity: "0" };
+    const rgb = hexRgb(layer.color);
+    if (!rgb) return { background: "", opacity: "" };
+    if (k === "global") return { background: layer.color, opacity: ".4" };
+    if (k === "flat") return { background: `rgba(${rgb},.22)`, opacity: "" };
+    if (k === "closing") {
+      return {
+        background: `linear-gradient(180deg, rgba(${rgb},.7) 0%, rgba(${rgb},.78) 50%, rgba(${rgb},.88) 100%)`,
+        opacity: ""
+      };
+    }
+    if (k === "quote") {
+      const [r, g, b] = rgb.split(",");
+      return {
+        background: `linear-gradient(180deg, rgba(${rgb},.55) 0%, rgba(${Math.round(r * .4)},${Math.round(g * .4)},${Math.round(b * .4)},.62) 100%)`,
+        opacity: ""
+      };
+    }
+    return { background: "", opacity: "" };
+  }
+
+  /** Update SATU kotak preview saja (elemen [data-preview-overlay=k]) —
+   * JANGAN render ulang seluruh form tiap ketik, cukup elemen itu. */
+  function updatePreview(k) {
+    const box = document.querySelector(`[data-preview-overlay="${k}"]`);
+    if (!box) return;
+    const s = overlayStyle(k);
+    box.style.background = s.background;
+    box.style.opacity = s.opacity;
   }
 
   /** Gabungkan tema tersimpan di atas default — key/layer yang belum pernah
@@ -125,7 +190,28 @@
       return;
     }
     theme = mergeTheme((data && data.content && data.content.theme) || {});
+    // Foto contoh untuk kotak preview overlay — diambil SEKALI tiap tab
+    // dibuka (blob upload lokal tidak bertahan lintas reload, itu OK).
+    previewPhotoUrl = "";
+    const path = await fetchPreviewPhoto();
+    if (path) previewPhotoUrl = photoUrl(path);
     render();
+  }
+
+  /** Ambil SATU foto contoh dari Storage: folder cover dulu (umumnya selalu
+   * ada), fallback foto pertama mana pun. Null kalau Storage kosong semua —
+   * kotak preview tampil polos (background solid), bukan broken image. */
+  async function fetchPreviewPhoto() {
+    const queries = [
+      sb.from("photos").select("storage_path").eq("folder", "cover")
+        .order("sort_order", { ascending: true }).order("id", { ascending: true }).limit(1),
+      sb.from("photos").select("storage_path").order("id", { ascending: true }).limit(1)
+    ];
+    for (const q of queries) {
+      const { data, error } = await window.AdminAPI.query(q, "Permintaan foto preview");
+      if (!error && data && data[0]) return data[0].storage_path;
+    }
+    return null;
   }
 
   /* ---------- Render ---------- */
@@ -155,21 +241,29 @@
     const overlayRows = Object.keys(DEFAULT_THEME.overlays)
       .map((k) => {
         const label = OVERLAY_LABELS[k];
+        const s = overlayStyle(k); // gaya awal kotak preview — ikut state form
         return `
-      <div class="theme-row">
-        <label class="theme-toggle">
-          <input type="checkbox" data-o-key="${k}" ${theme.overlays[k].enabled ? "checked" : ""}>
-          <span>${label}</span>
-        </label>
-        <span class="color-row">
-          <input type="color" value="${pickerHex(theme.overlays[k].color)}" data-o-color="${k}"
-                 aria-label="Warna ${label}">
-          <input type="text" class="color-hex" value="${escAttr(theme.overlays[k].color)}" data-o-hex="${k}"
-                 maxlength="7" spellcheck="false" autocapitalize="off" autocomplete="off"
-                 placeholder="#0a0907" aria-label="Kode hex ${label}">
-          <button type="button" class="btn btn--tiny" data-o-reset="${k}"
-                  title="Reset ${label} ke default" aria-label="Reset ${label} ke default">&#8634;</button>
-        </span>
+      <div class="theme-row theme-row--overlay">
+        <div class="theme-preview" data-preview="${k}">
+          ${previewPhotoUrl ? `<img src="${escAttr(previewPhotoUrl)}" alt="Preview ${label}">` : ""}
+          <div class="theme-preview__overlay" data-preview-overlay="${k}"
+               style="background:${s.background}; opacity:${s.opacity}"></div>
+        </div>
+        <div class="theme-overlay-fields">
+          <label class="theme-toggle">
+            <input type="checkbox" data-o-key="${k}" ${theme.overlays[k].enabled ? "checked" : ""}>
+            <span>${label}</span>
+          </label>
+          <span class="color-row">
+            <input type="color" value="${pickerHex(theme.overlays[k].color)}" data-o-color="${k}"
+                   aria-label="Warna ${label}">
+            <input type="text" class="color-hex" value="${escAttr(theme.overlays[k].color)}" data-o-hex="${k}"
+                   maxlength="7" spellcheck="false" autocapitalize="off" autocomplete="off"
+                   placeholder="#0a0907" aria-label="Kode hex ${label}">
+            <button type="button" class="btn btn--tiny" data-o-reset="${k}"
+                    title="Reset ${label} ke default" aria-label="Reset ${label} ke default">&#8634;</button>
+          </span>
+        </div>
       </div>`;
       })
       .join("");
@@ -183,7 +277,12 @@
       `<div id="theme-colors">${colorRows}</div>` +
       `<p class="theme-title">Overlay</p>` +
       `<p class="muted theme-hint">Mati/hidup tiap layer; warna hanya mengubah hue — ` +
-      `alpha & bentuk gradient tetap dari CSS.</p>` +
+      `alpha & bentuk gradient tetap dari CSS. Kotak kecil di tiap baris = ` +
+      `pratinjau efeknya langsung di sini.</p>` +
+      `<label class="upload-wrap theme-preview-upload">` +
+      `<span class="btn btn--ghost">Ganti foto preview</span>` +
+      `<input type="file" id="theme-preview-file" accept="image/*" hidden>` +
+      `</label>` +
       `<div id="theme-overlays">${overlayRows}</div>` +
       `<div class="theme-actions"><button type="button" class="btn btn--primary" id="theme-save">Simpan</button></div>`;
 
@@ -228,7 +327,9 @@
     // Overlay: checkbox on/off + picker warna (sinkron, pola sama).
     root.querySelectorAll("[data-o-key]").forEach((box) => {
       box.addEventListener("change", () => {
-        theme.overlays[box.dataset.oKey].enabled = box.checked;
+        const k = box.dataset.oKey;
+        theme.overlays[k].enabled = box.checked;
+        updatePreview(k); // kotak preview ikut seketika, tanpa re-render
       });
     });
     root.querySelectorAll("input[type=color][data-o-color]").forEach((input) => {
@@ -240,6 +341,7 @@
           hex.value = input.value;
           hex.classList.remove("is-invalid");
         }
+        updatePreview(k);
       });
     });
     root.querySelectorAll("[data-o-hex]").forEach((input) => {
@@ -253,6 +355,7 @@
         theme.overlays[k].color = val;
         const picker = root.querySelector(`[data-o-color="${k}"]`);
         if (picker) picker.value = pickerHex(val);
+        updatePreview(k);
       });
       input.addEventListener("blur", () => {
         const k = input.dataset.oHex;
@@ -267,6 +370,19 @@
         };
         render();
       });
+    });
+
+    // Upload foto preview — blob lokal MURNI (URL.createObjectURL), TIDAK ada
+    // sb.storage di jalur ini. Hilang saat halaman di-reload, itu disengaja.
+    document.getElementById("theme-preview-file").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      e.target.value = ""; // file yang sama boleh dipilih ulang
+      if (!file) return;
+      if (previewPhotoUrl && previewPhotoUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewPhotoUrl);
+      }
+      previewPhotoUrl = URL.createObjectURL(file);
+      render(); // bangun ulang ke-4 kotak preview dengan foto baru
     });
 
     document.getElementById("theme-reset-all").addEventListener("click", () => {
