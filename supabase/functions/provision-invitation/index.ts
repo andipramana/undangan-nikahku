@@ -1,6 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "https://undangan.andipramana.com", "Access-Control-Allow-Headers": "authorization, apikey, content-type" };
+const headers = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "https://undangan.andipramana.com",
+  // supabase-js sends x-client-info by default; it must be allowed in the
+  // browser preflight or the provisioning POST is blocked before reaching us.
+  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+  "Access-Control-Allow-Methods": "POST, OPTIONS"
+};
 const fail = (message: string, status = 400) => new Response(JSON.stringify({ error: message }), { status, headers });
 
 Deno.serve(async (req) => {
