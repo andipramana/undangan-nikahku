@@ -52,22 +52,43 @@ Deno.serve(async (req) => {
       const brideName = String(body.brideName || "").trim();
       const groomName = String(body.groomName || "").trim();
       const displayName = String(body.displayName || slug).trim();
-      if (brideName) {
-        content.couple = content.couple || {};
-        content.couple.bride = { ...(content.couple?.bride || {}), name: brideName, nickname: brideName };
-      }
-      if (groomName) {
-        content.couple = content.couple || {};
-        content.couple.groom = { ...(content.couple?.groom || {}), name: groomName, nickname: groomName };
-      }
+      const blankPerson = (name: string) => ({
+        name,
+        nickname: name,
+        father: "",
+        mother: "",
+        instagram: ""
+      });
+      content.couple = content.couple || {};
+      content.couple.bride = blankPerson(brideName || "Mempelai Wanita");
+      content.couple.groom = blankPerson(groomName || "Mempelai Pria");
+
+      // Never copy private root data into a customer invitation. The template
+      // keeps only generic structure/design; owner/admin fills these later.
       content.siteTitle = `${displayName} — The Wedding`;
+      content.livestream = { youtube: "", instagram: "", tiktok: "" };
+      content.galleryVideo = { youtube: "" };
+      content.gift = {
+        accounts: [],
+        contactCPP: "",
+        contactCPW: "",
+        address: { recipient: "", phone: "", detail: "" },
+        note: ""
+      };
+      content.event = {
+        ...(content.event || {}),
+        dateISO: "",
+        dateLabel: "",
+        dayLabel: "",
+        countdownTarget: "",
+        akad: { label: "Akad Nikah", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } },
+        resepsi: { label: "Resepsi", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } }
+      };
+      content.loveStory = [];
       await admin.from("site_content").insert({ invitation_id: invitationId, id: 1, content });
     }
-    // New tenants start with the root template's photo ordering and crop data.
-    // Objects are public-read; their metadata belongs to the new tenant, so a
-    // customer can later add/reorder its own photos without touching root rows.
-    const { data: rootPhotos } = await admin.from("photos").select("folder,storage_path,sort_order,focal_x,focal_y,zoom,alt,width,height").eq("invitation_id", rootId);
-    if (rootPhotos?.length) await admin.from("photos").insert(rootPhotos.map((photo) => ({ ...photo, invitation_id: invitationId })));
+    // Deliberately do NOT copy root photos, wishes, contacts, templates, or
+    // check-ins. Those can contain private data and must start empty per tenant.
     await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://undangan.andipramana.com/${slug}/` });
   } catch (error) {
     await rollback();
