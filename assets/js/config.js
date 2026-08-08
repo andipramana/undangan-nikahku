@@ -38,21 +38,38 @@ window.WEDDING_CONFIG = {
     dateLabel: "25 Agustus 2026",
     dayLabel: "Selasa",
     countdownTarget: "2026-08-25T08:00:00+07:00",
-    akad: { label: "Akad Nikah", start: "08.00", end: "10.00" },
-    resepsi: { label: "Resepsi", start: "11.00", end: "14.00" },
+    // Venue TIDAK lagi shared satu untuk kedua acara — masing-masing punya
+    // venue sendiri (kadang tempat akad beda dengan resepsi). Nilai default
+    // keduanya sama; diubah lewat tab Teks admin per acara.
+    akad: {
+      label: "Akad Nikah", start: "08.00", end: "10.00",
+      venue: {
+        name: "Gedung Serba Guna Mayang Arum",
+        address:
+          "Jl. Raya Ciwidey Km 27 No. 66, Pasir Jambu, Ciwidey, Jawa Barat",
+        mapsUrl:
+          "https://www.google.com/maps/search/?api=1&query=" +
+          encodeURIComponent(
+            "Gedung Serba Guna Mayang Arum, Jl. Raya Ciwidey Km 27 No. 66, Pasir Jambu, Ciwidey, Jawa Barat"
+          )
+      }
+    },
+    resepsi: {
+      label: "Resepsi", start: "11.00", end: "14.00",
+      venue: {
+        name: "Gedung Serba Guna Mayang Arum",
+        address:
+          "Jl. Raya Ciwidey Km 27 No. 66, Pasir Jambu, Ciwidey, Jawa Barat",
+        mapsUrl:
+          "https://www.google.com/maps/search/?api=1&query=" +
+          encodeURIComponent(
+            "Gedung Serba Guna Mayang Arum, Jl. Raya Ciwidey Km 27 No. 66, Pasir Jambu, Ciwidey, Jawa Barat"
+          )
+      }
+    },
     // Slider foto pasangan di kartu event (4/10 atas kartu) — di-fetch dari
     // manifest folder foto_slider_section_2, urutan by name. Minimal 6 foto utk loop.
-    manifest: "assets/img/foto_slider_section_2/manifest.json",
-    venue: {
-      name: "Gedung Serba Guna Mayang Arum",
-      address:
-        "Jl. Raya Ciwidey Km 27 No. 66, Pasir Jambu, Ciwidey, Jawa Barat",
-      mapsUrl:
-        "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent(
-          "Gedung Serba Guna Mayang Arum, Jl. Raya Ciwidey Km 27 No. 66, Pasir Jambu, Ciwidey, Jawa Barat"
-        )
-    }
+    manifest: "assets/img/foto_slider_section_2/manifest.json"
   },
 
   dresscode: {

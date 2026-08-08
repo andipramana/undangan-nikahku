@@ -75,6 +75,21 @@
       // Closing statement khusus kelompok — kosong = pakai default admin.
       if (typeof g.closing !== "string") g.closing = "";
     });
+    // Venue per event (Akad/Resepsi terpisah) — data lama cuma punya satu
+    // event.venue: salin ke venue tiap event supaya situs yang sudah jalan
+    // tidak tiba-tiba kosong venue-nya. Venue per-event yang sudah ada
+    // (bentuk baru) TIDAK ditimpa.
+    if (!isPlainObject(c.event)) c.event = {};
+    ["akad", "resepsi"].forEach((key) => {
+      if (!isPlainObject(c.event[key])) c.event[key] = {};
+      if (!isPlainObject(c.event[key].venue)) {
+        c.event[key].venue = {
+          name: (c.event.venue && typeof c.event.venue.name === "string") ? c.event.venue.name : "",
+          address: (c.event.venue && typeof c.event.venue.address === "string") ? c.event.venue.address : "",
+          mapsUrl: (c.event.venue && typeof c.event.venue.mapsUrl === "string") ? c.event.venue.mapsUrl : ""
+        };
+      }
+    });
   }
 
   function isPlainObject(v) {
@@ -175,9 +190,12 @@
             ${field("Resepsi — label", "f-resepsi-label")}
             ${field("Resepsi — mulai", "f-resepsi-start")}
             ${field("Resepsi — selesai", "f-resepsi-end")}
-            ${field("Nama venue", "f-venue-name")}
-            ${field("Alamat venue", "f-venue-address")}
-            ${field("URL Google Maps", "f-venue-maps")}
+            ${field("Venue Akad — nama", "f-venue-name-akad")}
+            ${field("Venue Akad — alamat", "f-venue-address-akad")}
+            ${field("Venue Akad — URL Maps", "f-venue-maps-akad")}
+            ${field("Venue Resepsi — nama", "f-venue-name-resepsi")}
+            ${field("Venue Resepsi — alamat", "f-venue-address-resepsi")}
+            ${field("Venue Resepsi — URL Maps", "f-venue-maps-resepsi")}
           </div>
         `)}
 
@@ -287,9 +305,12 @@
     set("f-resepsi-label", v("event.resepsi.label"));
     set("f-resepsi-start", v("event.resepsi.start"));
     set("f-resepsi-end", v("event.resepsi.end"));
-    set("f-venue-name", v("event.venue.name"));
-    set("f-venue-address", v("event.venue.address"));
-    set("f-venue-maps", v("event.venue.mapsUrl"));
+    set("f-venue-name-akad", v("event.akad.venue.name"));
+    set("f-venue-address-akad", v("event.akad.venue.address"));
+    set("f-venue-maps-akad", v("event.akad.venue.mapsUrl"));
+    set("f-venue-name-resepsi", v("event.resepsi.venue.name"));
+    set("f-venue-address-resepsi", v("event.resepsi.venue.address"));
+    set("f-venue-maps-resepsi", v("event.resepsi.venue.mapsUrl"));
     set("f-dresscode-text", v("dresscode.text"));
     set("f-quote-text", v("quotePhoto.quote"));
     set("f-live-youtube", v("livestream.youtube"));
@@ -625,9 +646,12 @@
     grab("f-resepsi-label", "event.resepsi.label");
     grab("f-resepsi-start", "event.resepsi.start");
     grab("f-resepsi-end", "event.resepsi.end");
-    grab("f-venue-name", "event.venue.name");
-    grab("f-venue-address", "event.venue.address");
-    grab("f-venue-maps", "event.venue.mapsUrl");
+    grab("f-venue-name-akad", "event.akad.venue.name");
+    grab("f-venue-address-akad", "event.akad.venue.address");
+    grab("f-venue-maps-akad", "event.akad.venue.mapsUrl");
+    grab("f-venue-name-resepsi", "event.resepsi.venue.name");
+    grab("f-venue-address-resepsi", "event.resepsi.venue.address");
+    grab("f-venue-maps-resepsi", "event.resepsi.venue.mapsUrl");
     grab("f-dresscode-text", "dresscode.text");
     grab("f-quote-text", "quotePhoto.quote");
     grab("f-live-youtube", "livestream.youtube");

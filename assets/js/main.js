@@ -156,9 +156,14 @@
       const t = String(cfg.event[key].start || "").replace(".", ":").split(":");
       document.getElementById(`${key}-time-h`).textContent = t[0] || "";
       document.getElementById(`${key}-time-m`).textContent = t[1] || "";
-      document.getElementById(`venue-name-${key}`).textContent = cfg.event.venue.name;
-      document.getElementById(`venue-address-${key}`).textContent = cfg.event.venue.address;
-      document.getElementById(`${key}-maps`).href = cfg.event.venue.mapsUrl;
+      // Venue per event (event.akad.venue / event.resepsi.venue, lihat
+      // seedDefaults di content.js) — data lama yang belum disimpan ulang
+      // hanya punya event.venue tunggal: fallback ke situ supaya venue
+      // tidak tiba-tiba kosong.
+      const venue = (cfg.event[key] && cfg.event[key].venue) || cfg.event.venue;
+      document.getElementById(`venue-name-${key}`).textContent = venue.name;
+      document.getElementById(`venue-address-${key}`).textContent = venue.address;
+      document.getElementById(`${key}-maps`).href = venue.mapsUrl;
     });
 
     // Kartu dresscode: teks + 5 bulatan warna dari config
@@ -247,12 +252,16 @@
     const start = new Date(cfg.event.countdownTarget);
     const end = new Date(start.getTime() + 6 * 60 * 60 * 1000);
     const fmt = (d) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    // Kalender menggabung akad & resepsi jadi satu agenda — pakai venue AKAD
+    // sebagai wakilnya; data lama tanpa venue per-event di-fallback ke
+    // event.venue tunggal (backward compat, lihat loop venue di atas).
+    const venue = (cfg.event.akad && cfg.event.akad.venue) || cfg.event.venue;
     const params = new URLSearchParams({
       action: "TEMPLATE",
       text: `Pernikahan ${cfg.couple.bride.nickname} & ${cfg.couple.groom.nickname}`,
       dates: `${fmt(start)}/${fmt(end)}`,
-      details: `${cfg.event.akad.label} & ${cfg.event.resepsi.label} di ${cfg.event.venue.name}`,
-      location: cfg.event.venue.address
+      details: `${cfg.event.akad.label} & ${cfg.event.resepsi.label} di ${venue.name}`,
+      location: venue.address
     });
     link.href = `https://calendar.google.com/calendar/render?${params.toString()}`;
   }

@@ -96,9 +96,14 @@
         dateLabel: c.event.dateLabel,
         dayLabel: c.event.dayLabel,
         countdownTarget: c.event.countdownTarget,
-        akad: { label: c.event.akad.label, start: c.event.akad.start, end: c.event.akad.end },
-        resepsi: { label: c.event.resepsi.label, start: c.event.resepsi.start, end: c.event.resepsi.end },
-        venue: { name: c.event.venue.name, address: c.event.venue.address, mapsUrl: c.event.venue.mapsUrl }
+        akad: {
+          label: c.event.akad.label, start: c.event.akad.start, end: c.event.akad.end,
+          venue: { name: c.event.akad.venue.name, address: c.event.akad.venue.address, mapsUrl: c.event.akad.venue.mapsUrl }
+        },
+        resepsi: {
+          label: c.event.resepsi.label, start: c.event.resepsi.start, end: c.event.resepsi.end,
+          venue: { name: c.event.resepsi.venue.name, address: c.event.resepsi.venue.address, mapsUrl: c.event.resepsi.venue.mapsUrl }
+        }
       },
       dresscode: { text: c.dresscode.text, colors: [...c.dresscode.colors] },
       quotePhoto: { quote: c.quotePhoto.quote },
