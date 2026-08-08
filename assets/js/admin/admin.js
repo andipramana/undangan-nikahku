@@ -19,8 +19,11 @@
     email: ADMIN_EMAIL,
     username: ADMIN_USERNAME,
     // Tab Teks adalah tab aktif saat app tampil — muat isinya begitu login.
-    onSignedIn: () => {
-      if (window.ContentPanel && window.ContentPanel.load) window.ContentPanel.load();
+    onSignedIn: async () => {
+      if (window.ContentPanel && window.ContentPanel.load) await window.ContentPanel.load();
+      // Menu lompat-section butuh fieldset #sec-... yang baru ada setelah form
+      // tab Teks dirender — init di sini, bukan di awal halaman.
+      if (window.SectionNav && window.SectionNav.init) window.SectionNav.init();
     },
     tabHandlers: {
       photos: () => { if (window.PhotosPanel) window.PhotosPanel.load(); },

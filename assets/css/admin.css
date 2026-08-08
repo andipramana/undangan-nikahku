@@ -11,6 +11,15 @@
   --text: #f0ead9;
   --text-dim: #a99e86;
   --danger: #d4706a;
+  /* Skala jarak & sudut — dipakai elemen baru dan area yang dipoles ulang,
+     supaya nilai tidak ditulis literal di sana-sini. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --space-xs: .35rem;
+  --space-sm: .6rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
 }
 
 * { box-sizing: border-box; }
@@ -79,7 +88,7 @@ h1, h2 { font-weight: 500; margin: 0; }
   gap: .4rem;
   padding: .55rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--bg-2);
   color: var(--text);
   font: inherit;
@@ -104,12 +113,30 @@ h1, h2 { font-weight: 500; margin: 0; }
   width: 100%; max-width: 380px;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 2rem 1.5rem;
+  border-radius: var(--radius-lg);
+  padding: 2rem var(--space-lg);
   display: flex; flex-direction: column; gap: 1rem;
+  position: relative;
 }
-.login-card h1 { font-size: 1.4rem; }
-.login-hint { color: var(--text-dim); margin: 0; font-size: .85rem; }
+/* Aksen identitas: garis emas tipis mengarah ke kanan di atas kartu — layar
+   login tidak lagi terasa form generik, tapi tetap ringkas. */
+.login-card::before {
+  content: "";
+  display: block;
+  width: 2.5rem; height: 2px;
+  background: linear-gradient(90deg, var(--gold), rgba(201, 166, 104, 0));
+  border-radius: 2px;
+}
+.login-card h1 { font-size: 1.4rem; letter-spacing: .04em; }
+/* "Mita & Andi — The Wedding" sebagai identitas: huruf kecil semua dengan
+   jarak renggang — lebih menonjol daripada teks keterangan biasa. */
+.login-hint {
+  color: var(--gold-soft);
+  margin: 0;
+  font-size: .72rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
 .login-error { color: var(--danger); margin: 0; font-size: .85rem; min-height: 1.2em; }
 
 /* ---------- Topbar & tab ---------- */
@@ -125,15 +152,20 @@ h1, h2 { font-weight: 500; margin: 0; }
 
 .tabs { display: flex; gap: .25rem; padding: .75rem 1.25rem 0; }
 .tab {
-  padding: .6rem 1.4rem;
+  padding: .6rem 1.25rem;
   background: transparent;
   border: 1px solid transparent;
   border-bottom: none;
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   color: var(--text-dim);
   font: inherit;
+  font-size: .78rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: color .25s ease;
 }
+.tab:hover { color: var(--text); }
 .tab--active {
   background: var(--panel);
   border-color: var(--border);
@@ -147,17 +179,23 @@ h1, h2 { font-weight: 500; margin: 0; }
 }
 
 /* ---------- Form Teks ---------- */
-.content-form { display: flex; flex-direction: column; gap: 1.25rem; }
+/* Gap lebih lega antar card section — form 13 bagian ini terasa "berbagian",
+   bukan satu blok tak berujung. */
+.content-form { display: flex; flex-direction: column; gap: var(--space-lg); }
 .form-section {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 1.25rem 1.25rem 1.5rem;
+  /* Datang dari menu lompat-section: fieldset tidak menempel ke tepi atas
+     viewport saat discroll ke sini. */
+  scroll-margin-top: .75rem;
 }
 .form-section legend {
   padding: 0 .5rem;
   color: var(--gold);
   font-size: .8rem;
+  font-weight: 600;
   letter-spacing: .12em;
   text-transform: uppercase;
 }
@@ -293,7 +331,7 @@ h1, h2 { font-weight: 500; margin: 0; }
   max-height: 92dvh; overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
 }
 .editor__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
@@ -330,6 +368,103 @@ h1, h2 { font-weight: 500; margin: 0; }
 .editor__zoom input[type=range] { width: 100%; accent-color: var(--gold); }
 .editor__zoom span { color: var(--text); font-variant-numeric: tabular-nums; }
 .editor__footer { display: flex; justify-content: space-between; }
+
+/* ---------- Menu navigasi section (tab Teks) ----------
+   Pola sama seperti sisi tamu (style.css): FAB bulat + modal daftar shortcut
+   lompat ke tiap fieldset #sec-... . z-index FAB (90) sengaja DI BAWAH
+   .editor (100) supaya tidak pernah menutupi overlay pan/zoom. */
+.section-nav-fab {
+  position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 90;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--bg-2);
+  border: 1.5px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--gold);
+}
+.section-nav-fab:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+.section-nav-fab svg { width: 22px; height: 22px; }
+
+/* Overlay modal — dibuka/ditutup lewat atribut `hidden` (lihat [hidden] di
+   atas), pola sama seperti modal sisi tamu. */
+.modal {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(10, 9, 8, .9);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-md);
+}
+.modal__panel {
+  width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  animation: fadeUp .35s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.modal__header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.25rem;
+}
+.modal__header h3 {
+  font-weight: 600; font-size: 1.05rem; margin: 0;
+  letter-spacing: .03em; color: var(--gold-soft);
+}
+.modal__close {
+  background: none; border: none; color: var(--gold-soft);
+  font-size: 1.8rem; line-height: 1; cursor: pointer; padding: .1rem .35rem;
+}
+
+/* Daftar shortcut — premium, sama seperti menu tamu: tanpa bingkai kotak,
+   tiap item hanya dipisah garis bawah tipis emas; item muncul BERURUTAN
+   (stagger) setiap modal dibuka. Animasi di-replay otomatis tiap buka karena
+   saat `hidden` (display:none) item keluar dari rendering lalu masuk lagi
+   bersama panelnya (panel memakai animasi fadeUp milik .modal__panel). */
+.nav-menu-list { display: flex; flex-direction: column; }
+.nav-menu-list button {
+  font: inherit;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: .75rem;
+  border: none;
+  border-bottom: 1px solid rgba(201, 166, 104, .22);
+  color: var(--text);
+  background: transparent;
+  padding: .95rem .2rem;
+  cursor: pointer;
+  text-align: left;
+  animation: navItemIn .75s cubic-bezier(.22, .61, .36, 1) both;
+  transition: color .3s ease, border-color .3s ease, padding-left .3s ease;
+}
+@keyframes navItemIn {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Jeda berurutan: item ke-N mulai ~60ms setelah item sebelumnya (13 item). */
+.nav-menu-list button:nth-child(1) { animation-delay: .08s; }
+.nav-menu-list button:nth-child(2) { animation-delay: .14s; }
+.nav-menu-list button:nth-child(3) { animation-delay: .2s; }
+.nav-menu-list button:nth-child(4) { animation-delay: .26s; }
+.nav-menu-list button:nth-child(5) { animation-delay: .32s; }
+.nav-menu-list button:nth-child(6) { animation-delay: .38s; }
+.nav-menu-list button:nth-child(7) { animation-delay: .44s; }
+.nav-menu-list button:nth-child(8) { animation-delay: .5s; }
+.nav-menu-list button:nth-child(9) { animation-delay: .56s; }
+.nav-menu-list button:nth-child(10) { animation-delay: .62s; }
+.nav-menu-list button:nth-child(11) { animation-delay: .68s; }
+.nav-menu-list button:nth-child(12) { animation-delay: .74s; }
+.nav-menu-list button:nth-child(13) { animation-delay: .8s; }
+/* Hover: teks emas menyala + garis bawah menguat + item "maju" halus ke kanan */
+.nav-menu-list button:hover {
+  color: var(--gold-soft);
+  border-bottom-color: var(--gold);
+  padding-left: .6rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-menu-list button { animation: none !important; opacity: 1; }
+}
 
 /* ---------- Toast ---------- */
 .toast {

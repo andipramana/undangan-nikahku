@@ -84,8 +84,10 @@
       </label>`;
   }
 
-  function section(title, body) {
-    return `<fieldset class="form-section"><legend>${title}</legend>${body}</fieldset>`;
+  /** id (slug pendek) dipakai untuk lompatan langsung dari menu navigasi
+   * section (section-nav.js) — lihat id="sec-${id}" di bawah. */
+  function section(id, title, body) {
+    return `<fieldset class="form-section" id="sec-${id}"><legend>${title}</legend>${body}</fieldset>`;
   }
 
   function render() {
@@ -102,13 +104,13 @@
     // Kartu berulang dirender dari state — lihat renderList() di bawah.
     formRoot.innerHTML = `
       <form id="content-form" class="content-form">
-        ${section("Umum", `
+        ${section("umum", "Umum", `
           ${field("Judul situs", "f-site-title")}
           ${field("Parameter nama tamu (URL)", "f-guest-param")}
           ${field("Nama tamu default", "f-default-guest")}
         `)}
 
-        ${section("Mempelai", `
+        ${section("mempelai", "Mempelai", `
           <div class="form-grid">
             ${field("Nama pengantin wanita", "f-bride-name")}
             ${field("Panggilan", "f-bride-nickname")}
@@ -123,13 +125,13 @@
           </div>
         `)}
 
-        ${section("Opening — ayat", `
+        ${section("opening", "Opening — ayat", `
           ${textarea("Bismillah (arab)", "f-opening-arabic", 2)}
           ${textarea("Terjemahan", "f-opening-quote", 4)}
           ${field("Sumber (QS …)", "f-opening-source")}
         `)}
 
-        ${section("Event", `
+        ${section("event", "Event", `
           <div class="form-grid">
             ${field("Tanggal (ISO, yyyy-mm-dd)", "f-event-iso")}
             ${field("Tanggal tampil", "f-event-label")}
@@ -147,7 +149,7 @@
           </div>
         `)}
 
-        ${section("Dresscode", `
+        ${section("dresscode", "Dresscode", `
           ${textarea("Teks", "f-dresscode-text", 3)}
           <div class="form-field">
             <span>Warna pilihan</span>
@@ -155,11 +157,11 @@
           </div>
         `)}
 
-        ${section("Quote foto", `
+        ${section("quote", "Quote foto", `
           ${textarea("Teks quote", "f-quote-text", 3)}
         `)}
 
-        ${section("Live Streaming & Video Galeri", `
+        ${section("live-streaming", "Live Streaming & Video Galeri", `
           <div class="form-grid">
             ${field("YouTube (URL)", "f-live-youtube", "url")}
             ${field("Instagram (URL)", "f-live-instagram", "url")}
@@ -171,15 +173,15 @@
           tampil sebagai thumbnail di atas foto galeri.</p>
         `)}
 
-        ${section("Love Story (tiap babak)", `
+        ${section("love-story", "Love Story (tiap babak)", `
           <div id="love-story-list"></div>
         `)}
 
-        ${section("Gift — rekening", `
+        ${section("gift-rekening", "Gift — rekening", `
           <div id="gift-accounts-list"></div>
         `)}
 
-        ${section("Gift — kontak WhatsApp", `
+        ${section("gift-kontak", "Gift — kontak WhatsApp", `
           <div class="form-grid">
             ${field("CPW — nomor WA (62…)", "f-gift-contact-cpw")}
             ${field("CPP — nomor WA (62…)", "f-gift-contact-cpp")}
@@ -189,7 +191,7 @@
           ikut di dropdown.</p>
         `)}
 
-        ${section("Gift — alamat kado", `
+        ${section("gift-alamat", "Gift — alamat kado", `
           <div class="form-grid">
             ${field("Penerima", "f-gift-recipient")}
             ${field("Telepon", "f-gift-phone")}
@@ -197,13 +199,13 @@
           </div>
         `)}
 
-        ${section("Gift — rekomendasi kado", `
+        ${section("gift-rekomendasi", "Gift — rekomendasi kado", `
           <div id="gift-recs-list"></div>
           <p class="muted">Foto kado diunggah di tab Foto (folder "Rekomendasi
           Kado") — foto ke-i dipasangkan dengan baris ke-i di sini.</p>
         `)}
 
-        ${section("Lainnya", `
+        ${section("lainnya", "Lainnya", `
           <div class="form-grid">
             ${field("Jeda slideshow hero (ms)", "f-hero-interval", "number")}
             ${field("Audio — sumber", "f-audio-src")}
