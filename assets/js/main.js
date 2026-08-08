@@ -120,13 +120,9 @@
     const month = parts[1] || "";
     const year = parts[2] || "";
 
-    // Baris tanggal di Save The Date (#event-date-label) dipecah jadi 4 span
-    // supaya angka tanggal & tahunnya bisa count-up oleh countdown.js saat
-    // .text-revealed terpasang (mekanisme .text-enter di #opening diproteksi).
-    document.getElementById("ed-day").textContent = cfg.event.dayLabel;
-    document.getElementById("ed-date").textContent = dayNum;
-    document.getElementById("ed-month").textContent = month;
-    document.getElementById("ed-year").textContent = year;
+    // Baris tanggal di Save The Date (#event-date-label) diisi utuh — tanggal
+    // & tahunnya sengaja TANPA animasi angka (kurang cocok di sana).
+    document.getElementById("event-date-label").textContent = `${cfg.event.dayLabel}, ${cfg.event.dateLabel}`;
 
     ["akad", "resepsi"].forEach((key) => {
       document.getElementById(`${key}-day`).textContent = cfg.event.dayLabel;

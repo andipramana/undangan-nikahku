@@ -101,12 +101,9 @@
         <div class="countdown-heading">
           <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
           <p class="script-names script-names--small text-enter text-enter--left" id="couple-names-opening">Mita <span class="amp">&amp;</span> Andi</p>
-          <!-- "Selasa, 25 Agustus 2026" dipecah jadi 4 span (hari/tanggal/bulan/
-               tahun) supaya angka tanggal & tahunnya bisa count-up. Span ini
-               TANPA data-reveal/data-count: animasinya dijalankan countdown.js
-               (animateFirst) saat .text-revealed terpasang — mekanisme
-               .text-enter di #opening ini diproteksi, tidak boleh diubah. -->
-          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"><span id="ed-day"></span>, <span id="ed-date"></span> <span id="ed-month"></span> <span id="ed-year"></span></p>
+          <!-- Tanggal & tahun di baris ini sengaja TANPA animasi angka —
+               kurang cocok di Save The Date, tampil tenang apa adanya -->
+          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"></p>
         </div>
         <a id="btn-add-calendar" class="btn-outline btn-outline--light text-enter text-enter--left" href="#" target="_blank" rel="noopener">
           <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>

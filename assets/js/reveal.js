@@ -14,9 +14,11 @@
  * mengikuti scroll. Dipakai untuk hal yang memang tak terpisahkan — bismillah +
  * ayat + sumbernya, atau nama acara + tanggal + lokasinya.
  *
- * Tambahan `data-count` pada elemen berisi angka: angkanya berputar cepat dari 1
- * ke nilai aslinya bersamaan dengan reveal-nya (dipakai angka tanggal di kartu
- * event).
+ * Tambahan `data-count` pada elemen berisi angka: angkanya naik TURUN
+ * BERURUTAN satu angka satu angka (1, 2, 3, …) ke puncak, lalu turun lagi ke
+ * angka aslinya bersamaan dengan reveal-nya (dipakai angka tanggal, tahun,
+ * jam, menit di kartu event, dan tanggal timeline Love Story). Perubahannya
+ * cepat (tiap 40ms) dan totalnya pendek — tidak ada angka yang dilompati.
  *
  * Semua state tersembunyi digantung pada `html.reveal-ready` yang dipasang di
  * sini: kalau file ini gagal dimuat/error, tidak ada satu pun konten yang
@@ -28,7 +30,8 @@
 (function () {
   const HIDDEN = "[data-reveal]:not(.is-revealed)";
   const GROUP = "[data-reveal-group]";
-  const COUNT_DURATION = 2400;
+  const STEP_MS = 40; // naik/turun SATU angka tiap 40ms — cepat, tapi tetap terbaca
+  const MAX_CLIMB = 30; // batas langkah pendakian, jaga total tetap pendek
   const seen = new WeakSet(); // elemen yang sudah diserahkan ke observer
   let observer = null; // pemicu utama: tepi atas elemen melewati tengah layar
   let early = null; // pemicu awal (data-reveal-early): begitu menyentuh layar
@@ -42,9 +45,13 @@
    *  naik biasa (perilaku lama) — untuk angka tanpa batas kecil seperti tahun. */
   const UNIT_MAX = { date: 31, hour: 24, minute: 60, second: 60 };
 
-  /** Angka berputar dari 1 ke nilai aslinya, melambat di ujung. Untuk unit
-   *  berbatas natural (`data-count="date/hour/minute/second"`): naik ke batas
-   *  lalu turun mengecil ke target — mendarat TEPAT di angka asli. */
+  /** Angka naik BERURUTAN (1, 2, 3, …) ke puncak lalu turun BERURUTAN ke
+   *  angka aslinya — tiap langkah ±1, tidak ada yang dilompati, mendarat
+   *  TEPAT di target. Puncaknya: batas natural unit untuk data-count berunit
+   *  (tanggal/jam/menit/detik), atau sedikit DI ATAS target (data-count tanpa
+   *  nilai, mis. tahun — tahun tidak mungkin dihitung dari 1). Kalau mulai
+   *  dari bawah membuat animasi kepanjangan, pendakiannya dipotong sampai
+   *  MAX_CLIMB langkah — total hampir selalu di bawah 2 detik. */
   function countUp(el) {
     const raw = el.textContent.trim();
     // HANYA animasikan teks angka MURNI ("2020", "25"). Teks campuran —
@@ -54,30 +61,27 @@
     if (!/^\d+$/.test(raw)) return;
     const target = parseInt(raw, 10);
     if (!Number.isFinite(target) || target <= 1) return;
-    const maxVal = UNIT_MAX[el.dataset.count] ?? null; // null = ramp naik 1x
+    const maxVal = UNIT_MAX[el.dataset.count] ?? null;
+    // Puncak & titik start pendakian
+    let lo = maxVal != null ? 1 : Math.max(1, target - MAX_CLIMB);
+    const top = maxVal != null ? Math.min(maxVal, target + 6) : target + 5;
+    if (top - lo > MAX_CLIMB) lo = top - MAX_CLIMB;
+    const upSteps = top - lo; // naik: lo, lo+1, …, top
+    const downSteps = top - target; // turun: top-1, …, target
+    const total = upSteps + downSteps;
     const t0 = performance.now();
+    let lastK = -1;
     (function frame(now) {
-      const p = Math.min((now - t0) / COUNT_DURATION, 1);
-      let v;
-      if (maxVal == null) {
-        const eased = 1 - Math.pow(1 - p, 3);
-        v = Math.max(1, Math.round(target * eased));
-      } else if (p < 0.55) {
-        // Fase 1 (~55% durasi): 0 -> batas unit, ease-out supaya berhenti mulus
-        const q = p / 0.55;
-        v = Math.round(maxVal * (1 - Math.pow(1 - q, 2)));
-      } else {
-        // Fase 2 (45% sisanya): batas -> target asli, ease-in; landas persis
-        // di angka target, tidak boleh meleset.
-        const q = (p - 0.55) / 0.45;
-        v = Math.round(maxVal - (maxVal - target) * q * q);
+      const k = Math.floor((now - t0) / STEP_MS);
+      if (k >= total) {
+        el.textContent = String(target); // mendarat TEPAT, tidak boleh meleset
+        return;
       }
-      if (p < 1) {
-        el.textContent = String(v);
-        requestAnimationFrame(frame);
-      } else {
-        el.textContent = String(target);
+      if (k !== lastK) {
+        lastK = k;
+        el.textContent = String(k < upSteps ? lo + k : top - (k - upSteps));
       }
+      requestAnimationFrame(frame);
     })(t0);
   }
 

@@ -712,10 +712,12 @@ a { color: inherit; }
 }
 .countdown--plain .countdown__item span { color: #fff; font-size: 1.15rem; }
 .countdown--plain .countdown__item small { color: #fff; opacity: .85; font-size: .6rem; }
-/* Jarak antar item countdown: semua item (Hari/Jam/Menit/Detik) dapat
-   padding kiri ekstra — persis hasil uji coba manual user. */
+/* Jarak antar item countdown: padding kiri ekstra per item. 40px yang lama
+   terlalu lebar — total 4 item + gap meluber dan sebagian item turun ke baris
+   berikutnya (flex-wrap) di layar HP. 20px tetap memberi jeda visual tapi
+   totalnya ~300px, muat bahkan di layar 320px. */
 .countdown--plain .countdown__item {
-  padding-left: 40px;
+  padding-left: 20px;
 }
 
 .event-grid {
@@ -1067,7 +1069,12 @@ a { color: inherit; }
    mengecil — foto tetap pas menutupi layar tanpa sisa piksel. */
 #closing { min-height: 100vh; }
 #closing .hero-media { inset: 0; }
-/* Teks penutup tidak bertabrakan dengan footer di bawahnya */
+/* Teks penutup ditempatkan di BAWAH section, bukan di tengah — foto slideshow
+   punya wajah di tengah layar yang tidak boleh tertutup teks. .section-hero
+   default flex center; #closing menimpa ke flex-end (tetap center horizontal
+   via text-align di parent). */
+#closing { align-items: flex-end; }
+/* Teks penutup di dasar section tidak bertabrakan dengan footer di bawahnya */
 #closing .hero-content { padding-bottom: 5.5rem; }
 
 /* ---------- Toast ---------- */

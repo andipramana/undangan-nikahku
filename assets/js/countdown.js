@@ -1,10 +1,11 @@
 /** Hitung mundur ke tanggal akad, update tiap detik.
  *
  * Keempat angka dianimasikan SEKALI saja saat countdown pertama kali masuk
- * layar (bukan tiap detik — kalau overshoot diulang tiap detik hasilnya
- * kacau): Jam/Menit/Detik "overshoot lalu turun" (naik dari 0 ke batas natural
- * unitnya 24/60/60, BARU turun ke nilai aslinya); Hari tidak punya batas
- * natural kecil seperti itu (bisa ratusan), jadi ramp naik biasa 1x.
+ * layar (bukan tiap detik): angkanya naik BERURUTAN satu angka satu angka
+ * (1, 2, 3, …) ke puncak lalu turun berurutan ke nilai aslinya — tiap langkah
+ * ±1, tidak ada yang dilompati. Hari mulai dari dekat nilainya (bisa ratusan,
+ * tidak mungkin dihitung dari 1); Jam/Menit/Detik naik dari 1 ke batas natural
+ * unitnya (24/60/60) atau sedikit di atas target.
  *
  * Pemicunya menunggu class `.text-revealed` pada #opening (di-observasi, bukan
  * diubah): saat halaman load, undangan masih terkunci dan countdown
@@ -12,7 +13,8 @@
  * layar. Interval detik baru mulai SETELAH animasi selesai, dan dari situ
  * tick polos mengganti teks tanpa animasi lagi. */
 window.initCountdown = function () {
-  const DURATION = 2400; // sama dengan COUNT_DURATION di reveal.js, biar terasa konsisten
+  const STEP_MS = 40; // naik/turun SATU angka tiap 40ms — cepat, tapi tetap terbaca
+  const MAX_CLIMB = 30; // batas langkah pendakian, jaga total tetap pendek
 
   function pad(n) {
     return String(n).padStart(2, "0");
@@ -44,43 +46,42 @@ window.initCountdown = function () {
     setText("cd-seconds", pad(t.seconds));
   }
 
-  /** Animasi sekali jalan. `max` null = ramp naik biasa (Hari); selain itu
-   * overshoot ke batas unit lalu turun ke target. Target <= 1 tidak dianimasi
-   * (angka sudah tidak menarik dinaikkan) — perilaku sama seperti countUp di
-   * reveal.js. */
+  /** Animasi sekali jalan — naik BERURUTAN ke puncak lalu turun berurutan ke
+   * target, model yang sama dengan countUp di reveal.js. `max` null = naik
+   * dari dekat target sendiri (Hari); selain itu naik dari 1 ke batas natural
+   * unitnya (24/60/60) atau sedikit di atas target. Target <= 1 tidak
+   * dianimasikan (angka sudah tidak menarik dimuter), langsung ditulis
+   * nilainya supaya tidak nyangkut di placeholder "00". Mengembalikan jumlah
+   * langkahnya (0 kalau tidak dianimasikan) — dipakai start() untuk tahu kapan
+   * animasi terlama selesai. */
   function animateFirst(el, target, max) {
-    if (!el) return;
-    // Target 0/1 tidak dianimasikan (guard sama seperti countUp di reveal.js),
-    // tapi elemen ini mulai dari placeholder statis "00" di HTML — tanpa baris
-    // ini, target<=1 akan nyangkut di "00" sampai tick() pertama (DURATION ms).
+    if (!el) return 0;
     if (!Number.isFinite(target) || target <= 1) {
       el.textContent = pad(Math.max(0, target || 0));
-      return;
+      return 0;
     }
+    // Puncak & titik start pendakian (sama dengan countUp di reveal.js)
+    let lo = max != null ? 1 : Math.max(1, target - MAX_CLIMB);
+    const top = max != null ? Math.min(max, target + 6) : target + 5;
+    if (top - lo > MAX_CLIMB) lo = top - MAX_CLIMB;
+    const upSteps = top - lo; // naik: lo, lo+1, …, top
+    const downSteps = top - target; // turun: top-1, …, target
+    const total = upSteps + downSteps;
     const t0 = performance.now();
+    let lastK = -1;
     (function frame(now) {
-      const p = Math.min((now - t0) / DURATION, 1);
-      let v;
-      if (max == null) {
-        const eased = 1 - Math.pow(1 - p, 3);
-        v = Math.max(1, Math.round(target * eased));
-      } else if (p < 0.55) {
-        // Fase 1 (~55% durasi): 0 -> batas unit, ease-out supaya berhenti mulus
-        const q = p / 0.55;
-        v = Math.round(max * (1 - Math.pow(1 - q, 2)));
-      } else {
-        // Fase 2 (45% sisanya): batas -> target asli, ease-in; landas persis
-        // di angka target, tidak boleh meleset (angka acara sungguhan).
-        const q = (p - 0.55) / 0.45;
-        v = Math.round(max - (max - target) * q * q);
+      const k = Math.floor((now - t0) / STEP_MS);
+      if (k >= total) {
+        el.textContent = pad(target); // mendarat TEPAT, tidak boleh meleset
+        return;
       }
-      if (p < 1) {
-        el.textContent = String(v);
-        requestAnimationFrame(frame);
-      } else {
-        el.textContent = pad(target);
+      if (k !== lastK) {
+        lastK = k;
+        el.textContent = pad(k < upSteps ? lo + k : top - (k - upSteps));
       }
+      requestAnimationFrame(frame);
     })(t0);
+    return total;
   }
 
   function start() {
@@ -91,25 +92,20 @@ window.initCountdown = function () {
       setInterval(tick, 1000);
       return;
     }
-    animateFirst(document.getElementById("cd-days"), first.days, null);
-    animateFirst(document.getElementById("cd-hours"), first.hours, 24);
-    animateFirst(document.getElementById("cd-minutes"), first.minutes, 60);
-    animateFirst(document.getElementById("cd-seconds"), first.seconds, 60);
-    // Angka tanggal & tahun di baris "Selasa, 25 Agustus 2026" (#event-date-label,
-    // dipecah main.js jadi span ed-date/ed-year) ikut berputar SATU KALI
-    // bersamaan: tanggal overshoot ke 31, tahun ramp naik biasa. Nilai dibaca
-    // dari isi span (bukan compute) — span yang kosong/None langsung di-skip
-    // guard di animateFirst.
-    const edDate = document.getElementById("ed-date");
-    const edYear = document.getElementById("ed-year");
-    animateFirst(edDate, parseInt(edDate ? edDate.textContent : "", 10), 31);
-    animateFirst(edYear, parseInt(edYear ? edYear.textContent : "", 10), null);
-    // Interval baru mulai setelah animasi selesai — tick polos tiap detik,
-    // TANPA animasi lagi.
+    // Tanggal & tahun di baris "Selasa, 25 Agustus 2026" sengaja TIDAK
+    // dianimasikan — kurang cocok, biar tampil tenang apa adanya.
+    // Interval baru mulai setelah animasi TERLAMA selesai (masing-masing item
+    // langkahnya beda) — tick polos tiap detik, TANPA animasi lagi.
+    const steps = [
+      animateFirst(document.getElementById("cd-days"), first.days, null),
+      animateFirst(document.getElementById("cd-hours"), first.hours, 24),
+      animateFirst(document.getElementById("cd-minutes"), first.minutes, 60),
+      animateFirst(document.getElementById("cd-seconds"), first.seconds, 60)
+    ];
     setTimeout(() => {
       tick();
       setInterval(tick, 1000);
-    }, DURATION);
+    }, Math.max(...steps) * STEP_MS);
   }
 
   // Tunggu sampai teks section countdown benar-benar masuk layar (class
