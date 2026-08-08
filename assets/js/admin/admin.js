@@ -27,7 +27,11 @@
     },
     tabHandlers: {
       photos: () => { if (window.PhotosPanel) window.PhotosPanel.load(); },
-      wishes: () => { if (window.WishesPanel) window.WishesPanel.load(); }
+      wishes: () => { if (window.WishesPanel) window.WishesPanel.load(); },
+      // Kirim WA hanya ada di admin.html — admin-qr.html tidak punya tab ini
+      // (fitur broadcast di luar scope check-in), jadi handler ini tidak pernah
+      // dipanggil di sana.
+      wa: () => { if (window.WaBlast) window.WaBlast.load(); }
     }
   });
 })();

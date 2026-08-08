@@ -574,3 +574,64 @@ h1, h2 { font-weight: 500; margin: 0; }
 .wish-row__head .btn--danger { margin-left: auto; }
 .wish-row__head time { font-size: .75rem; }
 .wish-row__msg { margin: 0; font-size: .9rem; line-height: 1.55; color: var(--text); }
+
+/* ---------- Tab Kirim WA ---------- */
+/* Banner peringatan spam memakai class .warning yang sudah ada (danger) —
+   peringatan serius, tidak perlu warna baru. */
+
+.wa-toolbar {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.wa-summary { margin: 0 0 1rem; font-size: .85rem; }
+
+/* Template pesan — daftar pendek, pakai wadah seperti .list-item */
+.wa-templates-title {
+  font-size: .8rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-dim); margin: 0 0 .6rem;
+}
+.wa-template-row {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .6rem;
+  margin-bottom: .6rem;
+}
+.wa-template-head { display: flex; gap: .5rem; align-items: center; margin-bottom: .45rem; }
+.wa-template-head .input { flex: 1; }
+.wa-template-body { font-size: .82rem; }
+
+/* Daftar kontak — COMPACT (mockup): per baris grid 4-5 kolom, font kecil &
+   baris ramping supaya ratusan-ribuan baris muat tanpa wrap. Sengaja TIDAK
+   pakai padding/gap besar seperti .list-item (itu untuk daftar pendek). */
+.wa-contact-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto; /* centang, nama+nomor, template, kirim, hapus */
+  align-items: center;
+  gap: .4rem .6rem;
+  padding: .35rem 0;
+  border-bottom: 1px solid rgba(51, 46, 36, .6);
+  font-size: .8rem;
+}
+.wa-contact-name {
+  display: flex; flex-direction: column; line-height: 1.3;
+  min-width: 0; /* supaya teks panjang bisa dipotong elipsis */
+}
+.wa-contact-name strong {
+  font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.wa-contact-name small {
+  color: var(--text-dim); font-size: .72rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.wa-contact-row select {
+  max-width: 9rem;
+  font-size: .78rem;
+  padding: .3rem .4rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+}
+.wa-contact-send { white-space: nowrap; }
