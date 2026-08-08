@@ -136,6 +136,9 @@
           dengan daftar di bawah (abaikan besar kecil huruf) — cocok berarti
           sapaan & closing statement KELOMPOK itulah yang dipakai, bukan yang
           default.</p>
+          <p class="muted">Token di closing statement (berlaku juga per kelompok):
+          <code>\${tamu}</code> nama tamu, <code>\${CPP}</code> panggilan
+          mempelai pria, <code>\${CPW}</code> panggilan mempelai wanita.</p>
           <div id="guest-greetings-list"></div>
         `)}
 
@@ -407,7 +410,7 @@
             <input type="text" class="input" data-g-i="${gi}" data-g-key="label" value="${escAttr(g.label)}"
                    placeholder="Sapaan kelompok, mis. Keluarga Besar">
             <textarea class="input" data-g-i="${gi}" data-g-key="closing" rows="2"
-                      placeholder="Closing statement khusus kelompok ini (kosongkan = pakai default)">${escAttr(g.closing)}</textarea>
+                      placeholder="Closing khusus kelompok ini (kosongkan = default). Token: \${tamu} \${CPP} \${CPW}">${escAttr(g.closing)}</textarea>
             <div class="greeting-names">
               ${g.names
                 .map(

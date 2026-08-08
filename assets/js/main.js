@@ -54,6 +54,23 @@
     return (matched && matched.label) || cfg.defaultGuestGreeting || "Kepada Yth.";
   }
 
+  /** Ganti token di closing statement — pola SAMA dengan template pesan WA
+   * di gift.js (buildMessage): replace STRING biasa via split/join, bukan
+   * regex/eval, aman dari karakter spesial di nama/label. Token yang dikenal:
+   * `${tamu}` nama tamu, `${CPP}` panggilan mempelai pria, `${CPW}` panggilan
+   * mempelai wanita. */
+  function fillTemplate(text, cfg, guestName) {
+    const values = {
+      "${tamu}": guestName,
+      "${CPP}": cfg.couple.groom.nickname,
+      "${CPW}": cfg.couple.bride.nickname
+    };
+    return Object.keys(values).reduce(
+      (s, token) => s.split(token).join(values[token]),
+      String(text ?? "")
+    );
+  }
+
   async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
     document.title = cfg.siteTitle;
@@ -211,9 +228,13 @@
       .join("");
 
     // Closing: khusus kelompok yang cocok kalau ada (dan tidak kosong),
-    // selain itu fallback ke default admin.
-    document.getElementById("closing-text").textContent =
-      (matchedGroup && matchedGroup.closing && matchedGroup.closing.trim()) || cfg.closing.text;
+    // selain itu fallback ke default admin. Token ${tamu}/${CPP}/${CPW} di
+    // teksnya diganti dengan nilai sebenarnya — diisi admin di tab Teks.
+    document.getElementById("closing-text").textContent = fillTemplate(
+      (matchedGroup && matchedGroup.closing && matchedGroup.closing.trim()) || cfg.closing.text,
+      cfg,
+      guestName
+    );
   }
 
   function setupCalendarLink(cfg) {
