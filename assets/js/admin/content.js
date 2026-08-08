@@ -343,8 +343,12 @@
     // Beberapa browser mobile (Android WebView/Chrome) tidak menyinkronkan
     // atribut HTML `value` dengan state internal popup color-picker native —
     // popup terbuka di hitam walau atribut sudah benar. Paksa assign ulang
-    // agar picker terbuka di warna saat ini (pola sama di render() theme.js).
+    // dengan pola RESET-DULU-LALU-ISI: assign nilai yang SAMA dengan yang
+    // sudah ada di .value sering di-skip browser sebagai no-op, jadi state
+    // internal H/S/V-nya tidak pernah di-refresh ke warna saat ini.
+    // (Pola sama di render() theme.js.)
     box.querySelectorAll("input[type=color]").forEach((el) => {
+      el.value = "";
       el.value = el.getAttribute("value");
     });
 

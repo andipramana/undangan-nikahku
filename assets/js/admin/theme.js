@@ -395,9 +395,12 @@
     // Beberapa browser mobile (Android WebView/Chrome) tidak menyinkronkan
     // atribut HTML `value` dengan state internal popup color-picker native —
     // popup terbuka di hitam walau atribut sudah benar. Paksa assign ulang
-    // SEMUA picker (7 solid + 4 overlay) agar terbuka di warna saat ini
-    // (pola sama dengan renderColors() dresscode di content.js).
+    // SEMUA picker (7 solid + 4 overlay) dengan pola RESET-DULU-LALU-ISI:
+    // assign nilai yang SAMA dengan yang sudah ada di .value sering di-skip
+    // browser sebagai no-op, jadi state H/S/V internal tidak pernah
+    // di-refresh. (Pola sama dengan renderColors() dresscode di content.js.)
     root.querySelectorAll("input[type=color]").forEach((el) => {
+      el.value = "";
       el.value = el.getAttribute("value");
     });
 
