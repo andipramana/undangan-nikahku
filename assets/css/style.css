@@ -566,7 +566,20 @@ a { color: inherit; }
 }
 
 /* -- Kartu event: mendarat dari sedikit miring, seperti kartu undangan fisik
-      yang diletakkan di meja. Akad & Resepsi miring berlawanan. -- */
+      yang diletakkan di meja. Akad & Resepsi miring berlawanan. --
+   Nama & detail acara (.event-card__info) kini satu grup dengan kartunya
+   sendiri (lihat index.html) supaya terpicu bareng, bukan trigger scroll
+   terpisah yang telat karena posisinya di bawah kartu setinggi 90vh. Delay
+   di bawah membuatnya tetap terasa "menyusul" kartu yang baru mendarat --
+   .event-card durasinya 2.2s (lihat --reveal-dur di bawah), tapi delay-nya
+   SENGAJA jauh lebih pendek dari itu: kalau didekatkan ke durasi penuh,
+   namanya baru muncul setelah tamu biasanya sudah scroll lewat (pelajaran
+   yang sama seperti .couple-info di atas). 140ms per --reveal-i menyamai
+   satuan stagger default (event-date=1, event-place=2 sudah ditulis dengan
+   asumsi itu). */
+.reveal-ready .event-card__info [data-reveal] {
+  transition-delay: calc(.5s + var(--reveal-i, 0) * 140ms);
+}
 .reveal-ready [data-reveal="tilt-left"]              { transform: translateY(34px) rotate(-1.8deg); }
 .reveal-ready [data-reveal="tilt-right"]             { transform: translateY(34px) rotate(1.8deg); }
 .reveal-ready [data-reveal="tilt-left"].is-revealed,
