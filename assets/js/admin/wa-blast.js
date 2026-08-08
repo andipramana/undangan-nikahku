@@ -9,9 +9,10 @@
  * manusia per pesan; WA mendeteksi spam dari pola kirim OTOMATIS, bukan dari
  * tab yang dibuka manual satu-satu.
  *
- * Butuh policy dari supabase/migrations/0006_wa_blast.sql. Tanpa itu, daftar
- * tampil KOSONG tanpa pesan error — RLS menolak diam-diam (pola yang sama
- * dengan tab Ucapan & migration 0003).
+ * Butuh policy dari supabase/migrations/0006_wa_blast.sql (template + kontak)
+ * dan 0007_wa_settings.sql (link undangan + template default). Tanpa itu,
+ * daftar tampil KOSONG tanpa pesan error — RLS menolak diam-diam (pola yang
+ * sama dengan tab Ucapan & migration 0003).
  *
  * Performa untuk ratusan-ribuan baris: render daftar kontak dalam SATU batch
  * innerHTML, dan aksi per baris (centang sent, ganti template, hapus) mengubah
@@ -20,14 +21,32 @@
 (function () {
   const { sb, toast } = window.AdminAPI;
 
-  // Fallback kalau wa_contacts.template_id NULL ("Default") — konseptual, tidak
-  // perlu baris DB terpisah. Admin boleh mengubahnya lewat template kustom,
-  // tapi selalu ada teks ini kalau kontak tidak menunjuk template apa pun.
+  // Teks BAWAAN yang sopan — dipakai kalau wa_settings.default_template
+  // KOSONG (= admin belum pernah menyimpan pengaturan). Paragraf dipisah
+  // \n\n; baris "…undangan digital kami di:" menyambung LANGSUNG ke baris
+  // link (SATU \n, tanpa baris kosong di antaranya). Token ${tamu}/${CPP}/
+  // ${CPW}/${link} tetap literal string biasa di sini — diganti nanti oleh
+  // buildMessage() saat tombol Kirim ditekan (pola sama dengan template kustom).
   const DEFAULT_TEMPLATE_BODY =
-    "Halo ${tamu}! Kami mengundang kamu ke pernikahan ${CPP} & ${CPW}. Info lengkap & RSVP di link ini ya 🙏";
+    "Assalamu'alaikum warahmatullahi wabarakatuh,\n\n" +
+    "Yth. ${tamu},\n\n" +
+    "Dengan penuh sukacita dan rasa syukur, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami, ${CPP} & ${CPW}.\n\n" +
+    "Informasi lengkap acara dan konfirmasi kehadiran dapat dilihat pada undangan digital kami di:\n${link}\n\n" +
+    "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.\n\n" +
+    "Atas perhatian dan kehadirannya, kami ucapkan terima kasih.\n\n" +
+    "Wassalamu'alaikum warahmatullahi wabarakatuh.";
 
   let contacts = [];
   let templates = [];
+
+  // Pengaturan tab WA (migration 0007, baris tunggal id=1) — link undangan
+  // yang disisipkan ke token ${link} + template default yang bisa diedit
+  // admin. Fallback dipakai kalau baris belum ada (harusnya sudah di-seed
+  // migrasi); di-refresh dari DB tiap load().
+  let settings = {
+    invitation_link: "https://undangan.andipramana.com/",
+    default_template: ""
+  };
 
   window.WaBlast = { load };
 
@@ -63,30 +82,45 @@
 
   /** Bangun pesan akhir dari body template + kontak baris ini. Token sama
    * PERSIS dengan konvensi yang sudah dipakai di gift.js (${tamu}/${CPP}/
-   * ${CPW}) — replace STRING biasa, aman dari karakter spesial di nama. */
+   * ${CPW}) + ${link} — replace STRING biasa, aman dari karakter spesial. */
   function buildMessage(body, contact) {
     const couple = window.WEDDING_CONFIG.couple;
     const values = {
       "${tamu}": contact.name,
       "${CPP}": couple.groom.nickname,
-      "${CPW}": couple.bride.nickname
+      "${CPW}": couple.bride.nickname,
+      "${link}": buildInviteLink(contact)
     };
     return Object.keys(values).reduce((s, token) => s.split(token).join(values[token]), body);
   }
 
-  /** Body template untuk kontak: template_id yang masih ada, atau default. */
+  /** Link undangan personal per kontak: base URL dari pengaturan + parameter
+   * tamu. Parameter WAJIB dari WEDDING_CONFIG.guestParam (BUKAN hardcode "to")
+   * — konsisten dengan cara situs membaca tamu (main.js/rsvp.js/gift.js pakai
+   * params.get(cfg.guestParam)), jadi kalau config diganti link WA ikut
+   * sinkron. Nama tamu di-encode supaya aman sebagai query string. */
+  function buildInviteLink(contact) {
+    const base =
+      (settings.invitation_link || "").trim() || "https://undangan.andipramana.com/";
+    const param = window.WEDDING_CONFIG.guestParam || "to";
+    const sep = base.includes("?") ? "&" : "?";
+    return `${base}${sep}${param}=${encodeURIComponent(contact.name)}`;
+  }
+
+  /** Body template untuk kontak: template_id yang masih ada, default dari
+   * pengaturan (kalau sudah diedit admin), atau teks bawaan. */
   function bodyFor(contact) {
     if (contact.template_id != null) {
       const t = templates.find((tpl) => tpl.id === contact.template_id);
       if (t) return t.body;
     }
-    return DEFAULT_TEMPLATE_BODY;
+    return settings.default_template || DEFAULT_TEMPLATE_BODY;
   }
 
   /* ---------- Load ---------- */
 
   async function load() {
-    const [tplRes, conRes] = await Promise.all([
+    const [tplRes, conRes, setRes] = await Promise.all([
       window.AdminAPI.query(
         sb.from("wa_templates").select("*").order("created_at", { ascending: true }),
         "Permintaan template"
@@ -94,15 +128,20 @@
       window.AdminAPI.query(
         sb.from("wa_contacts").select("*").order("created_at", { ascending: true }),
         "Permintaan kontak"
+      ),
+      window.AdminAPI.query(
+        sb.from("wa_settings").select("*").eq("id", 1).maybeSingle(),
+        "Permintaan pengaturan"
       )
     ]);
 
-    if (tplRes.error || conRes.error) {
-      const msg = (tplRes.error || conRes.error).message;
+    if (tplRes.error || conRes.error || setRes.error) {
+      const msg = (tplRes.error || conRes.error || setRes.error).message;
       const root = document.getElementById("wa-contacts");
       root.innerHTML =
         `<p class="warning">Gagal memuat tab Kirim WA: ${esc(msg)} — pastikan ` +
-        `migration <code>0006_wa_blast.sql</code> sudah dijalankan (RLS menolak ` +
+        `migration <code>0006_wa_blast.sql</code> dan ` +
+        `<code>0007_wa_settings.sql</code> sudah dijalankan (RLS menolak ` +
         `diam-diam kalau tabel/policy belum ada).</p>` +
         `<button type="button" class="btn btn--primary" id="wa-retry">Coba lagi</button>`;
       document.getElementById("wa-retry").addEventListener("click", load);
@@ -111,10 +150,40 @@
 
     templates = tplRes.data || [];
     contacts = conRes.data || [];
+    // maybeSingle() mengembalikan null kalau baris belum ada (belum di-seed
+    // migrasi) — biarkan fallback awal; kalau ada, pakai isi DB.
+    if (setRes.data) settings = setRes.data;
+    renderSettings();
     renderTemplates();
     renderContacts();
     updateSummary();
   }
+
+  /* ---------- Pengaturan (link undangan + template default) ---------- */
+
+  function renderSettings() {
+    document.getElementById("wa-link").value = settings.invitation_link || "";
+    // Kosong di DB = belum pernah diedit admin → tampilkan teks bawaan yang
+    // SOPAN (bukan kotak kosong), admin tinggal edit kalau mau.
+    document.getElementById("wa-default-template").value =
+      settings.default_template || DEFAULT_TEMPLATE_BODY;
+  }
+
+  async function saveSettings() {
+    const link = document.getElementById("wa-link").value.trim();
+    const tmpl = document.getElementById("wa-default-template").value;
+    const { error } = await window.AdminAPI.query(
+      sb.from("wa_settings").update({ invitation_link: link, default_template: tmpl }).eq("id", 1),
+      "Penyimpanan pengaturan"
+    );
+    if (error) {
+      toast("Gagal menyimpan pengaturan: " + error.message, true);
+      return;
+    }
+    settings = { invitation_link: link, default_template: tmpl };
+    toast("Pengaturan disimpan.");
+  }
+  document.getElementById("wa-settings-save").addEventListener("click", saveSettings);
 
   /* ---------- Template kustom ---------- */
 

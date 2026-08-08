@@ -107,6 +107,22 @@
     berbayar) yang punya limit lebih longgar untuk broadcast/kontak tersimpan,
     atau sebar pengiriman ke beberapa hari.</p>
     <p id="wa-summary" class="muted wa-summary"></p>
+    <!-- Pengaturan: link undangan (disisipkan lewat token ${link}) + template
+         default (kontak tanpa template kustom). Disimpan ke wa_settings
+         (migration 0007). Nilai diisi wa-blast.js saat tab dibuka. -->
+    <div class="wa-settings">
+      <p class="wa-templates-title">Pengaturan</p>
+      <label class="form-field">
+        <span>Link undangan</span>
+        <input type="url" id="wa-link" class="input" placeholder="https://undangan.andipramana.com/">
+      </label>
+      <label class="form-field">
+        <span>Template Default</span>
+        <textarea id="wa-default-template" class="input wa-template-body" rows="5"
+                  placeholder="Pesan bawaan kontak tanpa template kustom. Token: ${tamu} ${CPP} ${CPW} ${link}"></textarea>
+      </label>
+      <button type="button" class="btn btn--primary" id="wa-settings-save">Simpan pengaturan</button>
+    </div>
     <div id="wa-templates"></div>
     <div id="wa-contacts"></div>
   </main>

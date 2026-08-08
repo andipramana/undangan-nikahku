@@ -597,6 +597,16 @@ h1, h2 { font-weight: 500; margin: 0; }
   padding: .6rem;
   margin-bottom: .6rem;
 }
+/* Pengaturan (link undangan + template default) — migration 0007, kotak
+   terpisah di atas daftar template kustom */
+.wa-settings {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .6rem .6rem .8rem;
+  margin-bottom: 1.2rem;
+}
+.wa-settings .form-field { margin-bottom: .7rem; }
 .wa-template-head { display: flex; gap: .5rem; align-items: center; margin-bottom: .45rem; }
 .wa-template-head .input { flex: 1; }
 .wa-template-body { font-size: .82rem; }
