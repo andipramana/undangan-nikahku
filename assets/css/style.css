@@ -856,6 +856,36 @@ a { color: inherit; }
 .modal__panel .btn-primary { width: 100%; }
 .modal__hint { font-size: .7rem; opacity: .6; margin: .9rem 0 0; text-align: center; }
 
+/* Elemen dalam modal Konfirmasi Pengiriman & Rekomendasi Kado muncul
+   BERURUTAN (stagger) setiap modal dibuka. Dipakai animasi keyframes (bukan
+   transition) supaya di-REPLAY ulang tiap kali modal dibuka: saat `hidden`
+   (display:none) elemen keluar dari rendering, lalu saat dibuka mereka masuk
+   lagi dari state awal bersama panelnya (panel memakai fadeUp milik
+   .modal__panel) — pola yang sama dengan menu navigasi. Modal lain
+   (QR check-in) sengaja tidak ikut. */
+#gift-confirm-modal .modal__panel > *,
+#gift-recs-modal .modal__panel > * {
+  animation: modalItemIn .5s cubic-bezier(.22,.61,.36,1) both;
+}
+@keyframes modalItemIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Jeda berurutan: anak ke-N mulai ~80ms setelah anak sebelumnya */
+#gift-confirm-modal .modal__panel > *:nth-child(1) { animation-delay: .05s; }
+#gift-confirm-modal .modal__panel > *:nth-child(2) { animation-delay: .13s; }
+#gift-confirm-modal .modal__panel > *:nth-child(3) { animation-delay: .21s; }
+#gift-confirm-modal .modal__panel > *:nth-child(4) { animation-delay: .29s; }
+#gift-confirm-modal .modal__panel > *:nth-child(5) { animation-delay: .37s; }
+#gift-recs-modal .modal__panel > *:nth-child(1) { animation-delay: .05s; }
+#gift-recs-modal .modal__panel > *:nth-child(2) { animation-delay: .13s; }
+/* Tombol aksi utama mengembang (pop) — pusat perhatian saat modal terbuka */
+#gift-confirm-modal #gift-confirm-send { animation-name: modalBtnPop; }
+@keyframes modalBtnPop {
+  from { opacity: 0; transform: scale(.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 /* Daftar shortcut menu navigasi — gaya premium: tanpa bingkai kotak, tiap item
    hanya dipisah garis bawah tipis emas; item muncul BERURUTAN (stagger) setiap
    modal dibuka. Animasi di-replay otomatis tiap kali modal terbuka karena saat
