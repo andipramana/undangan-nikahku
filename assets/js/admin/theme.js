@@ -63,6 +63,48 @@
     quote: "Foto quote"
   };
 
+  // Tema siap pakai untuk dropdown preset. HANYA mengubah warna (7 solid +
+  // 4 warna overlay) — status hidup/mati (enabled) tiap overlay TIDAK
+  // disentuh, dan memilih preset tidak auto-save (pola sama seperti reset).
+  const THEME_PRESETS = [
+    { id: "golden-hour", label: "Golden Hour (default)",
+      colors: { bg: "#f7f3ea", dark: "#14120f", dark2: "#1c1914", gold: "#c9a668", goldSoft: "#e6d7b3", text: "#2b2620", textLight: "#f7f3ea" },
+      overlayColors: { global: "#c9a668", flat: "#0a0907", closing: "#0a0907", quote: "#30200d" } },
+    { id: "mocha-bloom", label: "Mocha & Bloom",
+      colors: { bg: "#f6f0e6", dark: "#241811", dark2: "#1a1109", gold: "#8a5f3c", goldSoft: "#c9a97e", text: "#2a2018", textLight: "#f6f0e6" },
+      overlayColors: { global: "#8a5f3c", flat: "#1a1109", closing: "#1a1109", quote: "#241811" } },
+    { id: "burgundy-wine", label: "Burgundy Wine",
+      colors: { bg: "#f6f0e6", dark: "#241811", dark2: "#1a1109", gold: "#7a2b30", goldSoft: "#b06a63", text: "#2a2018", textLight: "#f6f0e6" },
+      overlayColors: { global: "#7a2b30", flat: "#1a1109", closing: "#1a1109", quote: "#2e1416" } },
+    { id: "emerald-luxe", label: "Emerald Luxe",
+      colors: { bg: "#f5f1e6", dark: "#0f1a14", dark2: "#16241c", gold: "#b8935a", goldSoft: "#d9c396", text: "#1c231d", textLight: "#f5f1e6" },
+      overlayColors: { global: "#b8935a", flat: "#0f1a14", closing: "#0f1a14", quote: "#16241c" } },
+    { id: "rose-blush", label: "Rose Blush",
+      colors: { bg: "#faf3f0", dark: "#241615", dark2: "#2e1c1a", gold: "#c98a7a", goldSoft: "#e8c4b8", text: "#2c1c1a", textLight: "#faf3f0" },
+      overlayColors: { global: "#c98a7a", flat: "#241615", closing: "#241615", quote: "#2e1c1a" } },
+    { id: "navy-gold", label: "Navy & Gold",
+      colors: { bg: "#f4f2ec", dark: "#0d1420", dark2: "#131c2c", gold: "#c9a668", goldSoft: "#e6d7b3", text: "#1a1f28", textLight: "#f4f2ec" },
+      overlayColors: { global: "#c9a668", flat: "#0d1420", closing: "#0d1420", quote: "#131c2c" } },
+    { id: "sage-cream", label: "Sage & Cream",
+      colors: { bg: "#f7f5ee", dark: "#232922", dark2: "#2c332a", gold: "#a8b48a", goldSoft: "#cdd6b8", text: "#262b22", textLight: "#f7f5ee" },
+      overlayColors: { global: "#a8b48a", flat: "#232922", closing: "#232922", quote: "#2c332a" } },
+    { id: "terracotta-sunset", label: "Terracotta Sunset",
+      colors: { bg: "#f8f0e6", dark: "#2a1810", dark2: "#351f15", gold: "#c76f4e", goldSoft: "#e0a888", text: "#2c1a12", textLight: "#f8f0e6" },
+      overlayColors: { global: "#c76f4e", flat: "#2a1810", closing: "#2a1810", quote: "#351f15" } },
+    { id: "lavender-dusk", label: "Lavender Dusk",
+      colors: { bg: "#f6f2f6", dark: "#221a29", dark2: "#2c2233", gold: "#9b7fb0", goldSoft: "#cbb8db", text: "#241c29", textLight: "#f6f2f6" },
+      overlayColors: { global: "#9b7fb0", flat: "#221a29", closing: "#221a29", quote: "#2c2233" } },
+    { id: "noir-gold", label: "Classic Noir & Gold",
+      colors: { bg: "#f5f5f0", dark: "#0a0a0a", dark2: "#161616", gold: "#d4af37", goldSoft: "#e8d38a", text: "#1a1a1a", textLight: "#f5f5f0" },
+      overlayColors: { global: "#d4af37", flat: "#0a0a0a", closing: "#0a0a0a", quote: "#161616" } },
+    { id: "ocean-teal", label: "Ocean Teal",
+      colors: { bg: "#f2f6f5", dark: "#0e2624", dark2: "#163330", gold: "#4d8f85", goldSoft: "#9dc9c1", text: "#17241f", textLight: "#f2f6f5" },
+      overlayColors: { global: "#4d8f85", flat: "#0e2624", closing: "#0e2624", quote: "#163330" } },
+    { id: "champagne-blush", label: "Champagne Blush",
+      colors: { bg: "#faf4ee", dark: "#2b1e1a", dark2: "#362521", gold: "#d1a78e", goldSoft: "#ecd3c1", text: "#2c1f1a", textLight: "#faf4ee" },
+      overlayColors: { global: "#d1a78e", flat: "#2b1e1a", closing: "#2b1e1a", quote: "#362521" } }
+  ];
+
   // State form — hasil merge tema tersimpan (kalau ada) di atas default.
   let theme = null;
 
@@ -272,6 +314,13 @@
       `<p class="theme-title">Tampilan</p>` +
       `<p class="muted theme-hint">Warna halaman undangan (tamu). Panel admin tidak ` +
       `terpengaruh. Reset hanya mengubah form — klik <b>Simpan</b> untuk menyimpan ke situs.</p>` +
+      `<label class="form-field">` +
+      `<span>Tema siap pakai</span>` +
+      `<select id="theme-preset" class="input">` +
+      `<option value="">— pilih tema —</option>` +
+      THEME_PRESETS.map((p) => `<option value="${escAttr(p.id)}">${esc(p.label)}</option>`).join("") +
+      `</select>` +
+      `</label>` +
       `<button type="button" class="btn btn--ghost" id="theme-reset-all">Reset semua ke default</button>` +
       `<p class="theme-title">Warna</p>` +
       `<div id="theme-colors">${colorRows}</div>` +
@@ -383,6 +432,20 @@
       }
       previewPhotoUrl = URL.createObjectURL(file);
       render(); // bangun ulang ke-4 kotak preview dengan foto baru
+    });
+
+    // Preset tema: isi form dengan warna preset — HANYA warna (7 solid + 4
+    // overlay), enabled tiap overlay sengaja tidak disentuh. Setelah render()
+    // dropdown balik ke "— pilih tema —" (value="" di HTML baru) — itu benar:
+    // preset bukan mode tersimpan, admin tetap review lalu klik Simpan.
+    document.getElementById("theme-preset").addEventListener("change", (e) => {
+      const preset = THEME_PRESETS.find((p) => p.id === e.target.value);
+      if (!preset) return; // opsi "— pilih tema —"
+      Object.assign(theme.colors, preset.colors);
+      Object.keys(preset.overlayColors).forEach((k) => {
+        if (theme.overlays[k]) theme.overlays[k].color = preset.overlayColors[k];
+      });
+      render(); // form + kotak preview overlay ikut update (pola sama seperti reset)
     });
 
     document.getElementById("theme-reset-all").addEventListener("click", () => {
