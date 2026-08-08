@@ -712,12 +712,9 @@ a { color: inherit; }
 }
 .countdown--plain .countdown__item span { color: #fff; font-size: 1.15rem; }
 .countdown--plain .countdown__item small { color: #fff; opacity: .85; font-size: .6rem; }
-/* Jarak antar item countdown: item ke-1 (Hari), ke-2 (Jam), dan ke-4 (Detik)
-   dapat padding kiri ekstra; ke-3 (Menit) TIDAK — persis hasil uji coba
-   manual user, jangan diubah. */
-.countdown--plain .countdown__item:nth-child(1),
-.countdown--plain .countdown__item:nth-child(2),
-.countdown--plain .countdown__item:nth-child(4) {
+/* Jarak antar item countdown: semua item (Hari/Jam/Menit/Detik) dapat
+   padding kiri ekstra — persis hasil uji coba manual user. */
+.countdown--plain .countdown__item {
   padding-left: 40px;
 }
 
