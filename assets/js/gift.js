@@ -101,8 +101,12 @@ window.initGift = function () {
       return "";
     }
 
+    // Opsi dropdown + template pesan miliknya — diisi buildOptions(), dibaca
+    // ulang listener "change" lewat data-opt-i di <option>.
+    let opts = [];
+
     function buildOptions() {
-      const opts = [];
+      opts = [];
       cfg.accounts.forEach((acc) => {
         if (!acc.owner) return; // tanpa owner tidak ikut dropdown
         const num = normalizeWa(cfg[acc.owner === "cpp" ? "contactCPP" : "contactCPW"]);
@@ -110,7 +114,10 @@ window.initGift = function () {
         opts.push({
           type: "bank",
           label: `${acc.bank} — ${acc.holder}`,
-          num
+          num,
+          // Template pesan PER REKENING — diisi admin di tab Teks (field
+          // `template` tiap baris rekening); kosong = pakai default.
+          template: acc.template || ""
         });
       });
       // Opsi "kado / kirim barang" menuju nomor WA di alamat kado — SELALU
@@ -121,47 +128,63 @@ window.initGift = function () {
         opts.push({
           type: "kado",
           label: "Kado / Kirim Barang",
-          num: kadoNum
+          num: kadoNum,
+          template: (cfg.address && cfg.address.template) || ""
         });
       }
       return opts;
     }
 
+    /** Template default, satu per jenis opsi — versi ber-token dari string
+     * hardcoded lama. Hasil akhir untuk entri yang belum pernah dikustom
+     * HARUS identik dengan pesan sebelumnya (urutan nama CPW & CPP sengaja
+     * dijaga persis seperti dulu). */
+    const DEFAULT_TEMPLATE = {
+      bank: "Halo, saya ${tamu}.\n\nAku udah transfer ya buat kado pernikahan ${CPW} & ${CPP} lewat ${LABEL}.\n\nHappy wedding, semoga langgeng selalu!",
+      kado: "Halo, saya ${tamu}.\n\nAku mau konfirmasi kalau aku udah kirim kado buat pernikahan ${CPW} & ${CPP} ke alamat kamu ya.\n\nHappy wedding, semoga sakinah mawaddah warahmah!"
+    };
+
     /** Teks awal pesan WA — biarkan tamu mengedit (messageArea textarea).
-     *  Isinya BERBEDA tergantung jenis opsi (type), bukan satu template
-     *  generik: konfirmasi "alamat kirim ke mana" tidak masuk akal setelah
-     *  transfer/kirim sudah dilakukan.
-     *   - bank: konfirmasi SUDAH TRANSFER — nada santai + ucapan selamat;
-     *   - kado: konfirmasi SUDAH KIRIM BARANG ke alamat — nada santai,
-     *     doa selamat yang berbeda. */
-    function buildMessage(type, label) {
+     *  Tiap entri (tiap rekening + opsi kado) punya template KUSTOM sendiri
+     *  yang diisi admin; kalau kosong, jatuh ke DEFAULT_TEMPLATE per jenis.
+     *  Isinya BERBEDA tergantung jenis opsi (type): konfirmasi "alamat kirim
+     *  ke mana" tidak masuk akal setelah transfer/kirim sudah dilakukan.
+     *  Token diganti dengan replace STRING biasa (.split().join(), bukan
+     *  regex/eval) — aman dari karakter spesial di nama/label. */
+    function buildMessage(opt) {
       const couple = window.WEDDING_CONFIG.couple;
-      const names = `${couple.bride.nickname} & ${couple.groom.nickname}`;
-      if (type === "kado") {
-        return `Halo, saya ${guestName}.\n\nAku mau konfirmasi kalau aku udah kirim kado buat pernikahan ${names} ke alamat kamu ya.\n\nHappy wedding, semoga sakinah mawaddah warahmah!`;
-      }
-      return `Halo, saya ${guestName}.\n\nAku udah transfer ya buat kado pernikahan ${names} lewat ${label}.\n\nHappy wedding, semoga langgeng selalu!`;
+      const raw = opt.template && opt.template.trim()
+        ? opt.template
+        : DEFAULT_TEMPLATE[opt.type] || DEFAULT_TEMPLATE.bank;
+      const values = {
+        "${tamu}": guestName,
+        "${CPP}": couple.groom.nickname,
+        "${CPW}": couple.bride.nickname,
+        "${LABEL}": opt.label
+      };
+      return Object.keys(values).reduce((msg, token) => msg.split(token).join(values[token]), raw);
     }
 
     function openConfirmModal() {
-      const opts = buildOptions();
-      if (!opts.length) {
+      const built = buildOptions();
+      if (!built.length) {
         // Tanpa satu pun nomor tujuan yang valid, tombol tidak punya arti —
         // plan: tombolnya dihilangkan dari panel, bukan dianggap gagal.
         confirmBtn.remove();
         return;
       }
-      methodSel.innerHTML = opts
-        .map((o) => `<option value="${o.num}" data-type="${o.type}">${o.label}</option>`)
+      methodSel.innerHTML = built
+        .map((o, i) => `<option value="${o.num}" data-type="${o.type}" data-opt-i="${i}">${o.label}</option>`)
         .join("");
-      messageArea.value = buildMessage(opts[0].type, opts[0].label);
+      messageArea.value = buildMessage(built[0]);
       confirmModal.hidden = false;
     }
 
     methodSel.addEventListener("change", () => {
       const opt = methodSel.selectedOptions[0];
       if (!opt) return;
-      messageArea.value = buildMessage(opt.dataset.type || "bank", opt.textContent);
+      const o = opts[Number(opt.dataset.optI)];
+      if (o) messageArea.value = buildMessage(o);
     });
 
     sendBtn.addEventListener("click", () => {

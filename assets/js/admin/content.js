@@ -56,9 +56,23 @@
     c.galleryVideo = Object.assign({ youtube: "" }, isPlainObject(c.galleryVideo) ? c.galleryVideo : {});
     if (!isPlainObject(c.gift)) c.gift = {};
     if (!Array.isArray(c.gift.accounts)) c.gift.accounts = [];
+    // Template pesan WA PER REKENING — kosong = pakai default hardcoded di
+    // gift.js (bukan menyimpan string default panjang ke DB).
+    c.gift.accounts.forEach((a) => { if (typeof a.template !== "string") a.template = ""; });
+    if (!isPlainObject(c.gift.address)) c.gift.address = {};
+    if (typeof c.gift.address.template !== "string") c.gift.address.template = "";
     if (c.gift.contactCPP === undefined) c.gift.contactCPP = "";
     if (c.gift.contactCPW === undefined) c.gift.contactCPW = "";
     if (!Array.isArray(c.giftRecommendations)) c.giftRecommendations = [];
+    // Sapaan tamu per kelompok nama (Bagian D) — kosong = fallback "Kepada Yth."
+    if (!Array.isArray(c.guestGreetings)) c.guestGreetings = [];
+    if (c.defaultGuestGreeting === undefined) c.defaultGuestGreeting = "Kepada Yth.";
+    // Guard per grup: renderGreetings memanggil g.names.map LANGSUNG — grup
+    // dari DB versi lama tanpa names/label akan mematahkan render kalau lewat.
+    c.guestGreetings.forEach((g) => {
+      if (!Array.isArray(g.names)) g.names = [];
+      if (typeof g.label !== "string") g.label = "";
+    });
   }
 
   function isPlainObject(v) {
@@ -108,6 +122,15 @@
           ${field("Judul situs", "f-site-title")}
           ${field("Parameter nama tamu (URL)", "f-guest-param")}
           ${field("Nama tamu default", "f-default-guest")}
+        `)}
+
+        ${section("sapaan", "Sapaan tamu", `
+          ${field("Sapaan default (fallback)", "f-default-guest-greeting")}
+          <p class="muted">Sapaan default dipakai untuk tamu yang tidak cocok
+          dengan kelompok mana pun. Nama tamu dicocokkan PERSIS dengan daftar di
+          bawah (abaikan besar kecil huruf) — cocok berarti sapaan kelompok itulah
+          yang dipakai, bukan yang default.</p>
+          <div id="guest-greetings-list"></div>
         `)}
 
         ${section("mempelai", "Mempelai", `
@@ -197,6 +220,11 @@
             ${field("Telepon", "f-gift-phone")}
             ${field("Detail alamat", "f-gift-detail")}
           </div>
+          ${textarea("Template pesan konfirmasi kado", "f-gift-template-kado", 3)}
+          <p class="muted">Token: <code>\${tamu}</code> nama tamu,
+          <code>\${CPP}</code>/<code>\${CPW}</code> panggilan mempelai,
+          <code>\${LABEL}</code> nama rekening/opsi. Kosongkan = pesan default.
+          Template tiap rekening bisa dikustom di daftar rekening di atas.</p>
         `)}
 
         ${section("gift-rekomendasi", "Gift — rekomendasi kado", `
@@ -213,12 +241,11 @@
             ${textarea("Closing", "f-closing-text", 3)}
           </div>
         `)}
-
-        <div class="form-actions">
-          <button type="submit" class="btn btn--primary" id="btn-save-content">Simpan semua</button>
-        </div>
       </form>
     `;
+    // Tombol "Simpan semua" TIDAK dirender di sini — ia elemen statis di
+    // admin.html (btn-save-float, form="content-form") supaya bisa fixed di
+    // luar scroller; kliknya tetap memicu submit form ini (lihat admin.html).
 
     // Isi nilai dari state
     const set = (id, val) => {
@@ -228,6 +255,7 @@
     set("f-site-title", c.siteTitle);
     set("f-guest-param", c.guestParam);
     set("f-default-guest", c.defaultGuestName);
+    set("f-default-guest-greeting", v("defaultGuestGreeting"));
     set("f-bride-name", v("couple.bride.name"));
     set("f-bride-nickname", v("couple.bride.nickname"));
     set("f-bride-instagram", v("couple.bride.instagram"));
@@ -265,6 +293,7 @@
     set("f-gift-recipient", v("gift.address.recipient"));
     set("f-gift-phone", v("gift.address.phone"));
     set("f-gift-detail", v("gift.address.detail"));
+    set("f-gift-template-kado", v("gift.address.template"));
     set("f-hero-interval", v("heroSlideInterval"));
     set("f-audio-src", v("audio.src"));
     set("f-audio-title", v("audio.title"));
@@ -274,6 +303,7 @@
     renderList("loveStory", "love-story-list");
     renderList("accounts", "gift-accounts-list");
     renderList("giftRecommendations", "gift-recs-list");
+    renderGreetings();
 
     document.getElementById("content-form").addEventListener("submit", onSave);
   }
@@ -350,6 +380,91 @@
     });
   }
 
+  /** Kelompok sapaan tamu — daftar DUA tingkat: label kelompok + nama-nama
+   * anggotanya (renderGreetings di sini; dipakai main.js via resolveGreeting).
+   * Pola sama seperti renderList: nilai ditulis ke state saat mengetik,
+   * dirender ulang penuh tiap aksi struktur (tambah nama, tambah/hapus/pindah
+   * grup) supaya urutan state dan DOM tidak pernah berbeda. */
+  function renderGreetings() {
+    const list = document.getElementById("guest-greetings-list");
+    if (!list) return;
+    const groups = content.guestGreetings;
+
+    list.innerHTML = groups
+      .map((g, gi) => `
+        <div class="list-item">
+          <div class="list-item__controls">
+            <button type="button" class="btn btn--tiny" data-g-move="${gi}" data-dir="-1" ${gi === 0 ? "disabled" : ""}>&#9650;</button>
+            <button type="button" class="btn btn--tiny" data-g-move="${gi}" data-dir="1" ${gi === groups.length - 1 ? "disabled" : ""}>&#9660;</button>
+            <button type="button" class="btn btn--tiny btn--danger" data-g-del="${gi}" aria-label="Hapus grup">&times;</button>
+          </div>
+          <div class="list-item__fields">
+            <input type="text" class="input" data-g-i="${gi}" data-g-key="label" value="${escAttr(g.label)}"
+                   placeholder="Sapaan kelompok, mis. Keluarga Besar">
+            <div class="greeting-names">
+              ${g.names
+                .map(
+                  (n, ni) => `
+                <span class="greeting-name">
+                  <input type="text" class="input" data-g-i="${gi}" data-n-i="${ni}" value="${escAttr(n)}"
+                         placeholder="Nama tamu (persis seperti di URL)">
+                  <button type="button" class="btn btn--tiny" data-g-name-del="${gi}" data-n-del="${ni}" aria-label="Hapus nama">&times;</button>
+                </span>`
+                )
+                .join("")}
+            </div>
+            <div class="greeting-actions">
+              <button type="button" class="btn btn--ghost" data-g-add-name="${gi}">+ nama</button>
+            </div>
+          </div>
+        </div>`)
+      .join("") +
+      `<button type="button" class="btn btn--ghost" id="greetings-add">+ tambah grup sapaan</button>`;
+
+    // Label grup + nama: tulis ke state saat mengetik.
+    list.querySelectorAll("[data-g-key]").forEach((input) => {
+      input.addEventListener("input", () => {
+        groups[Number(input.dataset.gI)][input.dataset.gKey] = input.value;
+      });
+    });
+    list.querySelectorAll("[data-n-i]").forEach((input) => {
+      input.addEventListener("input", () => {
+        groups[Number(input.dataset.gI)].names[Number(input.dataset.nI)] = input.value;
+      });
+    });
+    list.querySelectorAll("[data-g-add-name]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        groups[Number(btn.dataset.gAddName)].names.push("");
+        renderGreetings();
+      });
+    });
+    list.querySelectorAll("[data-g-name-del]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        groups[Number(btn.dataset.gNameDel)].names.splice(Number(btn.dataset.nDel), 1);
+        renderGreetings();
+      });
+    });
+    list.querySelectorAll("[data-g-move]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const from = Number(btn.dataset.gMove);
+        const to = from + Number(btn.dataset.dir);
+        if (to < 0 || to >= groups.length) return;
+        [groups[from], groups[to]] = [groups[to], groups[from]];
+        renderGreetings();
+      });
+    });
+    list.querySelectorAll("[data-g-del]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        groups.splice(Number(btn.dataset.gDel), 1);
+        renderGreetings();
+      });
+    });
+    document.getElementById("greetings-add").addEventListener("click", () => {
+      groups.push({ label: "", names: [] });
+      renderGreetings();
+    });
+  }
+
   /** Render daftar berulang (loveStory / gift.accounts / giftRecommendations)
    * dengan tombol naik/turun + hapus. Value input langsung ditulis ke state
    * (bukan dibaca saat simpan) — dirender ulang penuh tiap aksi sehingga
@@ -367,7 +482,7 @@
     // Pilihan pemilik rekening — menentukan nomor WA tujuan di tombol
     // "Konfirmasi Pengiriman" (lihat gift.js); "" = rekening itu tidak ikut.
     const ownerOptions = (item) => `
-      <select data-item-i="__I__" data-key="owner">
+      <select class="input" data-item-i="__I__" data-key="owner">
         <option value="">Tidak ikut</option>
         <option value="cpw" ${item.owner === "cpw" ? "selected" : ""}>CPW (wanita)</option>
         <option value="cpp" ${item.owner === "cpp" ? "selected" : ""}>CPP (pria)</option>
@@ -378,23 +493,24 @@
         const inner =
           kind === "loveStory"
             ? `
-          <input type="text" data-item-i="${i}" data-key="date" value="${escAttr(item.date)}" placeholder="Tahun">
-          <input type="text" data-item-i="${i}" data-key="title" value="${escAttr(item.title)}" placeholder="Judul babak">
-          <textarea data-item-i="${i}" data-key="text" rows="2" placeholder="Cerita…">${escAttr(item.text)}</textarea>`
+          <input type="text" class="input" data-item-i="${i}" data-key="date" value="${escAttr(item.date)}" placeholder="Tahun">
+          <input type="text" class="input" data-item-i="${i}" data-key="title" value="${escAttr(item.title)}" placeholder="Judul babak">
+          <textarea class="input" data-item-i="${i}" data-key="text" rows="4" placeholder="Cerita…">${escAttr(item.text)}</textarea>`
             : kind === "accounts"
             ? `
-          <input type="text" data-item-i="${i}" data-key="bank" value="${escAttr(item.bank)}" placeholder="Bank">
-          <input type="text" data-item-i="${i}" data-key="number" value="${escAttr(item.number)}" placeholder="Nomor rekening">
-          <input type="text" data-item-i="${i}" data-key="holder" value="${escAttr(item.holder)}" placeholder="Atas nama">
+          <input type="text" class="input" data-item-i="${i}" data-key="bank" value="${escAttr(item.bank)}" placeholder="Bank">
+          <input type="text" class="input" data-item-i="${i}" data-key="number" value="${escAttr(item.number)}" placeholder="Nomor rekening">
+          <input type="text" class="input" data-item-i="${i}" data-key="holder" value="${escAttr(item.holder)}" placeholder="Atas nama">
           ${ownerOptions(item).replace("__I__", String(i))}
           <label class="check-row">
             <input type="checkbox" data-item-i="${i}" data-key="placeholder" ${item.placeholder ? "checked" : ""}>
             Sembunyikan nomor (placeholder)
-          </label>`
+          </label>
+          <textarea class="input" data-item-i="${i}" data-key="template" rows="3" placeholder="Pesan WA kustom (kosongkan = pakai default). Token: \${tamu} \${CPP} \${CPW} \${LABEL}">${escAttr(item.template)}</textarea>`
             : `
-          <input type="text" data-item-i="${i}" data-key="name" value="${escAttr(item.name)}" placeholder="Nama kado">
-          <input type="text" data-item-i="${i}" data-key="price" value="${escAttr(item.price)}" placeholder="Harga, mis. Rp 250.000">
-          <input type="url" data-item-i="${i}" data-key="link" value="${escAttr(item.link)}" placeholder="Link beli (Shopee/Tokopedia/…)">`;
+          <input type="text" class="input" data-item-i="${i}" data-key="name" value="${escAttr(item.name)}" placeholder="Nama kado">
+          <input type="text" class="input" data-item-i="${i}" data-key="price" value="${escAttr(item.price)}" placeholder="Harga, mis. Rp 250.000">
+          <input type="url" class="input" data-item-i="${i}" data-key="link" value="${escAttr(item.link)}" placeholder="Link beli (Shopee/Tokopedia/…)">`;
         return `
         <div class="list-item">
           <div class="list-item__controls">
@@ -463,6 +579,7 @@
     grab("f-site-title", "siteTitle");
     grab("f-guest-param", "guestParam");
     grab("f-default-guest", "defaultGuestName");
+    grab("f-default-guest-greeting", "defaultGuestGreeting");
     grab("f-bride-name", "couple.bride.name");
     grab("f-bride-nickname", "couple.bride.nickname");
     grab("f-bride-instagram", "couple.bride.instagram");
@@ -500,6 +617,7 @@
     grab("f-gift-recipient", "gift.address.recipient");
     grab("f-gift-phone", "gift.address.phone");
     grab("f-gift-detail", "gift.address.detail");
+    grab("f-gift-template-kado", "gift.address.template");
     grab("f-hero-interval", "heroSlideInterval", "number");
     grab("f-audio-src", "audio.src");
     grab("f-audio-title", "audio.title");

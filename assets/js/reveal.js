@@ -36,16 +36,38 @@
   let started = false; // initReveal sudah jalan?
   let animate = true; // false saat reduced-motion / tanpa IntersectionObserver
 
-  /** Angka berputar cepat dari 1 ke nilai aslinya, melambat di ujung. */
+  /** Batas natural tiap unit berangka — dipakai untuk animasi "overshoot lalu
+   *  turun": naik dulu dari 0 sampai batas unit, BARU turun ke angka asli
+   *  (tanggal 31, jam 24, menit/detik 60). `data-count` TANPA nilai = ramp
+   *  naik biasa (perilaku lama) — untuk angka tanpa batas kecil seperti tahun. */
+  const UNIT_MAX = { date: 31, hour: 24, minute: 60, second: 60 };
+
+  /** Angka berputar dari 1 ke nilai aslinya, melambat di ujung. Untuk unit
+   *  berbatas natural (`data-count="date/hour/minute/second"`): naik ke batas
+   *  lalu turun mengecil ke target — mendarat TEPAT di angka asli. */
   function countUp(el) {
     const target = parseInt(el.textContent, 10);
     if (!Number.isFinite(target) || target <= 1) return;
+    const maxVal = UNIT_MAX[el.dataset.count] ?? null; // null = ramp naik 1x
     const t0 = performance.now();
     (function frame(now) {
       const p = Math.min((now - t0) / COUNT_DURATION, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
+      let v;
+      if (maxVal == null) {
+        const eased = 1 - Math.pow(1 - p, 3);
+        v = Math.max(1, Math.round(target * eased));
+      } else if (p < 0.55) {
+        // Fase 1 (~55% durasi): 0 -> batas unit, ease-out supaya berhenti mulus
+        const q = p / 0.55;
+        v = Math.round(maxVal * (1 - Math.pow(1 - q, 2)));
+      } else {
+        // Fase 2 (45% sisanya): batas -> target asli, ease-in; landas persis
+        // di angka target, tidak boleh meleset.
+        const q = (p - 0.55) / 0.45;
+        v = Math.round(maxVal - (maxVal - target) * q * q);
+      }
       if (p < 1) {
-        el.textContent = String(Math.max(1, Math.round(target * eased)));
+        el.textContent = String(v);
         requestAnimationFrame(frame);
       } else {
         el.textContent = String(target);

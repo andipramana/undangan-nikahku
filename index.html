@@ -75,7 +75,7 @@
         </div>
 
         <div class="hero-content__bottom">
-          <p class="guest-label" data-aos="fade-up">Kepada Yth.</p>
+          <p class="guest-label" id="guest-label" data-aos="fade-up">Kepada Yth.</p>
           <p id="guest-name" class="guest-name" data-aos="fade-up" data-aos-delay="150">Bapak/Ibu/Saudara/i</p>
           <button id="btn-open" class="btn-open" type="button" data-aos="fade-up" data-aos-delay="300">
             <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>
@@ -202,8 +202,11 @@
               <p class="event-day" id="akad-day"></p>
               <hr class="event-divider">
               <!-- angka tanggal berputar cepat 1 -> 25 sambil bloknya naik -->
-              <p class="event-num" id="akad-date" data-reveal="fade" data-count style="--reveal-i:1"></p>
+              <p class="event-num" id="akad-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
               <p class="event-month" id="akad-month"></p>
+              <!-- Tahun animasi ramp naik biasa (data-count tanpa nilai) — ikut
+                   sistem reveal seperti event-num supaya count-up-nya terpicu -->
+              <p class="event-year" id="akad-year" data-reveal="fade" data-count></p>
               <p class="event-time" id="akad-time"></p>
             </div>
             <div class="event-place" data-reveal="up" style="--reveal-i:2">
@@ -231,8 +234,9 @@
             <div class="event-date" data-reveal="pop" style="--reveal-i:1">
               <p class="event-day" id="resepsi-day"></p>
               <hr class="event-divider">
-              <p class="event-num" id="resepsi-date" data-reveal="fade" data-count style="--reveal-i:1"></p>
+              <p class="event-num" id="resepsi-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
               <p class="event-month" id="resepsi-month"></p>
+              <p class="event-year" id="resepsi-year" data-reveal="fade" data-count></p>
               <p class="event-time" id="resepsi-time"></p>
             </div>
             <div class="event-place" data-reveal="up" style="--reveal-i:2">

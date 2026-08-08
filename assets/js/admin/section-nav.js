@@ -18,6 +18,7 @@ window.SectionNav = { init };
 // Label sengaja singkat dan manusiawi; boleh beda dari judul fieldset.
 const SECTION_ITEMS = [
   ["umum", "Umum"],
+  ["sapaan", "Sapaan tamu"],
   ["mempelai", "Mempelai"],
   ["opening", "Opening"],
   ["event", "Event"],
@@ -66,9 +67,13 @@ function init() {
     if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
-  // ---------- Visibilitas FAB: hanya tab Teks yang terbuka ----------
+  // ---------- Visibilitas FAB + tombol simpan: hanya tab Teks yang terbuka ----------
   const app = document.getElementById("app");
   const contentPanel = document.getElementById("tab-content");
+  // Tombol "Simpan semua" (admin.html, fixed di luar scroller) hidup di tab
+  // yang sama dengan FAB — visibilitasnya digabung ke sini, tidak perlu
+  // mekanisme kedua.
+  const saveBtn = document.getElementById("btn-save-content");
   function updateVisibility() {
     const contentOpen = app && !app.hidden && contentPanel && !contentPanel.hidden;
     // Tanpa pengecekan section, FAB tampil sia-sia kalau form gagal dimuat
@@ -77,6 +82,7 @@ function init() {
     // saat tab berpindah).
     const hasSections = !!document.querySelector(".form-section");
     btn.hidden = !contentOpen || !hasSections;
+    if (saveBtn) saveBtn.hidden = btn.hidden;
     if (btn.hidden && !modal.hidden) close();
   }
   document.querySelectorAll(".tab").forEach((tabBtn) => {

@@ -140,6 +140,14 @@
   </div>
 </div>
 
+<!-- Tombol "Simpan semua" — dipindah keluar dari form (dulu dirender content.js
+     di dalam scroller) supaya bisa position:fixed tanpa ikut hanyut. Atribut
+     form="content-form" (fitur HTML standar) membuat tombol di LUAR elemen
+     <form> tetap memicu event submit form itu — onSave/listener di content.js
+     tidak berubah. -->
+<button type="submit" form="content-form" class="btn btn--primary btn-save-float"
+        id="btn-save-content" hidden>Simpan semua</button>
+
 </div><!-- /app-frame -->
 
 <script src="assets/js/config.js"></script>

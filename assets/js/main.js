@@ -33,6 +33,20 @@
     return out;
   }
 
+  /** Cocokkan nama tamu ke kelompok sapaan (case-insensitive, match PERSIS,
+   * bukan substring). Yang cocok pertama menang; tanpa kecocokan, pakai
+   * defaultGuestGreeting (fallback "Kepada Yth."). */
+  function resolveGreeting(cfg, guestName) {
+    const groups = Array.isArray(cfg.guestGreetings) ? cfg.guestGreetings : [];
+    const needle = guestName.trim().toLowerCase();
+    for (const g of groups) {
+      if (Array.isArray(g.names) && g.names.some((n) => String(n).trim().toLowerCase() === needle)) {
+        return g.label || cfg.defaultGuestGreeting || "Kepada Yth.";
+      }
+    }
+    return cfg.defaultGuestGreeting || "Kepada Yth.";
+  }
+
   async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
     document.title = cfg.siteTitle;
@@ -41,6 +55,10 @@
     const rawGuest = params.get(cfg.guestParam);
     const guestName = rawGuest ? decodeURIComponent(rawGuest.replace(/\+/g, " ")) : cfg.defaultGuestName;
     document.getElementById("guest-name").textContent = guestName;
+    // Sapaan dinamis per kelompok nama (diatur admin di tab Teks): kalau nama
+    // tamu cocok persis dengan salah satu kelompok, teks sapaan kelompok itu
+    // yang dipakai — bukan "Kepada Yth." statis.
+    document.getElementById("guest-label").textContent = resolveGreeting(cfg, guestName);
 
     document.getElementById("wfl-arabic").textContent = cfg.opening.arabicQuote;
     document.getElementById("wfl-quote").textContent = cfg.opening.quote;
@@ -57,15 +75,20 @@
     document.getElementById("event-date-label").textContent = `${cfg.event.dayLabel}, ${cfg.event.dateLabel}`;
     setupCalendarLink(cfg);
 
-    // Kartu event: tanggal (Selasa / 25 / Agustus 2026 / jam) + venue + tombol maps
+    // Kartu event: tanggal (Selasa / 25 / Agustus / 2026 / jam) + venue +
+    // tombol maps. dateLabel mis. "25 Agustus 2026" dipecah jadi hari "25",
+    // bulan "Agustus", tahun "2026" — tahun dianimasikan count-up sendiri
+    // (#akad-year, data-count tanpa nilai).
     const parts = cfg.event.dateLabel.split(" ");
     const dayNum = parts[0];
-    const monthYear = parts.slice(1).join(" ");
+    const month = parts[1] || "";
+    const year = parts[2] || "";
     const fmtTime = (t) => t.replace(".", ":");
     ["akad", "resepsi"].forEach((key) => {
       document.getElementById(`${key}-day`).textContent = cfg.event.dayLabel;
       document.getElementById(`${key}-date`).textContent = dayNum;
-      document.getElementById(`${key}-month`).textContent = monthYear;
+      document.getElementById(`${key}-month`).textContent = month;
+      document.getElementById(`${key}-year`).textContent = year;
       document.getElementById(`${key}-time`).textContent = fmtTime(cfg.event[key].start);
       document.getElementById(`venue-name-${key}`).textContent = cfg.event.venue.name;
       document.getElementById(`venue-address-${key}`).textContent = cfg.event.venue.address;
@@ -137,7 +160,7 @@
         return `
       <div class="timeline-item" data-reveal="${i % 2 ? "slide-left" : "slide-right"}" data-reveal-group>
         ${imgSrc ? `<img class="timeline-item__photo" src="${esc(imgSrc)}" alt="${esc(item.title)}"${pan}>` : ""}
-        <span class="timeline-date" data-reveal="down" style="--reveal-i:1">${esc(item.date)}</span>
+        <span class="timeline-date" data-reveal="down" data-count style="--reveal-i:1">${esc(item.date)}</span>
         <h4 data-reveal="pop" style="--reveal-i:2">${esc(item.title)}</h4>
         <p data-reveal="up" style="--reveal-i:3">${esc(item.text)}</p>
       </div>`;

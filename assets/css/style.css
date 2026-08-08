@@ -712,6 +712,14 @@ a { color: inherit; }
 }
 .countdown--plain .countdown__item span { color: #fff; font-size: 1.15rem; }
 .countdown--plain .countdown__item small { color: #fff; opacity: .85; font-size: .6rem; }
+/* Jarak antar item countdown: item ke-1 (Hari), ke-2 (Jam), dan ke-4 (Detik)
+   dapat padding kiri ekstra; ke-3 (Menit) TIDAK — persis hasil uji coba
+   manual user, jangan diubah. */
+.countdown--plain .countdown__item:nth-child(1),
+.countdown--plain .countdown__item:nth-child(2),
+.countdown--plain .countdown__item:nth-child(4) {
+  padding-left: 40px;
+}
 
 .event-grid {
   display: grid; gap: 1.25rem;
@@ -1417,6 +1425,15 @@ a { color: inherit; }
   margin: 0;
 }
 .event-month { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; opacity: .7; margin: 0; }
+/* Tahun di kartu event — dipisah dari bulan supaya bisa animasi count-up
+   sendiri (data-count di index.html); sedikit lebih menonjol dari bulan. */
+.event-year {
+  font-size: .9rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--color-gold-soft);
+  margin: .15rem 0 0;
+}
 .event-time { font-size: 1.05rem; font-weight: 600; color: var(--color-gold); margin: .25rem 0 0; letter-spacing: .08em; }
 
 /* Lokasi di bawah tanggal, dipisah garis tipis */
