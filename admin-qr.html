@@ -13,11 +13,15 @@
 </head>
 <body>
 
-<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css (transform +
-     height:100dvh menjadikan kolom ini containing block elemen position:fixed
-     seperti .toast). -->
+<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css. DUA LAPIS:
+     .app-frame = containing block (transform) elemen position:fixed (.toast)
+     dan TIDAK discroll; .app-frame__scroll = scroller isi halaman, TANPA
+     transform, supaya scroll di dalamnya tidak ikut menyeret .toast keluar
+     layar (perangkap: transform+overflow-y:auto di elemen yang sama membuat
+     fixed descendant ikut hanyut saat discroll). -->
 <div class="app-frame">
 
+<div class="app-frame__scroll">
 <!-- ============ LAYAR LOGIN ============ -->
 <!-- Struktur id sama persis dengan admin.html — shared.js menanganinya.
      Akun admin-qr dibuat manual via SQL Editor (lihat migration 0004). -->
@@ -97,6 +101,7 @@
     </fieldset>
   </main>
 </div>
+</div><!-- /app-frame__scroll -->
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 

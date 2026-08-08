@@ -22,8 +22,14 @@
 <!-- Bingkai kolom HP portrait — semua konten halaman (termasuk elemen
      position:fixed seperti FAB, modal, lightbox) dikurung dalam kolom selebar
      ponsel 430px yang di-tengah di desktop; di HP kolom ini = seluruh layar.
-     Teknis: transform translateZ(0) + height:100dvh di .app-frame (style.css)
-     menjadikan kolom ini containing block bagi semua descendant fixed. -->
+
+     DUA LAPIS (style.css): .app-frame adalah containing block semua elemen
+     fixed (transform translateZ(0) + height:100dvh) dan TIDAK discroll
+     (overflow:hidden); yang discroll adalah .app-frame__scroll di bawah —
+     wrapper isi undangan TANPA transform, jadi perputaran scroll-nya tidak
+     mungkin ikut menyeret elemen fixed keluar layar (perangkap lama:
+     transform DAN overflow-y:auto di elemen yang sama membuat FAB/modal
+     ikut hanyut bersama konten begitu discroll lewat section pertama). -->
 <div class="app-frame">
 
 <div id="preloader" aria-hidden="true">
@@ -49,6 +55,10 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
 </button>
 
+<!-- Scroller isi undangan — satu-satunya yang discroll (lihat .app-frame__scroll
+     di style.css); preloader/FAB/modal/toast sengaja DI LUAR scroller ini supaya
+     scroll tidak pernah menyentuh elemen fixed. -->
+<div class="app-frame__scroll">
 <main id="invitation" class="is-locked">
 
   <!-- ============ COVER (+ countdown, satu foto & gradient menyambung) ============ -->
@@ -287,12 +297,6 @@
       <div id="gallery-wrapper" class="gallery-grid"></div>
     </section>
 
-    <!-- Lightbox -->
-    <div id="lightbox" class="lightbox" aria-hidden="true">
-      <button id="lightbox-close" class="lightbox__close" type="button" aria-label="Tutup">&times;</button>
-      <img id="lightbox-img" alt="">
-    </div>
-
     <!-- ============ DIGITAL GIFT ============ -->
     <section id="gift" class="section section--dark">
       <p class="section-eyebrow" data-reveal="up">Wedding Gift</p>
@@ -302,11 +306,11 @@
         tanda kasih, kami menyediakan pilihan berikut.
       </p>
 
-      <!-- Dua aksi sejajar: amplop digital + rekomendasi kado (tombol rekomendasi
-           dihapus gift.js kalau daftarnya kosong) -->
+      <!-- Alur: Kirim Hadiah -> panel terbuka (termasuk tombol Rekomendasi Kado
+           DI DALAM panel) -> klik Rekomendasi Kado -> modal. Tombol rekomendasi
+           dihapus gift.js kalau daftar kado kosong. -->
       <div class="gift-actions">
         <button id="btn-gift-toggle" class="btn-primary" type="button" data-reveal="up" style="--reveal-i:3">Kirim Hadiah</button>
-        <button id="btn-gift-recs" class="btn-outline" type="button" data-reveal="up" style="--reveal-i:4">Rekomendasi Kado</button>
       </div>
 
       <!-- Panel rekening: satu paket, muncul utuh begitu dibuka -->
@@ -314,6 +318,7 @@
         <!-- tiap kartu rekening dapat reveal sendiri, dipasang di gift.js -->
         <div id="gift-accounts" class="gift-accounts"></div>
         <div id="gift-address" class="gift-address" data-reveal="pop" style="--reveal-i:2"></div>
+        <button id="btn-gift-recs" class="btn-outline gift-recs-btn" type="button" data-reveal="fade" style="--reveal-i:3">Rekomendasi Kado</button>
         <button id="btn-gift-confirm" class="btn-outline gift-confirm-btn" type="button" data-reveal="fade" style="--reveal-i:4">Konfirmasi Pengiriman</button>
         <button id="btn-gift-hide" class="btn-text" type="button" data-reveal="fade" style="--reveal-i:5">Tutup</button>
       </div>
@@ -372,6 +377,18 @@
 
   </div>
 </main>
+
+</div><!-- /app-frame__scroll -->
+
+<!-- Lightbox dipindah ke luar .app-frame__scroll — sama seperti toast/modal
+     lain: dulu semua elemen position:fixed di dalam scroller ikut hanyut
+     saat discroll (bug yang baru diperbaiki di atas), jadi disamakan
+     strukturnya di sini juga supaya tidak bergantung pada perilaku
+     containing-block yang tidak diuji langsung di browser. -->
+<div id="lightbox" class="lightbox" aria-hidden="true">
+  <button id="lightbox-close" class="lightbox__close" type="button" aria-label="Tutup">&times;</button>
+  <img id="lightbox-img" alt="">
+</div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 

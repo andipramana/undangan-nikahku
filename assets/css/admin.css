@@ -43,21 +43,31 @@ html, body {
    height:100dvh (bukan min-height) penting: containing block harus setinggi
    viewport supaya .toast (anchor bottom) dan .editor (inset:0) tetap pada
    tempatnya, bukan membentang ke seluruh tinggi dokumen. */
+/* DUA LAPIS — containing block dipisah dari scroll container. Sama seperti
+   style.css (index.html): kalau transform DAN overflow-y:auto ada di elemen
+   yang SAMA, elemen position:fixed di dalamnya (.editor, .toast) ikut hanyut
+   saat discroll alih-alih tetap menempel di kolom. .app-frame di sini HANYA
+   containing block (tidak discroll), .app-frame__scroll HANYA scroller
+   (tanpa transform apa pun). */
 .app-frame {
   max-width: 430px;
   margin: 0 auto;
   position: relative;
   height: 100dvh;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+.app-frame__scroll {
+  height: 100dvh;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  transform: translateZ(0);
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: var(--gold) transparent;
 }
-.app-frame::-webkit-scrollbar { width: 6px; }
-.app-frame::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+.app-frame__scroll::-webkit-scrollbar { width: 6px; }
+.app-frame__scroll::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
 
 h1, h2 { font-weight: 500; margin: 0; }
 

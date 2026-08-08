@@ -13,11 +13,15 @@
 </head>
 <body>
 
-<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css (transform +
-     height:100dvh menjadikan kolom ini containing block elemen position:fixed
-     seperti .editor dan .toast). -->
+<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css. DUA LAPIS:
+     .app-frame = containing block (transform) elemen position:fixed (.editor,
+     .toast) dan TIDAK discroll; .app-frame__scroll = scroller isi halaman,
+     TANPA transform, supaya scroll di dalamnya tidak ikut menyeret .editor/
+     .toast keluar layar (perangkap: transform+overflow-y:auto di elemen yang
+     sama membuat fixed descendant ikut hanyut saat discroll). -->
 <div class="app-frame">
 
+<div class="app-frame__scroll">
 <!-- ============ LAYAR LOGIN ============ -->
 <!-- Field-nya "Nama pengguna" + "Kata sandi" (bukan email) supaya rasanya
      seperti panel internal. Nama pengguna dipetakan JS ke email tetap;
@@ -81,6 +85,7 @@
     <div id="wishes-root"></div>
   </main>
 </div>
+</div><!-- /app-frame__scroll -->
 
 <!-- ============ EDITOR PAN/ZOOM (overlay) ============ -->
 <div id="editor" class="editor" hidden>

@@ -52,49 +52,62 @@ html, body {
    persis seperti sebelumnya. Nilai lebar yang sama dipakai admin.html &
    admin-qr.html (admin.css) supaya ketiga halaman konsisten.
 
-   Kunci teknis (CSS spec): position:fixed membentuk containing block baru
-   terhadap ancestor terdekat yang punya transform — BUKAN ancestor
-   position:relative. `transform: translateZ(0)` di bawah membuat .app-frame
-   menjadi containing block bagi SEMUA descendant position:fixed (FAB audio/QR,
-   menu hamburger, semua .modal, .lightbox, #cover, #preloader, .toast),
-   sehingga semuanya otomatis ikut terkurung ke lebar kolom ini. Tanpa itu,
-   mereka tetap berpatokan ke viewport browser sungguhan dan di layar lebar
-   nempel ke tepi browser, jauh dari kolom.
+   DUA LAPIS — containing block DIPISAH dari scroll container (perbaikan bug
+   "FAB/modal hanya tampil saat section pertama di layar"):
 
-   KENAPA height:100dvh (bukan min-height): karena transform membuat koordinat
-   fixed (bottom:, inset:) dihitung dari box kolom, containing block harus
-   SETINGGI VIEWPORT. Kalau tingginya mengikuti isi halaman, elemen ber-anchor
-   bottom (FAB, toast) melayang ke dasar dokumen dan overlay inset:0
-   (modal/lightbox/cover/preloader) membentang setinggi seluruh halaman —
-   semua tenggelam di bawah lipatan. Konsekuensinya halaman scroll DI DALAM
-   kolom (overflow-y: auto), bukan di body. Aman: reveal.js memakai
-   IntersectionObserver (relatif viewport) dan tidak ada window.scrollY/
-   scrollTo di proyek, jadi tidak ada logika yang perlu menyesuaikan. */
+   1. .app-frame = containing block semua elemen position:fixed (FAB audio/QR,
+      menu hamburger, semua .modal, .lightbox, #cover, #preloader, .toast):
+      `transform: translateZ(0)` membuatnya containing block (CSS spec:
+      fixed mengacu ke ancestor TERDEKAT yang punya transform — bukan ancestor
+      position:relative), dan `height: 100dvh` membuat anchor bottom:/inset:
+      dihitung dari kolom setinggi viewport (bukan min-height — kalau tingginya
+      mengikuti isi halaman, FAB melayang ke dasar dokumen). Ia TIDAK discroll
+      (overflow: hidden): scroll tidak boleh terjadi di elemen yang juga
+      containing block — kalau keduanya menyatu (transform + overflow-y:auto
+      di elemen yang sama), engine browser ikut menyeret elemen fixed naik
+      bersama konten, dan elemen itu "hilang" begitu discroll lewat viewport
+      pertama (gejala persis: FAB/modal hanya tampil saat #opening di layar).
+
+   2. .app-frame__scroll = scroller isi undangan (membungkus main#invitation di
+      index.html): overflow-y:auto + height:100dvh, TANPA transform apa pun.
+      Karena ia bukan containing block, perputaran scroll-nya tidak bisa
+      menyentuh elemen fixed di luar dirinya; karena .app-frame tidak discroll,
+      elemen fixed menempel ke kolom selamanya.
+
+   Aman bagi JS: reveal.js memakai IntersectionObserver (relatif viewport, klip
+   kolom tetap berlaku karena scroller membentang penuh) dan tidak ada
+   window.scrollY/scrollTo di proyek, jadi tidak ada logika yang menyesuaikan. */
 .app-frame {
   max-width: 430px;
   margin: 0 auto;
   position: relative;
   height: 100dvh;
-  overflow-x: hidden;   /* klip geseran reveal di tepi kolom — sama seperti di HP */
-  overflow-y: auto;     /* halaman scroll di dalam kolom */
+  overflow: hidden;           /* klip geseran reveal — scroller ada di lapis bawah */
   overscroll-behavior: contain;
   background: var(--color-bg);  /* warna asli halaman di dalam kolom */
   transform: translateZ(0);     /* containing block fixed descendant (lihat atas) */
+}
+.app-frame__scroll {
+  height: 100dvh;               /* scrollport = kolom setinggi viewport */
+  overflow-x: hidden;           /* klip geseran reveal di tepi kolom */
+  overflow-y: auto;             /* halaman scroll DI SINI, bukan di .app-frame */
+  overscroll-behavior: contain;
   scroll-behavior: smooth;
   scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
   scrollbar-color: var(--color-gold) transparent;
 }
-.app-frame::-webkit-scrollbar { width: 6px; }
-.app-frame::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 3px; }
+.app-frame__scroll::-webkit-scrollbar { width: 6px; }
+.app-frame__scroll::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 3px; }
 
 html.no-scroll,
 html.no-scroll body {
   overflow: hidden;
   height: 100%;
 }
-/* Saat undangan terkunci (sebelum Buka Undangan), kolom ikut terkunci — yang
-   discroll adalah .app-frame, bukan body, jadi pembatasan dipasang di sana. */
-html.no-scroll .app-frame { overflow: hidden; }
+/* Saat undangan terkunci (sebelum Buka Undangan), scroller ikut terkunci —
+   yang discroll adalah .app-frame__scroll, bukan body, jadi pembatasan
+   dipasang di sana. (.app-frame sendiri selalu overflow:hidden.) */
+html.no-scroll .app-frame__scroll { overflow: hidden; }
 
 img { max-width: 100%; display: block; }
 
@@ -120,15 +133,16 @@ a { color: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- Audio FAB ---------- */
+/* 40px (dari 48px): FAB ramping yang tetap enak di-thumb. */
 .audio-fab {
   position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 500;
-  width: 48px; height: 48px; border-radius: 50%;
+  width: 40px; height: 40px; border-radius: 50%;
   background: var(--color-dark); border: 1.5px solid var(--color-gold);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
 }
 .audio-fab__disc {
-  width: 20px; height: 20px; border-radius: 50%;
+  width: 17px; height: 17px; border-radius: 50%;
   background: radial-gradient(circle at center, var(--color-dark) 0 3px, var(--color-gold) 4px 5px, var(--color-dark) 6px 100%);
   animation: spin 3s linear infinite;
   animation-play-state: paused;
@@ -136,17 +150,17 @@ a { color: inherit; }
 .audio-fab.playing .audio-fab__disc { animation-play-state: running; }
 
 /* Tombol QR check-in — ditumpuk di KANAN-BAWAH, persis di atas audio FAB:
-   bottom = jarak audio FAB dari tepi (1.1rem) + tingginya (48px) + jarak
+   bottom = jarak audio FAB dari tepi (1.1rem) + tingginya (40px) + jarak
    antar-tombol (.9rem), supaya tidak nempel. Muncul hanya untuk tamu
    perorangan (URL ber-?to=), diatur qr-checkin.js. */
 .qr-fab {
-  position: fixed; right: 1.1rem; bottom: calc(1.1rem + 48px + .9rem); z-index: 500;
-  width: 48px; height: 48px; border-radius: 50%;
+  position: fixed; right: 1.1rem; bottom: calc(1.1rem + 40px + .9rem); z-index: 500;
+  width: 40px; height: 40px; border-radius: 50%;
   background: var(--color-dark); border: 1.5px solid var(--color-gold);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: var(--color-gold);
 }
-.qr-fab svg { width: 22px; height: 22px; }
+.qr-fab svg { width: 18px; height: 18px; }
 
 /* Tombol menu hamburger — kembaran visual FAB lain (bulat, dark + emas), tapi
    di kanan atas: kanan bawah sudah dipakai audio + QR FAB. Muncul hanya
@@ -887,14 +901,32 @@ a { color: inherit; }
 .gift-address__copy { align-self: flex-end; flex: none; }
 .gift-note { font-size: .7rem; opacity: .6; margin-top: .75rem; }
 
-/* Dua tombol amplop digital sejajar di section Tanda Kasih */
+/* Amplop digital di section Tanda Kasih; tombol rekomendasi kado pindah ke
+   dalam #gift-panel (alur: Kirim Hadiah -> panel termasuk tombol -> modal). */
 .gift-actions { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
 .gift-confirm-btn { display: block; margin: 1.1rem auto 0; }
+.gift-recs-btn { display: block; margin: 1.1rem auto 0; }
 
-/* Rekomendasi kado (modal): dua kolom di HP, foto dipasangkan by-index
-   dengan entri giftRecommendations[] oleh gift.js */
-.gift-recs { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+/* Rekomendasi kado (modal): kartu SEJAJAR yang bisa DIGESER KE SAMPING
+   (flex row + overflow-x:auto), bukan grid yang wrap ke bawah. Foto
+   dipasangkan by-index dengan entri giftRecommendations[] oleh gift.js.
+   margin/padding -1.5rem/+1.5rem meniadakan padding panel (1.5rem) supaya
+   kartu menyentuh tepi modal dan kartu pertama/terakhir tidak terpotong
+   scrollbar horizontal emasnya. */
+.gift-recs {
+  display: flex; gap: .8rem;
+  overflow-x: auto;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem .6rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gold) transparent;
+}
+.gift-recs::-webkit-scrollbar { height: 6px; }
+.gift-recs::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 3px; }
 .gift-rec-card {
+  flex: 0 0 auto; width: 165px;
+  scroll-snap-align: start;
   border: 1px solid var(--color-gold); border-radius: 12px; overflow: hidden;
   display: flex; flex-direction: column; text-align: left;
 }
