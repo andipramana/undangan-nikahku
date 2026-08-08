@@ -430,7 +430,9 @@ a { color: inherit; }
   padding: .85rem 2rem;
   border-radius: 10px;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(201, 166, 104, .35);
+  /* Shadow emas — color-mix dengan alpha yang sama, diturunkan dari
+     --color-gold supaya ikut tema (ganti warna di tab Tampilan). */
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-gold) 35%, transparent);
   transition: background .3s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease;
 }
 /* Hover memekatkan emasnya, BUKAN menggelapkannya jadi --color-dark: di section
@@ -900,7 +902,7 @@ a { color: inherit; }
   text-transform: uppercase;
   font-size: .75rem;
   border: none;
-  border-bottom: 1px solid rgba(201, 166, 104, .22);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-gold) 22%, transparent);
   color: var(--color-text-light);
   background: transparent;
   padding: .95rem .2rem;
@@ -1442,7 +1444,7 @@ a { color: inherit; }
   left: 0;
   top: 1rem;
   bottom: 1rem;
-  border-left: 1px solid rgba(201, 166, 104, .4);
+  border-left: 1px solid color-mix(in srgb, var(--color-gold) 40%, transparent);
 }
 .event-date {
   text-align: center;
@@ -1485,7 +1487,7 @@ a { color: inherit; }
   align-items: center;
   text-align: center;
   padding-top: 1.1rem;
-  border-top: 1px solid rgba(201, 166, 104, .35);
+  border-top: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
 }
 .event-place h3 { font-size: .95rem; margin: 0 0 .3rem; line-height: 1.3; }
 .event-place p { font-size: .7rem; line-height: 1.55; opacity: .75; margin: 0 0 .9rem; }

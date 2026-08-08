@@ -236,6 +236,29 @@
     return cur;
   }
 
+  /** id preset yang warnanya PERSIS sama dengan state form saat ini (7 warna
+   * solid + 4 warna overlay, dibanding case-insensitive — hex kadang beda
+   * kapital) kalau ada, sehingga dropdown menunjukkan tema yang aktif.
+   * Kombinasi custom/campuran (tidak cocok utuh ke preset mana pun) -> "". */
+  function matchingPresetId() {
+    const wantColors = Object.keys(DEFAULT_THEME.colors).map(
+      (k) => [k, String(theme.colors[k]).toLowerCase()]
+    );
+    const wantOverlays = Object.keys(DEFAULT_THEME.overlays).map(
+      (k) => [k, String(theme.overlays[k].color).toLowerCase()]
+    );
+    for (const p of THEME_PRESETS) {
+      const colorsOk = wantColors.every(
+        ([k, v]) => String(p.colors[k]).toLowerCase() === v
+      );
+      const overlaysOk = wantOverlays.every(
+        ([k, v]) => String(p.overlayColors[k]).toLowerCase() === v
+      );
+      if (colorsOk && overlaysOk) return p.id;
+    }
+    return "";
+  }
+
   /* ---------- Load ---------- */
 
   async function load() {
@@ -338,6 +361,10 @@
       })
       .join("");
 
+    // Dropdown menunjukkan preset yang aktif kalau warna form saat ini cocok
+    // persis salah satu preset (matchingPresetId) — dipilih tadi atau termuat
+    // dari DB; kombinasi custom/campuran tetap di placeholder.
+    const matchingId = matchingPresetId();
     root.innerHTML =
       `<p class="theme-title">Tampilan</p>` +
       `<p class="muted theme-hint">Warna halaman undangan (tamu). Panel admin tidak ` +
@@ -346,7 +373,9 @@
       `<span>Tema siap pakai</span>` +
       `<select id="theme-preset" class="input">` +
       `<option value="">— pilih tema —</option>` +
-      THEME_PRESETS.map((p) => `<option value="${escAttr(p.id)}">${esc(p.label)}</option>`).join("") +
+      THEME_PRESETS.map(
+        (p) => `<option value="${escAttr(p.id)}" ${p.id === matchingId ? "selected" : ""}>${esc(p.label)}</option>`
+      ).join("") +
       `</select>` +
       `</label>` +
       `<button type="button" class="btn btn--ghost" id="theme-reset-all">Reset semua ke default</button>` +
