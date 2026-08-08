@@ -848,24 +848,45 @@ a { color: inherit; }
 .modal__panel .btn-primary { width: 100%; }
 .modal__hint { font-size: .7rem; opacity: .6; margin: .9rem 0 0; text-align: center; }
 
-/* Daftar shortcut menu navigasi — tiap item tombol outline penuh lebar.
-   Interaksi hover meniru .btn-outline (emas menyala). */
-.nav-menu-list { display: flex; flex-direction: column; gap: .6rem; }
+/* Daftar shortcut menu navigasi — gaya premium: tanpa bingkai kotak, tiap item
+   hanya dipisah garis bawah tipis emas; item muncul BERURUTAN (stagger) setiap
+   modal dibuka. Animasi di-replay otomatis tiap kali modal terbuka karena saat
+   `hidden` (display:none) item keluar dari rendering, lalu masuk lagi bersama
+   panelnya (panel memakai animasi fadeUp milik .modal__panel). */
+.nav-menu-list { display: flex; flex-direction: column; }
 .nav-menu-list button {
   font-family: var(--font-sans);
   letter-spacing: .12em;
   text-transform: uppercase;
   font-size: .75rem;
-  border: 1.5px solid var(--color-gold);
-  color: inherit;
+  border: none;
+  border-bottom: 1px solid rgba(201, 166, 104, .22);
+  color: var(--color-text-light);
   background: transparent;
-  padding: .75rem 1.8rem;
-  border-radius: 10px;
+  padding: .95rem .2rem;
   cursor: pointer;
   text-align: left;
-  transition: background .3s ease, color .3s ease;
+  animation: navItemIn .55s cubic-bezier(.22,.61,.36,1) both;
+  transition: color .3s ease, border-color .3s ease, padding-left .3s ease;
 }
-.nav-menu-list button:hover { background: var(--color-gold); color: var(--color-dark); }
+@keyframes navItemIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* Jeda berurutan: item ke-N mulai ~60ms setelah item sebelumnya */
+.nav-menu-list button:nth-child(1) { animation-delay: .08s; }
+.nav-menu-list button:nth-child(2) { animation-delay: .14s; }
+.nav-menu-list button:nth-child(3) { animation-delay: .2s; }
+.nav-menu-list button:nth-child(4) { animation-delay: .26s; }
+.nav-menu-list button:nth-child(5) { animation-delay: .32s; }
+.nav-menu-list button:nth-child(6) { animation-delay: .38s; }
+.nav-menu-list button:nth-child(7) { animation-delay: .44s; }
+/* Hover: teks emas menyala + garis bawah menguat + item "maju" halus ke kanan */
+.nav-menu-list button:hover {
+  color: var(--color-gold-soft);
+  border-bottom-color: var(--color-gold);
+  padding-left: .6rem;
+}
 
 /* Kanvas QR check-in tamu — kotak putih supaya kontras QR-nya jelas saat
    dipindai petugas (QR itu di atas panel gelap). */
@@ -904,8 +925,10 @@ a { color: inherit; }
 /* Amplop digital di section Tanda Kasih; tombol rekomendasi kado pindah ke
    dalam #gift-panel (alur: Kirim Hadiah -> panel termasuk tombol -> modal). */
 .gift-actions { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
-.gift-confirm-btn { display: block; margin: 1.1rem auto 0; }
-.gift-recs-btn { display: block; margin: 1.1rem auto 0; }
+/* Dua tombol panel (Rekomendasi & Konfirmasi) sama-sama selebar panel — lebar
+   seragam mengikuti kartu rekening/alamat, tidak bergantung panjang teks. */
+.gift-confirm-btn,
+.gift-recs-btn { display: block; width: 100%; margin: 1.1rem auto 0; }
 
 /* Rekomendasi kado (modal): kartu SEJAJAR yang bisa DIGESER KE SAMPING
    (flex row + overflow-x:auto), bukan grid yang wrap ke bawah. Foto
@@ -1075,6 +1098,11 @@ a { color: inherit; }
   .reveal-ready [data-reveal] {
     opacity: 1 !important;
     transition: none !important;
+  }
+  /* Item menu navigasi: tanpa animasi stagger, langsung tampil semua */
+  .nav-menu-list button {
+    animation: none !important;
+    opacity: 1;
   }
 }
 
