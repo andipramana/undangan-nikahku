@@ -28,7 +28,7 @@
 (function () {
   const HIDDEN = "[data-reveal]:not(.is-revealed)";
   const GROUP = "[data-reveal-group]";
-  const COUNT_DURATION = 1400;
+  const COUNT_DURATION = 2400;
   const seen = new WeakSet(); // elemen yang sudah diserahkan ke observer
   let observer = null; // pemicu utama: tepi atas elemen melewati tengah layar
   let early = null; // pemicu awal (data-reveal-early): begitu menyentuh layar
@@ -46,7 +46,13 @@
    *  berbatas natural (`data-count="date/hour/minute/second"`): naik ke batas
    *  lalu turun mengecil ke target — mendarat TEPAT di angka asli. */
   function countUp(el) {
-    const target = parseInt(el.textContent, 10);
+    const raw = el.textContent.trim();
+    // HANYA animasikan teks angka MURNI ("2020", "25"). Teks campuran —
+    // tanggal Love Story misalnya ("17 Agustus 2020") — diLEWATI tanpa
+    // menyentuh textContent: parseInt hanya membaca angka di depan, dan
+    // menimpa isi elemen akan menghancurkan sisa teksnya secara permanen.
+    if (!/^\d+$/.test(raw)) return;
+    const target = parseInt(raw, 10);
     if (!Number.isFinite(target) || target <= 1) return;
     const maxVal = UNIT_MAX[el.dataset.count] ?? null; // null = ramp naik 1x
     const t0 = performance.now();

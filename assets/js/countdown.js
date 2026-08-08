@@ -12,7 +12,7 @@
  * layar. Interval detik baru mulai SETELAH animasi selesai, dan dari situ
  * tick polos mengganti teks tanpa animasi lagi. */
 window.initCountdown = function () {
-  const DURATION = 1400; // sama dengan COUNT_DURATION di reveal.js, biar terasa konsisten
+  const DURATION = 2400; // sama dengan COUNT_DURATION di reveal.js, biar terasa konsisten
 
   function pad(n) {
     return String(n).padStart(2, "0");
@@ -95,6 +95,15 @@ window.initCountdown = function () {
     animateFirst(document.getElementById("cd-hours"), first.hours, 24);
     animateFirst(document.getElementById("cd-minutes"), first.minutes, 60);
     animateFirst(document.getElementById("cd-seconds"), first.seconds, 60);
+    // Angka tanggal & tahun di baris "Selasa, 25 Agustus 2026" (#event-date-label,
+    // dipecah main.js jadi span ed-date/ed-year) ikut berputar SATU KALI
+    // bersamaan: tanggal overshoot ke 31, tahun ramp naik biasa. Nilai dibaca
+    // dari isi span (bukan compute) — span yang kosong/None langsung di-skip
+    // guard di animateFirst.
+    const edDate = document.getElementById("ed-date");
+    const edYear = document.getElementById("ed-year");
+    animateFirst(edDate, parseInt(edDate ? edDate.textContent : "", 10), 31);
+    animateFirst(edYear, parseInt(edYear ? edYear.textContent : "", 10), null);
     // Interval baru mulai setelah animasi selesai — tick polos tiap detik,
     // TANPA animasi lagi.
     setTimeout(() => {

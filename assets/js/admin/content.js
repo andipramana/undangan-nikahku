@@ -72,6 +72,8 @@
     c.guestGreetings.forEach((g) => {
       if (!Array.isArray(g.names)) g.names = [];
       if (typeof g.label !== "string") g.label = "";
+      // Closing statement khusus kelompok — kosong = pakai default admin.
+      if (typeof g.closing !== "string") g.closing = "";
     });
   }
 
@@ -125,11 +127,15 @@
         `)}
 
         ${section("sapaan", "Sapaan tamu", `
-          ${field("Sapaan default (fallback)", "f-default-guest-greeting")}
-          <p class="muted">Sapaan default dipakai untuk tamu yang tidak cocok
-          dengan kelompok mana pun. Nama tamu dicocokkan PERSIS dengan daftar di
-          bawah (abaikan besar kecil huruf) — cocok berarti sapaan kelompok itulah
-          yang dipakai, bukan yang default.</p>
+          <div class="form-grid">
+            ${field("Sapaan default (fallback)", "f-default-guest-greeting")}
+            ${textarea("Closing statement default (fallback)", "f-closing-text", 3)}
+          </div>
+          <p class="muted">Sapaan & closing default dipakai untuk tamu yang
+          tidak cocok dengan kelompok mana pun. Nama tamu dicocokkan PERSIS
+          dengan daftar di bawah (abaikan besar kecil huruf) — cocok berarti
+          sapaan & closing statement KELOMPOK itulah yang dipakai, bukan yang
+          default.</p>
           <div id="guest-greetings-list"></div>
         `)}
 
@@ -238,7 +244,6 @@
             ${field("Jeda slideshow hero (ms)", "f-hero-interval", "number")}
             ${field("Audio — sumber", "f-audio-src")}
             ${field("Audio — judul", "f-audio-title")}
-            ${textarea("Closing", "f-closing-text", 3)}
           </div>
         `)}
       </form>
@@ -401,6 +406,8 @@
           <div class="list-item__fields">
             <input type="text" class="input" data-g-i="${gi}" data-g-key="label" value="${escAttr(g.label)}"
                    placeholder="Sapaan kelompok, mis. Keluarga Besar">
+            <textarea class="input" data-g-i="${gi}" data-g-key="closing" rows="2"
+                      placeholder="Closing statement khusus kelompok ini (kosongkan = pakai default)">${escAttr(g.closing)}</textarea>
             <div class="greeting-names">
               ${g.names
                 .map(

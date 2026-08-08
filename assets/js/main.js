@@ -34,17 +34,24 @@
   }
 
   /** Cocokkan nama tamu ke kelompok sapaan (case-insensitive, match PERSIS,
-   * bukan substring). Yang cocok pertama menang; tanpa kecocokan, pakai
-   * defaultGuestGreeting (fallback "Kepada Yth."). */
-  function resolveGreeting(cfg, guestName) {
+   * bukan substring). Kembalikan kelompok yang cocok atau null. Dipakai
+   * resolveGreeting (sapaan) DAN closing statement — panggil SEKALI lalu
+   * pakai hasilnya untuk keduanya, jangan menelusuri dua kali. */
+  function matchGreetingGroup(cfg, guestName) {
     const groups = Array.isArray(cfg.guestGreetings) ? cfg.guestGreetings : [];
     const needle = guestName.trim().toLowerCase();
-    for (const g of groups) {
-      if (Array.isArray(g.names) && g.names.some((n) => String(n).trim().toLowerCase() === needle)) {
-        return g.label || cfg.defaultGuestGreeting || "Kepada Yth.";
-      }
-    }
-    return cfg.defaultGuestGreeting || "Kepada Yth.";
+    return groups.find(
+      (g) => Array.isArray(g.names) && g.names.some((n) => String(n).trim().toLowerCase() === needle)
+    ) || null;
+  }
+
+  /** Sapaan tamu: label kelompok yang cocok, fallback defaultGuestGreeting
+   * ("Kepada Yth."). `matchedGroup` opsional — kalau pemanggil sudah
+   * menghitungnya (untuk closing juga), kirim lewat sini supaya tidak
+   * menelusuri daftar kelompok dua kali. */
+  function resolveGreeting(cfg, guestName, matchedGroup) {
+    const matched = matchedGroup || matchGreetingGroup(cfg, guestName);
+    return (matched && matched.label) || cfg.defaultGuestGreeting || "Kepada Yth.";
   }
 
   async function populateContent() {
@@ -54,11 +61,13 @@
     const params = new URLSearchParams(location.search);
     const rawGuest = params.get(cfg.guestParam);
     const guestName = rawGuest ? decodeURIComponent(rawGuest.replace(/\+/g, " ")) : cfg.defaultGuestName;
+    // Sapaan & closing statement dinamis per kelompok nama (diatur admin di
+    // tab Teks): kalau nama tamu cocok persis dengan salah satu kelompok, teks
+    // kelompok itulah yang dipakai — bukan default statis. Match dihitung
+    // SEKALI, dipakai untuk sapaan di sini dan closing di bawah.
+    const matchedGroup = matchGreetingGroup(cfg, guestName);
     document.getElementById("guest-name").textContent = guestName;
-    // Sapaan dinamis per kelompok nama (diatur admin di tab Teks): kalau nama
-    // tamu cocok persis dengan salah satu kelompok, teks sapaan kelompok itu
-    // yang dipakai — bukan "Kepada Yth." statis.
-    document.getElementById("guest-label").textContent = resolveGreeting(cfg, guestName);
+    document.getElementById("guest-label").textContent = resolveGreeting(cfg, guestName, matchedGroup);
 
     document.getElementById("wfl-arabic").textContent = cfg.opening.arabicQuote;
     document.getElementById("wfl-quote").textContent = cfg.opening.quote;
@@ -72,7 +81,6 @@
     document.getElementById("groom-parents").textContent =
       `Putra dari Bpk. ${cfg.couple.groom.father} & Ibu ${cfg.couple.groom.mother}`;
 
-    document.getElementById("event-date-label").textContent = `${cfg.event.dayLabel}, ${cfg.event.dateLabel}`;
     setupCalendarLink(cfg);
 
     // Kartu event: tanggal (Selasa / 25 / Agustus / 2026 / jam) + venue +
@@ -83,13 +91,26 @@
     const dayNum = parts[0];
     const month = parts[1] || "";
     const year = parts[2] || "";
-    const fmtTime = (t) => t.replace(".", ":");
+
+    // Baris tanggal di Save The Date (#event-date-label) dipecah jadi 4 span
+    // supaya angka tanggal & tahunnya bisa count-up oleh countdown.js saat
+    // .text-revealed terpasang (mekanisme .text-enter di #opening diproteksi).
+    document.getElementById("ed-day").textContent = cfg.event.dayLabel;
+    document.getElementById("ed-date").textContent = dayNum;
+    document.getElementById("ed-month").textContent = month;
+    document.getElementById("ed-year").textContent = year;
+
     ["akad", "resepsi"].forEach((key) => {
       document.getElementById(`${key}-day`).textContent = cfg.event.dayLabel;
       document.getElementById(`${key}-date`).textContent = dayNum;
       document.getElementById(`${key}-month`).textContent = month;
       document.getElementById(`${key}-year`).textContent = year;
-      document.getElementById(`${key}-time`).textContent = fmtTime(cfg.event[key].start);
+      // Jam & menit diisi ke span terpisah (#akad-time-h/m) — tiap angka
+      // count-up sendiri (overshoot jam ke 24, menit ke 60). Format config
+      // "HH.MM", dinormalisasi dulu ke "HH:MM" lalu dipecah.
+      const t = String(cfg.event[key].start || "").replace(".", ":").split(":");
+      document.getElementById(`${key}-time-h`).textContent = t[0] || "";
+      document.getElementById(`${key}-time-m`).textContent = t[1] || "";
       document.getElementById(`venue-name-${key}`).textContent = cfg.event.venue.name;
       document.getElementById(`venue-address-${key}`).textContent = cfg.event.venue.address;
       document.getElementById(`${key}-maps`).href = cfg.event.venue.mapsUrl;
@@ -167,7 +188,10 @@
       })
       .join("");
 
-    document.getElementById("closing-text").textContent = cfg.closing.text;
+    // Closing: khusus kelompok yang cocok kalau ada (dan tidak kosong),
+    // selain itu fallback ke default admin.
+    document.getElementById("closing-text").textContent =
+      (matchedGroup && matchedGroup.closing && matchedGroup.closing.trim()) || cfg.closing.text;
   }
 
   function setupCalendarLink(cfg) {

@@ -99,7 +99,12 @@
         <div class="countdown-heading">
           <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
           <p class="script-names script-names--small text-enter text-enter--left">Mita <span class="amp">&amp;</span> Andi</p>
-          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"></p>
+          <!-- "Selasa, 25 Agustus 2026" dipecah jadi 4 span (hari/tanggal/bulan/
+               tahun) supaya angka tanggal & tahunnya bisa count-up. Span ini
+               TANPA data-reveal/data-count: animasinya dijalankan countdown.js
+               (animateFirst) saat .text-revealed terpasang — mekanisme
+               .text-enter di #opening ini diproteksi, tidak boleh diubah. -->
+          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"><span id="ed-day"></span>, <span id="ed-date"></span> <span id="ed-month"></span> <span id="ed-year"></span></p>
         </div>
         <a id="btn-add-calendar" class="btn-outline btn-outline--light text-enter text-enter--left" href="#" target="_blank" rel="noopener">
           <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
@@ -205,9 +210,13 @@
               <p class="event-num" id="akad-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
               <p class="event-month" id="akad-month"></p>
               <!-- Tahun animasi ramp naik biasa (data-count tanpa nilai) — ikut
-                   sistem reveal seperti event-num supaya count-up-nya terpicu -->
-              <p class="event-year" id="akad-year" data-reveal="fade" data-count></p>
-              <p class="event-time" id="akad-time"></p>
+                   sistem reveal seperti event-num supaya count-up-nya terpicu.
+                   --reveal-i:3 = muncul menyusul day/date/month, tidak serentak
+                   dengan angka tanggal. -->
+              <p class="event-year" id="akad-year" data-reveal="fade" data-count style="--reveal-i:3"></p>
+              <!-- Jam & menit dipecah jadi dua span supaya tiap angka bisa
+                   count-up sendiri (overshoot jam ke 24, menit ke 60) -->
+              <p class="event-time"><span id="akad-time-h" data-reveal="fade" data-count="hour" style="--reveal-i:4"></span>:<span id="akad-time-m" data-reveal="fade" data-count="minute" style="--reveal-i:5"></span></p>
             </div>
             <div class="event-place" data-reveal="up" style="--reveal-i:2">
               <h3 id="venue-name-akad"></h3>
@@ -236,8 +245,8 @@
               <hr class="event-divider">
               <p class="event-num" id="resepsi-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
               <p class="event-month" id="resepsi-month"></p>
-              <p class="event-year" id="resepsi-year" data-reveal="fade" data-count></p>
-              <p class="event-time" id="resepsi-time"></p>
+              <p class="event-year" id="resepsi-year" data-reveal="fade" data-count style="--reveal-i:3"></p>
+              <p class="event-time"><span id="resepsi-time-h" data-reveal="fade" data-count="hour" style="--reveal-i:4"></span>:<span id="resepsi-time-m" data-reveal="fade" data-count="minute" style="--reveal-i:5"></span></p>
             </div>
             <div class="event-place" data-reveal="up" style="--reveal-i:2">
               <h3 id="venue-name-resepsi"></h3>
