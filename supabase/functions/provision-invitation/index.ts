@@ -47,7 +47,22 @@ Deno.serve(async (req) => {
     const { data: root } = await admin.from("invitations").select("id").eq("slug", "root").single();
     const rootId = root?.id;
     const { data: rootContent } = await admin.from("site_content").select("content").eq("invitation_id", rootId).eq("id", 1).maybeSingle();
-    if (rootContent?.content) await admin.from("site_content").insert({ invitation_id: invitationId, id: 1, content: rootContent.content });
+    if (rootContent?.content) {
+      const content = structuredClone(rootContent.content);
+      const brideName = String(body.brideName || "").trim();
+      const groomName = String(body.groomName || "").trim();
+      const displayName = String(body.displayName || slug).trim();
+      if (brideName) {
+        content.couple = content.couple || {};
+        content.couple.bride = { ...(content.couple?.bride || {}), name: brideName, nickname: brideName };
+      }
+      if (groomName) {
+        content.couple = content.couple || {};
+        content.couple.groom = { ...(content.couple?.groom || {}), name: groomName, nickname: groomName };
+      }
+      content.siteTitle = `${displayName} — The Wedding`;
+      await admin.from("site_content").insert({ invitation_id: invitationId, id: 1, content });
+    }
     // New tenants start with the root template's photo ordering and crop data.
     // Objects are public-read; their metadata belongs to the new tenant, so a
     // customer can later add/reorder its own photos without touching root rows.

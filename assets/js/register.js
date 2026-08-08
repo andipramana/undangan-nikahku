@@ -15,7 +15,7 @@
       const { error: loginError } = await sb.auth.signInWithPassword({ email: get("owner-email"), password: document.getElementById("owner-password").value });
       if (loginError) throw loginError;
       const { data, error } = await sb.functions.invoke("provision-invitation", { body: {
-        slug, displayName: get("display-name"), adminEmail: get("admin-email"), adminPassword: document.getElementById("admin-password").value,
+        slug, displayName: get("display-name"), brideName: get("bride-name"), groomName: get("groom-name"), adminEmail: get("admin-email"), adminPassword: document.getElementById("admin-password").value,
         qrEmail: get("qr-email"), qrPassword: document.getElementById("qr-password").value
       }});
       if (error) throw error;
