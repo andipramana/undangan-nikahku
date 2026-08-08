@@ -18,7 +18,7 @@
     formRoot.innerHTML = "<p class='muted'>Memuat teks…</p>";
 
     const { data, error } = await window.AdminAPI.query(
-      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      sb.from("site_content").select("content").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1).maybeSingle(),
       "Permintaan teks"
     );
     if (error && error.code !== "PGRST116") {
@@ -682,7 +682,7 @@
     const btn = document.getElementById("btn-save-content");
     btn.disabled = true;
     sb.from("site_content")
-      .upsert({ id: 1, content, updated_at: new Date().toISOString() }, { onConflict: "id" })
+      .upsert({ invitation_id: window.AdminAPI.tenant.invitationId, id: 1, content, updated_at: new Date().toISOString() }, { onConflict: "invitation_id,id" })
       .then(({ error }) => {
         btn.disabled = false;
         if (error) toast("Gagal menyimpan: " + error.message, true);

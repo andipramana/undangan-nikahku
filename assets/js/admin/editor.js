@@ -253,6 +253,7 @@
         focal_y: Number(img.dataset.fy),
         zoom
       })
+      .eq("invitation_id", window.AdminAPI.tenant.invitationId)
       .eq("id", item.id);
     btn.disabled = false;
     if (error) {

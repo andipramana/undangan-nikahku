@@ -36,7 +36,8 @@
 
   // Versi di kunci membedakan bentuk payload kalau skema berubah nanti —
   // cadangan lama yang bentuknya beda tidak boleh dipakai.
-  const STORAGE_KEY = "wedding_invitation_v1";
+  const tenant = window.TenantContext || { slug: "root", setInvitation() {} };
+  const STORAGE_KEY = `wedding_invitation_v2_${tenant.slug}`;
 
   /** Ambil payload undangan: {content, photos} | null.
    * Prioritas: Supabase → localStorage → null (undangan pakai config.js +
@@ -44,9 +45,10 @@
   window.fetchInvitation = async function () {
     if (!sb) return null;
     try {
-      const { data, error } = await sb.rpc("get_invitation");
+      const { data, error } = await sb.rpc("get_invitation", { p_slug: tenant.slug });
       if (error) throw error;
-      if (!data) throw new Error("payload kosong");
+      if (!data) throw new Error("Undangan tidak ditemukan atau tidak aktif.");
+      tenant.setInvitation(data.invitation);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       } catch (_) {

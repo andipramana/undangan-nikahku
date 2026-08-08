@@ -78,6 +78,7 @@ window.initRsvp = function () {
     const { data, error } = await window.sb
       .from(window.WEDDING_CONFIG.supabase.wishesTable)
       .select("*")
+      .eq("invitation_id", window.TenantContext && window.TenantContext.invitationId)
       .order("created_at", { ascending: false })
       .limit(50);
     if (error) {
@@ -105,6 +106,7 @@ window.initRsvp = function () {
     statusEl.textContent = "Mengirim...";
 
     const payload = {
+      invitation_id: window.TenantContext && window.TenantContext.invitationId,
       name: nameInput.value.trim(),
       attendance: attendanceValue,
       // Yang tidak hadir selalu terkirim 1, bukan angka sisa yang sempat

@@ -64,6 +64,7 @@
       sb
         .from("photos")
         .select("*")
+        .eq("invitation_id", window.AdminAPI.tenant.invitationId)
         .eq("folder", currentFolder)
         .order("sort_order", { ascending: true })
         .order("id", { ascending: true }),
@@ -153,10 +154,15 @@
       btn.addEventListener("click", async () => {
         const item = photos[Number(btn.dataset.del)];
         if (!confirm(`Hapus foto ${item.storage_path}?`)) return;
-        const { error: rowErr } = await sb.from("photos").delete().eq("id", item.id);
+        const { error: rowErr } = await sb.from("photos").delete().eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", item.id);
         if (rowErr) return toast("Gagal menghapus baris: " + rowErr.message, true);
-        const { error: stErr } = await sb.storage.from("photos").remove([item.storage_path]);
-        if (stErr) return toast("Baris terhapus, tapi objek storage gagal: " + stErr.message, true);
+        // Foto template yang diwarisi dari root dapat berbagi object Storage.
+        // Hapus object hanya jika file memang diunggah tenant ini sendiri;
+        // menghapus metadata template tidak boleh menghapus foto root/tenant lain.
+        if (item.storage_path.startsWith(`${window.AdminAPI.tenant.slug}/`)) {
+          const { error: stErr } = await sb.storage.from("photos").remove([item.storage_path]);
+          if (stErr) return toast("Baris terhapus, tapi objek storage gagal: " + stErr.message, true);
+        }
         toast("Foto dihapus.");
         render();
       });
@@ -177,7 +183,7 @@
       // Update berurutan — sort_order ditulis ulang dari indeks DOM.
       for (const [i, p] of photos.entries()) {
         if (p.sort_order === i) continue;
-        const { error } = await sb.from("photos").update({ sort_order: i }).eq("id", p.id);
+        const { error } = await sb.from("photos").update({ sort_order: i }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", p.id);
         if (error) {
           toast("Gagal menyimpan urutan: " + error.message, true);
           btn.disabled = false;
@@ -245,7 +251,7 @@
    * foto terunggah dengan entri giftRecommendations di site_content. */
   async function updateGiftHint() {
     const { data } = await window.AdminAPI.query(
-      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      sb.from("site_content").select("content").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1).maybeSingle(),
       "Permintaan teks"
     );
     if (currentFolder !== "gift_item") return; // pengguna sudah pindah folder
@@ -282,14 +288,14 @@
     for (const file of files) {
       try {
         const blob = await convertToWebp(file, MAX_WIDTH[folder]);
-        const name = `${folder}/${uuid()}.webp`;
+        const name = `${window.AdminAPI.tenant.slug}/${folder}/${uuid()}.webp`;
         const { error: upErr } = await sb.storage.from("photos").upload(name, blob, {
           contentType: "image/webp"
         });
         if (upErr) throw new Error(upErr.message);
         const { error: rowErr } = await sb
           .from("photos")
-          .insert({ folder, storage_path: name, sort_order: nextOrder });
+          .insert({ invitation_id: window.AdminAPI.tenant.invitationId, folder, storage_path: name, sort_order: nextOrder });
         if (rowErr) throw new Error(rowErr.message);
         nextOrder += 1;
         toast(`${file.name} → terunggah ✓`);

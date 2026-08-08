@@ -13,8 +13,6 @@
 (function () {
   const { sb, toast } = window.AdminAPI;
 
-  const ADMIN_EMAIL = "admin-qr@mitaandi.wedding";
-  const ADMIN_USERNAME = "admin-qr";
 
   // =========================================================================
   // TAB CHECK-IN: daftar
@@ -27,7 +25,7 @@
     root.innerHTML = "<p class='muted'>Memuat daftar check-in…</p>";
 
     const { data, error, count } = await window.AdminAPI.query(
-      sb.from("checkins").select("*", { count: "exact" }).order("checked_in_at", { ascending: false }),
+      sb.from("checkins").select("*", { count: "exact" }).eq("invitation_id", window.AdminAPI.tenant.invitationId).order("checked_in_at", { ascending: false }),
       "Permintaan check-in"
     );
 
@@ -85,7 +83,7 @@
     if (!item) return;
     if (!confirm(`Hapus check-in "${item.guest_name}"? Tidak bisa dibatalkan.`)) return;
     btn.disabled = true;
-    const { error, count } = await sb.from("checkins").delete({ count: "exact" }).eq("guest_key", item.guest_key);
+    const { error, count } = await sb.from("checkins").delete({ count: "exact" }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("guest_key", item.guest_key);
     if (error) {
       btn.disabled = false;
       toast("Gagal menghapus: " + error.message, true);
@@ -227,6 +225,11 @@
       return null;
     }
     if (url.hostname !== location.hostname) return null;
+    // URL QR wajib berasal dari slug undangan yang sedang dikelola. Domain
+    // sama saja tidak cukup: petugas Siti-Ujang tidak boleh check-in tamu
+    // undangan lain di domain yang sama.
+    const scannedSlug = url.pathname.split("/").filter(Boolean)[0] || "root";
+    if (scannedSlug !== window.AdminAPI.tenant.slug) return null;
     const param = window.WEDDING_CONFIG.guestParam;
     const name = url.searchParams.get(param);
     return name ? decodeURIComponent(name.replace(/\+/g, " ")) : null;
@@ -238,7 +241,7 @@
   async function doCheckin(name) {
     const status = document.getElementById("scan-status");
     const { data, error } = await window.AdminAPI.query(
-      sb.rpc("checkin_guest", { p_to: name }),
+      sb.rpc("checkin_guest", { p_invitation_id: window.AdminAPI.tenant.invitationId, p_to: name }),
       "Check-in"
     );
     if (error) {
@@ -264,7 +267,7 @@
 
   async function loadLivestream() {
     const { data, error } = await window.AdminAPI.query(
-      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      sb.from("site_content").select("content").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1).maybeSingle(),
       "Permintaan livestream"
     );
     if (error && error.code !== "PGRST116") {
@@ -305,8 +308,6 @@
   document.getElementById("btn-save-livestream").addEventListener("click", saveLivestream);
 
   window.AdminShared.initAdminAuth({
-    email: ADMIN_EMAIL,
-    username: ADMIN_USERNAME,
     onSignedIn: () => loadCheckins(),
     tabHandlers: {
       // scanFrame() sengaja berhenti menjadwalkan dirinya sendiri saat panel

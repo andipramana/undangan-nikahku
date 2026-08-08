@@ -132,14 +132,30 @@
     };
   }
 
+  const tenant = window.TenantContext || { slug: "root", invitationId: null, setInvitation() {} };
+
+  async function requireTenantAccess() {
+    const { data, error } = await query(
+      sb.rpc("get_my_invitation_access", { p_slug: tenant.slug }),
+      "Verifikasi akses undangan"
+    );
+    const access = Array.isArray(data) ? data[0] : null;
+    if (error || !access || !access.invitation_id) {
+      await sb.auth.signOut();
+      throw new Error("Akun ini tidak berhak mengakses undangan ini.");
+    }
+    tenant.setInvitation({ id: access.invitation_id, slug: access.slug });
+    return access;
+  }
+
   window.AdminAPI = {
     sb,
     query,
-    // URL publik foto di bucket 'photos' (path relatif, mis. 'bride/01.webp')
+    tenant,
+    requireTenantAccess,
+    // URL publik foto di bucket 'photos' (path selalu slug/folder/file).
     photoUrl: (path) => sb.storage.from("photos").getPublicUrl(path).data.publicUrl,
     toast,
-    // Isi form Teks dari config.js kalau DB belum punya baris site_content —
-    // admin tetap bisa dipakai sebelum seed dijalankan.
     contentFromConfig: buildContentFromConfig
   };
   window.AdminToast = toast;
@@ -152,8 +168,10 @@
    * diterima untuk alat internal ini. Dipakai admin-qr (wajib) dan boleh juga
    * admin biasa untuk field livestream-nya. */
   async function saveLivestream(urls) {
+    const invitationId = tenant.invitationId;
+    if (!invitationId) return { data: null, error: new Error("Konteks undangan belum siap.") };
     const { data, error } = await query(
-      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      sb.from("site_content").select("content").eq("invitation_id", invitationId).eq("id", 1).maybeSingle(),
       "Permintaan teks"
     );
     // PGRST116 = baris belum ada — lanjut dengan starter dari config.js supaya
@@ -165,7 +183,7 @@
       : buildContentFromConfig(window.WEDDING_CONFIG);
     content.livestream = { ...(content.livestream || {}), ...urls };
     return query(
-      sb.from("site_content").upsert({ id: 1, content, updated_at: new Date().toISOString() }, { onConflict: "id" }),
+      sb.from("site_content").upsert({ invitation_id: invitationId, id: 1, content, updated_at: new Date().toISOString() }, { onConflict: "invitation_id,id" }),
       "Penyimpanan livestream"
     );
   }
@@ -199,10 +217,16 @@
    * menyegarkan token dan masih memegang kunci auth ketika .then() ini
    * dijalankan. */
   function initAdminAuth(opts) {
-    function showApp() {
-      document.getElementById("login-screen").hidden = true;
-      document.getElementById("app").hidden = false;
-      if (opts.onSignedIn) opts.onSignedIn();
+    async function showApp() {
+      try {
+        await requireTenantAccess();
+        document.getElementById("login-screen").hidden = true;
+        document.getElementById("app").hidden = false;
+        if (opts.onSignedIn) opts.onSignedIn();
+      } catch (err) {
+        document.getElementById("login-error").textContent = err.message || "Akses ditolak.";
+        showLogin();
+      }
     }
 
     function showLogin() {
@@ -232,13 +256,16 @@
       errorEl.textContent = "";
       const username = document.getElementById("login-username").value.trim();
       const password = document.getElementById("login-password").value;
-      if (username !== opts.username) {
-        errorEl.textContent = "Nama pengguna salah.";
+      // Tenant accounts dibuat dinamis oleh admin root, jadi identitas login
+      // tidak boleh lagi di-hardcode per halaman. Gunakan email akun Supabase.
+      const email = opts.email || username;
+      if (!email.includes("@")) {
+        errorEl.textContent = "Masukkan email akun admin yang terdaftar.";
         return;
       }
       const btn = document.getElementById("login-submit");
       btn.disabled = true;
-      const { error } = await sb.auth.signInWithPassword({ email: opts.email, password });
+      const { error } = await sb.auth.signInWithPassword({ email, password });
       btn.disabled = false;
       if (error) {
         errorEl.textContent =

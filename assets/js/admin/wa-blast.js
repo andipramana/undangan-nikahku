@@ -122,15 +122,15 @@
   async function load() {
     const [tplRes, conRes, setRes] = await Promise.all([
       window.AdminAPI.query(
-        sb.from("wa_templates").select("*").order("created_at", { ascending: true }),
+        sb.from("wa_templates").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("created_at", { ascending: true }),
         "Permintaan template"
       ),
       window.AdminAPI.query(
-        sb.from("wa_contacts").select("*").order("created_at", { ascending: true }),
+        sb.from("wa_contacts").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("created_at", { ascending: true }),
         "Permintaan kontak"
       ),
       window.AdminAPI.query(
-        sb.from("wa_settings").select("*").eq("id", 1).maybeSingle(),
+        sb.from("wa_settings").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1).maybeSingle(),
         "Permintaan pengaturan"
       )
     ]);
@@ -173,7 +173,7 @@
     const link = document.getElementById("wa-link").value.trim();
     const tmpl = document.getElementById("wa-default-template").value;
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_settings").update({ invitation_link: link, default_template: tmpl }).eq("id", 1),
+      sb.from("wa_settings").update({ invitation_link: link, default_template: tmpl }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1),
       "Penyimpanan pengaturan"
     );
     if (error) {
@@ -234,7 +234,7 @@
       return;
     }
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_templates").update({ name, body }).eq("id", t.id),
+      sb.from("wa_templates").update({ name, body }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", t.id),
       "Penyimpanan template"
     );
     if (error) {
@@ -255,7 +255,7 @@
 
   async function addTemplate() {
     const { data, error } = await window.AdminAPI.query(
-      sb.from("wa_templates").insert({ name: "Template baru", body: "" }).select().single(),
+      sb.from("wa_templates").insert({ invitation_id: window.AdminAPI.tenant.invitationId, name: "Template baru", body: "" }).select().single(),
       "Pembuatan template"
     );
     if (error) {
@@ -271,7 +271,7 @@
     if (!t) return;
     if (!confirm(`Hapus template "${t.name}"?\n\nKontak yang memakainya akan kembali ke template Default.`)) return;
     const { error, count } = await window.AdminAPI.query(
-      sb.from("wa_templates").delete({ count: "exact" }).eq("id", t.id),
+      sb.from("wa_templates").delete({ count: "exact" }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", t.id),
       "Penghapusan template"
     );
     if (error) {
@@ -349,7 +349,7 @@
     const sent = box.checked;
     const patch = { sent, sent_at: sent ? new Date().toISOString() : null };
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_contacts").update(patch).eq("id", c.id),
+      sb.from("wa_contacts").update(patch).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
       "Penyimpanan status"
     );
     if (error) {
@@ -365,7 +365,7 @@
   async function changeTemplate(c, sel) {
     const templateId = sel.value === "" ? null : Number(sel.value);
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_contacts").update({ template_id: templateId }).eq("id", c.id),
+      sb.from("wa_contacts").update({ template_id: templateId }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
       "Penyimpanan template"
     );
     if (error) {
@@ -397,7 +397,7 @@
     if (!confirm(`Hapus kontak "${c.name}" (${c.phone})?\n\nTidak bisa dibatalkan.`)) return;
     btn.disabled = true;
     const { error, count } = await window.AdminAPI.query(
-      sb.from("wa_contacts").delete({ count: "exact" }).eq("id", c.id),
+      sb.from("wa_contacts").delete({ count: "exact" }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
       "Penghapusan kontak"
     );
     if (error) {
@@ -504,7 +504,7 @@
     if (!ok) return;
     for (let i = 0; i < rows.length; i += 200) {
       const { error } = await window.AdminAPI.query(
-        sb.from("wa_contacts").insert(rows.slice(i, i + 200)),
+        sb.from("wa_contacts").insert(rows.slice(i, i + 200).map((row) => ({ ...row, invitation_id: window.AdminAPI.tenant.invitationId }))),
         "Penyimpanan kontak"
       );
       if (error) {
@@ -548,7 +548,7 @@
       return;
     }
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_contacts").insert({ name, phone }),
+      sb.from("wa_contacts").insert({ invitation_id: window.AdminAPI.tenant.invitationId, name, phone }),
       "Penyimpanan kontak"
     );
     if (error) {

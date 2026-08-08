@@ -263,7 +263,7 @@
 
   async function load() {
     const { data, error } = await window.AdminAPI.query(
-      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      sb.from("site_content").select("content").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1).maybeSingle(),
       "Permintaan tema"
     );
     // PGRST116 = baris belum ada — lanjut dengan default saja.
@@ -290,9 +290,9 @@
    * kotak preview tampil polos (background solid), bukan broken image. */
   async function fetchPreviewPhoto() {
     const queries = [
-      sb.from("photos").select("storage_path").eq("folder", "cover")
+      sb.from("photos").select("storage_path").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("folder", "cover")
         .order("sort_order", { ascending: true }).order("id", { ascending: true }).limit(1),
-      sb.from("photos").select("storage_path").order("id", { ascending: true }).limit(1)
+      sb.from("photos").select("storage_path").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("id", { ascending: true }).limit(1)
     ];
     for (const q of queries) {
       const { data, error } = await window.AdminAPI.query(q, "Permintaan foto preview");
@@ -540,7 +540,7 @@
 
   async function saveTheme() {
     const { data, error } = await window.AdminAPI.query(
-      sb.from("site_content").select("content").eq("id", 1).maybeSingle(),
+      sb.from("site_content").select("content").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1).maybeSingle(),
       "Permintaan teks"
     );
     // PGRST116 = baris belum ada — lanjut dengan starter dari config.js
@@ -556,8 +556,8 @@
     content.theme = JSON.parse(JSON.stringify(theme)); // salinan, bukan referensi state
     const res = await window.AdminAPI.query(
       sb.from("site_content").upsert(
-        { id: 1, content, updated_at: new Date().toISOString() },
-        { onConflict: "id" }
+        { invitation_id: window.AdminAPI.tenant.invitationId, id: 1, content, updated_at: new Date().toISOString() },
+        { onConflict: "invitation_id,id" }
       ),
       "Penyimpanan tema"
     );

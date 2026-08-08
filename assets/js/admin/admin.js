@@ -12,14 +12,12 @@
  *    rahasia (email admin boleh terlihat), sedangkan kata sandi rahasia.
  */
 (function () {
-  const ADMIN_EMAIL = "admin@mitaandi.wedding";
-  const ADMIN_USERNAME = "Mita&Andi";
-
+  // Tenant accounts are provisioned dynamically; the login form supplies email.
   window.AdminShared.initAdminAuth({
-    email: ADMIN_EMAIL,
-    username: ADMIN_USERNAME,
     // Tab Teks adalah tab aktif saat app tampil — muat isinya begitu login.
     onSignedIn: async () => {
+      const preview = document.getElementById("preview-invitation");
+      if (preview) preview.href = window.AdminAPI.tenant.path();
       if (window.ContentPanel && window.ContentPanel.load) await window.ContentPanel.load();
       // Menu lompat-section butuh fieldset #sec-... yang baru ada setelah form
       // tab Teks dirender — init di sini, bukan di awal halaman.

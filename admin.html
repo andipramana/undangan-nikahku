@@ -31,8 +31,8 @@
     <h1>Panel Admin</h1>
     <p class="login-hint">Mita &amp; Andi — The Wedding</p>
     <label>
-      Nama pengguna
-      <input type="text" id="login-username" autocomplete="username" required>
+      Email admin
+      <input type="email" id="login-username" autocomplete="username" required>
     </label>
     <label>
       Kata sandi
@@ -48,7 +48,7 @@
   <header class="topbar">
     <h1>Admin — Mita &amp; Andi</h1>
     <div class="topbar__actions">
-      <a class="btn btn--ghost" href="index.html" target="_blank" rel="noopener">Pratinjau undangan</a>
+      <a id="preview-invitation" class="btn btn--ghost" href="/" target="_blank" rel="noopener">Pratinjau undangan</a>
       <button type="button" class="btn btn--ghost" id="btn-logout">Keluar</button>
     </div>
   </header>
@@ -228,6 +228,7 @@
 </div><!-- /app-frame -->
 
 <script src="assets/js/config.js"></script>
+<script src="assets/js/tenant.js"></script>
 <!-- Tata letak grid galeri, dipakai bersama halaman undangan: editor pan/zoom
      memakainya untuk membentuk bingkai pratinjau sesuai kotak asli tiap foto. -->
 <script src="assets/js/gallery-layout.js"></script>
