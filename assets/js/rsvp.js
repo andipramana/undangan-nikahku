@@ -18,6 +18,19 @@ window.initRsvp = function () {
   if (guestFromUrl) nameInput.value = guestFromUrl;
 
   const statusLabel = { hadir: "Hadir", tidak_hadir: "Tidak Hadir", ragu: "Ragu-ragu" };
+  // Token acak per browser, bukan IP/fingerprint. Nilai ini menjadi kunci blokir
+  // tenant-scoped di server jika admin memilih "Hapus & blokir perangkat".
+  function deviceToken() {
+    const key = "wedding-wish-device-token";
+    let value = localStorage.getItem(key);
+    if (!value) {
+      value = crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+        const r = Math.floor(Math.random() * 16); return (c === "x" ? r : (r & 3) | 8).toString(16);
+      });
+      localStorage.setItem(key, value);
+    }
+    return value;
+  }
 
   // Pilihan kehadiran pakai tombol capsule (bukan dropdown). Belum ada yang
   // terpilih di awal — tamu harus klik dulu, jangan diasumsikan "Hadir".
@@ -119,16 +132,24 @@ window.initRsvp = function () {
     // Minta baris yang baru dibuat dikembalikan. Mengandalkan query ulang saja
     // membuat UI terasa tertinggal ketika replica/edge cache Supabase belum
     // melihat insert yang baru selesai — ucapan baru muncul setelah refresh.
-    const { data: createdWish, error } = await window.sb
-      .from(window.WEDDING_CONFIG.supabase.wishesTable)
-      .insert(payload)
-      .select()
-      .single();
+    const token = deviceToken();
+    const { data: createdWish, error } = token
+      ? await window.sb.rpc("submit_wish", {
+          p_invitation_id: payload.invitation_id, p_device_token: token,
+          p_name: payload.name, p_attendance: payload.attendance,
+          p_guest_count: payload.guest_count, p_message: payload.message
+        })
+      // LAN HTTP lama tanpa crypto.randomUUID tetap memakai jalur legacy sampai
+      // browser mendapat secure context; deployment normal memakai RPC aman.
+      : await window.sb.from(window.WEDDING_CONFIG.supabase.wishesTable).insert(payload).select().single();
     submitBtn.disabled = false;
 
     if (error) {
       console.error(error);
-      statusEl.textContent = "Gagal mengirim. Silakan coba lagi.";
+      // Pesan dari RPC sengaja santun untuk perangkat diblokir maupun filter kata.
+      statusEl.textContent = /Doa baik akan kembali kepada orang yang mendoakan/i.test(error.message || "")
+        ? "Doa baik akan kembali kepada orang yang mendoakan."
+        : "Gagal mengirim. Silakan coba lagi.";
       return;
     }
 
