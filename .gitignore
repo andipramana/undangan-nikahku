@@ -9,3 +9,10 @@ assets/img_backup/
 # graphify-axet (tool lokal — tidak ikut repo)
 .graphify/
 .graphifyignore
+
+# Tooling/session lokal Hermes
+.hermes/
+
+# Hasil dump schema Supabase untuk inspeksi lokal (bukan migration)
+supabase/remote-public-schema.sql
+supabase/*-schema.sql
