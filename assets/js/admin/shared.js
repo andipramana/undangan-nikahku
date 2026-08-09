@@ -291,6 +291,8 @@
         // admin pindah ke tab lain.
         const fontsSave = document.getElementById("btn-save-fonts");
         if (fontsSave) fontsSave.hidden = btn.dataset.tab !== "fonts";
+        const visualSave = document.getElementById("btn-save-visual-editor");
+        if (visualSave) visualSave.hidden = btn.dataset.tab !== "editor-visual";
         const handler = opts.tabHandlers && opts.tabHandlers[btn.dataset.tab];
         if (handler) handler();
       });

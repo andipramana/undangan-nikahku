@@ -32,7 +32,8 @@
       wa: () => { if (window.WaBlast) window.WaBlast.load(); },
       // Tampilan juga khusus admin.html (tema warna di luar scope check-in).
       tampilan: () => { if (window.ThemePanel) window.ThemePanel.load(); },
-      fonts: () => { if (window.FontsPanel) window.FontsPanel.load(); }
+      fonts: () => { if (window.FontsPanel) window.FontsPanel.load(); },
+      "editor-visual": () => { if (window.VisualEditorPanel) window.VisualEditorPanel.load(); }
     }
   });
 })();

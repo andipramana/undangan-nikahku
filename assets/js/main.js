@@ -244,6 +244,9 @@
       cfg,
       guestName
     );
+
+    // Jalankan paling akhir: teks closing dan elemen dinamis sudah tersedia.
+    if (window.applyVisualEditorOverrides) window.applyVisualEditorOverrides(cfg);
   }
 
   function setupCalendarLink(cfg) {
