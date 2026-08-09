@@ -33,7 +33,7 @@ try {
     });
     if (result.scrollWidth > result.clientWidth) throw new Error(`${width}px: horizontal overflow (${result.scrollWidth}/${result.clientWidth})`);
     if (result.cta.height < 44 || result.cta.width < 100) throw new Error(`${width}px: hero CTA target too small`);
-    if (!result.featureCta || result.featureCta.height < 44 || result.featureCount < 6) throw new Error(`${width}px: complete feature anchor/list unavailable`);
+    if (!result.featureCta || result.featureCta.height < 44 || result.featureCount < 9) throw new Error(`${width}px: complete feature anchor/list unavailable`);
     if (result.stickyDisplay === "none" || result.sticky.height < 44) throw new Error(`${width}px: sticky WhatsApp CTA unavailable`);
     if (result.media.top < result.hero.top || result.media.bottom > result.hero.bottom + 1) throw new Error(`${width}px: hero media escaped its section`);
     await page.screenshot({ path: `test-results/landing-mobile-${width}.png`, fullPage: false });
