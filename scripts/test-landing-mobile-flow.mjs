@@ -13,7 +13,7 @@ try {
         return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height };
       };
       const heroCta = [...document.querySelectorAll("a")].find((link) => link.getAttribute("href") === "/demo/");
-      const featureCta = [...document.querySelectorAll("a")].find((link) => link.getAttribute("href") === "#fitur");
+      const featureCta = [...document.querySelectorAll("a")].find((link) => link.getAttribute("href") === "/home/#fitur");
       const sticky = rect(".mobile-chat");
       const hero = rect(".hero");
       const media = rect(".hero-visual");
