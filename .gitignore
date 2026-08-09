@@ -19,3 +19,6 @@ supabase/*-schema.sql
 
 # Artifact build GitHub Pages (dibuat ulang oleh scripts/build-pages-dist.mjs)
 dist/
+
+# Screenshot/artifact verifikasi browser lokal
+test-results/
