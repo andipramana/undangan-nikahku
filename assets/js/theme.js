@@ -50,6 +50,10 @@ window.applyTheme = function (cfg) {
     if (colors[k]) root.setProperty(map[k], colors[k]);
   });
 
+  // Tipografi per kelompok elemen dari tab Font admin. Font dimuat dari
+  // Google Fonts bila belum ada, lalu diterapkan hanya ke selector miliknya.
+  applyTypography((cfg && cfg.typography) || {});
+
   const ov = t.overlays || {};
 
   // Golden hour global (.app-frame::after — pseudo-element, tidak bisa
@@ -102,3 +106,49 @@ window.applyTheme = function (cfg) {
     });
   }
 };
+
+/** Terapkan font per tulisan/elemen dari tab Font admin. Tanpa setting
+ * tersimpan, CSS awal tidak disentuh sehingga desain bawaan tetap identik. */
+function applyTypography(typography) {
+  const selectors = {
+    "cover-eyebrow": ".cover-eyebrow", "cover-names": ".cover-names, #couple-names-cover",
+    "cover-guest": ".guest-label, .guest-name", "cover-button": ".btn-open",
+    "opening-eyebrow": "#opening .eyebrow", "opening-names": "#couple-names-opening",
+    "opening-date": ".save-date, .cover-countdown__date", "opening-quote": ".opening-quote",
+    "couple-eyebrow": "#couple .section-eyebrow", "couple-title": "#couple .section-title--script",
+    "couple-name": ".couple-info__name", "couple-label": ".couple-info__label, .couple-info__parents",
+    "event-eyebrow": "#event .section-eyebrow", "event-title": "#event .section-title",
+    "event-label": ".event-label", "event-date": ".event-num, .event-day, .event-month, .event-year, .event-time",
+    "event-venue": ".event-place h3, .event-place p", "dresscode": ".dresscode-label, .dresscode-text",
+    "story-title": "#love-story .section-title--script", "story-content": ".timeline-item h4, .timeline-item p",
+    "gallery-title": "#gallery .section-title--script", "quote": ".quote-text",
+    "gift-title": "#gift .section-title", "gift-content": ".gift-account__bank, .gift-account__number, .gift-rec-card__name, .gift-rec-card__price",
+    "gift-button": "#gift .btn-primary, #gift .btn-outline, #gift .btn-text", "rsvp-title": "#rsvp .section-title",
+    "rsvp-form": ".rsvp-form label, .rsvp-form input, .rsvp-form select, .rsvp-form textarea, .rsvp-pill, #rsvp-submit",
+    "wishes": ".wishes-heading p, .wishes-intro, .wish-card__name, .wish-card__status, .wish-card__message",
+    "closing-text": ".closing-text, footer", "closing-names": "#couple-names-closing"
+  };
+  const values = (typography && typography.elements) || {};
+  Object.entries(values).forEach(([key, setting]) => {
+    const selector = selectors[key];
+    if (!selector || !setting) return;
+    const family = String(setting.family || "").trim();
+    if (family) loadTypographyFont(family);
+    document.querySelectorAll(selector).forEach((el) => {
+      if (family) el.style.fontFamily = `"${family.replace(/"/g, "")}", sans-serif`;
+      if (setting.size !== "" && Number(setting.size) > 0) el.style.fontSize = `${Number(setting.size)}px`;
+      if (setting.weight !== "" && Number(setting.weight) >= 100) el.style.fontWeight = String(Number(setting.weight));
+      if (setting.color) el.style.color = String(setting.color);
+    });
+  });
+}
+
+function loadTypographyFont(family) {
+  const id = "dynamic-font-" + encodeURIComponent(family).replace(/%/g, "");
+  if (document.getElementById(id)) return;
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = "https://fonts.googleapis.com/css2?family=" + encodeURIComponent(family).replace(/%20/g, "+") + ":wght@300;400;500;600;700&display=swap";
+  document.head.appendChild(link);
+}

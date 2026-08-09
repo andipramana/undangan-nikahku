@@ -344,12 +344,10 @@
       <p class="section-eyebrow" data-reveal="up">RSVP</p>
       <h2 class="section-title" data-reveal="up" style="--reveal-i:1">Konfirmasi Kehadiran</h2>
 
-      <!-- Satu paket: form RSVP + daftar ucapan tampil BERSAMAAN begitu section
-           ini masuk layar — tamu tidak perlu scroll lagi cuma untuk memunculkan
-           kartu ucapan satu-satu (data-reveal="fade" di sini murni penanda
-           kapan grup ini sudah tampil, dipakai rsvp.js untuk kartu ucapan yang
-           dirender belakangan — lihat komentar renderWishes()). -->
-      <div class="rsvp-wrap" data-reveal="fade" data-reveal-group>
+      <!-- Form tampil sebagai satu kartu saat RSVP masuk layar. Daftar ucapan
+           SENGAJA bukan bagian reveal group: masing-masing kartu punya pemicu
+           sendiri ketika baru memasuki area bawah viewport. -->
+      <div class="rsvp-wrap" data-reveal="fade">
         <form id="rsvp-form" class="rsvp-form">
           <label data-reveal="up">
             Nama
@@ -365,16 +363,25 @@
           </label>
           <label data-reveal="up" style="--reveal-i:2">
             Jumlah Tamu
-            <input type="number" id="rsvp-guests" name="guest_count" min="1" max="10" value="1">
+            <select id="rsvp-guests" name="guest_count" aria-label="Jumlah tamu">
+              <option value="1">1 orang</option>
+              <option value="2">2 orang</option>
+              <option value="3">3 orang</option>
+              <option value="4">4 orang</option>
+            </select>
           </label>
           <label data-reveal="up" style="--reveal-i:3">
             Ucapan &amp; Doa
-            <textarea id="rsvp-message" name="message" rows="3" required></textarea>
+            <textarea id="rsvp-message" name="message" rows="4" placeholder="Tuliskan doa terbaik Anda untuk kami…" required></textarea>
           </label>
-          <button type="submit" class="btn-primary" id="rsvp-submit" data-reveal="pop" style="--reveal-i:4">Kirim</button>
+          <button type="submit" class="btn-primary" id="rsvp-submit" data-reveal="pop" style="--reveal-i:4">Kirim Konfirmasi</button>
           <p id="rsvp-status" class="rsvp-status" role="status"></p>
         </form>
 
+        <div class="wishes-heading" aria-hidden="true">
+          <span></span><p>DOA &amp; UCAPAN</p><span></span>
+        </div>
+        <p class="wishes-intro">Doa baik dan ucapan hangat dari orang-orang terkasih.</p>
         <div id="wishes-list" class="wishes-list" aria-live="polite"></div>
       </div>
     </section>

@@ -31,7 +31,8 @@
       // dipanggil di sana.
       wa: () => { if (window.WaBlast) window.WaBlast.load(); },
       // Tampilan juga khusus admin.html (tema warna di luar scope check-in).
-      tampilan: () => { if (window.ThemePanel) window.ThemePanel.load(); }
+      tampilan: () => { if (window.ThemePanel) window.ThemePanel.load(); },
+      fonts: () => { if (window.FontsPanel) window.FontsPanel.load(); }
     }
   });
 })();

@@ -34,6 +34,11 @@
     return `${cfg.url}/storage/v1/object/public/photos/${path}`;
   };
 
+  // Backsound memakai bucket yang sama, tetapi path-nya selalu tenant-scoped:
+  // <slug>/audio/<uuid>.<ext>. Dengan begitu undangan tidak pernah menunjuk
+  // atau menimpa file audio milik tenant lain.
+  window.audioUrl = window.photoUrl;
+
   // Versi di kunci membedakan bentuk payload kalau skema berubah nanti —
   // cadangan lama yang bentuknya beda tidak boleh dipakai.
   const tenant = window.TenantContext || { slug: "root", setInvitation() {} };

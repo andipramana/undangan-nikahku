@@ -4,7 +4,12 @@ window.initAudioPlayer = function () {
   const btn = document.getElementById("audio-toggle");
   if (!audio || !btn) return;
 
-  audio.src = window.WEDDING_CONFIG.audio.src;
+  const audioConfig = window.WEDDING_CONFIG.audio || {};
+  // Audio unggahan admin disimpan sebagai path tenant di Storage. `src` hanya
+  // fallback untuk instalasi lama yang masih memakai file lokal/URL langsung.
+  audio.src = audioConfig.path && window.audioUrl
+    ? window.audioUrl(audioConfig.path)
+    : audioConfig.src || "";
   audio.volume = 0.6;
 
   function play() {

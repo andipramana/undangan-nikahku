@@ -696,6 +696,25 @@ h1, h2 { font-weight: 500; margin: 0; }
 .theme-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
 .theme-preview-upload { margin-bottom: .6rem; }
 
+/* ---------- Tab Font ---------- */
+.font-list { display: grid; gap: .85rem; }
+.font-card {
+  padding: .9rem; border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--bg-2);
+}
+.font-card h3 { margin: 0 0 .65rem; font-size: .9rem; font-weight: 600; color: var(--gold-soft); }
+.font-card .form-field { margin-bottom: .65rem; }
+.font-card .form-field:last-child { margin-bottom: 0; }
+.font-preview {
+  min-height: 4.6rem; display: flex; align-items: center; padding: .75rem;
+  margin: 0 0 .8rem; overflow: hidden; border: 1px solid rgba(201,166,104,.38);
+  border-radius: 8px; background: linear-gradient(135deg, rgba(201,166,104,.13), rgba(255,255,255,.025));
+  color: var(--text); line-height: 1.25; word-break: break-word;
+}
+.font-custom { letter-spacing: 0; text-transform: none; }
+@media (min-width: 620px) { .font-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+
 /* Baris overlay: kotak preview di kiri, field (toggle + warna) di kanan */
 .theme-row--overlay { align-items: stretch; }
 .theme-preview {

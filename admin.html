@@ -60,6 +60,7 @@
     <button type="button" class="tab" data-tab="wishes">Ucapan</button>
     <button type="button" class="tab" data-tab="wa">Kirim WA</button>
     <button type="button" class="tab" data-tab="tampilan">Tampilan</button>
+    <button type="button" class="tab" data-tab="fonts">Font</button>
   </nav>
 
   <!-- ============ TAB TEKS ============ -->
@@ -136,6 +137,11 @@
        field lain di site_content tidak ikut tertimpa. -->
   <main id="tab-tampilan" class="panel" hidden>
     <div id="theme-root"></div>
+  </main>
+
+  <!-- ============ TAB FONT ============ -->
+  <main id="tab-fonts" class="panel" hidden>
+    <div id="fonts-root"></div>
   </main>
 </div>
 </div><!-- /app-frame__scroll -->
@@ -225,6 +231,9 @@
      tidak berubah. -->
 <button type="submit" form="content-form" class="btn btn--primary btn-save-float"
         id="btn-save-content" hidden>Simpan semua</button>
+<button type="button" class="btn btn--primary btn-save-float" id="btn-save-fonts" hidden>
+  Simpan font
+</button>
 
 </div><!-- /app-frame -->
 
@@ -251,5 +260,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="assets/js/admin/wa-blast.js"></script>
 <script src="assets/js/admin/theme.js"></script>
+<script src="assets/js/admin/fonts.js"></script>
 </body>
 </html>

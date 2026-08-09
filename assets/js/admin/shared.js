@@ -127,7 +127,9 @@
         ? c.giftRecommendations.map((r) => ({ ...r }))
         : [],
       heroSlideInterval: c.heroSlideInterval,
-      audio: { src: c.audio.src, title: c.audio.title },
+      // `path` adalah objek Storage privat per-undangan (slug/audio/uuid.ext).
+      // `src` dipertahankan untuk backsound lokal/URL lama sebagai fallback.
+      audio: { src: c.audio.src, path: (c.audio && c.audio.path) || "", title: c.audio.title },
       closing: { text: c.closing.text }
     };
   }
@@ -285,6 +287,10 @@
         document.querySelectorAll(".panel").forEach((p) => { p.hidden = true; });
         const panel = document.getElementById("tab-" + btn.dataset.tab);
         if (panel) panel.hidden = false;
+        // Tombol simpan mengambang khusus tab Font tidak boleh tertinggal saat
+        // admin pindah ke tab lain.
+        const fontsSave = document.getElementById("btn-save-fonts");
+        if (fontsSave) fontsSave.hidden = btn.dataset.tab !== "fonts";
         const handler = opts.tabHandlers && opts.tabHandlers[btn.dataset.tab];
         if (handler) handler();
       });

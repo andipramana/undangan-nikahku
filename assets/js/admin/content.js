@@ -64,6 +64,11 @@
     if (c.gift.contactCPP === undefined) c.gift.contactCPP = "";
     if (c.gift.contactCPW === undefined) c.gift.contactCPW = "";
     if (!Array.isArray(c.giftRecommendations)) c.giftRecommendations = [];
+    // Backward-compatible: undangan lama hanya punya audio.src lokal/URL.
+    if (!isPlainObject(c.audio)) c.audio = {};
+    if (typeof c.audio.src !== "string") c.audio.src = "";
+    if (typeof c.audio.path !== "string") c.audio.path = "";
+    if (typeof c.audio.title !== "string") c.audio.title = "";
     // Sapaan tamu per kelompok nama (Bagian D) — kosong = fallback "Kepada Yth."
     if (!Array.isArray(c.guestGreetings)) c.guestGreetings = [];
     if (c.defaultGuestGreeting === undefined) c.defaultGuestGreeting = "Kepada Yth.";
@@ -263,9 +268,13 @@
         ${section("lainnya", "Lainnya", `
           <div class="form-grid">
             ${field("Jeda slideshow hero (ms)", "f-hero-interval", "number")}
-            ${field("Audio — sumber", "f-audio-src")}
             ${field("Audio — judul", "f-audio-title")}
           </div>
+          <label class="form-field">
+            <span>Ganti backsound (MP3, M4A, WAV, OGG; maks. 15 MB)</span>
+            <input type="file" id="f-audio-file" accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/ogg,.mp3,.m4a,.wav,.ogg">
+          </label>
+          <p class="muted" id="audio-upload-status">${c.audio.path ? `Backsound tersimpan: ${esc(c.audio.path.split("/").pop())}` : "Belum ada backsound unggahan; file/URL lama tetap dipakai bila tersedia."}</p>
         `)}
       </form>
     `;
@@ -611,7 +620,7 @@
   // -------------------------------------------------------------------------
   // Simpan
   // -------------------------------------------------------------------------
-  function onSave(e) {
+  async function onSave(e) {
     e.preventDefault();
     // Field tunggal (non-daftar) dibaca dari DOM ke state. Bagian berulang
     // sudah menulis ke state saat mengetik, jadi tidak disentuh di sini.
@@ -665,7 +674,6 @@
     grab("f-gift-detail", "gift.address.detail");
     grab("f-gift-template-kado", "gift.address.template");
     grab("f-hero-interval", "heroSlideInterval", "number");
-    grab("f-audio-src", "audio.src");
     grab("f-audio-title", "audio.title");
     grab("f-closing-text", "closing.text");
 
@@ -680,14 +688,48 @@
     }
 
     const btn = document.getElementById("btn-save-content");
+    const fileInput = document.getElementById("f-audio-file");
+    const audioFile = fileInput && fileInput.files && fileInput.files[0];
     btn.disabled = true;
-    sb.from("site_content")
-      .upsert({ invitation_id: window.AdminAPI.tenant.invitationId, id: 1, content, updated_at: new Date().toISOString() }, { onConflict: "invitation_id,id" })
-      .then(({ error }) => {
-        btn.disabled = false;
-        if (error) toast("Gagal menyimpan: " + error.message, true);
-        else toast("Tersimpan ✓");
-      });
+
+    try {
+      if (audioFile) {
+        const allowed = /\.(mp3|m4a|wav|ogg)$/i;
+        if (!allowed.test(audioFile.name) || audioFile.size > 15 * 1024 * 1024) {
+          throw new Error("Backsound harus MP3, M4A, WAV, atau OGG dengan ukuran maksimal 15 MB.");
+        }
+        const ext = audioFile.name.split(".").pop().toLowerCase();
+        // crypto.randomUUID hanya tersedia di secure context (HTTPS/localhost).
+        // Saat admin dibuka melalui IP LAN HTTP, gunakan fallback unik yang sama
+        // dengan upload foto agar proses tetap jalan tanpa tabrakan path.
+        const id = (window.crypto && typeof window.crypto.randomUUID === "function")
+          ? window.crypto.randomUUID()
+          : `a${Date.now()}${Math.random().toString(16).slice(2)}`;
+        const audioPath = `${window.AdminAPI.tenant.slug}/audio/${id}.${ext}`;
+        const { error: uploadError } = await sb.storage.from("photos").upload(audioPath, audioFile, {
+          contentType: audioFile.type || `audio/${ext}`,
+          upsert: false
+        });
+        if (uploadError) throw new Error("Upload backsound gagal: " + uploadError.message);
+        // Hanya path baru ini yang disimpan. UUID + prefix slug mencegah sebuah
+        // undangan menimpa file audio undangan lain, bahkan jika nama file sama.
+        content.audio.path = audioPath;
+        content.audio.src = "";
+      }
+
+      const { error } = await sb
+        .from("site_content")
+        .upsert(
+          { invitation_id: window.AdminAPI.tenant.invitationId, id: 1, content, updated_at: new Date().toISOString() },
+          { onConflict: "invitation_id,id" }
+        );
+      if (error) throw new Error(error.message);
+      toast(audioFile ? "Backsound dan konten tersimpan ✓" : "Tersimpan ✓");
+    } catch (err) {
+      toast("Gagal menyimpan: " + err.message, true);
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   // -------------------------------------------------------------------------

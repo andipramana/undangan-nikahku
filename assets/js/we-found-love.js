@@ -11,11 +11,8 @@
  *    bawaan, tiap slide akan terasa melambat di ujungnya dan hanyutannya
  *    tersendat-sendat, bukan rata.
  *
- * 2. Digeser jari seperti menggulir daftar — `freeMode` melepas kewajiban
- *    berhenti pas di tepi foto, `momentum` membuat lemparan meluncur lalu
- *    melambat sendiri. `sticky: false` penting: kalau true, di akhir luncuran
- *    pita akan menarik diri agar rapi ke foto terdekat, dan rasa "lempar
- *    bebas"-nya hilang. */
+ * 2. Tetap dapat disentuh/digeser tamu. Setelah interaksi, autoplay langsung
+ *    mengambil alih lagi agar pita tetap mengalir terus. */
 window.initWeFoundLove = async function () {
   const wrapper = document.getElementById("wfl-slider-wrapper");
   if (!wrapper) return;
@@ -38,16 +35,26 @@ window.initWeFoundLove = async function () {
       // menentukan KECEPATAN aliran, bukan lagi lama sebuah transisi.
       speed: 4000,
       observer: true,
+      // freeMode menghentikan siklus autoplay Swiper setelah transisi pertama
+      // pada konfigurasi loop + delay: 0. Autoplay linear tetap bisa disentuh
+      // dan akan langsung melanjutkan aliran sesudah interaksi.
+      freeMode: false,
       autoplay: {
         delay: 0, // tanpa jeda antar foto -> aliran tak terputus
-        disableOnInteraction: false // digeser tamu, alirannya lanjut lagi
+        disableOnInteraction: false, // digeser tamu, alirannya lanjut lagi
+        waitForTransition: false
       },
-      freeMode: {
-        enabled: true,
-        momentum: true,
-        momentumRatio: 1,
-        momentumVelocityRatio: 1,
-        sticky: false // jangan merapikan diri ke tepi foto di akhir luncuran
+      // Swiper 11 dapat membiarkan timer autoplay berstatus "running" namun
+      // tidak menjadwalkan langkah berikutnya setelah transisi loop pertama.
+      // Memulai ulang timer tepat di akhir setiap transisi memastikan pita
+      // langsung meneruskan perjalanan tanpa jeda.
+      on: {
+        transitionEnd(instance) {
+          if (!instance.destroyed && instance.autoplay.running) {
+            instance.autoplay.stop();
+            instance.autoplay.start();
+          }
+        }
       },
       breakpoints: {
         768: { slidesPerView: 5, spaceBetween: 14 }

@@ -4,6 +4,11 @@ window.initRsvp = function () {
   const statusEl = document.getElementById("rsvp-status");
   const listEl = document.getElementById("wishes-list");
   const nameInput = document.getElementById("rsvp-name");
+  // Cache daftar terakhir agar ucapan yang baru berhasil diinsert bisa langsung
+  // dirender tanpa menunggu query ulang ke server. Versi ini juga melindungi
+  // kartu baru dari respons load awal yang datang terlambat.
+  let currentWishes = [];
+  let wishesVersion = 0;
   if (!form) return;
 
   const params = new URLSearchParams(location.search);
@@ -42,39 +47,33 @@ window.initRsvp = function () {
   }
 
   function renderWishes(items) {
-    if (!items.length) {
+    currentWishes = Array.isArray(items) ? items : [];
+    if (!currentWishes.length) {
       listEl.innerHTML =
-        '<p style="opacity:.6;font-size:.85rem;text-align:center;">Jadilah yang pertama memberi ucapan.</p>';
+        '<p class="wishes-empty">Jadilah yang pertama memberi ucapan dan doa terbaik.</p>';
       return;
     }
     listEl.innerHTML = items
       .map(
         (w, i) => `
-      <div class="wish-card" data-reveal="${i % 2 ? "slide-left" : "slide-right"}" style="--reveal-i:${i % 4}">
+      <div class="wish-card" data-reveal="${i % 2 ? "slide-left" : "slide-right"}" data-reveal-early style="--reveal-i:${i % 4}">
         <span class="wish-card__name">${escapeHtml(w.name)}</span>
         <span class="wish-card__status wish-card__status--${w.attendance || ""}">${statusLabel[w.attendance] || ""}</span>
         <p class="wish-card__message">${escapeHtml(w.message)}</p>
       </div>`
       )
       .join("");
-    // Kartu ucapan ikut SATU PAKET dengan form RSVP (data-reveal-group di
-    // .rsvp-wrap, index.html) — begitu grup itu tampil, revealGroup() sendiri
-    // yang mengambil kartu-kartu ini (asal sudah ada di DOM saat itu). Tapi
-    // kalau grup itu SUDAH tampil lebih dulu (fetch lambat, atau render ulang
-    // setelah tamu ini kirim RSVP baru sambil sudah melihat section-nya),
-    // revealScan tidak akan mendaftarkan kartu ini lagi (elemen di dalam grup
-    // sengaja dilewati — lihat insideGroup() di reveal.js) sehingga tidak ada
-    // yang memicunya lagi: reveal LANGSUNG (revealNow) untuk kasus itu.
-    const wrap = listEl.closest("[data-reveal-group]");
-    if (wrap && wrap.classList.contains("is-revealed")) {
-      if (window.revealNow) window.revealNow(listEl);
-    } else if (window.revealScan) {
-      window.revealScan(listEl);
-    }
+    // Kartu dipantau terpisah agar muncul berurutan hanya ketika benar-benar
+    // masuk dari area bawah viewport (data-reveal-early), bukan bersamaan saat
+    // tombol kirim/form RSVP selesai dianimasikan.
+    if (window.revealScan) window.revealScan(listEl);
   }
 
   async function loadWishes() {
     if (!window.sb) return;
+    // Snapshot sebelum request: jika tamu submit sementara request ini masih
+    // berjalan, respons lama tidak boleh menghapus kartu yang sudah tampil.
+    const requestVersion = wishesVersion;
     const { data, error } = await window.sb
       .from(window.WEDDING_CONFIG.supabase.wishesTable)
       .select("*")
@@ -85,6 +84,7 @@ window.initRsvp = function () {
       console.error(error);
       return;
     }
+    if (requestVersion !== wishesVersion) return;
     renderWishes(data || []);
   }
 
@@ -116,7 +116,14 @@ window.initRsvp = function () {
       message: document.getElementById("rsvp-message").value.trim()
     };
 
-    const { error } = await window.sb.from(window.WEDDING_CONFIG.supabase.wishesTable).insert(payload);
+    // Minta baris yang baru dibuat dikembalikan. Mengandalkan query ulang saja
+    // membuat UI terasa tertinggal ketika replica/edge cache Supabase belum
+    // melihat insert yang baru selesai — ucapan baru muncul setelah refresh.
+    const { data: createdWish, error } = await window.sb
+      .from(window.WEDDING_CONFIG.supabase.wishesTable)
+      .insert(payload)
+      .select()
+      .single();
     submitBtn.disabled = false;
 
     if (error) {
@@ -125,10 +132,17 @@ window.initRsvp = function () {
       return;
     }
 
+    // Render hasil insert secara optimistis dari respons server. Jadi kartu
+    // langsung tampil tanpa reload; setiap request lama menjadi basi dan tidak
+    // boleh menimpa daftar ini ketika responsnya baru tiba.
+    wishesVersion += 1;
+    if (createdWish) renderWishes([createdWish, ...currentWishes]);
     statusEl.textContent = "Terima kasih atas doa dan ucapannya!";
     form.reset();
     if (guestFromUrl) nameInput.value = guestFromUrl;
-    loadWishes();
+    // Jangan langsung query ulang di sini: respons baca yang terlambat dapat
+    // mengembalikan daftar lama dan menimpa kartu yang baru saja dirender.
+    // Sinkronisasi normal tetap terjadi saat halaman dibuka kembali.
   });
 
   loadWishes();
