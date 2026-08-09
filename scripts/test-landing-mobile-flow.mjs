@@ -12,10 +12,10 @@ try {
         const r = el.getBoundingClientRect();
         return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height };
       };
-      const heroCta = [...document.querySelectorAll("a")].find((link) => link.textContent.includes("Lihat demo dulu"));
-      const sticky = rect(".sticky-cta");
+      const heroCta = [...document.querySelectorAll("a")].find((link) => link.textContent.includes("Lihat demo"));
+      const sticky = rect(".mobile-chat");
       const hero = rect(".hero");
-      const media = rect(".hero-media");
+      const media = rect(".hero-visual");
       const cta = heroCta.getBoundingClientRect();
       return {
         scrollWidth: document.documentElement.scrollWidth,
@@ -24,7 +24,7 @@ try {
         media,
         cta: { width: cta.width, height: cta.height, bottom: cta.bottom },
         sticky,
-        stickyDisplay: getComputedStyle(document.querySelector(".sticky-cta")).display,
+        stickyDisplay: getComputedStyle(document.querySelector(".mobile-chat")).display,
       };
     });
     if (result.scrollWidth > result.clientWidth) throw new Error(`${width}px: horizontal overflow (${result.scrollWidth}/${result.clientWidth})`);
