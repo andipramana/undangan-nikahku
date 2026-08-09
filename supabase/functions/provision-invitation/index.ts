@@ -101,35 +101,72 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ deleted: true, retainedUserIds: retained }), { headers });
   }
 
-  const copyPhotos = async (fromInvitationId: string, toInvitationId: string) => {
-    const { data: sourcePhotos, error: sourceError } = await admin.from("photos").select("folder,storage_path,sort_order,focal_x,focal_y,zoom,alt,width,height,gallery_layout,gallery_row").eq("invitation_id", fromInvitationId).order("folder").order("sort_order").order("id");
-    if (sourceError) throw new Error(sourceError.message);
+  type TemplatePhoto = { folder: string; storage_path: string; sort_order: number; focal_x: number; focal_y: number; zoom: number; alt: string; width: number | null; height: number | null; gallery_layout: string; gallery_row: number };
+  const templateName = "default";
+  const blankPerson = (name: string) => ({ name, nickname: name, father: "", mother: "", instagram: "" });
+  const sanitizeContent = (raw: Record<string, unknown>, displayName = "Undangan Demo") => {
+    const content = structuredClone(raw) as Record<string, any>;
+    content.couple = { ...(content.couple || {}), bride: blankPerson("Mempelai Wanita"), groom: blankPerson("Mempelai Pria") };
+    content.siteTitle = `${displayName} — The Wedding`;
+    content.livestream = { youtube: "", instagram: "", tiktok: "" }; content.galleryVideo = { youtube: "" };
+    content.gift = { accounts: [], contactCPP: "", contactCPW: "", address: { recipient: "", phone: "", detail: "" }, note: "" };
+    content.event = { ...(content.event || {}), dateISO: "", dateLabel: "", dayLabel: "", countdownTarget: "", akad: { label: "Akad Nikah", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } }, resepsi: { label: "Resepsi", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } } };
+    content.loveStory = []; content.guestGreetings = [];
+    return content;
+  };
+  const copyObject = async (from: string, to: string) => {
+    const bucket = admin.storage.from("photos"); const { data, error } = await bucket.download(from);
+    if (error || !data) throw new Error(error?.message || `Foto template tidak dapat dibaca: ${from}`);
+    const { error: uploadError } = await bucket.upload(to, data, { upsert: true, contentType: data.type || undefined });
+    if (uploadError) throw new Error(uploadError.message);
+  };
+  const readTemplate = async () => {
+    const { data, error } = await admin.from("invitation_templates").select("content,photos").eq("name", templateName).single();
+    if (error || !data) throw new Error("Default statis belum dibuat. Ambil snapshot root terlebih dahulu.");
+    return { content: data.content as Record<string, unknown>, photos: (data.photos || []) as TemplatePhoto[] };
+  };
+  const applyTemplate = async (toInvitationId: string, displayName: string, brideName = "Mempelai Wanita", groomName = "Mempelai Pria") => {
+    const template = await readTemplate(); const content = sanitizeContent(template.content, displayName);
+    content.couple = { ...(content.couple || {}), bride: blankPerson(brideName), groom: blankPerson(groomName) };
+    const { error: contentError } = await admin.from("site_content").upsert({ invitation_id: toInvitationId, id: 1, content }, { onConflict: "invitation_id,id" });
+    if (contentError) throw new Error(contentError.message);
     const { error: removeError } = await admin.from("photos").delete().eq("invitation_id", toInvitationId);
     if (removeError) throw new Error(removeError.message);
-    if (!sourcePhotos?.length) return;
-    const cloned = sourcePhotos.map((photo) => ({ ...photo, invitation_id: toInvitationId }));
-    const { error: insertError } = await admin.from("photos").insert(cloned);
-    if (insertError) throw new Error(insertError.message);
+    if (template.photos.length) {
+      const { error: photoError } = await admin.from("photos").insert(template.photos.map((photo) => ({ ...photo, invitation_id: toInvitationId })));
+      if (photoError) throw new Error(photoError.message);
+    }
   };
-
-  // Demo is an explicit snapshot of the root invitation. It shares only public
-  // Storage objects with root but receives its own tenant-scoped metadata rows.
-  // This preserves the approved crop/order/theme without letting demo edits touch root.
-  if (action === "sync_demo") {
-    const { data: root, error: rootError } = await admin.from("invitations").select("id,display_name").eq("slug", "root").single();
+  // Captures root once into an independent static template. Assets are physically
+  // copied under templates/default so later root edits/deletions cannot affect it.
+  if (action === "capture_default_template") {
+    const { data: root, error: rootError } = await admin.from("invitations").select("id,updated_at").eq("slug", "root").single();
     if (rootError || !root) return fail("Undangan root tidak ditemukan", 404);
-    const { data: rootContent, error: contentError } = await admin.from("site_content").select("content").eq("invitation_id", root.id).eq("id", 1).single();
-    if (contentError || !rootContent?.content) return fail("Konten root belum siap disalin", 409);
+    const { data: rootContent, error: contentError } = await admin.from("site_content").select("content,updated_at").eq("invitation_id", root.id).eq("id", 1).single();
+    const { data: rootPhotos, error: photoError } = await admin.from("photos").select("folder,storage_path,sort_order,focal_x,focal_y,zoom,alt,width,height,gallery_layout,gallery_row").eq("invitation_id", root.id).order("folder").order("sort_order").order("id");
+    if (contentError || !rootContent?.content || photoError) return fail(contentError?.message || photoError?.message || "State root belum siap", 409);
+    try {
+      const capturedPhotos: TemplatePhoto[] = [];
+      for (const [index, photo] of (rootPhotos || []).entries()) {
+        const extension = photo.storage_path.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "jpg";
+        const staticPath = `templates/default/photos/${String(index).padStart(3, "0")}.${extension}`;
+        await copyObject(photo.storage_path, staticPath);
+        capturedPhotos.push({ ...photo, storage_path: staticPath });
+      }
+      const content = sanitizeContent(rootContent.content as Record<string, unknown>);
+      const originalAudioPath = content.audio?.path;
+      if (originalAudioPath) { const extension = String(originalAudioPath).split(".").pop()?.replace(/[^a-z0-9]/gi, "") || "mp3"; const staticAudioPath = `templates/default/audio/backsound.${extension}`; await copyObject(originalAudioPath, staticAudioPath); content.audio.path = staticAudioPath; content.audio.src = ""; }
+      const { error } = await admin.from("invitation_templates").upsert({ name: templateName, content, photos: capturedPhotos, source_root_updated_at: rootContent.updated_at || root.updated_at, captured_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "name" });
+      if (error) throw new Error(error.message);
+    } catch (error) { return fail(error instanceof Error ? error.message : "Gagal mengambil snapshot default"); }
+    return new Response(JSON.stringify({ template: templateName, capturedFrom: "root" }), { headers });
+  }
+  if (action === "sync_demo") {
     const { data: demo, error: demoError } = await admin.from("invitations").upsert({ slug: "demo", display_name: "Demo Undangan" }, { onConflict: "slug" }).select("id,slug").single();
     if (demoError || !demo) return fail(demoError?.message || "Gagal menyiapkan demo");
-    try {
-      const { error: upsertError } = await admin.from("site_content").upsert({ invitation_id: demo.id, id: 1, content: structuredClone(rootContent.content) }, { onConflict: "invitation_id,id" });
-      if (upsertError) throw new Error(upsertError.message);
-      await copyPhotos(root.id, demo.id);
-      const { error: waError } = await admin.from("wa_settings").upsert({ invitation_id: demo.id, id: 1, invitation_link: "https://undangan.andipramana.com/demo/" }, { onConflict: "invitation_id,id" });
-      if (waError) throw new Error(waError.message);
-    } catch (error) { return fail(error instanceof Error ? error.message : "Gagal menyelaraskan demo"); }
-    return new Response(JSON.stringify({ demo: { slug: demo.slug }, copiedFrom: "root" }), { headers });
+    try { await applyTemplate(demo.id, "Demo Undangan"); const { error: waError } = await admin.from("wa_settings").upsert({ invitation_id: demo.id, id: 1, invitation_link: "https://undangan.andipramana.com/demo/" }, { onConflict: "invitation_id,id" }); if (waError) throw new Error(waError.message); }
+    catch (error) { return fail(error instanceof Error ? error.message : "Gagal memperbarui demo dari default statis"); }
+    return new Response(JSON.stringify({ demo: { slug: demo.slug }, copiedFrom: "static_default" }), { headers });
   }
 
   if (action !== "create") return fail("Aksi tidak dikenal");
@@ -152,23 +189,7 @@ Deno.serve(async (req) => {
   try {
     await createAccount(clean(body.adminEmail), String(body.adminPassword), "admin");
     await createAccount(clean(body.qrEmail), String(body.qrPassword), "admin_qr");
-    // Client baru selalu mengambil snapshot demo, bukan root langsung. Demo
-    // diselaraskan root owner secara eksplisit melalui action sync_demo.
-    const { data: template, error: templateError } = await admin.from("invitations").select("id").eq("slug", "demo").single();
-    if (templateError || !template) throw new Error("Template demo belum disiapkan. Sinkronkan demo dari root terlebih dahulu.");
-    const { data: templateContent, error: templateContentError } = await admin.from("site_content").select("content").eq("invitation_id", template.id).eq("id", 1).maybeSingle();
-    if (templateContentError || !templateContent?.content) throw new Error("Konten template demo belum siap.");
-    if (templateContent.content) {
-      const content = structuredClone(templateContent.content); const brideName = clean(body.brideName); const groomName = clean(body.groomName); const displayName = clean(body.displayName || slug);
-      const blankPerson = (name: string) => ({ name, nickname: name, father: "", mother: "", instagram: "" });
-      content.couple = { ...(content.couple || {}), bride: blankPerson(brideName || "Mempelai Wanita"), groom: blankPerson(groomName || "Mempelai Pria") };
-      content.siteTitle = `${displayName} — The Wedding`; content.livestream = { youtube: "", instagram: "", tiktok: "" }; content.galleryVideo = { youtube: "" };
-      content.gift = { accounts: [], contactCPP: "", contactCPW: "", address: { recipient: "", phone: "", detail: "" }, note: "" };
-      content.event = { ...(content.event || {}), dateISO: "", dateLabel: "", dayLabel: "", countdownTarget: "", akad: { label: "Akad Nikah", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } }, resepsi: { label: "Resepsi", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } } };
-      content.loveStory = [];
-      const { error } = await admin.from("site_content").insert({ invitation_id: invitationId, id: 1, content }); if (error) throw new Error(error.message);
-    }
-    await copyPhotos(template.id, invitationId);
+    await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"));
     const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://undangan.andipramana.com/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
   return new Response(JSON.stringify({ invitation: created, urls: { invitation: `/${slug}/`, admin: `/${slug}/admin/`, adminQr: `/${slug}/admin-qr/` } }), { headers });

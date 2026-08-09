@@ -8,6 +8,7 @@
   const refreshClients = document.getElementById("clients-refresh");
   const openClients = document.getElementById("clients-open");
   const syncDemo = document.getElementById("sync-demo");
+  const captureDefault = document.getElementById("capture-default");
   if (!window.supabase || !cfg) { message.textContent = "Supabase belum dikonfigurasi."; return; }
   const sb = window.supabase.createClient(cfg.url, cfg.anonKey);
 
@@ -80,6 +81,16 @@
   });
   refreshClients.addEventListener("click", loadClients);
   openClients.addEventListener("click", loadClients);
+  captureDefault.addEventListener("click", async () => {
+    message.textContent = "";
+    captureDefault.disabled = true;
+    try {
+      await ensureRootLogin();
+      await invoke({ action: "capture_default_template" });
+      message.textContent = "Default statis berhasil dibuat dari root saat ini. Root berikutnya tidak akan mengubah default ini.";
+    } catch (err) { message.textContent = err.message || "Gagal mengambil default dari root."; }
+    finally { captureDefault.disabled = false; }
+  });
   syncDemo.addEventListener("click", async () => {
     message.textContent = "";
     syncDemo.disabled = true;
