@@ -782,13 +782,16 @@ a { color: inherit; }
 .timeline-item__photo,
 #quote-img {
   object-position: var(--fx, 50%) var(--fy, 50%);
+  /* Titik zoom sama dengan titik pan supaya crop setelah zoom persis seperti
+     editor admin, dan ruang baru tersedia ke dua arah pada tiap sumbu. */
+  transform-origin: var(--fx, 50%) var(--fy, 50%);
   transform: scale(var(--zoom, 1));
 }
 /* 1 foto landscape selebar grid — seukuran foto Our Story (16/10) */
-.gallery-item--landscape { grid-column: 1 / -1; }
-/* 2 foto potrait satu baris, tinggi menyamai foto landscape di atasnya */
-.gallery-item--portrait { grid-column: span 6; }
-/* baris campur: potrait 1/3 lebar + semi-landscape 2/3 lebar, tinggi sama */
+.gallery-item--landscape, .gallery-item--full { grid-column: 1 / -1; }
+/* Dua foto setengah lebar pada baris yang sama. */
+.gallery-item--portrait, .gallery-item--half { grid-column: span 6; }
+/* Baris campur: 1/3 + 2/3, tinggi sama. */
 .gallery-item--third { grid-column: span 4; }
 .gallery-item--twothirds { grid-column: span 8; }
 

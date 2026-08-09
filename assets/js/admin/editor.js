@@ -51,7 +51,7 @@
    * ada hubungannya dengan yang benar-benar tampil di undangan. */
   function ratioFor(folderName, index) {
     if (folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)) {
-      return window.GalleryLayout.ratioAt(index);
+      return window.GalleryLayout.ratioAt(index, item);
     }
     return FOLDER_RATIO[folderName] || 1;
   }
@@ -66,7 +66,7 @@
     // berubah kalau urutan fotonya diubah.
     const shape =
       folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)
-        ? ` — kotak ${window.GalleryLayout.labelAt(index)}`
+        ? ` — ${window.GalleryLayout.labelAt(index, photo)}, baris ${window.GalleryLayout.rowAt(index, photo)}`
         : "";
     const hint = document.querySelector(".editor__hint");
     if (hint) hint.textContent = `Seret foto untuk menggeser (pan)${shape}`;
@@ -101,11 +101,26 @@
     preview.style.height = h + "px";
   }
 
+  /** Object-position mengatur crop saat foto sudah overflow pada zoom 1.
+   * Transform-origin memakai titik fokus yang sama agar saat zoom menciptakan
+   * ruang baru, focal tetap menggeser foto di kedua sumbu—termasuk sumbu yang
+   * tadinya pas persis dengan bingkai. CSS tamu memakai aturan identik. */
   function applyFocal(fx, fy) {
     const img = document.getElementById("editor-img");
     img.style.objectPosition = `${fx}% ${fy}%`;
+    img.style.transformOrigin = `${fx}% ${fy}%`;
     img.dataset.fx = String(fx);
     img.dataset.fy = String(fy);
+  }
+
+  function renderedImageSize() {
+    const img = document.getElementById("editor-img");
+    const rect = preview.getBoundingClientRect();
+    const nw = img.naturalWidth;
+    const nh = img.naturalHeight;
+    if (!nw || !nh) return { width: 0, height: 0, frameWidth: rect.width, frameHeight: rect.height };
+    const coverScale = Math.max(rect.width / nw, rect.height / nh);
+    return { width: nw * coverScale * zoom, height: nh * coverScale * zoom, frameWidth: rect.width, frameHeight: rect.height };
   }
 
   // -------------------------------------------------------------------------
@@ -143,15 +158,10 @@
    * bingkai membuat KEDUA sumbu ikut melebar begitu zoom naik, sesuai yang
    * terlihat di layar. */
   function panRange() {
-    const img = document.getElementById("editor-img");
-    const rect = preview.getBoundingClientRect();
-    const nw = img.naturalWidth;
-    const nh = img.naturalHeight;
-    if (!nw || !nh) return { x: 0, y: 0 };
-    const s = Math.max(rect.width / nw, rect.height / nh); // skala object-fit: cover
+    const size = renderedImageSize();
     return {
-      x: Math.max(0, nw * s * zoom - rect.width),
-      y: Math.max(0, nh * s * zoom - rect.height)
+      x: Math.max(0, size.width - size.frameWidth),
+      y: Math.max(0, size.height - size.frameHeight)
     };
   }
 

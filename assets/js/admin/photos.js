@@ -44,6 +44,10 @@
 
   let currentFolder = "cover";
   let photos = [];
+  // Metadata rekomendasi tetap di site_content, tetapi diedit dari kartu foto
+  // yang dipasangkannya berdasarkan urutan.
+  let giftContent = null;
+  let giftRecommendations = [];
 
   window.PhotosPanel = { load };
 
@@ -82,11 +86,48 @@
       return;
     }
     photos = data || [];
+    if (currentFolder === "gift_item") await loadGiftRecommendations();
     paintGrid();
+  }
+
+  async function loadGiftRecommendations() {
+    const { data, error } = await window.AdminAPI.query(
+      sb.from("site_content").select("content").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1).maybeSingle(),
+      "Permintaan rekomendasi kado"
+    );
+    if (error) { toast("Gagal memuat detail rekomendasi: " + error.message, true); giftContent = null; giftRecommendations = []; return; }
+    giftContent = data?.content || {};
+    giftRecommendations = Array.isArray(giftContent.giftRecommendations) ? giftContent.giftRecommendations : [];
+  }
+
+  async function saveGiftRecommendations() {
+    if (!giftContent) return;
+    giftContent.giftRecommendations = giftRecommendations;
+    const { error } = await sb.from("site_content").upsert(
+      { invitation_id: window.AdminAPI.tenant.invitationId, id: 1, content: giftContent, updated_at: new Date().toISOString() },
+      { onConflict: "invitation_id,id" }
+    );
+    if (error) throw error;
+  }
+
+  /** Bentuk thumbnail admin wajib mengikuti slot render tamu. Galeri ditentukan
+   * indeksnya (pola grid), hero memakai bingkai layar penuh; folder lain memakai
+   * rasio yang sama dengan editor pan/zoom. */
+  function cardLayoutFor(folderName, index) {
+    if (folderName === "gallery" && window.GalleryLayout) {
+      const photo = photos[index];
+      const shape = window.GalleryLayout.shapeAt(index, photo);
+      const row = window.GalleryLayout.rowAt(index, photo);
+      return { className: `photo-card--gallery photo-card--${shape}`, ratio: window.GalleryLayout.ratioAt(index, photo), row };
+    }
+    const ratio = { cover: 9 / 19.5, opening: 9 / 19.5, closing: 9 / 19.5, bride: 2 / 3, groom: 2 / 3, wfl: 1, event: 1.2, quote: 1, story: 16 / 10, gift_item: 1 }[folderName] || 1;
+    const hero = ["cover", "opening", "closing"].includes(folderName);
+    return { className: hero ? "photo-card--hero" : "", ratio };
   }
 
   function paintGrid() {
     const grid = document.getElementById("photo-grid");
+    grid.className = `photo-grid photo-grid--${currentFolder}`;
     const warning = document.getElementById("photo-warning");
 
     // Peringatan ambang Swiper loop
@@ -110,15 +151,18 @@
     }
 
     grid.innerHTML = photos
-      .map(
-        (p, i) => `
-      <div class="photo-card" draggable="true" data-id="${p.id}">
+      .map((p, i) => {
+        const layout = cardLayoutFor(currentFolder, i);
+        return `
+      <div class="photo-card ${layout.className}" draggable="true" data-id="${p.id}" ${currentFolder === "gallery" ? `data-gallery-row="${layout.row}" style="--photo-ratio:${layout.ratio};grid-row:${layout.row}"` : `style="--photo-ratio:${layout.ratio}"`}>
         <div class="photo-card__thumb">
-          <img src="${photoUrl(p.storage_path)}" alt="${esc(p.alt)}" loading="lazy">
+          <img src="${photoUrl(p.storage_path)}" alt="${esc(p.alt)}" loading="lazy" style="object-position:${Number(p.focal_x) || 50}% ${Number(p.focal_y) || 50}%; transform-origin:${Number(p.focal_x) || 50}% ${Number(p.focal_y) || 50}%; transform:scale(${Number(p.zoom) || 1})">
         </div>
         <div class="photo-card__meta">
           <span class="photo-card__name">${esc(p.storage_path.split("/").pop())}</span>
           <span class="photo-card__focal">pan ${p.focal_x}% ${p.focal_y}% · zoom ${p.zoom}×</span>
+          ${currentFolder === "gallery" ? `<label class="photo-card__layout">Baris <input class="input" data-gallery-row="${i}" type="number" min="1" value="${layout.row}" aria-label="Baris galeri foto ${i + 1}"></label><label class="photo-card__layout">Lebar <select class="input" data-gallery-layout="${i}" aria-label="Lebar galeri foto ${i + 1}">${window.GalleryLayout.choices.map(choice=>`<option value="${choice.value}" ${choice.value===window.GalleryLayout.shapeAt(i,p)?"selected":""}>${choice.label}</option>`).join("")}</select></label>` : ""}
+          ${currentFolder === "gift_item" ? (() => { const r=giftRecommendations[i]||{}; return `<label class="photo-card__layout">Nama<input class="input" data-gift-rec="name" data-gift-i="${i}" value="${esc(r.name||"")}" placeholder="Nama kado"></label><label class="photo-card__layout">Harga<input class="input" data-gift-rec="price" data-gift-i="${i}" value="${esc(r.price||"")}" placeholder="Rp 250.000"></label><label class="photo-card__layout">Link<input class="input" type="url" data-gift-rec="link" data-gift-i="${i}" value="${esc(r.link||"")}" placeholder="https://…"></label>`; })() : ""}
         </div>
         <div class="photo-card__actions">
           <button type="button" class="btn btn--tiny" data-edit="${i}">Atur</button>
@@ -126,13 +170,27 @@
           <button type="button" class="btn btn--tiny" data-move="${i}" data-dir="1" ${i === photos.length - 1 ? "disabled" : ""}>&#9660;</button>
           <button type="button" class="btn btn--tiny btn--danger" data-del="${i}" aria-label="Hapus">&times;</button>
         </div>
-      </div>`
-      )
+      </div>`;
+      })
       .join("") +
       `<div class="photo-grid__actions">
         <button type="button" class="btn btn--primary" id="btn-save-order" ${photos.length < 2 ? "disabled" : ""}>Simpan urutan</button>
       </div>`;
 
+    // Tinggi thumbnail Galeri dihitung dari LEBAR grid yang sedang nyata
+    // dirender: sama seperti guest (full slot = lebar grid / 1.6). Semua slot
+    // satu baris memakai tinggi ini; lebar saja yang berubah menurut span.
+    const syncGalleryPreviewHeight = () => {
+      if (currentFolder !== "gallery") return;
+      const width = grid.getBoundingClientRect().width;
+      if (width) grid.style.setProperty("--gallery-thumb-height", `${width / 1.6}px`);
+    };
+    requestAnimationFrame(syncGalleryPreviewHeight);
+    window.__galleryAdminResize?.disconnect();
+    if (currentFolder === "gallery" && window.ResizeObserver) {
+      window.__galleryAdminResize = new ResizeObserver(syncGalleryPreviewHeight);
+      window.__galleryAdminResize.observe(grid);
+    }
     bindGridEvents();
   }
 
@@ -146,6 +204,7 @@
         const to = from + Number(btn.dataset.dir);
         if (to < 0 || to >= photos.length) return;
         [photos[from], photos[to]] = [photos[to], photos[from]];
+        if (currentFolder === "gift_item") [giftRecommendations[from], giftRecommendations[to]] = [giftRecommendations[to], giftRecommendations[from]];
         paintGrid();
       });
     });
@@ -163,8 +222,40 @@
           const { error: stErr } = await sb.storage.from("photos").remove([item.storage_path]);
           if (stErr) return toast("Baris terhapus, tapi objek storage gagal: " + stErr.message, true);
         }
+        if (currentFolder === "gift_item") {
+          giftRecommendations.splice(Number(btn.dataset.del), 1);
+          try { await saveGiftRecommendations(); } catch (err) { toast("Foto terhapus, tetapi detail kado gagal diselaraskan: " + err.message, true); }
+        }
         toast("Foto dihapus.");
         render();
+      });
+    });
+
+    // Galeri memiliki posisi eksplisit: simpan baris/lebar ke foto tenant ini,
+    // lalu daftar langsung dirender pada slot yang sama seperti undangan.
+    grid.querySelectorAll("input[data-gallery-row], select[data-gallery-layout]").forEach((control) => {
+      control.addEventListener("change", async () => {
+        const i = Number(control.dataset.galleryRow ?? control.dataset.galleryLayout);
+        const photo = photos[i]; if (!photo) return;
+        const patch = control.dataset.galleryRow !== undefined
+          ? { gallery_row: Math.max(1, Number(control.value) || 1) }
+          : { gallery_layout: control.value };
+        const { error } = await sb.from("photos").update(patch).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", photo.id);
+        if (error) { toast("Gagal menyimpan layout galeri: " + error.message, true); paintGrid(); return; }
+        Object.assign(photo, patch);
+        toast("Layout galeri tersimpan ✓");
+        paintGrid();
+      });
+    });
+
+    // Detail rekomendasi tinggal bersama kartu fotonya: foto ke-i = metadata ke-i.
+    grid.querySelectorAll("[data-gift-rec]").forEach((input) => {
+      input.addEventListener("change", async () => {
+        const i = Number(input.dataset.giftI);
+        giftRecommendations[i] ||= { name: "", price: "", link: "" };
+        giftRecommendations[i][input.dataset.giftRec] = input.value.trim();
+        try { await saveGiftRecommendations(); toast("Detail rekomendasi tersimpan ✓"); }
+        catch (err) { toast("Gagal menyimpan rekomendasi: " + err.message, true); render(); }
       });
     });
 
@@ -189,6 +280,10 @@
           btn.disabled = false;
           return;
         }
+      }
+      if (currentFolder === "gift_item") {
+        try { await saveGiftRecommendations(); }
+        catch (err) { toast("Urutan foto tersimpan, tetapi detail kado gagal diselaraskan: " + err.message, true); btn.disabled = false; return; }
       }
       toast("Urutan tersimpan ✓");
       btn.disabled = false;

@@ -1,78 +1,43 @@
-/** Tata letak grid galeri — SATU sumber kebenaran, dipakai dua halaman:
- *  - index.html (gallery.js) untuk merender grid,
- *  - admin.html (editor.js) untuk menentukan rasio bingkai pratinjau pan/zoom.
- *
- * Sebelumnya polanya terkunci di dalam gallery.js, sehingga panel admin tidak
- * bisa tahu bentuk kotak tiap foto dan memakai 16/10 untuk semuanya. Foto di
- * kotak 1/4 yang sempit-tinggi jadi dipratinjau sebagai kotak lebar, dan
- * hasil crop-nya meleset jauh dari yang sebenarnya tampil.
- *
- * PENTING: bentuk kotak ditentukan POSISI foto dalam folder, bukan sifat
- * fotonya. Mengubah urutan foto di panel admin otomatis mengubah bentuk kotak
- * yang ditempatinya — pan/zoom yang sudah diatur perlu ditinjau ulang. */
+/** Layout Galeri — satu source-of-truth untuk guest, Tab Foto, dan modal pan/zoom.
+ * Layout disimpan per foto sebagai `gallery_layout`: full / half / third / twothirds.
+ * Invitation lama tanpa nilai tetap memakai pola legacy berdasarkan indeks. */
 (function () {
-  // Pola baris (20 foto): pola 7 baris diulang 2x, baris terakhir landscape penutup.
-  const PATTERN = [
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape",
-    "third",
-    "twothirds",
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape",
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape",
-    "third",
-    "twothirds",
-    "landscape",
-    "portrait",
-    "portrait",
-    "landscape"
+  const LEGACY_PATTERN = [
+    "full", "half", "half", "full", "third", "twothirds", "full",
+    "half", "half", "full", "full", "half", "half", "full",
+    "third", "twothirds", "full", "half", "half", "full"
   ];
-
-  // Berapa kolom (dari 12) yang ditempati tiap bentuk — sesuai .gallery-item--*
-  // di style.css. Grid memakai 12 kolom supaya pembagian perdua (potret) DAN
-  // pertiga (baris campur) sama-sama bisa dibentuk; dengan 4 kolom, sepertiga
-  // tidak mungkin.
-  const SPAN = { landscape: 12, twothirds: 8, portrait: 6, third: 4 };
-
-  // Tetapan geometri grid, disalin dari .gallery-grid di style.css. Rasio
-  // dihitung dari sini (bukan angka rasio yang ditulis tangan) supaya kalau
-  // salah satu tetapan berubah, keempat rasionya ikut benar sendiri.
-  const COLUMNS = 12;
-  const GAP = 8; // .5rem
-  const MAX_WIDTH = 720; // max-width .gallery-grid
-  const ROW_HEIGHT = 450; // grid-auto-rows: min(450px, 60vw)
-
-  const COL = (MAX_WIDTH - GAP * (COLUMNS - 1)) / COLUMNS;
-
+  const SPAN = { full: 12, twothirds: 8, half: 6, third: 4 };
   const LABEL = {
-    landscape: "selebar grid",
-    twothirds: "2/3 lebar",
-    portrait: "1/2 lebar",
-    third: "1/3 lebar — sempit & tinggi"
+    full: "1/1 — selebar grid", half: "1/2 lebar", third: "1/3 lebar", twothirds: "2/3 lebar"
   };
-
-  /** Bentuk kotak untuk foto ke-i (0-based) dalam folder galeri. */
-  function shapeAt(i) {
-    return PATTERN[i] || "landscape";
-  }
-
-  /** Rasio lebar:tinggi kotak yang benar-benar ditempati foto ke-i. */
-  function ratioAt(i) {
-    const span = SPAN[shapeAt(i)] || SPAN.landscape;
+  const COLUMNS = 12, GAP = 8, MAX_WIDTH = 720, ROW_HEIGHT = 450;
+  const COL = (MAX_WIDTH - GAP * (COLUMNS - 1)) / COLUMNS;
+  function normalize(value) { return SPAN[value] ? value : ""; }
+  function shapeAt(index, photo) { return normalize(photo?.galleryLayout || photo?.gallery_layout) || LEGACY_PATTERN[index] || "full"; }
+  function ratioAt(index, photo) {
+    const span = SPAN[shapeAt(index, photo)];
     return (span * COL + (span - 1) * GAP) / ROW_HEIGHT;
   }
-
+  function rowAt(index, photo) {
+    const explicit = Number(photo?.galleryRow || photo?.gallery_row);
+    if (Number.isInteger(explicit) && explicit >= 1) return explicit;
+    // Invitation lama: turunkan baris dari pola legacy yang mengisi 12 kolom.
+    let row = 1, used = 0;
+    for (let i = 0; i <= index; i++) {
+      const span = SPAN[shapeAt(i)];
+      if (used && used + span > COLUMNS) { row++; used = 0; }
+      if (i === index) return row;
+      used += span;
+      if (used === COLUMNS) { row++; used = 0; }
+    }
+    return row;
+  }
   window.GalleryLayout = {
-    PATTERN,
-    shapeAt,
-    ratioAt,
-    labelAt: (i) => LABEL[shapeAt(i)] || ""
+    // Alias legacy: gallery.js/reveal motion versi lama masih membacanya.
+    PATTERN: LEGACY_PATTERN,
+    LEGACY_PATTERN, SPAN, shapeAt, ratioAt, rowAt,
+    labelAt: (index, photo) => LABEL[shapeAt(index, photo)],
+    choices: Object.entries(LABEL).map(([value, label]) => ({ value, label }))
   };
 })();

@@ -26,18 +26,30 @@ window.initGallery = async function () {
     return "pop";
   }
 
+  // Video selalu memegang baris visual pertama. Baris yang disimpan admin
+  // tetap baris foto (mulai 1), lalu digeser satu saat video aktif agar nilai
+  // tersebut tidak perlu berubah hanya karena URL YouTube dinyalakan.
+  const videoId = parseYouTubeId(
+    window.WEDDING_CONFIG.galleryVideo && window.WEDDING_CONFIG.galleryVideo.youtube
+  );
+  const videoRowOffset = videoId ? 1 : 0;
+
   // Tanpa --reveal-i: sejak pemicunya digeser ke tengah layar, tiap baris sudah
   // terpicu di posisi scroll-nya masing-masing. Jeda buatan justru merusak
   // kesan dua foto sebaris masuk bersamaan.
   wrapper.innerHTML = photos
     .map((item, i) => {
-      const cls = PATTERN[i] || "landscape";
+      // Layout tidak lagi semata-mata urutan: setiap foto galeri dapat memilih
+      // lebar dan nomor barisnya dari Tab Foto. Foto lama memakai pola legacy.
+      const cls = window.GalleryLayout.shapeAt(i, item);
+      const row = window.GalleryLayout.rowAt(i, item);
+      const galleryRow = row + videoRowOffset;
       const src = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
       const fx = item.focalX ?? 50;
       const fy = item.focalY ?? 50;
       const zoom = item.zoom ?? 1;
       return `
-    <div class="gallery-item gallery-item--${cls}" data-full="${src}" data-reveal="${motionFor(i)}">
+    <div class="gallery-item gallery-item--${cls}" style="grid-row:${galleryRow}" data-full="${src}" data-reveal="${motionFor(i)}">
       <picture>
         <source srcset="${src}" type="image/webp">
         <img src="${src}" alt="Momen ${i + 1}" loading="lazy"
@@ -47,14 +59,8 @@ window.initGallery = async function () {
     })
     .join("");
 
-  // Slot video galeri — sengaja BUKAN bagian dari photos/PATTERN: menyisipkan
-  // video ke array foto akan menggeser indeks semua foto dan merusak bentuk
-  // kotak yang sudah dihitung MAUPUN pan/zoom yang sudah diatur admin untuk
-  // foto-foto itu. Slot ini berdiri sendiri sebagai baris pertama grid;
-  // foto-foto tetap menempati kotak sesuai polanya masing-masing.
-  const videoId = parseYouTubeId(
-    window.WEDDING_CONFIG.galleryVideo && window.WEDDING_CONFIG.galleryVideo.youtube
-  );
+  // Slot video sengaja bukan bagian photos/PATTERN. Ia mengunci baris 1 secara
+  // eksplisit; foto dengan Baris 1 dirender di baris 2 via videoRowOffset.
   if (videoId) wrapper.prepend(buildVideoSlot(videoId));
 
   const lightbox = document.getElementById("lightbox");
@@ -99,6 +105,7 @@ function buildVideoSlot(videoId) {
   const slot = document.createElement("div");
   slot.className = "gallery-item gallery-item--landscape gallery-video";
   slot.dataset.reveal = "pop";
+  slot.style.gridRow = "1";
   slot.innerHTML = `
     <button type="button" class="gallery-video__launcher" aria-label="Putar video galeri">
       <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="Video galeri" loading="lazy">
