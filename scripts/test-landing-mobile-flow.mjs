@@ -12,7 +12,7 @@ try {
         const r = el.getBoundingClientRect();
         return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width, height: r.height };
       };
-      const heroCta = [...document.querySelectorAll("a")].find((link) => link.textContent.includes("Lihat demo"));
+      const heroCta = [...document.querySelectorAll("a")].find((link) => link.getAttribute("href") === "/demo/");
       const sticky = rect(".mobile-chat");
       const hero = rect(".hero");
       const media = rect(".hero-visual");
