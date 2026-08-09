@@ -601,6 +601,9 @@ h1, h2 { font-weight: 500; margin: 0; }
 /* ---------- Root Register: daftar client ---------- */
 .register-actions { display:grid; grid-template-columns:1fr 1fr; gap:.55rem; margin-top:.8rem; }
 .register-actions .btn { width:100%; justify-content:center; }
+.template-sync { display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-top:1rem; padding:.75rem; border:1px solid var(--border); border-radius:.65rem; background:rgba(255,255,255,.04); }
+.template-sync p { margin:.25rem 0 0; }
+.template-sync .btn { flex:none; }
 .clients-panel { margin-top: 1rem; max-width: 620px; }
 .clients-panel__head { display:flex; align-items:flex-start; justify-content:space-between; gap:.8rem; margin-bottom:.8rem; }
 .clients-panel__head h2 { margin:0; font-size:1.1rem; }

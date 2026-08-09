@@ -7,6 +7,7 @@
   const clientsList = document.getElementById("clients-list");
   const refreshClients = document.getElementById("clients-refresh");
   const openClients = document.getElementById("clients-open");
+  const syncDemo = document.getElementById("sync-demo");
   if (!window.supabase || !cfg) { message.textContent = "Supabase belum dikonfigurasi."; return; }
   const sb = window.supabase.createClient(cfg.url, cfg.anonKey);
 
@@ -79,6 +80,16 @@
   });
   refreshClients.addEventListener("click", loadClients);
   openClients.addEventListener("click", loadClients);
+  syncDemo.addEventListener("click", async () => {
+    message.textContent = "";
+    syncDemo.disabled = true;
+    try {
+      await ensureRootLogin();
+      await invoke({ action: "sync_demo" });
+      message.textContent = "Demo sudah disalin dari root. Client baru sekarang akan memakai template demo ini.";
+    } catch (err) { message.textContent = err.message || "Gagal memperbarui demo."; }
+    finally { syncDemo.disabled = false; }
+  });
 
   form.addEventListener("submit", async event => {
     event.preventDefault(); message.textContent = ""; result.hidden = true;

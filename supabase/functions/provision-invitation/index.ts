@@ -101,8 +101,40 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ deleted: true, retainedUserIds: retained }), { headers });
   }
 
+  const copyPhotos = async (fromInvitationId: string, toInvitationId: string) => {
+    const { data: sourcePhotos, error: sourceError } = await admin.from("photos").select("folder,storage_path,sort_order,focal_x,focal_y,zoom,alt,width,height,gallery_layout,gallery_row").eq("invitation_id", fromInvitationId).order("folder").order("sort_order").order("id");
+    if (sourceError) throw new Error(sourceError.message);
+    const { error: removeError } = await admin.from("photos").delete().eq("invitation_id", toInvitationId);
+    if (removeError) throw new Error(removeError.message);
+    if (!sourcePhotos?.length) return;
+    const cloned = sourcePhotos.map((photo) => ({ ...photo, invitation_id: toInvitationId }));
+    const { error: insertError } = await admin.from("photos").insert(cloned);
+    if (insertError) throw new Error(insertError.message);
+  };
+
+  // Demo is an explicit snapshot of the root invitation. It shares only public
+  // Storage objects with root but receives its own tenant-scoped metadata rows.
+  // This preserves the approved crop/order/theme without letting demo edits touch root.
+  if (action === "sync_demo") {
+    const { data: root, error: rootError } = await admin.from("invitations").select("id,display_name").eq("slug", "root").single();
+    if (rootError || !root) return fail("Undangan root tidak ditemukan", 404);
+    const { data: rootContent, error: contentError } = await admin.from("site_content").select("content").eq("invitation_id", root.id).eq("id", 1).single();
+    if (contentError || !rootContent?.content) return fail("Konten root belum siap disalin", 409);
+    const { data: demo, error: demoError } = await admin.from("invitations").upsert({ slug: "demo", display_name: "Demo Undangan" }, { onConflict: "slug" }).select("id,slug").single();
+    if (demoError || !demo) return fail(demoError?.message || "Gagal menyiapkan demo");
+    try {
+      const { error: upsertError } = await admin.from("site_content").upsert({ invitation_id: demo.id, id: 1, content: structuredClone(rootContent.content) }, { onConflict: "invitation_id,id" });
+      if (upsertError) throw new Error(upsertError.message);
+      await copyPhotos(root.id, demo.id);
+      const { error: waError } = await admin.from("wa_settings").upsert({ invitation_id: demo.id, id: 1, invitation_link: "https://undangan.andipramana.com/demo/" }, { onConflict: "invitation_id,id" });
+      if (waError) throw new Error(waError.message);
+    } catch (error) { return fail(error instanceof Error ? error.message : "Gagal menyelaraskan demo"); }
+    return new Response(JSON.stringify({ demo: { slug: demo.slug }, copiedFrom: "root" }), { headers });
+  }
+
   if (action !== "create") return fail("Aksi tidak dikenal");
   const slug = clean(body.slug).toLowerCase();
+  if (slug === "root" || slug === "demo") return fail("Slug ini dicadangkan untuk template sistem");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return fail("Slug hanya huruf kecil, angka, dan tanda hubung");
   for (const field of ["adminEmail", "adminPassword", "qrEmail", "qrPassword"]) if (!clean(body[field])) return fail(`Field ${field} wajib diisi`);
   const { data: created, error: invitationError } = await admin.from("invitations").insert({ slug, display_name: clean(body.displayName || slug) }).select("id,slug").single();
@@ -120,10 +152,14 @@ Deno.serve(async (req) => {
   try {
     await createAccount(clean(body.adminEmail), String(body.adminPassword), "admin");
     await createAccount(clean(body.qrEmail), String(body.qrPassword), "admin_qr");
-    const { data: root } = await admin.from("invitations").select("id").eq("slug", "root").single();
-    const { data: rootContent } = await admin.from("site_content").select("content").eq("invitation_id", root?.id).eq("id", 1).maybeSingle();
-    if (rootContent?.content) {
-      const content = structuredClone(rootContent.content); const brideName = clean(body.brideName); const groomName = clean(body.groomName); const displayName = clean(body.displayName || slug);
+    // Client baru selalu mengambil snapshot demo, bukan root langsung. Demo
+    // diselaraskan root owner secara eksplisit melalui action sync_demo.
+    const { data: template, error: templateError } = await admin.from("invitations").select("id").eq("slug", "demo").single();
+    if (templateError || !template) throw new Error("Template demo belum disiapkan. Sinkronkan demo dari root terlebih dahulu.");
+    const { data: templateContent, error: templateContentError } = await admin.from("site_content").select("content").eq("invitation_id", template.id).eq("id", 1).maybeSingle();
+    if (templateContentError || !templateContent?.content) throw new Error("Konten template demo belum siap.");
+    if (templateContent.content) {
+      const content = structuredClone(templateContent.content); const brideName = clean(body.brideName); const groomName = clean(body.groomName); const displayName = clean(body.displayName || slug);
       const blankPerson = (name: string) => ({ name, nickname: name, father: "", mother: "", instagram: "" });
       content.couple = { ...(content.couple || {}), bride: blankPerson(brideName || "Mempelai Wanita"), groom: blankPerson(groomName || "Mempelai Pria") };
       content.siteTitle = `${displayName} — The Wedding`; content.livestream = { youtube: "", instagram: "", tiktok: "" }; content.galleryVideo = { youtube: "" };
@@ -132,6 +168,7 @@ Deno.serve(async (req) => {
       content.loveStory = [];
       const { error } = await admin.from("site_content").insert({ invitation_id: invitationId, id: 1, content }); if (error) throw new Error(error.message);
     }
+    await copyPhotos(template.id, invitationId);
     const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://undangan.andipramana.com/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
   return new Response(JSON.stringify({ invitation: created, urls: { invitation: `/${slug}/`, admin: `/${slug}/admin/`, adminQr: `/${slug}/admin-qr/` } }), { headers });
