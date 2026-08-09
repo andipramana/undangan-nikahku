@@ -16,3 +16,6 @@ assets/img_backup/
 # Hasil dump schema Supabase untuk inspeksi lokal (bukan migration)
 supabase/remote-public-schema.sql
 supabase/*-schema.sql
+
+# Artifact build GitHub Pages (dibuat ulang oleh scripts/build-pages-dist.mjs)
+dist/

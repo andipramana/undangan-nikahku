@@ -6,6 +6,8 @@
   "scripts": {
     "optimize-images": "node scripts/optimize-images.mjs",
     "serve": "http-server . -p 8080 -c-1",
+    "serve:dist": "http-server dist -p 4173 -c-1",
+    "build:pages": "node scripts/build-pages-dist.mjs",
     "verify": "node scripts/verify-with-playwright.mjs"
   },
   "devDependencies": {
