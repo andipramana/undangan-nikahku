@@ -4,11 +4,14 @@ import path from "node:path";
 const root = process.cwd();
 const dist = path.join(root, "dist");
 const rootFiles = ["index.html", "admin.html", "admin-qr.html", "register.html", "404.html", "CNAME"];
+const routedFiles = ["home/index.html", "demo/index.html"];
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
-for (const file of rootFiles) {
-  await cp(path.join(root, file), path.join(dist, file));
+for (const file of [...rootFiles, ...routedFiles]) {
+  const destination = path.join(dist, file);
+  await mkdir(path.dirname(destination), { recursive: true });
+  await cp(path.join(root, file), destination);
 }
 
 // Only browser runtime assets belong in Pages. Source, tests, docs, migrations,
@@ -23,6 +26,7 @@ await writeFile(path.join(dist, ".nojekyll"), "");
 
 const required = [
   ...rootFiles,
+  ...routedFiles,
   ".nojekyll",
   "assets/img/favicon.png",
   "assets/css/style.css",

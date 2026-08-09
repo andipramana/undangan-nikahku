@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Pretty tenant paths (/siti-dan-ujang/) still use this one static shell.
+     Keep all shared assets rooted at the GitHub Pages site, not the slug. -->
+<base href="/">
+<title>Mita &amp; Andi — The Wedding</title>
+<meta name="description" content="Undangan pernikahan digital Mita Meliana &amp; Andi Pramana, 25 Agustus 2026">
+<meta property="og:title" content="Mita &amp; Andi — The Wedding">
+<meta property="og:description" content="Dengan penuh syukur, kami mengundang Anda di hari bahagia kami, 25 Agustus 2026.">
+<meta property="og:image" content="assets/img/foto_cover/01.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- Bingkai kolom HP portrait — semua konten halaman (termasuk elemen
+     position:fixed seperti FAB, modal, lightbox) dikurung dalam kolom selebar
+     ponsel 430px yang di-tengah di desktop; di HP kolom ini = seluruh layar.
+
+     DUA LAPIS (style.css): .app-frame adalah containing block semua elemen
+     fixed (transform translateZ(0) + height:100dvh) dan TIDAK discroll
+     (overflow:hidden); yang discroll adalah .app-frame__scroll di bawah —
+     wrapper isi undangan TANPA transform, jadi perputaran scroll-nya tidak
+     mungkin ikut menyeret elemen fixed keluar layar (perangkap lama:
+     transform DAN overflow-y:auto di elemen yang sama membuat FAB/modal
+     ikut hanyut bersama konten begitu discroll lewat section pertama). -->
+<div class="app-frame">
+
+<div id="preloader" aria-hidden="true">
+  <div class="preloader-ring"></div>
+</div>
+
+<!-- Floating audio player -->
+<button id="audio-toggle" class="audio-fab" type="button" aria-label="Putar musik">
+  <span class="audio-fab__disc"></span>
+</button>
+<audio id="bg-audio" loop preload="none"></audio>
+
+<!-- Tombol QR check-in mengambang — hanya muncul kalau URL punya ?to=
+     (lihat qr-checkin.js). Ditumpuk di kanan-bawah, PERSIS di atas tombol
+     musik (audio FAB) — kiri bawah dibiarkan kosong. -->
+<button id="btn-qr-checkin" class="qr-fab" type="button" aria-label="Tunjukkan QR check-in" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M14 14h3v3h-3zM20 14h1M14 20h1M18 18h3v3h-3zM21 17v1"/></svg>
+</button>
+
+<!-- Menu hamburger mengambang — shortcut lompat ke section undangan. Muncul
+     hanya SETELAH undangan dibuka (lihat nav-menu.js). -->
+<button id="btn-nav-menu" class="nav-fab" type="button" aria-label="Buka menu navigasi" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+</button>
+
+<!-- Scroller isi undangan — satu-satunya yang discroll (lihat .app-frame__scroll
+     di style.css); preloader/FAB/modal/toast sengaja DI LUAR scroller ini supaya
+     scroll tidak pernah menyentuh elemen fixed. -->
+<div class="app-frame__scroll">
+<main id="invitation" class="is-locked">
+
+  <!-- ============ COVER (+ countdown, satu foto & gradient menyambung) ============ -->
+  <section id="cover" class="section-hero">
+    <div class="hero-media" id="cover-media">
+      <div class="hero-overlay hero-overlay--flat"></div>
+    </div>
+
+    <div class="cover-screen">
+      <div class="hero-content hero-content--split">
+        <div class="hero-content__top">
+          <p class="eyebrow" data-aos="fade-down">The Wedding Of</p>
+          <!-- Nama panggilan pasangan diisi main.js dari couple.*.nickname
+               (config/Supabase), bukan hardcoded -->
+          <h1 class="script-names" data-aos="zoom-in" data-aos-delay="150" id="couple-names-cover">Mita <span class="amp">&amp;</span> Andi</h1>
+        </div>
+
+        <div class="hero-content__bottom">
+          <p class="guest-label" id="guest-label" data-aos="fade-up">Kepada Yth.</p>
+          <p id="guest-name" class="guest-name" data-aos="fade-up" data-aos-delay="150">Bapak/Ibu/Saudara/i</p>
+          <button id="btn-open" class="btn-open" type="button" data-aos="fade-up" data-aos-delay="300">
+            <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>
+            <span>Buka Undangan</span>
+          </button>
+          <p class="hero-note">*Mohon maaf apabila ada kesalahan penulisan nama</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="invitation-body">
+
+    <!-- ============ COUNTDOWN (section biasa, tetap bisa di-scroll ulang, foto auto-slide seperti cover) ============ -->
+    <section id="opening" class="section-hero section-hero--anchor-right-bottom">
+      <div class="hero-media" id="opening-media">
+        <div class="hero-overlay hero-overlay--flat"></div>
+      </div>
+      <div class="section-fade-bottom section-fade-bottom--dark"></div>
+      <div class="hero-content">
+        <div class="countdown-heading">
+          <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
+          <p class="script-names script-names--small text-enter text-enter--left" id="couple-names-opening">Mita <span class="amp">&amp;</span> Andi</p>
+          <!-- Tanggal & tahun di baris ini sengaja TANPA animasi angka —
+               kurang cocok di Save The Date, tampil tenang apa adanya -->
+          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"></p>
+        </div>
+        <a id="btn-add-calendar" class="btn-outline btn-outline--light text-enter text-enter--left" href="#" target="_blank" rel="noopener">
+          <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          Save The Date
+        </a>
+        <div class="countdown countdown--plain text-enter text-enter--up">
+          <div class="countdown__item"><span id="cd-days">00</span><small>Hari</small></div>
+          <div class="countdown__item"><span id="cd-hours">00</span><small>Jam</small></div>
+          <div class="countdown__item"><span id="cd-minutes">00</span><small>Menit</small></div>
+          <div class="countdown__item"><span id="cd-seconds">00</span><small>Detik</small></div>
+        </div>
+        <span class="scroll-chevron" aria-hidden="true">&#8964;</span>
+      </div>
+    </section>
+
+    <!-- ============ WE FOUND LOVE (slider foto 1:1 infinite + ayat quran kecil) ============ -->
+    <section id="we-found-love" class="section section--dark">
+      <!-- judul turun dari atas — satu-satunya di halaman yang begitu, jadi
+           pembuka section ini punya aksen sendiri -->
+      <h2 class="section-title--script" data-reveal="down">We Found Love</h2>
+      <div class="wfl-slider swiper" data-reveal="zoom" style="--reveal-i:1">
+        <div class="swiper-wrapper" id="wfl-slider-wrapper"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+      <!-- Satu paket: bismillah, ayat, dan sumbernya tampil bersamaan —
+           tidak masuk akal kalau tamu harus scroll untuk memunculkan sumber ayat -->
+      <div class="wfl-quote" data-reveal-group>
+        <!-- dipicu barengan, tapi geraknya masing-masing: ayat turun dari atas,
+             terjemahannya naik menyambut, penanda suratnya mengembang -->
+        <p class="arabic-quote" id="wfl-arabic" data-reveal="down"></p>
+        <p class="opening-quote" id="wfl-quote" data-reveal="up" style="--reveal-i:1"></p>
+        <p class="opening-source" id="wfl-source" data-reveal="pop" style="--reveal-i:2"></p>
+      </div>
+    </section>
+
+    <!-- ============ COUPLE (slideshow foto besar 3/4 layar + info mempelai) ============ -->
+    <section id="couple" class="section section--dark">
+
+      <!-- Mempelai wanita — foto MELUNCUR MASUK DARI LUAR LAYAR SEBELAH KANAN.
+           .couple-block yang jadi pemicu (dia diam di tempat), .couple-reveal yang
+           bergerak. Pemisahan ini wajib: kalau elemen yang diobservasi itu sendiri
+           yang digeser ke luar layar, dia tidak pernah bersinggungan dengan layar
+           sehingga tidak pernah terpicu — dan tidak akan pernah masuk.
+           .couple-reveal juga membungkus root Swiper, bukan menimpanya, supaya
+           Swiper tidak salah mengukur slide gara-gara transform. -->
+      <div class="couple-block" data-reveal-group data-reveal-early>
+        <div class="couple-reveal" data-reveal="enter-right">
+          <div class="couple-slider swiper" id="bride-slider">
+            <div class="swiper-wrapper" id="bride-slider-wrapper"></div>
+            <div class="couple-fade"></div>
+            <!-- ikut terbawa masuk bersama fotonya; gerak masing-masing berbeda -->
+            <div class="couple-info">
+              <p class="couple-info__label" data-reveal="down">The Bride</p>
+              <h3 class="couple-info__name" id="bride-name" data-reveal="pop" style="--reveal-i:1"></h3>
+              <p class="couple-info__parents" id="bride-parents" data-reveal="up" style="--reveal-i:2"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mempelai pria — DARI LUAR LAYAR SEBELAH KIRI, berlawanan dengan mempelai
+           wanita, seolah keduanya meluncur saling mendekat -->
+      <div class="couple-block" data-reveal-group data-reveal-early>
+        <div class="couple-reveal" data-reveal="enter-left">
+          <div class="couple-slider swiper" id="groom-slider">
+            <div class="swiper-wrapper" id="groom-slider-wrapper"></div>
+            <div class="couple-fade"></div>
+            <div class="couple-info">
+              <p class="couple-info__label" data-reveal="down">The Groom</p>
+              <h3 class="couple-info__name" id="groom-name" data-reveal="pop" style="--reveal-i:1"></h3>
+              <p class="couple-info__parents" id="groom-parents" data-reveal="up" style="--reveal-i:2"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EVENT (2 kartu portrait: slider pasangan + info acara) ============ -->
+    <section id="event" class="section">
+      <p class="section-eyebrow" data-reveal="up">Wedding</p>
+      <h2 class="section-title--script" data-reveal="up" style="--reveal-i:1">Event</h2>
+
+      <!-- Akad Nikah -->
+      <!-- data-reveal-group DI SINI (bukan lagi di .event-card__info) — supaya
+           nama & detail acara terpicu BARENGAN dengan kartu/slideshow-nya,
+           bukan trigger scroll terpisah yang baru menyala setelah tamu
+           discroll lebih jauh (posisi .event-card__info ada di bagian bawah
+           kartu setinggi 90vh, jadi trigger sendirinya selalu telat). -->
+      <article class="event-card" data-reveal="tilt-left" data-reveal-group>
+        <div class="event-card__slider swiper" id="event-akad-slider">
+          <div class="swiper-wrapper" id="event-akad-wrapper"></div>
+        </div>
+        <!-- Satu paket: nama acara, tanggal, jam, dan lokasinya adalah satu
+             kesatuan informasi — muncul bersamaan, bukan dicicil per scroll -->
+        <div class="event-card__info">
+          <!-- varian "fade" (tanpa transform) — label ini sudah dirotate -90deg -->
+          <p class="event-label" data-reveal="fade">Akad Nikah</p>
+          <div class="event-detail">
+            <div class="event-date" data-reveal="pop" style="--reveal-i:1">
+              <p class="event-day" id="akad-day"></p>
+              <hr class="event-divider">
+              <!-- angka tanggal berputar cepat 1 -> 25 sambil bloknya naik -->
+              <p class="event-num" id="akad-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
+              <p class="event-month" id="akad-month"></p>
+              <!-- Tahun animasi ramp naik biasa (data-count tanpa nilai) — ikut
+                   sistem reveal seperti event-num supaya count-up-nya terpicu.
+                   --reveal-i:3 = muncul menyusul day/date/month, tidak serentak
+                   dengan angka tanggal. -->
+              <p class="event-year" id="akad-year" data-reveal="fade" data-count style="--reveal-i:3"></p>
+              <!-- Jam & menit dipecah jadi dua span supaya tiap angka bisa
+                   count-up sendiri (overshoot jam ke 24, menit ke 60) -->
+              <p class="event-time"><span id="akad-time-h" data-reveal="fade" data-count="hour" style="--reveal-i:4"></span>:<span id="akad-time-m" data-reveal="fade" data-count="minute" style="--reveal-i:5"></span></p>
+            </div>
+            <div class="event-place" data-reveal="up" style="--reveal-i:2">
+              <h3 id="venue-name-akad"></h3>
+              <p id="venue-address-akad"></p>
+              <a id="akad-maps" class="btn-maps" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                Google Maps
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Resepsi -->
+      <!-- miring ke arah berlawanan dari kartu Akad, supaya dua kartu berurutan
+           tidak terasa mengulang gerakan yang sama persis -->
+      <article class="event-card" data-reveal="tilt-right" data-reveal-group>
+        <div class="event-card__slider swiper" id="event-resepsi-slider">
+          <div class="swiper-wrapper" id="event-resepsi-wrapper"></div>
+        </div>
+        <div class="event-card__info">
+          <p class="event-label" data-reveal="fade">Resepsi</p>
+          <div class="event-detail">
+            <div class="event-date" data-reveal="pop" style="--reveal-i:1">
+              <p class="event-day" id="resepsi-day"></p>
+              <hr class="event-divider">
+              <p class="event-num" id="resepsi-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
+              <p class="event-month" id="resepsi-month"></p>
+              <p class="event-year" id="resepsi-year" data-reveal="fade" data-count style="--reveal-i:3"></p>
+              <p class="event-time"><span id="resepsi-time-h" data-reveal="fade" data-count="hour" style="--reveal-i:4"></span>:<span id="resepsi-time-m" data-reveal="fade" data-count="minute" style="--reveal-i:5"></span></p>
+            </div>
+            <div class="event-place" data-reveal="up" style="--reveal-i:2">
+              <h3 id="venue-name-resepsi"></h3>
+              <p id="venue-address-resepsi"></p>
+              <a id="resepsi-maps" class="btn-maps" href="#" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                Google Maps
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Dresscode (kartu kecil 1/4 layar) -->
+      <!-- Kartu kecil, satu paket: judul + keterangan + bulatan warnanya -->
+      <article class="dresscode-card" data-reveal="rise" data-reveal-group>
+        <p class="dresscode-label" data-reveal="down" style="--reveal-i:1">Dresscode</p>
+        <p class="dresscode-text" id="dresscode-text" data-reveal="up" style="--reveal-i:2"></p>
+        <!-- tiap bulatan warna dapat reveal sendiri, dipasang di main.js -->
+        <div class="dresscode-swatches" id="dresscode-swatches"></div>
+      </article>
+    </section>
+
+    <!-- ============ LIVE STREAMING (opsional per platform — lihat livestream.js.
+         Ketiga URL kosong = section DIHAPUS dari DOM oleh JS, bukan disembunyikan) ============ -->
+    <section id="livestream" class="section section--dark">
+      <p class="section-eyebrow" data-reveal="up">Live</p>
+      <h2 class="section-title--script" data-reveal="up" style="--reveal-i:1">Live Streaming</h2>
+      <p class="section-desc" data-reveal="up" style="--reveal-i:2">
+        Tidak bisa hadir langsung? Saksikan momen bahagia kami lewat siaran langsung.
+      </p>
+      <!-- tombol platform dirender livestream.js dari config -->
+      <div class="livestream-actions"></div>
+    </section>
+
+    <!-- ============ QUOTE (foto full-width 1:1 + overlay golden hour + teks quote) ============ -->
+    <!-- Foto + kalimatnya satu kesatuan — keduanya tampil bersamaan, teks hanya
+         menyusul sedikit supaya fotonya sempat mengendap dulu -->
+    <section id="quote" class="quote-section" data-reveal-group>
+      <picture id="quote-picture" data-reveal="zoom">
+        <source id="quote-webp" srcset="" type="image/webp">
+        <img id="quote-img" src="" alt="">
+      </picture>
+      <div class="quote-overlay"></div>
+      <!-- teks menyusul setelah fotonya selesai "settle" -->
+      <p class="quote-text" id="quote-text" data-reveal="up" style="--reveal-i:3"></p>
+    </section>
+
+    <!-- ============ LOVE STORY ============ -->
+    <section id="love-story" class="section section--dark">
+      <p class="section-eyebrow" data-reveal="up">Our Story</p>
+      <h2 class="section-title--script" data-reveal="up" style="--reveal-i:1">Perjalanan Kami</h2>
+      <div id="love-story-list" class="timeline"></div>
+    </section>
+
+    <!-- ============ GALLERY ============ -->
+    <section id="gallery" class="section">
+      <p class="section-eyebrow" data-reveal="up">Moments</p>
+      <h2 class="section-title--script" data-reveal="up" style="--reveal-i:1">Galeri Foto</h2>
+      <!-- reveal dipasang per foto (gallery.js), bukan pada grid-nya sekaligus -->
+      <div id="gallery-wrapper" class="gallery-grid"></div>
+    </section>
+
+    <!-- ============ DIGITAL GIFT ============ -->
+    <section id="gift" class="section section--dark">
+      <p class="section-eyebrow" data-reveal="up">Wedding Gift</p>
+      <h2 class="section-title" data-reveal="up" style="--reveal-i:1">Tanda Kasih</h2>
+      <p class="section-desc" data-reveal="up" style="--reveal-i:2">
+        Doa restu Anda adalah karunia yang berarti bagi kami. Namun jika ingin memberi
+        tanda kasih, kami menyediakan pilihan berikut.
+      </p>
+
+      <!-- Alur: Kirim Hadiah -> panel terbuka (termasuk tombol Rekomendasi Kado
+           DI DALAM panel) -> klik Rekomendasi Kado -> modal. Tombol rekomendasi
+           dihapus gift.js kalau daftar kado kosong. -->
+      <div class="gift-actions">
+        <button id="btn-gift-toggle" class="btn-primary" type="button" data-reveal="up" style="--reveal-i:3">Kirim Hadiah</button>
+      </div>
+
+      <!-- Panel rekening: satu paket, muncul utuh begitu dibuka -->
+      <div id="gift-panel" class="gift-panel" hidden data-reveal-group>
+        <!-- tiap kartu rekening dapat reveal sendiri, dipasang di gift.js -->
+        <div id="gift-accounts" class="gift-accounts"></div>
+        <div id="gift-address" class="gift-address" data-reveal="pop" style="--reveal-i:2"></div>
+        <button id="btn-gift-recs" class="btn-outline gift-recs-btn" type="button" data-reveal="fade" style="--reveal-i:3">Rekomendasi Kado</button>
+        <button id="btn-gift-confirm" class="btn-outline gift-confirm-btn" type="button" data-reveal="fade" style="--reveal-i:4">Konfirmasi Pengiriman</button>
+        <button id="btn-gift-hide" class="btn-text" type="button" data-reveal="fade" style="--reveal-i:5">Tutup</button>
+      </div>
+    </section>
+
+    <!-- ============ RSVP & BUKU TAMU ============ -->
+    <section id="rsvp" class="section">
+      <p class="section-eyebrow" data-reveal="up">RSVP</p>
+      <h2 class="section-title" data-reveal="up" style="--reveal-i:1">Konfirmasi Kehadiran</h2>
+
+      <!-- Form tampil sebagai satu kartu saat RSVP masuk layar. Daftar ucapan
+           SENGAJA bukan bagian reveal group: masing-masing kartu punya pemicu
+           sendiri ketika baru memasuki area bawah viewport. -->
+      <div class="rsvp-wrap" data-reveal="fade">
+        <form id="rsvp-form" class="rsvp-form">
+          <label data-reveal="up">
+            Nama
+            <input type="text" id="rsvp-name" name="name" required autocomplete="name">
+          </label>
+          <label data-reveal="up" style="--reveal-i:1">
+            Kehadiran
+            <div class="rsvp-attendance" id="rsvp-attendance" role="radiogroup" aria-label="Kehadiran">
+              <button type="button" class="rsvp-pill rsvp-pill--full" data-value="hadir">Hadir</button>
+              <button type="button" class="rsvp-pill" data-value="tidak_hadir">Tidak Hadir</button>
+              <button type="button" class="rsvp-pill" data-value="ragu">Ragu-ragu</button>
+            </div>
+          </label>
+          <label data-reveal="up" style="--reveal-i:2">
+            Jumlah Tamu
+            <select id="rsvp-guests" name="guest_count" aria-label="Jumlah tamu">
+              <option value="1">1 orang</option>
+              <option value="2">2 orang</option>
+              <option value="3">3 orang</option>
+              <option value="4">4 orang</option>
+            </select>
+          </label>
+          <label data-reveal="up" style="--reveal-i:3">
+            Ucapan &amp; Doa
+            <textarea id="rsvp-message" name="message" rows="4" placeholder="Tuliskan doa terbaik Anda untuk kami…" required></textarea>
+          </label>
+          <button type="submit" class="btn-primary" id="rsvp-submit" data-reveal="pop" style="--reveal-i:4">Kirim Konfirmasi</button>
+          <p id="rsvp-status" class="rsvp-status" role="status"></p>
+        </form>
+
+        <div class="wishes-heading" aria-hidden="true">
+          <span></span><p>DOA &amp; UCAPAN</p><span></span>
+        </div>
+        <p class="wishes-intro">Doa baik dan ucapan hangat dari orang-orang terkasih.</p>
+        <div id="wishes-list" class="wishes-list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ============ CLOSING ============ -->
+    <section id="closing" class="section-hero">
+      <div class="hero-media" id="closing-media">
+        <div class="hero-overlay hero-overlay--closing"></div>
+      </div>
+      <!-- Penutup: kalimat & nama mempelai tampil sebagai satu kesatuan.
+           Namanya mengembang pelan (pop), penutup paling tenang di halaman. -->
+      <div class="hero-content" data-reveal-group>
+        <p class="closing-text" data-reveal="up" id="closing-text"></p>
+        <p class="script-names script-names--small" data-reveal="pop" style="--reveal-i:2" id="couple-names-closing">Mita <span class="amp">&amp;</span> Andi</p>
+      </div>
+      <footer class="site-footer">
+        <p data-reveal="up" style="--reveal-i:2">Dibuat dengan &#10084; oleh Mita &amp; Iyow — 2026</p>
+      </footer>
+    </section>
+
+  </div>
+</main>
+
+</div><!-- /app-frame__scroll -->
+
+<!-- Lightbox dipindah ke luar .app-frame__scroll — sama seperti toast/modal
+     lain: dulu semua elemen position:fixed di dalam scroller ikut hanyut
+     saat discroll (bug yang baru diperbaiki di atas), jadi disamakan
+     strukturnya di sini juga supaya tidak bergantung pada perilaku
+     containing-block yang tidak diuji langsung di browser. -->
+<div id="lightbox" class="lightbox" aria-hidden="true">
+  <button id="lightbox-close" class="lightbox__close" type="button" aria-label="Tutup">&times;</button>
+  <img id="lightbox-img" alt="">
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- ============ MODAL KONFIRMASI PENGIRIMAN (WhatsApp) ============ -->
+<!-- Pola overlay sama dengan .editor/.lightbox: fixed inset-0, center, panel +
+     tombol tutup. Opsi dropdown & nomor tujuan dibangun gift.js dari
+     gift.accounts[].owner + gift.contactCPP/CPW + gift.address.phone. -->
+<div id="gift-confirm-modal" class="modal" hidden>
+  <div class="modal__panel">
+    <div class="modal__header">
+      <h3>Konfirmasi Pengiriman</h3>
+      <button type="button" class="modal__close" aria-label="Tutup">&times;</button>
+    </div>
+    <label class="modal__field">
+      <span>Metode</span>
+      <select id="gift-confirm-method"></select>
+    </label>
+    <label class="modal__field">
+      <span>Pesan (bisa diedit)</span>
+      <textarea id="gift-confirm-message" rows="4"></textarea>
+    </label>
+    <button id="gift-confirm-send" class="btn-primary" type="button">Kirim via WhatsApp</button>
+    <p class="modal__hint">WhatsApp akan terbuka di tab baru dengan pesan siap kirim.</p>
+  </div>
+</div>
+
+<!-- ============ MODAL REKOMENDASI KADO ============ -->
+<!-- Kartu di-grid dari giftRecommendations[] (nama/harga/link), gambar
+     dipasangkan by-index dengan foto folder gift_item (lihat gift.js). -->
+<div id="gift-recs-modal" class="modal" hidden>
+  <div class="modal__panel">
+    <div class="modal__header">
+      <h3>Rekomendasi Kado</h3>
+      <button type="button" class="modal__close" aria-label="Tutup">&times;</button>
+    </div>
+    <div id="gift-recs-grid" class="gift-recs"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL QR CHECK-IN ============ -->
+<!-- QR meng-encode location.href apa adanya (link yang sedang dibuka tamu,
+     sudah memuat ?to=...) — petugas admin-qr tinggal memindainya. Canvas
+     diisi qr-checkin.js (qrcode via CDN, tanpa API pihak ketiga). -->
+<div id="qr-checkin-modal" class="modal" hidden>
+  <div class="modal__panel">
+    <div class="modal__header">
+      <h3>Check-in</h3>
+      <button type="button" class="modal__close" aria-label="Tutup">&times;</button>
+    </div>
+    <div class="qr-modal__canvas-wrap qr-container">
+      <canvas id="qr-checkin-canvas"></canvas>
+    </div>
+    <p class="qr-modal__hint">Tunjukkan QR ini ke petugas saat check-in.</p>
+  </div>
+</div>
+
+<!-- ============ MODAL MENU NAVIGASI ============ -->
+<!-- Daftar shortcut ke section undangan, dibangun nav-menu.js dari id yang
+     ADA di DOM (Live Streaming ikut hanya kalau sectionnya masih ada —
+     livestream.js menghapus elemennya kalau semua URL kosong). Pola modal
+     sama seperti modul lain: overlay + panel dark gold. -->
+<div id="nav-menu-modal" class="modal" hidden>
+  <div class="modal__panel">
+    <div class="modal__header">
+      <h3>Menu</h3>
+      <button type="button" class="modal__close" aria-label="Tutup">&times;</button>
+    </div>
+    <nav id="nav-menu-list" class="nav-menu-list" aria-label="Navigasi undangan"></nav>
+  </div>
+</div>
+
+</div><!-- /app-frame -->
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/tenant.js"></script>
+<script src="assets/js/photos.js"></script>
+<script src="assets/js/gallery-layout.js"></script>
+<script src="assets/js/supabase-client.js"></script>
+<script src="assets/js/hero-slideshow.js"></script>
+<script src="assets/js/reveal.js"></script>
+<script src="assets/js/countdown.js"></script>
+<script src="assets/js/gallery.js"></script>
+<script src="assets/js/we-found-love.js"></script>
+<script src="assets/js/couple-sliders.js"></script>
+<script src="assets/js/event-cards.js"></script>
+<script src="assets/js/audio-player.js"></script>
+<script src="assets/js/gift.js"></script>
+<script src="assets/js/rsvp.js"></script>
+<!-- QR check-in tamu: qrcode-generator (UMD plain script, global `qrcode`).
+     Paket npm `qrcode` tidak punya build browser (CommonJS mentah di lib/),
+     dan jalur +esm butuh type=module yang tidak dipakai script lain di halaman
+     ini — library ini punya build browser siap pakai, komputasi tetap lokal. -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="assets/js/livestream.js"></script>
+<script src="assets/js/nav-menu.js"></script>
+<script src="assets/js/qr-checkin.js"></script>
+<!-- Tema warna (tab "Tampilan" admin) WAJIB sebelum main.js — applyTheme
+     dipanggil di baris pertama populateContent(), jadi fungsi ini harus
+     sudah ada saat itu. -->
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/visual-editor/registry.js"></script>
+<script src="assets/js/visual-editor/guest-overrides.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
