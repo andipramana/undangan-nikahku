@@ -29,7 +29,6 @@ const SECTION_ITEMS = [
   ["gift-rekening", "Rekening"],
   ["gift-kontak", "Kontak WA"],
   ["gift-alamat", "Alamat kado"],
-  ["gift-rekomendasi", "Rekomendasi kado"],
   ["lainnya", "Lainnya"]
 ];
 

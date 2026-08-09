@@ -259,12 +259,6 @@
           Template tiap rekening bisa dikustom di daftar rekening di atas.</p>
         `)}
 
-        ${section("gift-rekomendasi", "Gift — rekomendasi kado", `
-          <div id="gift-recs-list"></div>
-          <p class="muted">Foto kado diunggah di tab Foto (folder "Rekomendasi
-          Kado") — foto ke-i dipasangkan dengan baris ke-i di sini.</p>
-        `)}
-
         ${section("lainnya", "Lainnya", `
           <div class="form-grid">
             ${field("Jeda slideshow hero (ms)", "f-hero-interval", "number")}
@@ -340,7 +334,6 @@
     renderColors();
     renderList("loveStory", "love-story-list");
     renderList("accounts", "gift-accounts-list");
-    renderList("giftRecommendations", "gift-recs-list");
     renderGreetings();
 
     document.getElementById("content-form").addEventListener("submit", onSave);
