@@ -5,20 +5,20 @@
   "css": "/templates/modern-minimal.css",
   "js": "/templates/modern-minimal.js",
   "fonts": [
-    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
+    "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap"
   ],
   "theme": {
-    "--color-bg": "#F5F0E6",
-    "--color-dark": "#1D1B17",
-    "--color-dark-2": "#25231E",
-    "--color-gold": "#B89149",
-    "--color-gold-soft": "#DBCA9E",
-    "--color-text": "#2D2421",
-    "--color-text-light": "#F5F0E6",
-    "--font-serif": "\"Cormorant Garamond\", \"Georgia\", serif",
-    "--font-script": "\"Cormorant Garamond\", \"Georgia\", serif",
-    "--font-sans": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
-    "--font-label": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
-    "--overlay-closing": "linear-gradient(180deg, rgba(15,14,11,.82) 0%, rgba(15,14,11,.88) 50%, rgba(15,14,11,.94) 100%)"
+    "--color-bg": "#2d2a28",
+    "--color-dark": "#1a1816",
+    "--color-dark-2": "#242220",
+    "--color-gold": "#c9a96e",
+    "--color-gold-soft": "#d4c5a0",
+    "--color-text": "#e8e4de",
+    "--color-text-light": "#e8e4de",
+    "--font-serif": "\"Playfair Display\", \"Georgia\", serif",
+    "--font-script": "\"Great Vibes\", \"Dancing Script\", cursive",
+    "--font-sans": "\"Montserrat\", \"Helvetica Neue\", sans-serif",
+    "--font-label": "\"Montserrat\", \"Helvetica Neue\", sans-serif",
+    "--overlay-closing": "linear-gradient(180deg, rgba(26,24,22,.3) 0%, rgba(26,24,22,.25) 50%, rgba(26,24,22,.8) 100%)"
   }
 }
