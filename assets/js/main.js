@@ -409,6 +409,17 @@
     }
 
     await populateContent();
+
+    // Template engine re-apply: populateContent memanggil applyTheme(cfg)
+    // yang bisa meng-override warna template dengan warna tersimpan di DB.
+    // Supaya template selalu menang, re-apply tema template setelah konten diisi.
+    if (tpl && tpl.theme && window.getActiveTemplate()) {
+      const root = document.documentElement;
+      for (const [key, value] of Object.entries(tpl.theme)) {
+        if (key.startsWith("--")) root.style.setProperty(key, value);
+      }
+    }
+
     setupOpenButton();
     if (window.initHeroSlideshows) window.initHeroSlideshows();
 
