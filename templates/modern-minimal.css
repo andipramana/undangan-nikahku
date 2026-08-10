@@ -1,6 +1,7 @@
 /* ================================================================
-   Modern Minimal — standalone template CSS (style.css DISABLED)
+   Modern Minimal — standalone template CSS v3 (style.css DISABLED)
    Dark cinematic, editorial layout, premium Indonesian wedding
+   Base: #1a1816, Gold: #c9a96e, Fonts: Playfair+GreatVibes+Montserrat
    ================================================================ */
 
 /* ─── RESET & BASE ─── */
@@ -21,6 +22,16 @@ h1, h2, h3, h4 { margin: 0; font-weight: 400; }
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
 input, select, textarea { font: inherit; }
+
+/* ─── SUBTLE BACKGROUND TEXTURE ─── */
+/* A single best photo as almost-transparent page texture */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -1;
+  background: url("assets/img/foto_cover/01.jpg") center/cover no-repeat;
+  opacity: .06;
+  pointer-events: none;
+}
 
 /* ─── APP FRAME ─── */
 .app-frame {
@@ -217,6 +228,11 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   background: #1a1816;
   color: #e8e4de;
 }
+/* Closing hero should stack content + footer vertically, not center */
+#closing.section-hero {
+  flex-direction: column;
+  justify-content: flex-start;
+}
 .hero-media { position: absolute; inset: 0; overflow: hidden; }
 .hero-media img {
   width: 100%; height: 100%;
@@ -297,10 +313,10 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 #cover .btn-open .icon-envelope { width: 14px; height: 14px; opacity: .5; }
 #cover .hero-note { font-family: "Montserrat","Helvetica Neue",sans-serif; font-size: .52rem; opacity: .3; margin-top: .35rem; }
 
-/* Cover exit — slide LEFT (overridden by template JS) */
+/* Cover exit — slide LEFT (set by template JS) */
 #cover.is-exiting {
-  transform: translateY(-100%);
-  transition: transform 0.9s cubic-bezier(.7,0,.3,1);
+  transform: translateX(-105%) !important;
+  transition: transform 0.85s cubic-bezier(0.5,0,0.75,0);
   pointer-events: none;
 }
 
@@ -344,7 +360,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 #opening .btn-outline--light .icon-envelope { width: 13px; height: 13px; }
 
 /* Countdown */
-.countdown--plain { display: flex; gap: 1.4rem; justify-content: center; margin-top: .6rem; }
+.countdown--plain { display: flex; gap: 1.6rem; justify-content: center; margin-top: .6rem; }
 .countdown__item { text-align: center; min-width: 44px; }
 .countdown__item span {
   font-family: "Playfair Display","Georgia",serif;
@@ -367,8 +383,11 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 
 /* ═══════════════════════ WE FOUND LOVE ═══════════════════════ */
 #we-found-love.section { padding: 4.5rem 1.5rem; text-align: center; }
-.wfl-slider { max-width: 290px; margin: 0 auto 2rem; overflow: hidden; border-radius: 0; }
-.wfl-slider .swiper-slide img { filter: brightness(.78); }
+.wfl-slider { max-width: 290px; margin: 0 auto 2rem; overflow: hidden; }
+.wfl-slider .swiper-slide img {
+  width: 100%; aspect-ratio: 1; object-fit: cover;
+  filter: brightness(.78);
+}
 .wfl-quote { max-width: 320px; margin: 0 auto; }
 .arabic-quote {
   font-family: "Playfair Display","Georgia",serif;
@@ -387,8 +406,8 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 /* ═══════════════════════ COUPLE ═══════════════════════ */
 #couple.section { padding: 4rem 0; }
 .couple-block { margin: 2.5rem 0; text-align: center; }
-.couple-slider { max-width: 300px; margin: 0 auto; overflow: hidden; border-radius: 0; }
-.couple-slider .swiper-slide img { filter: brightness(.85); }
+.couple-slider { max-width: 300px; margin: 0 auto; overflow: hidden; }
+.couple-slider .swiper-slide img { width: 100%; aspect-ratio: 3/4; object-fit: cover; filter: brightness(.85); }
 .couple-fade {
   position: absolute; bottom: 0; left: 0; right: 0; height: 45%; z-index: 2;
   background: linear-gradient(0deg, #1a1816 0%, transparent 100%);
@@ -419,13 +438,16 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   width: 100%; height: 100%; object-fit: cover;
   filter: brightness(.4); object-position: var(--fx, 50%) var(--fy, 50%);
 }
+/* FIX #2: Event info VISIBLE overlaid on full-bleed image with z-index */
 .event-card__info {
-  position: absolute; bottom: 0; left: 0; right: 0;
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 5;
   padding: 3.5rem 1.5rem 2rem;
   background: linear-gradient(0deg, rgba(26,24,22,.92) 0%, rgba(26,24,22,.45) 60%, transparent 100%);
   text-align: center; display: flex; flex-direction: column; align-items: center;
-  border: none;
+  border: none; pointer-events: none;
 }
+/* Allow clicking through to maps button */
+.event-card__info a, .event-card__info button { pointer-events: auto; }
 .event-label {
   font-family: "Great Vibes","Dancing Script",cursive;
   font-size: 1.35rem; color: #c9a96e;
@@ -512,7 +534,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .timeline-item { text-align: center; margin-bottom: 3rem; border: none; padding: 0; }
 .timeline-item__photo {
   width: 100%; max-width: 300px; margin: 0 auto 1rem; display: block;
-  border-radius: 0; filter: brightness(.78);
+  filter: brightness(.78); aspect-ratio: 16/10; object-fit: cover;
   object-position: var(--fx, 50%) var(--fy, 50%);
 }
 .timeline-date {
@@ -528,7 +550,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   font-size: .72rem; color: rgba(232,228,222,.5); line-height: 1.6;
 }
 
-/* ═══════════════════════ GALLERY — proper masonry grid ═══════════════════════ */
+/* ═══════════════════════ GALLERY — masonry grid ═══════════════════════ */
 #gallery.section { padding: 4rem 0; }
 .gallery-grid {
   display: grid;
@@ -667,14 +689,25 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 .wish-card__message { font-family: "Montserrat","Helvetica Neue",sans-serif; font-size: .68rem; color: rgba(232,228,222,.45); line-height: 1.5; }
 
-/* ═══════════════════════ CLOSING ═══════════════════════ */
-#closing.section-hero { background: #1a1816; }
+/* ═══════════════════════ CLOSING — stacked blocks ═══════════════════════ */
+#closing.section-hero {
+  background: #1a1816;
+  /* Stack content vertically: closing text → couple names → footer */
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 8rem;
+}
 #closing .hero-media img { filter: brightness(.45) saturate(1.15); }
 #closing .hero-overlay--closing {
   position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(26,24,22,.2) 0%, rgba(26,24,22,.15) 50%, rgba(26,24,22,.72) 100%);
 }
-#closing .hero-content { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+/* FIX #3: Hero content (closing-text + couple-names) and footer as stacked blocks */
+#closing .hero-content {
+  display: flex; flex-direction: column; align-items: center; gap: 1.2rem;
+  width: 100%;
+  z-index: 2; position: relative;
+}
 .closing-text {
   font-family: "Great Vibes","Dancing Script",cursive;
   font-size: 1.2rem; color: #c9a96e;
@@ -688,9 +721,11 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   font-family: "Great Vibes","Dancing Script",cursive; font-size: .5em; color: #c9a96e;
 }
 .site-footer {
+  position: relative; z-index: 2;
   font-family: "Montserrat","Helvetica Neue",sans-serif;
   font-size: .52rem; color: rgba(232,228,222,.25); letter-spacing: .08em;
   text-align: center; padding: 3rem 1rem 2rem;
+  width: 100%;
 }
 
 /* ═══════════════════════ SWIPER ═══════════════════════ */
@@ -702,7 +737,10 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 .swiper-pagination-bullet-active { background: #c9a96e; width: 16px; border-radius: 3px; }
 
-/* ═══════════════════════ REVEAL ═══════════════════════ */
+/* ═══════════════════════ REVEAL — comprehensive per-element ═══════════════════════ */
+/* FIX #6: Every element has reveal animation. Different animations per type. */
+
+/* Base: all data-reveal elements start hidden */
 .reveal-ready [data-reveal] {
   opacity: 0;
   transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1),
@@ -711,38 +749,66 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 .reveal-ready [data-reveal].is-revealed { opacity: 1; }
 
-/* Up */
+/* Directional variants */
 .reveal-ready [data-reveal="up"] { transform: translateY(22px); }
 .reveal-ready [data-reveal="up"].is-revealed { transform: translateY(0); }
-/* Down */
+
 .reveal-ready [data-reveal="down"] { transform: translateY(-18px); }
 .reveal-ready [data-reveal="down"].is-revealed { transform: translateY(0); }
-/* Pop */
+
 .reveal-ready [data-reveal="pop"] { transform: scale(.84); }
 .reveal-ready [data-reveal="pop"].is-revealed { transform: scale(1); }
-/* Fade */
+
 .reveal-ready [data-reveal="fade"] { transition: opacity 0.85s cubic-bezier(0.22,1,0.36,1); }
-/* Zoom */
+
 .reveal-ready [data-reveal="zoom"] { transform: scale(1.08); }
 .reveal-ready [data-reveal="zoom"].is-revealed { transform: scale(1); }
-/* Slide right/left */
+
 .reveal-ready [data-reveal="slide-right"] { transform: translateX(45px); }
 .reveal-ready [data-reveal="slide-right"].is-revealed { transform: translateX(0); }
+
 .reveal-ready [data-reveal="slide-left"] { transform: translateX(-45px); }
 .reveal-ready [data-reveal="slide-left"].is-revealed { transform: translateX(0); }
-/* Enter right/left — slide from outside screen */
+
 .reveal-ready [data-reveal="enter-right"] { transform: translateX(105%) scale(1.03); }
 .reveal-ready [data-reveal="enter-left"] { transform: translateX(-105%) scale(1.03); }
 .reveal-ready [data-reveal="enter-right"].is-revealed,
 .reveal-ready [data-reveal="enter-left"].is-revealed { transform: none; }
-/* Tilt */
+
 .reveal-ready [data-reveal="tilt-left"] { transform: translateY(24px) rotate(-1.2deg); }
 .reveal-ready [data-reveal="tilt-right"] { transform: translateY(24px) rotate(1.2deg); }
 .reveal-ready [data-reveal="tilt-left"].is-revealed,
 .reveal-ready [data-reveal="tilt-right"].is-revealed { transform: none; }
-/* Rise */
+
 .reveal-ready [data-reveal="rise"] { transform: translateY(26px) scale(.97); }
 .reveal-ready [data-reveal="rise"].is-revealed { transform: translateY(0) scale(1); }
+
+/* Gallery items: staggered reveal with alternate slide directions */
+.reveal-ready .gallery-item[data-reveal] {
+  transition-delay: calc(var(--reveal-i, 0) * 60ms + 0.12s);
+  transition-duration: 0.8s;
+}
+.reveal-ready .gallery-item[data-reveal="slide-left"] { transform: translateX(-30px); }
+.reveal-ready .gallery-item[data-reveal="slide-right"] { transform: translateX(30px); }
+.reveal-ready .gallery-item[data-reveal="slide-left"].is-revealed,
+.reveal-ready .gallery-item[data-reveal="slide-right"].is-revealed { transform: translateX(0); }
+
+/* Story items: more dramatic entrance */
+.reveal-ready .timeline-item[data-reveal="slide-left"] { transform: translateX(-60px); }
+.reveal-ready .timeline-item[data-reveal="slide-right"] { transform: translateX(60px); }
+.reveal-ready .timeline-item[data-reveal="slide-left"].is-revealed,
+.reveal-ready .timeline-item[data-reveal="slide-right"].is-revealed { transform: translateX(0); }
+
+/* Event cards: subtle rise + slight tilt */
+.reveal-ready .event-card[data-reveal] { transition-duration: 1.1s; }
+.reveal-ready .event-card[data-reveal="tilt-left"] { transform: translateY(36px) rotate(-1deg); }
+.reveal-ready .event-card[data-reveal="tilt-right"] { transform: translateY(36px) rotate(1deg); }
+.reveal-ready .event-card[data-reveal="tilt-left"].is-revealed,
+.reveal-ready .event-card[data-reveal="tilt-right"].is-revealed { transform: none; }
+
+/* Couple blocks: slower entrance from off-screen */
+.reveal-ready [data-reveal="enter-right"],
+.reveal-ready [data-reveal="enter-left"] { transition-duration: 1.6s !important; }
 
 /* ─── TEXT ENTER (Save The Date opening reveal) ─── */
 #opening .text-enter {
@@ -762,7 +828,22 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 #opening .hero-media img { transform: translateX(-6%); }
 
-/* ─── REDUCED MOTION ─── */
+/* ─── MODAL ANIMATION ─── */
+.modal:not([hidden]) .modal__panel {
+  animation: mmModalIn 0.38s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes mmModalIn {
+  from { transform: translateY(36px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ─── PARALLAX READY — for JS-driven translate3d ─── */
+.parallax-layer {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ═══════════════════════ REDUCED MOTION ═══════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   .reveal-ready [data-reveal] { transform: none !important; transition: opacity .4s ease !important; }
   .reveal-ready [data-reveal].is-revealed { opacity: 1; }
@@ -771,9 +852,12 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   .hero-slide.active img { animation: none; }
   .scroll-chevron { animation: none; }
   #cover.is-exiting { transition: opacity .3s ease; }
+  /* Disable parallax */
+  .parallax-layer { transform: none !important; will-change: auto; }
+  #opening .hero-media img { transform: none !important; transition: none !important; }
 }
 
-/* ─── MOBILE ─── */
+/* ═══════════════════════ MOBILE ═══════════════════════ */
 @media (max-width: 430px) {
   .section { padding: 3.5rem 1.2rem; }
   #cover .script-names { font-size: 2.2rem; }
@@ -789,4 +873,10 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   .section-title, .section-title--script { font-size: 1.6rem; }
   .timeline-item__photo { max-width: 260px; }
   .wfl-slider { max-width: 260px; }
+  #closing.section-hero { padding-top: 6rem; }
 }
+
+/* Ensure gallery item images are always visible */
+.gallery-item { display: block; }
+.gallery-item img { opacity: 1; visibility: visible; }
+.gallery-item picture { display: block; width: 100%; height: 100%; }
