@@ -1,0 +1,483 @@
+/* ================================================================
+   Modern Minimal — template undangan digital
+   Style: bersih, banyak whitespace, border tipis, card flat,
+           typography tight, cover center-vertical, no shadow
+   ================================================================ */
+
+/* ─── CRITICAL RESET: override style.css specificity ─── */
+/* Cover — LIGHT ivory overlay, bukan dark moody */
+.section-hero { background: #F5F0E6 !important; }
+#cover .hero-media::after,
+#cover .hero-overlay--flat { 
+  background: linear-gradient(180deg, rgba(245,240,230,.75) 0%, rgba(245,240,230,.6) 50%, rgba(245,240,230,.8) 100%) !important;
+}
+/* Opening bg */
+#opening .hero-media::after,
+#opening .hero-overlay--flat {
+  background: linear-gradient(180deg, rgba(245,240,230,.7) 0%, rgba(245,240,230,.55) 50%, rgba(245,240,230,.75) 100%) !important;
+}
+/* Cover text — dark, bukan putih */
+#cover .hero-content,
+#cover .hero-content *,
+.cover-screen,
+.cover-screen * {
+  color: #1D1B17 !important;
+}
+#cover .eyebrow,
+#cover .guest-label,
+#cover .guest-name,
+#cover .hero-note { color: #1D1B17 !important; }
+#cover .script-names { color: #1D1B17 !important; }
+#cover .btn-open {
+  color: #1D1B17 !important;
+  border-color: #1D1B17 !important;
+  background: transparent !important;
+}
+#cover .btn-open:hover {
+  background: #1D1B17 !important;
+  color: #F5F0E6 !important;
+}
+#cover .btn-open .icon-envelope { color: #1D1B17 !important; }
+#cover .btn-open:hover .icon-envelope { color: #F5F0E6 !important; }
+
+/* Opening / Save The Date — text dark */
+#opening .hero-content,
+#opening .hero-content * { color: #1D1B17 !important; }
+#opening .countdown__item span { color: #1D1B17 !important; }
+#opening .countdown__item small { color: #6b6359 !important; }
+#opening .btn-outline--light {
+  color: #1D1B17 !important;
+  border-color: #1D1B17 !important;
+}
+#opening .scroll-chevron { color: #1D1B17 !important; }
+
+/* Variables — pastikan theme vars benar */
+:root {
+  --max-w: 430px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+}
+
+/* ─── Body ─── */
+html, body {
+  background: #1a1a1a; /* dark surround on desktop */
+}
+
+/* ─── App frame ─── */
+.app-frame {
+  background: #F5F0E6; /* ivory */
+  border-left: 1px solid #e0d8cc;
+  border-right: 1px solid #e0d8cc;
+}
+
+/* ─── Section — banyak whitespace, border tipis antar section ─── */
+.section {
+  padding: 4rem 1.6rem 5rem;
+  background: #F5F0E6;
+  border-bottom: 1px solid #e0d8cc;
+}
+.section--dark {
+  background: #F5F0E6; /* modern: ga ada section gelap */
+  color: #2D2421;
+}
+.section--dark .section-eyebrow { color: #B89149; }
+
+/* ─── Eyebrow ─── */
+.section-eyebrow {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #B89149;
+  margin-bottom: 0.4rem;
+}
+
+/* ─── Judul section — clean sans-serif ─── */
+.section-title,
+.section-title--script {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #1D1B17;
+  margin-bottom: 1rem;
+  text-transform: none;
+}
+
+/* ─── Hero / Cover ─── */
+.section-hero {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #F5F0E6;
+}
+.hero-media img {
+  object-fit: cover;
+  filter: brightness(0.65);
+}
+.hero-overlay--flat {
+  background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.35) 50%, rgba(0,0,0,.5) 100%);
+}
+
+/* ─── Cover screen — vertical center, tight spacing ─── */
+.cover-screen {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+  max-width: 340px;
+}
+.hero-content--split {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.hero-content__top .eyebrow {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+/* Nama — serif elegan, bukan script */
+.script-names {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 2.8rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  margin: 0;
+}
+.script-names .amp {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.8em;
+}
+.hero-content__bottom { margin-top: 0; }
+.guest-label {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+}
+.guest-name {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-bottom: 1.8rem;
+}
+
+/* ─── Tombol buka — flat, border tipis, no shadow ─── */
+.btn-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 2rem;
+  border: 1px solid #F5F0E6;
+  background: transparent;
+  color: #F5F0E6;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+}
+.btn-open:hover { background: #F5F0E6; color: #1D1B17; }
+.btn-open .icon-envelope { width: 14px; height: 14px; }
+.hero-note {
+  font-size: 0.6rem;
+  opacity: 0.6;
+  margin-top: 0.8rem;
+}
+
+/* ─── Scroller ─── */
+.app-frame__scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #B89149 transparent;
+}
+
+/* ─── Opening / Save The Date ─── */
+#opening .hero-content {
+  gap: 1rem;
+}
+#opening .eyebrow {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+}
+#opening .script-names--small {
+  font-size: 2rem;
+}
+.countdown--plain {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.countdown__item {
+  text-align: center;
+}
+.countdown__item span {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 1.8rem;
+  font-weight: 300;
+  display: block;
+  line-height: 1;
+}
+.countdown__item small {
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.btn-outline--light {
+  border: 1px solid #F5F0E6;
+  color: #F5F0E6;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  padding: 0.5rem 1.5rem;
+}
+
+/* ─── Couple cards — flat, border-tipis ─── */
+.couple-block {
+  margin: 2rem 0;
+}
+.couple-slider {
+  border-radius: 0;
+  overflow: hidden;
+}
+.couple-slider .swiper-slide img {
+  object-fit: cover;
+  filter: brightness(0.95);
+}
+.couple-info {
+  padding: 1.2rem;
+  text-align: left;
+  background: transparent;
+  border-top: 1px solid #e0d8cc;
+}
+.couple-info__label {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+}
+.couple-info__name {
+  font-family: "Cormorant Garamond", "Georgia", serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+}
+.couple-info__parents {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: #6b6359;
+}
+
+/* ─── Event cards — flat rectangle ─── */
+.event-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e0d8cc;
+  border-radius: 0;
+  margin: 1.2rem 0;
+  overflow: hidden;
+  background: #F5F0E6;
+  box-shadow: none;
+}
+.event-card__slider {
+  width: 100%;
+  height: 280px;
+}
+.event-card__slider img {
+  object-fit: cover;
+}
+.event-card__info {
+  padding: 1.5rem;
+  border-top: 1px solid #e0d8cc;
+}
+.event-label {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  writing-mode: horizontal-tb;
+  transform: none;
+  margin-bottom: 0.3rem;
+}
+.event-detail {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.event-day {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+}
+.event-num {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 3rem;
+  font-weight: 200;
+  line-height: 1;
+}
+.event-month, .event-year {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+.event-time {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8rem;
+}
+.event-place h3 {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.event-place p {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: #6b6359;
+}
+.btn-maps {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  border: 1px solid #B89149;
+  color: #B89149;
+  padding: 0.4rem 1rem;
+}
+
+/* ─── Dresscode ─── */
+.dresscode-card {
+  border: 1px solid #e0d8cc;
+  border-radius: 0;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  background: #F5F0E6;
+}
+
+/* ─── Love Story / Timeline ─── */
+.timeline-item {
+  border-left: 1px solid #e0d8cc;
+  padding-left: 1.5rem;
+  margin-left: 1rem;
+  margin-bottom: 2.5rem;
+}
+.timeline-item__photo {
+  border-radius: 0;
+  margin-bottom: 0.8rem;
+}
+.timeline-date {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+}
+.timeline-item h4 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.3rem;
+}
+.timeline-item p {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: #6b6359;
+}
+
+/* ─── Gallery — grid 2-kolom, gap kecil ─── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.gallery-item {
+  border-radius: 0;
+}
+
+/* ─── Gift / RSVP ─── */
+.btn-primary {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  border: 1px solid #1D1B17;
+  background: #1D1B17;
+  color: #F5F0E6;
+  padding: 0.7rem 2rem;
+  border-radius: 0;
+  cursor: pointer;
+}
+.rsvp-form input,
+.rsvp-form textarea,
+.rsvp-form select {
+  border: 1px solid #e0d8cc;
+  border-radius: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8rem;
+  padding: 0.7rem;
+  background: #fff;
+}
+.rsvp-pill {
+  border: 1px solid #e0d8cc;
+  border-radius: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.7rem;
+}
+.rsvp-pill--full { background: #1D1B17; color: #F5F0E6; border-color: #1D1B17; }
+
+/* ─── Closing ─── */
+.closing-text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1rem;
+  font-style: italic;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.site-footer {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+}
+
+/* ─── Wishes ─── */
+.wish-card {
+  border: 1px solid #e0d8cc;
+  border-radius: 0;
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+.wish-card__name {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.wish-card__message {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.75rem;
+  color: #6b6359;
+}
+
+/* ─── Audio FAB ─── */
+.audio-fab {
+  background: #1D1B17;
+  border: 1px solid #B89149;
+  border-radius: 0;
+}
+
+/* ─── Quote section ─── */
+.quote-text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.2rem;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 430px) {
+  .section { padding: 3rem 1.2rem 4rem; }
+  .script-names { font-size: 2.2rem; }
+  .event-card__slider { height: 220px; }
+}

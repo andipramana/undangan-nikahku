@@ -1,19 +1,10 @@
 {
   "id": "modern-minimal",
   "name": "Modern Minimal",
-  "version": 1,
+  "version": 2,
+  "css": "/templates/modern-minimal.css",
   "fonts": [
-    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
-  ],
-  "sections": [
-    "cover", "opening", "event", "couple",
-    "gallery", "quote", "love-story",
-    "gift", "rsvp", "closing"
-  ],
-  "section_order": [
-    "cover", "opening", "event", "couple",
-    "gallery", "quote", "love-story",
-    "gift", "rsvp", "closing"
+    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
   ],
   "theme": {
     "--color-bg": "#F5F0E6",
@@ -28,34 +19,5 @@
     "--font-sans": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
     "--font-label": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
     "--overlay-closing": "linear-gradient(180deg, rgba(15,14,11,.82) 0%, rgba(15,14,11,.88) 50%, rgba(15,14,11,.94) 100%)"
-  },
-  "transitions": {
-    "default": "up",
-    "cover": "aos",
-    "opening": "text-enter",
-    "event": "tilt",
-    "couple": "enter",
-    "gallery": "pop",
-    "quote": "zoom",
-    "love-story": "slide",
-    "gift": "up",
-    "rsvp": "fade",
-    "closing": "up"
-  },
-  "parallax": {
-    "enabled": false,
-    "type": "none"
-  },
-  "features": {
-    "countdown": true,
-    "calendar": true,
-    "love_story": true,
-    "livestream": false,
-    "gallery": true,
-    "gift": true,
-    "rsvp": true,
-    "wishes": true,
-    "dresscode": true,
-    "qr_checkin": true
   }
 }

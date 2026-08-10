@@ -385,14 +385,11 @@
       .replace(/\/+$/, ""); // strip trailing slash
     if (!urlTpl && savedTpl) {
       const active = window.getActiveTemplate();
-      console.log("Template engine: DB says", savedTpl, "active:", active && active.id);
       if (!active || active.id !== savedTpl) {
         try {
-          console.log("Template engine: switching to", savedTpl);
           const fontLinks = document.querySelectorAll('link[data-template-font]');
           fontLinks.forEach((l) => l.remove());
-          const result = await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
-          console.log("Template engine: switch result", result && result.id);
+          await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
           tpl = window.getActiveTemplate();
           if (tpl && tpl.fonts) {
             tpl.fonts.forEach((url) => {

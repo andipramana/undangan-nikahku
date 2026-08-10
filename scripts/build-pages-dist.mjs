@@ -40,7 +40,9 @@ const required = [
   "assets/js/tenant.js",
   "assets/js/register.js",
   "templates/classic-elegance.json",
-  "templates/modern-minimal.json"
+  "templates/modern-minimal.json",
+  "templates/classic-elegance.css",
+  "templates/modern-minimal.css"
 ];
 for (const file of required) {
   try { await access(path.join(dist, file)); }
