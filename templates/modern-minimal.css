@@ -138,6 +138,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   display: flex; align-items: center; justify-content: center;
   background: rgba(26,24,22,.95);
 }
+.lightbox[aria-hidden="true"] { display: none !important; }
 .lightbox img { max-width: 95vw; max-height: 90vh; object-fit: contain; }
 .lightbox__close {
   position: absolute; top: 1rem; right: 1.2rem;
