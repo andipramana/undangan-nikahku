@@ -385,9 +385,11 @@
       console.log("Template engine: DB says", savedTpl, "active:", active && active.id);
       if (!active || active.id !== savedTpl) {
         try {
+          console.log("Template engine: switching to", savedTpl);
           const fontLinks = document.querySelectorAll('link[data-template-font]');
           fontLinks.forEach((l) => l.remove());
-          await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
+          const result = await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
+          console.log("Template engine: switch result", result && result.id);
           tpl = window.getActiveTemplate();
           if (tpl && tpl.fonts) {
             tpl.fonts.forEach((url) => {

@@ -164,7 +164,9 @@
     _definition = null;
     if (typeof source === "string") {
       try {
+        console.log("Template engine: fetch", source);
         const res = await fetch(source);
+        console.log("Template engine: fetch status", res.status, res.ok);
         if (res.ok) _definition = await res.json();
       } catch {}
     } else if (source && typeof source === "object") {
