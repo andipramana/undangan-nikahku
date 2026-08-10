@@ -53,6 +53,8 @@
    *  feature flag (countdown, livestream, etc.) diterapkan. */
   function applySections(sections, features) {
     const active = new Set(sections);
+    // Cover SELALU tampil — safety net. Tanpa cover, halaman terlihat blank.
+    active.add("cover");
     for (const [key, selector] of Object.entries(SECTION_IDS)) {
       const el = document.querySelector(selector);
       if (!el) continue;
