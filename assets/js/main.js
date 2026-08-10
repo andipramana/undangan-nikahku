@@ -350,7 +350,7 @@
     //    tidak kedip, lalu periksa payload Supabase untuk template pilihan
     //    client (site_content.template). Kalau berbeda, switch ke template
     //    yang benar setelah payload tiba.
-    const urlTpl = new URLSearchParams(location.search).get("template");
+    const urlTpl = (new URLSearchParams(location.search).get("template") || "").replace(/\/+$/, "");
     let tpl = await window.loadTemplate(
       urlTpl ? `/templates/${encodeURIComponent(urlTpl)}.json` : null
     );
@@ -378,8 +378,9 @@
     // Kalau client sudah memilih template berbeda (site_content.template),
     // switch sekarang — setelah payload tiba, sebelum konten diisi.
     // KECUALI: kalau ?template=... di URL, URL yang menang (admin preview).
-    const savedTpl = (payload && payload.content && payload.content.template)
-      || (window.WEDDING_CONFIG && window.WEDDING_CONFIG.template);
+    const savedTpl = ((payload && payload.content && payload.content.template)
+      || (window.WEDDING_CONFIG && window.WEDDING_CONFIG.template) || "")
+      .replace(/\/+$/, ""); // strip trailing slash
     if (!urlTpl && savedTpl) {
       const active = window.getActiveTemplate();
       console.log("Template engine: DB says", savedTpl, "active:", active && active.id);
