@@ -133,21 +133,17 @@ a { color: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- Audio FAB ---------- */
-/* 40px (dari 48px): FAB ramping yang tetap enak di-thumb. */
+/* 40px (dari 48px): FAB ramping yang tetap enak di-thumb.
+   Background sama dengan .btn-open (kapsul putih transparan) — konsisten
+   satu bahasa visual dengan tombol Buka Undangan. */
 .audio-fab {
   position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 500;
   width: 40px; height: 40px; border-radius: 50%;
-  background: var(--color-dark); border: 1.5px solid var(--color-gold);
+  background: #ffffff61; border: 1.5px solid var(--color-gold);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
+  cursor: pointer; color: #ffffff;
 }
-.audio-fab__disc {
-  width: 17px; height: 17px; border-radius: 50%;
-  background: radial-gradient(circle at center, var(--color-dark) 0 3px, var(--color-gold) 4px 5px, var(--color-dark) 6px 100%);
-  animation: spin 3s linear infinite;
-  animation-play-state: paused;
-}
-.audio-fab.playing .audio-fab__disc { animation-play-state: running; }
+.audio-fab i { font-size: 14px; }
 
 /* Tombol QR check-in — ditumpuk di KANAN-BAWAH, persis di atas audio FAB:
    bottom = jarak audio FAB dari tepi (1.1rem) + tingginya (40px) + jarak
@@ -156,19 +152,19 @@ a { color: inherit; }
 .qr-fab {
   position: fixed; right: 1.1rem; bottom: calc(1.1rem + 40px + .9rem); z-index: 500;
   width: 40px; height: 40px; border-radius: 50%;
-  background: var(--color-dark); border: 1.5px solid var(--color-gold);
+  background: #ffffff61; border: 1.5px solid var(--color-gold);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: var(--color-gold);
 }
 .qr-fab svg { width: 18px; height: 18px; }
 
-/* Tombol menu hamburger — kembaran visual FAB lain (bulat, dark + emas), tapi
-   di kanan atas: kanan bawah sudah dipakai audio + QR FAB. Muncul hanya
-   setelah undangan dibuka (lihat nav-menu.js). */
+/* Tombol menu hamburger — kembaran visual FAB lain (bulat, kapsul putih
+   transparan + garis emas), tapi di kanan atas: kanan bawah sudah dipakai
+   audio + QR FAB. Muncul hanya setelah undangan dibuka (lihat nav-menu.js). */
 .nav-fab {
   position: fixed; top: 1.1rem; right: 1.1rem; z-index: 500;
   width: 48px; height: 48px; border-radius: 50%;
-  background: var(--color-dark); border: 1.5px solid var(--color-gold);
+  background: #ffffff61; border: 1.5px solid var(--color-gold);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: var(--color-gold);
 }
@@ -399,11 +395,11 @@ a { color: inherit; }
   text-transform: uppercase;
   font-size: .8rem;
   font-weight: 500;
-  background: transparent;
-  border: 1.5px solid #ffffff;
+  background: #ffffff61;
+  border: none;
   color: #ffffff;
   padding: .65rem 1.6rem;
-  border-radius: 10px;
+  border-radius: 999px;
   cursor: pointer;
   transition: background .3s ease, color .3s ease;
   display: inline-flex; align-items: center; gap: .5rem;
@@ -1149,7 +1145,7 @@ a { color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kenburns, .audio-fab__disc, .preloader-ring { animation: none !important; }
+  .kenburns, .preloader-ring { animation: none !important; }
   /* reveal.js sudah menandai semuanya .is-revealed saat reduced-motion; di sini
      cukup matikan transisinya supaya benar-benar tanpa gerak. Transform sengaja
      tidak dipaksa `none` — itu akan menghapus rotasi .event-label. */

@@ -2,6 +2,7 @@
 window.initAudioPlayer = function () {
   const audio = document.getElementById("bg-audio");
   const btn = document.getElementById("audio-toggle");
+  const icon = document.getElementById("audio-toggle-icon");
   if (!audio || !btn) return;
 
   const audioConfig = window.WEDDING_CONFIG.audio || {};
@@ -12,10 +13,22 @@ window.initAudioPlayer = function () {
     : audioConfig.src || "";
   audio.volume = 0.6;
 
+  /* Icon fa-play/fa-pause mengikuti status sebenarnya (bukan cuma niat
+     play()/pause()) — supaya kalau autoplay diblokir browser, icon tetap
+     nunjukin "play" (belum benar-benar jalan), bukan telanjur "pause". */
+  function syncIcon() {
+    if (!icon) return;
+    icon.classList.toggle("fa-play", audio.paused);
+    icon.classList.toggle("fa-pause", !audio.paused);
+  }
+
   function play() {
     audio
       .play()
-      .then(() => btn.classList.add("playing"))
+      .then(() => {
+        btn.classList.add("playing");
+        syncIcon();
+      })
       .catch(() => {
         /* autoplay diblokir browser — user bisa tap tombol FAB */
       });
@@ -24,6 +37,7 @@ window.initAudioPlayer = function () {
   function pause() {
     audio.pause();
     btn.classList.remove("playing");
+    syncIcon();
   }
 
   btn.addEventListener("click", () => {
