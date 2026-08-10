@@ -378,9 +378,11 @@
     // Kalau client sudah memilih template berbeda (site_content.template),
     // switch sekarang — setelah payload tiba, sebelum konten diisi.
     // KECUALI: kalau ?template=... di URL, URL yang menang (admin preview).
-    if (!urlTpl && payload && payload.content && payload.content.template) {
-      const savedTpl = payload.content.template;
+    const savedTpl = (payload && payload.content && payload.content.template)
+      || (window.WEDDING_CONFIG && window.WEDDING_CONFIG.template);
+    if (!urlTpl && savedTpl) {
       const active = window.getActiveTemplate();
+      console.log("Template engine: DB says", savedTpl, "active:", active && active.id);
       if (!active || active.id !== savedTpl) {
         try {
           const fontLinks = document.querySelectorAll('link[data-template-font]');
