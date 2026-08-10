@@ -42,7 +42,8 @@ const required = [
   "templates/classic-elegance.json",
   "templates/modern-minimal.json",
   "templates/classic-elegance.css",
-  "templates/modern-minimal.css"
+  "templates/modern-minimal.css",
+  "templates/modern-minimal.js"
 ];
 for (const file of required) {
   try { await access(path.join(dist, file)); }
