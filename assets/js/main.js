@@ -73,10 +73,12 @@
 
   async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
-    // Tema custom (tab "Tampilan" di admin) diterapkan PALING AWAL — sebelum
-    // elemen apa pun diisi, supaya warna custom aktif tanpa kedipan. cfg sudah
-    // termasuk payload Supabase (di-merge sebelum populateContent dipanggil).
-    if (window.applyTheme) window.applyTheme(cfg);
+    // Tema custom (tab "Tampilan" di admin) — JANGAN dipanggil kalau template
+    // engine sudah aktif. Template engine mengatur semua CSS variable; theme.js
+    // menulis inline style yang akan mengalahkan CSS variable template.
+    if (!window.getActiveTemplate || !window.getActiveTemplate()) {
+      if (window.applyTheme) window.applyTheme(cfg);
+    }
     document.title = cfg.siteTitle;
     // Meta share (pratinjau WhatsApp/sosmed) ikut dinamis — kalau nama atau
     // tanggal diubah lewat admin, tautan yang dibagikan tidak menampilkan
@@ -410,17 +412,6 @@
     }
 
     await populateContent();
-
-    // Template engine re-apply: populateContent memanggil applyTheme(cfg)
-    // yang bisa meng-override warna template dengan warna tersimpan di DB.
-    // Supaya template selalu menang, re-apply tema template setelah konten diisi.
-    if (tpl && tpl.theme && window.getActiveTemplate()) {
-      const root = document.documentElement;
-      for (const [key, value] of Object.entries(tpl.theme)) {
-        if (key.startsWith("--")) root.style.setProperty(key, value);
-      }
-    }
-
     setupOpenButton();
     if (window.initHeroSlideshows) window.initHeroSlideshows();
 
