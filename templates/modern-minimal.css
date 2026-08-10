@@ -316,47 +316,66 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 
 #cover { position: relative; } /* overridden to fixed by JS */
 #cover .eyebrow {
-  font-family: "Great Vibes","Dancing Script",cursive;
-  font-size: 1.25rem; color: #c9a96e; letter-spacing: .02em;
+  font-family: "Joan",serif;
+  font-size: 1.125rem; color: #fff; letter-spacing: .02em;
 }
 #cover .script-names {
-  font-family: "Playfair Display","Georgia",serif;
-  font-size: 2.7rem; letter-spacing: .06em; line-height: 1.3;
+  font-family: "Joan",serif;
+  font-size: 2.5rem; letter-spacing: .04em; line-height: 1.2;
   color: #e8e4de;
+  display: flex; flex-direction: column; align-items: center;
 }
-#cover .script-names .amp {
-  font-family: "Great Vibes","Dancing Script",cursive;
-  font-size: .5em; display: block; margin: .15rem 0; color: #c9a96e;
+#cover .script-names .bride-line {
+  display: block;
+}
+#cover .script-names .amp-line {
+  display: block;
+  font-size: .85em; color: #c9a96e;
 }
 #cover .guest-label {
-  font-family: "Montserrat","Helvetica Neue",sans-serif;
+  font-family: "Joan",serif;
   font-size: .62rem; letter-spacing: .22em; text-transform: uppercase;
   opacity: .6;
 }
 #cover .guest-name {
-  font-family: "Playfair Display","Georgia",serif;
+  font-family: "Joan",serif;
   font-size: 1.15rem; margin-bottom: 1.4rem;
 }
 #cover .btn-open {
   display: inline-flex; align-items: center; gap: .55rem;
   padding: .6rem 2rem;
   border: 1px solid rgba(232,228,222,.28);
-  background: rgba(232,228,222,.05);
-  font-family: "Montserrat","Helvetica Neue",sans-serif;
+  background: #ffffff61;
   font-size: .66rem; font-weight: 500; letter-spacing: .18em;
   text-transform: uppercase;
   transition: background .4s, border-color .4s;
   cursor: pointer;
 }
-#cover .btn-open:hover { background: rgba(232,228,222,.15); border-color: rgba(232,228,222,.45); }
+#cover .btn-open span { font-family: "Joan",serif; }
+#cover .btn-open:hover { background: rgba(232,228,222,.25); border-color: rgba(232,228,222,.45); }
 #cover .btn-open .icon-envelope { width: 14px; height: 14px; opacity: .5; }
 #cover .hero-note { font-family: "Montserrat","Helvetica Neue",sans-serif; font-size: .52rem; opacity: .3; margin-top: .35rem; }
 
 /* Cover exit — slide LEFT (set by template JS) */
 #cover.is-exiting {
   transform: translateX(-105%) !important;
-  transition: transform 0.85s cubic-bezier(0.5,0,0.75,0);
+  transition: transform 3s cubic-bezier(0.5,0,0.75,0);
   pointer-events: none;
+}
+
+/* Cover layout: blok atas menempel top, blok bawah menempel bottom */
+#cover.section-hero {
+  align-items: stretch;
+}
+#cover .cover-screen {
+  height: 100%;
+  display: flex; flex-direction: column;
+  padding: 1.5rem 1.5rem;
+}
+#cover .hero-content--split {
+  height: 100%;
+  justify-content: space-between;
+  gap: 0;
 }
 
 /* ─── LOCKED STATE ─── */
@@ -912,7 +931,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 /* ═══════════════════════ MOBILE ═══════════════════════ */
 @media (max-width: 430px) {
   .section { padding: 3.5rem 1.2rem; }
-  #cover .script-names { font-size: 2.2rem; }
+  #cover .script-names { font-size: 2rem; }
   #cover .guest-name { font-size: 1rem; }
   #opening .script-names--small { font-size: 1.4rem; }
   .event-card__slider { height: 65vh; min-height: 340px; }

@@ -25,7 +25,7 @@ return (function() {
   injectStyle("mm-cover",
     "#cover { position: fixed !important; inset: 0; z-index: 100; }" +
     "#cover.cover-visible { transform: translateX(0); opacity: 1; }" +
-    "#cover.is-exiting { transform: translateX(-105%) !important; opacity: 1; transition: transform 0.85s cubic-bezier(0.5,0,0.75,0); pointer-events: none; }" +
+    "#cover.is-exiting { transform: translateX(-105%) !important; opacity: 1; transition: transform 3s cubic-bezier(0.5,0,0.75,0); pointer-events: none; }" +
     "#invitation.is-locked .invitation-body { display: none; }" +
     /* Opening visible immediately behind cover */
     "#opening { opacity: 1 !important; transform: none !important; }" +
@@ -46,7 +46,13 @@ return (function() {
     btn.parentNode.replaceChild(newBtn, btn);
     btn = newBtn;
 
-    btn.addEventListener("click", function() {
+    /* stopImmediatePropagation: setupOpenButton() di main.js (~baris 412,
+       file shared JANGAN diubah) ikut addEventListener ke tombol hasil clone
+       ini, jadi ada 2 listener untuk 1 click. Listener ini terdaftar LEBIH
+       DULU (template init), maka jalan pertama — hentikan sisanya agar audio
+       tidak 2x, slideshow tidak 2x, dan transitionend tidak dobel. */
+    btn.addEventListener("click", function(evt) {
+      if (evt && evt.stopImmediatePropagation) evt.stopImmediatePropagation();
       invitation.classList.remove("is-locked");
       document.documentElement.classList.remove("no-scroll");
       window.__invitationOpen = true;
@@ -77,6 +83,86 @@ return (function() {
     });
   }
 
+  /* ─── 2b. Restructure couple names jadi 2 baris ───
+   *  MutationObserver dibutuhkan karena populateContent() di main.js
+   *  (baris ~411) menimpa ulang innerHTML #couple-names-cover SETELAH
+   *  template JS init — jadi restrukturisasi pertama selalu kalah.
+   *  Observer memastikan SETIAP perubahan innerHTML langsung direspons,
+   *  dengan guard .bride-line + disconnect/reconnect untuk cegah
+   *  infinite loop. Scope HANYA #couple-names-cover. */
+  var coupleNamesObserver = null;
+
+  function restructureCoupleNames() {
+    var el = document.getElementById("couple-names-cover");
+    if (!el) return;
+    /* Guard: sudah direstruktur */
+    if (el.querySelector(".bride-line")) return;
+
+    /* Parse DOM langsung — lebih robust daripada regex di innerHTML
+       karena serialisasi &amp; bisa berbeda antar browser.
+       Format A (dari fillCoupleNames main.js): textNode + <span class="amp">&</span> + textNode
+       Format B (dari applyVisualEditorOverrides main.js — guest-overrides.js
+       baris ~24 menimpa via el.textContent): teks POLOS tanpa span sama
+       sekali, mis. "Mita & Iyow" — fallback split '&' jadi 2 bagian. */
+    var ampSpan = el.querySelector("span.amp");
+    var bride = "";
+    var groom = "";
+
+    if (ampSpan) {
+      var foundAmp = false;
+      var children = el.childNodes;
+      for (var i = 0; i < children.length; i++) {
+        var node = children[i];
+        if (node === ampSpan) { foundAmp = true; continue; }
+        if (node.nodeType === 3 /* TEXT_NODE */) {
+          var text = node.textContent.trim();
+          if (text) {
+            if (!foundAmp) bride = text;
+            else groom = text;
+          }
+        }
+      }
+    } else if (el.children.length === 0 && el.textContent.indexOf("&") !== -1) {
+      /* Format B: murni text node tanpa child element. Split harus tepat
+         2 bagian non-kosong — selain itu jangan diproses (guard). */
+      var parts = el.textContent.split("&");
+      if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
+        bride = parts[0].trim();
+        groom = parts[1].trim();
+      }
+    }
+
+    if (!bride && !groom) return;
+
+    /* Disconnect observer sebelum mengubah innerHTML agar tidak infinite loop */
+    if (coupleNamesObserver) coupleNamesObserver.disconnect();
+    el.innerHTML = '<span class="bride-line">' + bride + '</span><span class="amp-line">&amp; ' + groom + '</span>';
+    /* Reconnect observer */
+    if (coupleNamesObserver) coupleNamesObserver.observe(el, { childList: true });
+  }
+
+  function startObservingCoupleNames() {
+    var el = document.getElementById("couple-names-cover");
+    if (!el) return;
+    if (coupleNamesObserver) coupleNamesObserver.disconnect();
+    coupleNamesObserver = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].type === "childList") {
+          restructureCoupleNames();
+          break;
+        }
+      }
+    });
+    coupleNamesObserver.observe(el, { childList: true });
+  }
+
+  function stopObservingCoupleNames() {
+    if (coupleNamesObserver) {
+      coupleNamesObserver.disconnect();
+      coupleNamesObserver = null;
+    }
+  }
+
   /* ─── 3. PARALLAX 3D — scroll-depth berlapis (perspective + translateZ) ───
    *  Bukan sekadar geser 28px: wrapper diberi perspective, tiap layer gambar
    *  digeser dengan kecepatan berbeda (depth), sehingga scroll terasa punya
@@ -88,7 +174,6 @@ return (function() {
     /* Foto slideshow di-inject ASYNC oleh hero-slideshow.js setelah payload
        Supabase termuat — jangan daftarkan layer sebelum gambar ada. */
     var layerDefs = [
-      { sel: "#cover .hero-media img", speed: 0.18, z: 18 },
       { sel: "#opening .hero-media img", speed: 0.22, z: 26 },
       { sel: "#closing .hero-media img", speed: 0.18, z: 18 },
       { sel: ".quote-section", speed: 0.10, z: 12 }
@@ -111,7 +196,15 @@ return (function() {
     if (!scroller) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    var wrap = document.getElementById("invitation");
+    /* PERSPECTIVE DI SINI, BUKAN DI #invitation:
+       perspective pada ancestor jadi containing block untuk descendant
+       position:fixed. #cover pakai position:fixed — kalau perspective
+       di #invitation (yang tinggi 10877px saat is-locked dilepas),
+       #cover ikut membentang setinggi dokumen dan semua kontennya
+       terlempar keluar viewport. .app-frame__scroll selalu 100dvh dan
+       berisi semua parallax layer (img opening/closing/quote), jadi
+       efek 3D tetap sama — hanya containing block #cover yang stabil. */
+    var wrap = document.querySelector(".app-frame__scroll");
     if (wrap) {
       wrap.style.perspective = "420px";
       wrap.style.perspectiveOrigin = "50% 50%";
@@ -225,6 +318,34 @@ return (function() {
        cover → opening → we-found-love → couple → event →
        livestream → quote → love-story → gallery → gift → rsvp → closing */
 
+    /* Observer harus terpasang SEBELUM restructure pertama,
+       karena populateContent() di main.js bisa saja sudah/sedang
+       menimpa innerHTML tepat setelah init() selesai. */
+    /* Monkey-patch window.getPhotos: cover cuma 1 foto (index 0).
+       Harus dipasang SEBELUM initHeroSlideshows() di main.js (~baris 413)
+       — hero-slideshow.js baca getPhotos('cover'), kalau cuma 1 slide
+       logic cycle/swiper tidak jalan. Folder lain tidak terpengaruh. */
+    if (window.getPhotos) {
+      var _getPhotos = window.getPhotos;
+      window.getPhotos = function(folder) {
+        var p = _getPhotos(folder);
+        if (folder === "cover") {
+          return Promise.resolve(p).then(function(list) {
+            return Array.isArray(list) ? list.slice(0, 1) : list;
+          });
+        }
+        return p;
+      };
+    }
+
+    startObservingCoupleNames();
+    restructureCoupleNames();
+    /* Safety net: populateContent() di main.js (baris ~411) jalan
+       SETELAH template init, jadi restructure pertama selalu ditimpa.
+       Observer menangani kasus itu, tapi setTimeout ini jaga-jaga
+       kalau ada penimpa lain setelah observer (misal VE override). */
+    setTimeout(restructureCoupleNames, 200);
+    setTimeout(restructureCoupleNames, 600);
     patchOpenButton();
     startParallax();
 
@@ -253,6 +374,7 @@ return (function() {
   /* ─── CLEANUP ─── */
   return function cleanup() {
     if (parallaxRaf) cancelAnimationFrame(parallaxRaf);
+    stopObservingCoupleNames();
     /* Remove injected styles */
     injected.forEach(function(el) {
       if (el && el.parentNode) el.remove();
@@ -265,7 +387,7 @@ return (function() {
       img.style.backfaceVisibility = "";
       img.classList.remove("parallax-layer");
     });
-    var wrap = document.getElementById("invitation");
+    var wrap = document.querySelector(".app-frame__scroll");
     if (wrap) {
       wrap.style.perspective = "";
       wrap.style.perspectiveOrigin = "";
