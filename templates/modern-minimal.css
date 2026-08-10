@@ -854,11 +854,24 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   opacity: 0;
   transition: opacity .75s cubic-bezier(0.22,1,0.36,1),
               transform .75s cubic-bezier(0.22,1,0.36,1);
+  transition-delay: calc(var(--reveal-i, 0) * 70ms);
 }
 #opening .text-enter--down { transform: translateY(-14px); }
 #opening .text-enter--left { transform: translateX(-18px); }
 #opening .text-enter--up { transform: translateY(14px); }
 #opening.text-revealed .text-enter { opacity: 1; transform: none; }
+
+/* Semua elemen Save The Date ikut reveal berjenjang — termasuk tiap unit
+   countdown (Hari/Jam/Menit/Detik) yang di-render dinamis, supaya tidak ada
+   satu pun elemen yang diam tanpa animasi. */
+#opening .countdown__item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .7s cubic-bezier(0.22,1,0.36,1),
+              transform .7s cubic-bezier(0.22,1,0.36,1);
+  transition-delay: calc(var(--reveal-i, 0) * 70ms + 0.25s);
+}
+#opening.text-revealed .countdown__item { opacity: 1; transform: none; }
 
 /* ─── OPENING SECTION SLIDE-IN ─── */
 #opening.section-revealed .hero-media img {

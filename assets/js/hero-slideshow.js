@@ -12,8 +12,10 @@
  * sudah masuk, supaya foto pertama tetap bisa dilihat dulu. */
 window.initHeroSlideshows = async function () {
   const cfg = window.WEDDING_CONFIG;
-  const interval = cfg.heroSlideInterval || 4500;
-  const SLIDE_TRANSITION_MS = 3200;
+  // Satu foto tampil PENUH sebelum diganti: jeda 7 detik, transisi 1.8 detik.
+  // Total satu siklus ≈ 8.8s — terasa tenang, tidak terburu-buru.
+  const interval = cfg.heroSlideInterval || 7000;
+  const SLIDE_TRANSITION_MS = 1800;
 
   // Muat foto ketiga slideshow sekaligus
   const [coverSlides, openingSlides, closingSlides] = await Promise.all([
@@ -128,8 +130,8 @@ window.initHeroSlideshows = async function () {
         // Slideshow section 2 baru berjalan saat foto pertamanya sudah tampil
         // (dipicu dari main.js lewat window.startOpeningSlideshow). Kalau main.js
         // sudah minta start lebih dulu (fetch manifest masih jalan), langsung jalan.
-        // Foto pertama hanya tampil 2s sebelum berganti (bukan 4.5s penuh).
-        const OPENING_FIRST_DELAY = 2000;
+        // Foto pertama tampil PENUH dulu (~6.5s) sebelum berganti — tidak buru-buru.
+        const OPENING_FIRST_DELAY = 6500;
         window.startOpeningSlideshow = () => start(OPENING_FIRST_DELAY);
         if (window.__openingStartQueued) start(OPENING_FIRST_DELAY);
       } else {

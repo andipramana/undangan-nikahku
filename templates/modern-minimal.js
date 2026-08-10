@@ -77,42 +77,63 @@ return (function() {
     });
   }
 
-  /* ─── 3. PARALLAX SCROLL — subtle translate3d on hero images ─── */
+  /* ─── 3. PARALLAX 3D — scroll-depth berlapis (perspective + translateZ) ───
+   *  Bukan sekadar geser 28px: wrapper diberi perspective, tiap layer gambar
+   *  digeser dengan kecepatan berbeda (depth), sehingga scroll terasa punya
+   *  kedalaman. Hanya 2-5 layer kunci (cover/opening/closing/quote) — tidak
+   *  semua elemen. Hormati prefers-reduced-motion. */
   var parallaxRaf = null;
+  var depthLayers = [];
+  function registerParallaxLayers() {
+    /* Foto slideshow di-inject ASYNC oleh hero-slideshow.js setelah payload
+       Supabase termuat — jangan daftarkan layer sebelum gambar ada. */
+    var layerDefs = [
+      { sel: "#cover .hero-media img", speed: 0.18, z: 18 },
+      { sel: "#opening .hero-media img", speed: 0.22, z: 26 },
+      { sel: "#closing .hero-media img", speed: 0.18, z: 18 },
+      { sel: ".quote-section", speed: 0.10, z: 12 }
+    ];
+    depthLayers = [];
+    layerDefs.forEach(function(def) {
+      var els = document.querySelectorAll(def.sel);
+      els.forEach(function(el) {
+        if (el.classList.contains("parallax-layer")) return;
+        el.classList.add("parallax-layer");
+        el.style.willChange = "transform";
+        el.style.backfaceVisibility = "hidden";
+        depthLayers.push({ el: el, speed: def.speed, z: def.z });
+      });
+    });
+  }
+
   function startParallax() {
     var scroller = document.querySelector(".app-frame__scroll");
     if (!scroller) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    /* Only parallax hero section images (not gallery items) */
-    var heroImgs = [];
-    var sections = document.querySelectorAll("#cover .hero-media, #opening .hero-media, #closing .hero-media, .quote-section");
-    sections.forEach(function(media) {
-      var imgs = media.querySelectorAll("img");
-      imgs.forEach(function(img) {
-        img.classList.add("parallax-layer");
-        heroImgs.push(img);
-      });
-    });
+    var wrap = document.getElementById("invitation");
+    if (wrap) {
+      wrap.style.perspective = "420px";
+      wrap.style.perspectiveOrigin = "50% 50%";
+    }
 
-    if (!heroImgs.length) return;
+    registerParallaxLayers();
 
     function tick() {
       var scrollTop = scroller.scrollTop;
-      heroImgs.forEach(function(img) {
-        var section = img.closest("section, .quote-section");
+      depthLayers.forEach(function(layer) {
+        var section = layer.el.closest("section, .quote-section");
         if (!section) return;
         var rect = section.getBoundingClientRect();
-        /* Only animate when section is on screen */
-        if (rect.bottom > -100 && rect.top < window.innerHeight + 100) {
+        /* Animasikan hanya saat section di layar (plus sedikit buffer) */
+        if (rect.bottom > -120 && rect.top < window.innerHeight + 120) {
           var progress = (window.innerHeight - rect.top) / (window.innerHeight + rect.height);
-          /* Clamp 0-1 */
           if (progress < 0) progress = 0;
           if (progress > 1) progress = 1;
-          /* Subtle 28px max movement — background moves slower */
-          var y = (progress - 0.5) * 28;
-          img.style.transform = "translate3d(0," + y + "px,0)";
-          img.style.transition = "none";
+          /* Gerakan depth: makin cepat layer, makin besar jarak — tetap halus */
+          var y = (progress - 0.5) * layer.speed * 220;
+          layer.el.style.transform =
+            "translate3d(0," + y.toFixed(1) + "px,0) translateZ(" + layer.z + "px)";
         }
       });
       parallaxRaf = requestAnimationFrame(tick);
@@ -150,14 +171,14 @@ return (function() {
       document.querySelectorAll(".swiper").forEach(function(el) {
         if (!el.swiper) return;
         var s = el.swiper;
-        /* Slower autoplay for all */
+        /* Slower autoplay for all — 1 foto tampil penuh dulu */
         if (s.params.autoplay) {
-          s.params.autoplay.delay = 5000;
+          s.params.autoplay.delay = 7000;
           if (typeof s.autoplay !== "undefined" && s.autoplay.running) {
             s.autoplay.stop();
           }
         }
-        s.params.speed = 1500;
+        s.params.speed = 1800;
         /* Fade transition for smoother look */
         s.params.effect = "fade";
         s.params.fadeEffect = { crossFade: true };
@@ -207,13 +228,17 @@ return (function() {
     patchOpenButton();
     startParallax();
 
-    /* Patch swipers after they initialize (they're created on open click or
-       via __openCallbacks) */
-    if (window.__openCallbacks) {
-      window.__openCallbacks.push(function() {
+    /* Foto hero di-inject async setelah payload Supabase; daftarkan ulang
+       layer parallax begitu undangan dibuka (foto sudah pasti ada).
+       __openCallbacks mungkin belum dibuat main.js saat template init —
+       jangan asumsi, buat array dulu kalau belum ada. */
+    if (!window.__openCallbacks) window.__openCallbacks = [];
+    window.__openCallbacks.push(function() {
+      setTimeout(function() {
+        registerParallaxLayers();
         setTimeout(patchSwipers, 400);
-      });
-    }
+      }, 600);
+    });
 
     /* Also try patching after DOM settles */
     setTimeout(patchSwipers, 2000);
@@ -232,11 +257,19 @@ return (function() {
     injected.forEach(function(el) {
       if (el && el.parentNode) el.remove();
     });
-    /* Reset parallax images */
+    /* Reset parallax images + perspective wrapper */
     document.querySelectorAll(".parallax-layer").forEach(function(img) {
       img.style.transform = "";
       img.style.transition = "";
+      img.style.willChange = "";
+      img.style.backfaceVisibility = "";
       img.classList.remove("parallax-layer");
     });
+    var wrap = document.getElementById("invitation");
+    if (wrap) {
+      wrap.style.perspective = "";
+      wrap.style.perspectiveOrigin = "";
+    }
+    depthLayers = [];
   };
 })();
