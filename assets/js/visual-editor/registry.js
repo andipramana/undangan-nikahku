@@ -2,7 +2,12 @@
  * terlihat dengan urutan deterministik; tidak menerima selector dari admin. */
 (function () {
   const SECTIONS = [["all", "Semua halaman (scroll)"], ["global", "Global settings"]];
-  const EXCLUDE = "script,style,svg,path,option,.ve-pencil,[aria-hidden='true']";
+  // .wish-card ikut di-exclude: kartu ucapan tampil asinkron (rsvp.js) dan
+  // jumlahnya berubah antar sesi — kalau teksnya ikut jadi kandidat, index
+  // data-ve-auto semua elemen SESUDAH #wishes (nama closing, footer) bergeser
+  // dan override visualEditor yang tersimpan menunjuk elemen salah. Styling
+  // kartu sudah ditangani target khusus wish.card.
+  const EXCLUDE = "script,style,svg,path,option,.ve-pencil,[aria-hidden='true'],.wish-card";
   const candidates = (doc) => [...doc.querySelectorAll("#invitation h1,#invitation h2,#invitation h3,#invitation h4,#invitation p,#invitation small,#invitation button,#invitation a,#invitation label,#invitation strong,#invitation legend,#gift-confirm-modal h3,#gift-confirm-modal p,#gift-confirm-modal button,#gift-confirm-modal label,#gift-recs-modal h3,#gift-recs-modal p,#gift-recs-modal button,#gift-recs-modal a")]
     .filter(el => !el.closest(EXCLUDE) && !el.closest("[data-ve-wish-dummy]") && el.textContent.trim() && !el.closest(".ve-pencil"));
   function markAutoTargets(doc) {
