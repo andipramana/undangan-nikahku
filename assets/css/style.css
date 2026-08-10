@@ -1514,3 +1514,48 @@ a { color: inherit; }
 .btn-maps svg { width: .9rem; height: .9rem; color: var(--color-gold); }
 .btn-maps:hover { background: var(--color-gold); color: #ffffff; }
 .btn-maps:hover svg { color: #ffffff; }
+
+/* ─── Parallax 3D (template engine) ───
+   Scroll-based depth: hanya translateY + translateZ, tidak ada rotasi
+   (rotasi menciptakan efek "game" yang terlihat murahan). Perspective
+   diset di JS pada #invitation — di sini hanya smoothing + fallback. */
+#invitation[style*="perspective"] .hero-media img,
+#invitation[style*="perspective"] .invitation-body section {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+/* Parallax layer: transition untuk smoothing antar frame (opsional,
+   diaktifkan kalau browser mendukung). */
+@supports (translate: none) {
+  #invitation[style*="perspective"] .hero-media img {
+    transition: transform 0.1s linear;
+  }
+}
+
+/* ─── Reveal stagger enhancement ───
+   Per-elemen reveal dengan delay bertahap. --reveal-i dikali STEP_MS
+   oleh reveal.js. Di sini kita tambahkan aturan untuk elemen yang
+   belum memiliki data-reveal tapi perlu reveal default. */
+.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]) {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-ready .section > *.is-revealed:not([data-reveal]):not([data-reveal-group]) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion: animasi tetap FADE, tapi tanpa transform */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-ready [data-reveal],
+  .reveal-ready .section > *:not([data-reveal]) {
+    transform: none !important;
+  }
+  #invitation[style*="perspective"] .hero-media img,
+  #invitation[style*="perspective"] .invitation-body section {
+    transform: none !important;
+    will-change: auto;
+  }
+}

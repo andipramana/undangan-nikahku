@@ -1,0 +1,68 @@
+{
+  "id": "modern-minimal",
+  "name": "Modern Minimal",
+  "version": 1,
+  "fonts": [
+    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
+  ],
+  "sections": [
+    "cover", "opening", "event", "couple",
+    "gallery", "quote", "love-story",
+    "gift", "rsvp", "closing"
+  ],
+  "section_order": [
+    "cover", "opening", "event", "couple",
+    "gallery", "quote", "love-story",
+    "gift", "rsvp", "closing"
+  ],
+  "theme": {
+    "--color-bg": "#F5F0E6",
+    "--color-dark": "#1D1B17",
+    "--color-dark-2": "#25231E",
+    "--color-gold": "#B89149",
+    "--color-gold-soft": "#DBCA9E",
+    "--color-text": "#2D2421",
+    "--color-text-light": "#F5F0E6",
+    "--font-serif": "\"Cormorant Garamond\", \"Georgia\", serif",
+    "--font-script": "\"Cormorant Garamond\", \"Georgia\", serif",
+    "--font-sans": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
+    "--font-label": "\"Inter\", \"SF Pro Display\", system-ui, sans-serif",
+    "--overlay-closing": "linear-gradient(180deg, rgba(15,14,11,.82) 0%, rgba(15,14,11,.88) 50%, rgba(15,14,11,.94) 100%)"
+  },
+  "transitions": {
+    "default": "up",
+    "cover": "aos",
+    "opening": "text-enter",
+    "event": "tilt",
+    "couple": "enter",
+    "gallery": "pop",
+    "quote": "zoom",
+    "love-story": "slide",
+    "gift": "up",
+    "rsvp": "fade",
+    "closing": "up"
+  },
+  "parallax": {
+    "enabled": true,
+    "type": "scroll-3d",
+    "perspective": 400,
+    "layers": [
+      { "selector": "#cover .hero-media img", "speed": 0.15, "z": -5 },
+      { "selector": "#opening .hero-media img", "speed": 0.2, "z": -10 },
+      { "selector": "#closing .hero-media img", "speed": 0.1, "z": -3 },
+      { "selector": ".invitation-body section", "speed": 0.04, "z": 0 }
+    ]
+  },
+  "features": {
+    "countdown": true,
+    "calendar": true,
+    "love_story": true,
+    "livestream": false,
+    "gallery": true,
+    "gift": true,
+    "rsvp": true,
+    "wishes": true,
+    "dresscode": true,
+    "qr_checkin": true
+  }
+}

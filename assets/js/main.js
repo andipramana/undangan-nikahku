@@ -346,6 +346,27 @@
   document.addEventListener("DOMContentLoaded", async () => {
     document.documentElement.classList.add("no-scroll");
 
+    // 0) Template engine: terapkan tema + section + parallax SEBELUM konten
+    //    diisi, supaya warna custom aktif tanpa kedipan dan section yang
+    //    tidak dipakai sudah disembunyikan.
+    //    Template aktif ditentukan dari:
+    //      1. ?template=... di URL (admin preview switch)
+    //      2. admin.site.template di Supabase (template yang disimpan client)
+    //      3. fallback: inline `window.__TEMPLATE_DEFINITION`
+    const tpl = await window.loadTemplate();
+    // Font Google untuk template harus sudah dimuat; kalau template ganti
+    // font dari default, tambahkan stylesheet secara dinamis.
+    if (tpl && tpl.fonts) {
+      tpl.fonts.forEach((url) => {
+        if (!document.querySelector(`link[href="${url}"]`)) {
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = url;
+          document.head.appendChild(link);
+        }
+      });
+    }
+
     // 1) Satu fetch payload dari Supabase (teks + foto). Gagal → pakai
     //    localStorage; kosong semua → undangan tetap jalan dari config.js +
     //    manifest lokal (jaring pengaman hari-H, lihat §2.3 rencana admin).

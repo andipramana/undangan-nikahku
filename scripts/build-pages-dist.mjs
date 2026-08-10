@@ -22,6 +22,10 @@ await cp(path.join(root, "assets"), path.join(dist, "assets"), {
     return !source.split(path.sep).includes("img_backup");
   }
 });
+
+// Template definitions — public JSON, no secrets
+await cp(path.join(root, "templates"), path.join(dist, "templates"), { recursive: true });
+
 await writeFile(path.join(dist, ".nojekyll"), "");
 
 const required = [
@@ -31,9 +35,12 @@ const required = [
   "assets/img/favicon.png",
   "assets/css/style.css",
   "assets/css/admin.css",
+  "assets/js/template-engine.js",
   "assets/js/config.js",
   "assets/js/tenant.js",
-  "assets/js/register.js"
+  "assets/js/register.js",
+  "templates/classic-elegance.json",
+  "templates/modern-minimal.json"
 ];
 for (const file of required) {
   try { await access(path.join(dist, file)); }
