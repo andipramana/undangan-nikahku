@@ -447,6 +447,22 @@ return (function() {
         '<button type="button" class="mm-wfl-next" aria-label="Foto berikutnya">&#9655;</button>';
       sliderRoot.insertAdjacentElement("afterend", btnWrap);
 
+      /* BUG FIX 2026-08-10: applyVisualEditorOverrides() (main.js, dipanggil
+         di akhir populateContent(), JAUH sebelum initWeFoundLove ini bahkan
+         dipanggil apalagi selesai — getPhotos di atas itu async) sudah lebih
+         dulu jalan sebelum 2 tombol ◁/▷ di atas ada di DOM. Tombol ini
+         punya teks (jadi ikut ter-auto-index registry Visual Editor,
+         assets/js/visual-editor/registry.js men-scan #invitation button dkk)
+         — begitu mereka baru muncul SETELAH override pertama diterapkan,
+         index semua elemen SESUDAHNYA di DOM (mis. eyebrow "MOMENTS" di
+         Galeri, nama "Mita & Andi" di footer closing) bergeser 2 dibanding
+         saat admin mengatur override-nya di Visual Editor — override jadi
+         salah sasaran/tidak berlaku sama sekali untuk elemen-elemen itu.
+         Fix: terapkan ulang overrides SEKARANG, setelah DOM final (foto +
+         tombol) benar-benar settle, supaya index-nya konsisten dengan yang
+         dilihat admin. Idempoten — aman dipanggil dua kali. */
+      if (window.applyVisualEditorOverrides) window.applyVisualEditorOverrides(window.WEDDING_CONFIG);
+
       function next() {
         var items = wrapper.querySelectorAll(".item");
         if (items.length) wrapper.appendChild(items[0]);
