@@ -1,22 +1,32 @@
-/** Template Engine v2 — setiap template adalah CSS stylesheet UTUH.
+/** Template Engine v3 — template CSS REPLACES style.css entirely.
  *
- * Template = JSON metadata + CSS file + optional JS file. Engine:
- * 1. Load JSON → ambil nama, theme vars, font list, path CSS, path JS
- * 2. Inject <link> CSS template → override total layout/style
- * 3. Jalankan JS template (kalau ada) → override behaviour
- * 4. Apply CSS variables dari theme (untuk yang pakai var)
- *
- * Saat switch template: CSS/JS lama dihapus, CSS/JS baru di-inject.
- * Style.css tetap sebagai base/reset.
+ * Classic Elegance: css=null → style.css tetap aktif (default HTML).
+ * Template lain: css="/templates/xxx.css" → style.css DISABLE,
+ *   template CSS inject. Template CSS harus comprehensive (app-frame,
+ *   modal, FAB, semua section).
  */
 (function () {
   "use strict";
 
   let _definition = null;
   let _cssLink = null;
+  let _styleDisabled = false;
   let _jsCleanup = null;
 
-  /* ─── CSS injection ─── */
+  /* ─── CSS management ─── */
+  const STYLE_CSS_SEL = 'link[href$="style.css"]';
+
+  function disableStyleCSS() {
+    if (_styleDisabled) return;
+    const el = document.querySelector(STYLE_CSS_SEL);
+    if (el) { el.disabled = true; _styleDisabled = true; }
+  }
+  function enableStyleCSS() {
+    if (!_styleDisabled) return;
+    const el = document.querySelector(STYLE_CSS_SEL);
+    if (el) { el.disabled = false; _styleDisabled = false; }
+  }
+
   function injectCSS(url) {
     if (_cssLink) { _cssLink.remove(); _cssLink = null; }
     if (!url) return;
@@ -28,13 +38,11 @@
     _cssLink = link;
   }
 
-  /* ─── Theme CSS variables ─── */
   function applyTheme(theme) {
     const root = document.documentElement;
     for (const [key, value] of Object.entries(theme || {})) {
       if (key.startsWith("--")) root.style.setProperty(key, value);
     }
-    window.__ACTIVE_THEME = theme;
   }
 
   /* ─── Public API ─── */
@@ -43,29 +51,29 @@
     _definition = null;
 
     if (typeof source === "string") {
-      try {
-        const res = await fetch(source);
-        if (res.ok) _definition = await res.json();
-      } catch {}
+      try { const res = await fetch(source); if (res.ok) _definition = await res.json(); } catch {}
     } else if (source && typeof source === "object") {
       _definition = source;
     }
 
     if (!_definition) {
-      try {
-        const res = await fetch("/templates/classic-elegance.json");
-        _definition = await res.json();
-      } catch {
-        _definition = { id: "classic-elegance", name: "Classic Elegance", theme: {} };
+      try { const res = await fetch("/templates/classic-elegance.json"); _definition = await res.json(); } catch {
+        _definition = { id: "classic-elegance", name: "Classic Elegance" };
       }
     }
 
     const tpl = _definition;
 
-    // 1) Inject CSS
-    injectCSS(tpl.css || `/templates/${tpl.id}.css`);
+    // 1) CSS: disable style.css, inject template CSS
+    if (tpl.css) {
+      disableStyleCSS();
+      injectCSS(tpl.css);
+    } else {
+      enableStyleCSS();
+      injectCSS(null);
+    }
 
-    // 2) JS template — cleanup dulu, lalu load kalau tpl.js ada
+    // 2) JS
     if (_jsCleanup) { try { _jsCleanup(); } catch {}; _jsCleanup = null; }
     if (tpl.js) {
       try {
@@ -76,10 +84,10 @@
           const result = fn();
           if (typeof result === "function") _jsCleanup = result;
         }
-      } catch {} // JS optional
+      } catch {}
     }
 
-    // 3) Theme CSS variables
+    // 3) Theme
     applyTheme(tpl.theme || {});
 
     window.__TEMPLATE_ACTIVE = tpl;

@@ -2,7 +2,6 @@
   "id": "classic-elegance",
   "name": "Classic Elegance",
   "version": 2,
-  "css": "/templates/classic-elegance.css",
   "fonts": [
     "https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap"
   ],
