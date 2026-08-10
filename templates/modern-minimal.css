@@ -28,7 +28,7 @@ input, select, textarea { font: inherit; }
 body::before {
   content: "";
   position: fixed; inset: 0; z-index: -1;
-  background: url("assets/img/foto_cover/01.jpg") center/cover no-repeat;
+  background: url("/assets/img/foto_cover/01.jpg") center/cover no-repeat;
   opacity: .06;
   pointer-events: none;
 }
@@ -233,6 +233,34 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   flex-direction: column;
   justify-content: flex-start;
 }
+/* Closing is a vertical story: message → names → footer. Footer MUST NOT
+   inherit an inline/flex layout from a slider or hero content layer. */
+#closing .hero-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  min-height: calc(100dvh - 7rem);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 1.4rem;
+  padding: 4rem 1.5rem 2rem;
+}
+#closing .closing-text { display: block; width: 100%; text-align: center; }
+#closing #couple-names-closing { display: block; width: 100%; text-align: center; }
+#closing .site-footer {
+  position: relative !important;
+  z-index: 3;
+  width: 100%;
+  display: block !important;
+  clear: both;
+  margin: 0;
+  padding: 1.25rem 1.5rem 1.75rem;
+  text-align: center;
+  background: rgba(26,24,22,.58);
+}
+#closing .site-footer p { display: block; text-align: center; }
 .hero-media { position: absolute; inset: 0; overflow: hidden; }
 .hero-media img {
   width: 100%; height: 100%;
@@ -248,14 +276,25 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 /* Hero slideshow — slide + Ken Burns */
 .hero-slide {
   position: absolute; inset: 0; overflow: hidden;
-  transform: translateX(-100%);
-  transition: transform 3.2s cubic-bezier(0.4,0,0.2,1);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.15s ease-in-out, visibility 0s linear 1.15s;
 }
-.hero-slide.active { transform: translateX(0); z-index: 2; }
-.hero-slide.exiting { transform: translateX(100%); z-index: 1; }
-.hero-slide.active img {
-  animation: kenburns 14s ease-in-out infinite alternate;
+/* Clean cinematic crossfade: current stays full until next is ready; no
+   horizontal collision or half-loaded slide over the preceding photo. */
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 2;
+  transition: opacity 1.15s ease-in-out;
 }
+.hero-slide.exiting {
+  opacity: 0;
+  visibility: visible;
+  z-index: 1;
+  transition: opacity 1.15s ease-in-out;
+}
+.hero-slide.active img { animation: kenburns 14s ease-in-out infinite alternate; }
 .hero-slide.exiting img { animation: none; }
 @keyframes kenburns {
   from { transform: scale(var(--zoom, 1)); }
