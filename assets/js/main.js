@@ -346,22 +346,21 @@
   document.addEventListener("DOMContentLoaded", async () => {
     document.documentElement.classList.add("no-scroll");
 
-    // 0) Template engine: terapkan tema + section + parallax SEBELUM konten
-    //    diisi, supaya warna custom aktif tanpa kedipan dan section yang
-    //    tidak dipakai sudah disembunyikan.
-    //    Template aktif ditentukan dari:
-    //      1. ?template=... di URL (admin preview switch)
-    //      2. admin.site.template di Supabase (template yang disimpan client)
-    //      3. fallback: inline `window.__TEMPLATE_DEFINITION`
-    const tpl = await window.loadTemplate();
-    // Font Google untuk template harus sudah dimuat; kalau template ganti
-    // font dari default, tambahkan stylesheet secara dinamis.
+    // 0) Template engine — fallback ke classic-elegance dulu supaya warna
+    //    tidak kedip, lalu periksa payload Supabase untuk template pilihan
+    //    client (site_content.template). Kalau berbeda, switch ke template
+    //    yang benar setelah payload tiba.
+    const urlTpl = new URLSearchParams(location.search).get("template");
+    let tpl = await window.loadTemplate(
+      urlTpl ? `/templates/${encodeURIComponent(urlTpl)}.json` : null
+    );
     if (tpl && tpl.fonts) {
       tpl.fonts.forEach((url) => {
         if (!document.querySelector(`link[href="${url}"]`)) {
           const link = document.createElement("link");
           link.rel = "stylesheet";
           link.href = url;
+          link.dataset.templateFont = "1";
           document.head.appendChild(link);
         }
       });
@@ -375,6 +374,30 @@
       window.WEDDING_CONFIG = mergeInvitationContent(window.WEDDING_CONFIG, payload.content);
     }
     window.__PHOTO_PAYLOAD = payload && payload.photos ? payload.photos : null;
+
+    // Kalau client sudah memilih template berbeda (site_content.template),
+    // switch sekarang — setelah payload tiba, sebelum konten diisi.
+    if (payload && payload.content && payload.content.template) {
+      const savedTpl = payload.content.template;
+      const active = window.getActiveTemplate();
+      if (!active || active.id !== savedTpl) {
+        const fontLinks = document.querySelectorAll('link[data-template-font]');
+        fontLinks.forEach((l) => l.remove());
+        await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
+        tpl = window.getActiveTemplate();
+        if (tpl && tpl.fonts) {
+          tpl.fonts.forEach((url) => {
+            if (!document.querySelector(`link[href="${url}"]`)) {
+              const link = document.createElement("link");
+              link.rel = "stylesheet";
+              link.href = url;
+              link.dataset.templateFont = "1";
+              document.head.appendChild(link);
+            }
+          });
+        }
+      }
+    }
 
     await populateContent();
     setupOpenButton();

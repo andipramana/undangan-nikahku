@@ -155,11 +155,21 @@
 
   /* ─── Public API ─── */
 
-  /** Muat template dari definisi inline atau URL. */
-  window.loadTemplate = async function (definition) {
-    _definition = definition || window.__TEMPLATE_DEFINITION;
+  /** Muat template dari URL path (string) atau definisi inline (object).
+   *  @param {string|object|null} source — path seperti "/templates/modern-minimal.json"
+   *         atau object definisi, atau null untuk fallback ke classic-elegance. */
+  window.loadTemplate = async function (source) {
+    _definition = null;
+    if (typeof source === "string") {
+      try {
+        const res = await fetch(source);
+        if (res.ok) _definition = await res.json();
+      } catch {}
+    } else if (source && typeof source === "object") {
+      _definition = source;
+    }
+    // Fallback: template bawaan classic-elegance
     if (!_definition) {
-      // Fallback: template bawaan classic-elegance
       try {
         const res = await fetch("/templates/classic-elegance.json");
         _definition = await res.json();
