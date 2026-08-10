@@ -1535,14 +1535,25 @@ a { color: inherit; }
 /* ─── Reveal stagger enhancement ───
    Per-elemen reveal dengan delay bertahap. --reveal-i dikali STEP_MS
    oleh reveal.js. Di sini kita tambahkan aturan untuk elemen yang
-   belum memiliki data-reveal tapi perlu reveal default. */
-.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]) {
+   belum memiliki data-reveal tapi perlu reveal default.
+
+   BUG (ditemukan 2026-08-10): #gallery-wrapper dan #love-story-list adalah
+   anak langsung .section TANPA data-reveal/data-reveal-group — disengaja,
+   reveal-nya dipasang PER FOTO oleh gallery.js/main.js (data-reveal di tiap
+   .gallery-item/.timeline-item), bukan sekaligus di wrapper-nya (lihat
+   komentar di index.html dekat #gallery-wrapper). Tapi selector catch-all
+   ini ikut menimpa opacity:0 ke WRAPPER itu sendiri, dan karena wrapper-nya
+   sendiri tidak pernah ditandai .is-revealed (reveal.js cuma meregister
+   elemen ber-data-reveal), wrapper-nya opacity:0 SELAMANYA — menyembunyikan
+   semua foto di dalamnya meski tiap foto sudah benar ter-reveal individual.
+   Fix: kecualikan kedua ID wrapper ini secara eksplisit. */
+.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list) {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
               transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.reveal-ready .section > *.is-revealed:not([data-reveal]):not([data-reveal-group]) {
+.reveal-ready .section > *.is-revealed:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list) {
   opacity: 1;
   transform: translateY(0);
 }
