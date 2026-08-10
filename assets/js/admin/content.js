@@ -95,6 +95,13 @@
         };
       }
     });
+    // Section subcover (quotes setelah cover, sebelum Save The Date).
+    // Field TERSENDIRI — jangan menyentuh content.opening.quote (punya We
+    // Found Love). Guard tampil/tidak lewat toggle c.subcover.enabled.
+    if (!isPlainObject(c.subcover)) c.subcover = {};
+    if (typeof c.subcover.enabled !== "boolean") c.subcover.enabled = true;
+    if (typeof c.subcover.quoteLine1 !== "string") c.subcover.quoteLine1 = "All because two people";
+    if (typeof c.subcover.quoteLine2 !== "string") c.subcover.quoteLine2 = "fell in love ...";
   }
 
   function isPlainObject(v) {
@@ -181,6 +188,18 @@
           ${textarea("Bismillah (arab)", "f-opening-arabic", 2)}
           ${textarea("Terjemahan", "f-opening-quote", 4)}
           ${field("Sumber (QS …)", "f-opening-source")}
+        `)}
+
+        ${section("subcover", "Subcover — quotes setelah cover", `
+          <label class="check-row">
+            <input type="checkbox" id="f-subcover-enabled">
+            Tampilkan section Subcover (quotes setelah cover)
+          </label>
+          <p class="muted">Quotes tampil di layar penuh antara cover dan Save
+          The Date, dengan foto dari folder <em>Subcover</em> di tab Foto.
+          Kosongkan baris mana pun untuk menyembunyikannya.</p>
+          ${field("Quote baris 1", "f-subcover-quote1")}
+          ${field("Quote baris 2", "f-subcover-quote2")}
         `)}
 
         ${section("event", "Event", `
@@ -298,6 +317,10 @@
     set("f-opening-arabic", v("opening.arabicQuote"));
     set("f-opening-quote", v("opening.quote"));
     set("f-opening-source", v("opening.source"));
+    set("f-subcover-quote1", v("subcover.quoteLine1"));
+    set("f-subcover-quote2", v("subcover.quoteLine2"));
+    const cbSubcover = document.getElementById("f-subcover-enabled");
+    if (cbSubcover) cbSubcover.checked = c.subcover.enabled !== false;
     set("f-event-iso", v("event.dateISO"));
     set("f-event-label", v("event.dateLabel"));
     set("f-event-day", v("event.dayLabel"));
@@ -638,6 +661,10 @@
     grab("f-opening-arabic", "opening.arabicQuote");
     grab("f-opening-quote", "opening.quote");
     grab("f-opening-source", "opening.source");
+    grab("f-subcover-quote1", "subcover.quoteLine1");
+    grab("f-subcover-quote2", "subcover.quoteLine2");
+    const cbSubcoverSave = document.getElementById("f-subcover-enabled");
+    if (cbSubcoverSave) setPath(content, "subcover.enabled", cbSubcoverSave.checked);
     grab("f-event-iso", "event.dateISO");
     grab("f-event-label", "event.dateLabel");
     grab("f-event-day", "event.dayLabel");

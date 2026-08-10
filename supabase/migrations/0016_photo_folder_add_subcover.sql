@@ -1,0 +1,13 @@
+-- Folder foto baru "subcover" (section quotes setelah cover, sebelum Save
+-- The Date). Enum photo_folder dipakai oleh kolom photos.folder dan RLS.
+--
+-- PENTING (batasan PostgreSQL): "ALTER TYPE ... ADD VALUE" tidak bisa
+-- digabung dalam satu transaksi dengan pernyataan lain yang memakai nilai
+-- baru tersebut. Oleh karena itu file ini sengaja HANYA berisi SATU
+-- pernyataan. Pemakaian nilai 'subcover' (query admin, upload, RLS) baru
+-- boleh dilakukan setelah migration ini ter-push.
+--
+-- Eksekusi dilakukan MANUAL oleh pemilik proyek: npx supabase db push
+-- (JANGAN dijalankan otomatis oleh agent; keputusan deploy ke DB live
+-- tetap di tangan user).
+alter type public.photo_folder add value if not exists 'subcover';

@@ -21,6 +21,7 @@ const SECTION_ITEMS = [
   ["sapaan", "Sapaan tamu"],
   ["mempelai", "Mempelai"],
   ["opening", "Opening"],
+  ["subcover", "Subcover"],
   ["event", "Event"],
   ["dresscode", "Dresscode"],
   ["quote", "Quote foto"],

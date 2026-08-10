@@ -18,6 +18,7 @@
   const FOLDER_RATIO = {
     cover: 9 / 19.5,   // layar HP penuh
     opening: 9 / 19.5,
+    subcover: 9 / 19.5, // layar HP penuh, sama seperti cover/opening/closing
     closing: 9 / 19.5,
     bride: 2 / 3,      // lebar layar × 75vh
     groom: 2 / 3,

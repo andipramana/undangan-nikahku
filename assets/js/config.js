@@ -102,6 +102,18 @@ window.WEDDING_CONFIG = {
     quote: "Marriage is not about age; it's about finding the right person."
   },
 
+  subcover: {
+    // Section quotes layar penuh antara cover dan Save The Date (baru).
+    // Foto DIAMBIL DARI SUPABASE folder "subcover" (tab Foto admin) — TIDAK
+    // ada cadangan foto lokal, pola sama seperti quote/story/gift_item yang
+    // lebih baru. Folder lokal lama (cover/opening/closing/bride/groom/
+    // event/gallery/wfl) masih punya fallback manifest; folder baru ini
+    // sengaja tidak.
+    enabled: true,
+    quoteLine1: "All because two people",
+    quoteLine2: "fell in love ..."
+  },
+
   loveStory: [
     {
       date: "2022",
