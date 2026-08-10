@@ -6,7 +6,8 @@
   "js": "/templates/modern-minimal.js",
   "fonts": [
     "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap",
-    "https://fonts.googleapis.com/css2?family=Joan&display=swap"
+    "https://fonts.googleapis.com/css2?family=Joan&display=swap",
+    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&display=swap"
   ],
   "theme": {
     "--color-bg": "#2d2a28",

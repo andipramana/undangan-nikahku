@@ -27,9 +27,12 @@ return (function() {
     "#cover.cover-visible { transform: translateX(0); opacity: 1; }" +
     "#cover.is-exiting { transform: translateX(-105%) !important; opacity: 1; transition: transform 3s cubic-bezier(0.5,0,0.75,0); pointer-events: none; }" +
     "#invitation.is-locked .invitation-body { display: none; }" +
-    /* Opening visible immediately behind cover */
+    /* Opening visible immediately behind cover.
+       CATATAN: TIDAK ada rule !important untuk transform img opening — rule
+       itu mematikan zoom reveal (scale 1.025→1, lihat CSS #opening.section-
+       revealed) yang sekarang diatur murni dari stylesheet template. Ken
+       Burns opening dimatikan lewat CSS #opening .hero-slide.active img. */
     "#opening { opacity: 1 !important; transform: none !important; }" +
-    "#opening .hero-media img { transform: none !important; }" +
     "#opening .hero-content { opacity: 1 !important; }"
   );
 
@@ -74,6 +77,10 @@ return (function() {
           else window.__openingStartQueued = true;
         }, 800);
       }
+
+      /* Subcover: reveal langsung begitu undangan dibuka (kalau ada) */
+      var subcoverSec = document.getElementById("subcover");
+      if (subcoverSec && window.revealNow) window.revealNow(subcoverSec);
 
       /* Cover slide keluar kiri */
       cover.classList.add("is-exiting");
@@ -282,11 +289,8 @@ return (function() {
     } catch(e) { /* Swiper not ready, ignore */ }
   }
 
-  /* ─── 6. COUNTDOWN: cinematic lighter weight ─── */
-  injectStyle("mm-cd",
-    ".countdown--plain .countdown__item span { font-weight: 200; }" +
-    ".countdown--plain { gap: 1.6rem; }"
-  );
+  /* ─── 6. COUNTDOWN: dihapus — glass panel grid 4 kolom sekarang
+       sepenuhnya diatur stylesheet template (modern-minimal.css) ─── */
 
   /* ─── 7. MODAL: subtle slide-up ─── */
   injectStyle("mm-modal",
@@ -311,6 +315,65 @@ return (function() {
   injectStyle("mm-couple",
     ".couple-slider .swiper-slide img { display: block; width: 100%; height: 100%; object-fit: cover; }"
   );
+
+  /* ─── 10. SUbCOVER SLIDESHOW (self-contained) ───
+     Foto section subcover dijalankan di sini, TIDAK lewat hero-slideshow.js
+     (section ini baru; pola crossfade .active/.exiting + kenburns diambil
+     dari CSS generik template, interval & durasi sama dengan hero lain).
+     Folder "subcover" mungkin KOSONG — migration 0016 belum di-push atau
+     admin belum upload. Kalau kosong, section tetap tampil (overlay + bg
+     gelap #1a1816), itu normal, bukan bug. */
+  function initSubcoverSlideshow(media) {
+    if (!media || !window.getPhotos) return;
+    window.getPhotos("subcover").then(function(slides) {
+      if (!(slides && slides.length)) return;
+      var overlay = media.querySelector(".hero-overlay");
+      slides.forEach(function(slide, i) {
+        var wrap = document.createElement("picture");
+        wrap.className = "hero-slide" + (i === 0 ? " active" : "");
+        var src = slide.path && !slide.webp ? window.photoUrl(slide.path) : (slide.webp || slide.jpg);
+        var fx = slide.focalX != null ? slide.focalX : 50;
+        var fy = slide.focalY != null ? slide.focalY : 50;
+        var zoom = slide.zoom != null ? slide.zoom : 1;
+        wrap.innerHTML =
+          '<source srcset="' + src + '" type="image/webp">' +
+          '<img class="kenburns" src="' + src + '" alt="" style="--fx:' + fx + '%; --fy:' + fy + '%; --zoom:' + zoom + '">';
+        media.insertBefore(wrap, overlay);
+      });
+      var items = media.querySelectorAll(".hero-slide");
+      if (items.length > 1) {
+        var cfg = window.WEDDING_CONFIG || {};
+        var interval = cfg.heroSlideInterval || 7000;
+        var SLIDE_TRANSITION_MS = 1800;
+        var index = 0;
+        var awake = true;
+        /* Pause saat di luar layar — section biasa yang di-scroll,
+           jangan boros GPU di belakang layar. */
+        if ("IntersectionObserver" in window) {
+          awake = false;
+          media.classList.add("hero-media--paused");
+          new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+              awake = e.isIntersecting;
+              media.classList.toggle("hero-media--paused", !awake);
+            });
+          }, { rootMargin: "25% 0px 25% 0px" }).observe(document.getElementById("subcover"));
+        }
+        function cycle() {
+          if (!awake) { setTimeout(cycle, 1000); return; }
+          var current = items[index];
+          var next = items[(index + 1) % items.length];
+          current.classList.remove("active");
+          current.classList.add("exiting");
+          next.classList.add("active");
+          setTimeout(function() { current.classList.remove("exiting"); }, SLIDE_TRANSITION_MS);
+          index = (index + 1) % items.length;
+          setTimeout(cycle, interval + SLIDE_TRANSITION_MS);
+        }
+        setTimeout(cycle, interval);
+      }
+    });
+  }
 
   /* ─── INIT ─── */
   function init() {
@@ -338,6 +401,109 @@ return (function() {
       };
     }
 
+    /* Monkey-patch window.initWeFoundLove: slider Swiper section "We Found
+       Love" diganti stacked-card carousel gaya CodePen — mekanisme murni
+       DOM: pindahkan node (.appendChild/.prepend), CSS nth-child +
+       transition yang menggeser tiap kartu, TANPA state/index manual.
+       we-found-love.js (shared, template lain masih memakainya) TIDAK
+       diubah. main.js memanggil window.initWeFoundLove SETELAH template
+       init (baris ~420), jadi menimpa di sini memastikan yang jalan
+       carousel ini — Swiper tidak pernah di-init untuk section ini. */
+    var _origInitWeFoundLove = window.initWeFoundLove; /* disimpan, tidak dipanggil */
+    window.initWeFoundLove = async function () {
+      var wrapper = document.getElementById("wfl-slider-wrapper");
+      if (!wrapper) return;
+      var photos = (await window.getPhotos("wfl")) || [];
+      if (!photos.length) return;
+
+      wrapper.classList.add("mm-wfl-slide");
+      var sliderRoot = document.querySelector(".wfl-slider");
+      if (sliderRoot) sliderRoot.classList.add("mm-wfl-carousel");
+
+      /* Kartu dari payload — bentuk objek SAMA dengan buildPhotoSlide
+         (assets/js/photos.js): Supabase {path, focalX, focalY, zoom},
+         manifest lokal {jpg, webp} tanpa focal (default 50/1). Pan/zoom
+         admin dihormati via custom property --fx/--fy/--zoom, pola sama
+         persis dengan hero-slideshow.js. */
+      photos.forEach(function (item) {
+        var el = document.createElement("div");
+        el.className = "item mm-wfl-item";
+        var fx = item.focalX ?? 50;
+        var fy = item.focalY ?? 50;
+        var zoom = item.zoom ?? 1;
+        var src = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
+        el.innerHTML =
+          '<picture><source srcset="' + src + '" type="image/webp">' +
+          '<img src="' + src + '" alt="" style="--fx:' + fx + '%;--fy:' + fy + '%;--zoom:' + zoom + '"></picture>';
+        wrapper.appendChild(el);
+      });
+
+      /* Tombol ◁/▷ — belum ada di index.html (shared, tidak diubah),
+         dibuat dari sini, disisipkan setelah .wfl-slider */
+      var btnWrap = document.createElement("div");
+      btnWrap.className = "mm-wfl-buttons";
+      btnWrap.innerHTML =
+        '<button type="button" class="mm-wfl-prev" aria-label="Foto sebelumnya">&#9665;</button>' +
+        '<button type="button" class="mm-wfl-next" aria-label="Foto berikutnya">&#9655;</button>';
+      sliderRoot.insertAdjacentElement("afterend", btnWrap);
+
+      function next() {
+        var items = wrapper.querySelectorAll(".item");
+        if (items.length) wrapper.appendChild(items[0]);
+      }
+      function prev() {
+        var items = wrapper.querySelectorAll(".item");
+        if (items.length) wrapper.prepend(items[items.length - 1]);
+      }
+
+      /* Auto-advance: section ini didesain "mengalir terus tanpa disentuh"
+         — dipertahankan (reuse next() yang sama persis dengan tombol),
+         tapi cuma jalan saat section KELIHATAN di layar (Intersection-
+         Observer) dan berhenti kalau pointer di atas slider (pause hover,
+         biar tidak berebut waktu tamu lagi lihat-lihat). */
+      var autoTimer = null;
+      var AUTO_MS = 3200;
+      function startAutoAdvance() {
+        stopAutoAdvance();
+        autoTimer = setInterval(next, AUTO_MS);
+      }
+      function stopAutoAdvance() {
+        if (autoTimer) clearInterval(autoTimer);
+        autoTimer = null;
+      }
+      function resetAutoAdvance() { startAutoAdvance(); }
+
+      if (photos.length > 1) {
+        if ("IntersectionObserver" in window) {
+          new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+              if (e.isIntersecting) startAutoAdvance(); else stopAutoAdvance();
+            });
+          }, { threshold: 0.3 }).observe(document.getElementById("we-found-love"));
+        } else {
+          startAutoAdvance();
+        }
+        sliderRoot.addEventListener("mouseenter", stopAutoAdvance);
+        sliderRoot.addEventListener("mouseleave", startAutoAdvance);
+      }
+
+      btnWrap.querySelector(".mm-wfl-next").addEventListener("click", function () {
+        next(); resetAutoAdvance();
+      });
+      btnWrap.querySelector(".mm-wfl-prev").addEventListener("click", function () {
+        prev(); resetAutoAdvance();
+      });
+    };
+
+    /* Cover eyebrow: index.html (shared) hardcode "The Wedding Of" (O
+       besar). Teks TIDAK bisa diubah di sana → override via JS, pola sama
+       seperti restructureCoupleNames. populateContent() di main.js hanya
+       menulis #couple-names-cover (bukan eyebrow), jadi sekali cukup. */
+    var coverEyebrow = document.querySelector("#cover .eyebrow");
+    if (coverEyebrow && coverEyebrow.textContent !== "The Wedding of") {
+      coverEyebrow.textContent = "The Wedding of";
+    }
+
     startObservingCoupleNames();
     restructureCoupleNames();
     /* Safety net: populateContent() di main.js (baris ~411) jalan
@@ -346,6 +512,110 @@ return (function() {
        kalau ada penimpa lain setelah observer (misal VE override). */
     setTimeout(restructureCoupleNames, 200);
     setTimeout(restructureCoupleNames, 600);
+
+    /* ─── OPENING REDESIGN — DOM surgery (pola restructureCoupleNames):
+       (1) bungkus .countdown-heading + #btn-add-calendar dalam
+           <div class="mm-opening-content"> — zona tengah ~44-66% viewport;
+       (2) sisipkan divider dekoratif .mm-divider (garis-diamond-garis)
+           antara .eyebrow dan .script-names--small di dalam heading.
+       Elemen-elemen ini statis dari index.html (populateContent hanya
+       mengisi innerHTML #couple-names-opening, bukan heading/content),
+       jadi cukup dijalankan sekali. index.html TIDAK diubah. */
+    var openingHero = document.querySelector("#opening .hero-content");
+    var openingHeading = document.querySelector("#opening .countdown-heading");
+    var openingCalBtn = document.getElementById("btn-add-calendar");
+    if (openingHero && openingHeading && openingCalBtn &&
+        !openingHero.querySelector(".mm-opening-content")) {
+      var mmWrap = document.createElement("div");
+      mmWrap.className = "mm-opening-content";
+      openingHero.insertBefore(mmWrap, openingHeading);
+      mmWrap.appendChild(openingHeading);
+      mmWrap.appendChild(openingCalBtn);
+
+      var openingEyebrow = openingHeading.querySelector(".eyebrow");
+      var openingNames = openingHeading.querySelector(".script-names--small");
+      if (openingEyebrow && openingNames &&
+          !openingHeading.querySelector(".mm-divider")) {
+        var mmDivider = document.createElement("div");
+        mmDivider.className = "mm-divider";
+        var mmLineA = document.createElement("span");
+        mmLineA.className = "mm-divider__line";
+        var mmDiamond = document.createElement("span");
+        mmDiamond.className = "mm-divider__diamond";
+        var mmLineB = document.createElement("span");
+        mmLineB.className = "mm-divider__line";
+        mmDivider.appendChild(mmLineA);
+        mmDivider.appendChild(mmDiamond);
+        mmDivider.appendChild(mmLineB);
+        openingHeading.insertBefore(mmDivider, openingNames);
+      }
+    }
+
+    /* ─── SUbCOVER SECTION — DOM surgery (pola restructureCoupleNames):
+       Section quotes layar penuh BARU antara cover dan Save The Date.
+       index.html TIDAK diubah — semua elemen dibuat dari sini.
+       Toggle tampil/mati lewat content.subcover.enabled (admin, tab Teks):
+       kalau mati, section TIDAK dibuat sama sekali (bukan dibuat lalu
+       disembunyikan). Foldernya TERSENDIRI ("subcover") — TIDAK memakai
+       folder "opening", dan jangan sentuh content.opening.quote (itu
+       punya We Found Love). */
+    var subcoverCfg = (window.WEDDING_CONFIG && window.WEDDING_CONFIG.subcover) || {};
+    if (subcoverCfg.enabled !== false) {
+      var openingSec = document.getElementById("opening");
+      if (openingSec && openingSec.parentNode && !document.getElementById("subcover")) {
+        var subSec = document.createElement("section");
+        subSec.id = "subcover";
+        subSec.className = "section-hero";
+
+        var subMedia = document.createElement("div");
+        subMedia.className = "hero-media";
+        subMedia.id = "subcover-media";
+        var subOverlay = document.createElement("div");
+        subOverlay.className = "hero-overlay hero-overlay--flat";
+        subMedia.appendChild(subOverlay);
+        subSec.appendChild(subMedia);
+
+        var subQuote = document.createElement("div");
+        subQuote.className = "mm-subcover-quote";
+        var subQ1 = document.createElement("p");
+        subQ1.setAttribute("data-reveal", "up");
+        subQ1.textContent = subcoverCfg.quoteLine1 || "";
+        var subQ2 = document.createElement("p");
+        subQ2.setAttribute("data-reveal", "up");
+        subQ2.textContent = subcoverCfg.quoteLine2 || "";
+        subQuote.appendChild(subQ1);
+        subQuote.appendChild(subQ2);
+        subSec.appendChild(subQuote);
+
+        var subNames = document.createElement("div");
+        subNames.className = "mm-subcover-names";
+        var subN0 = document.createElement("p");
+        subN0.setAttribute("data-reveal", "up");
+        subN0.textContent = "The Wedding of";
+        var coupleCfg = (window.WEDDING_CONFIG && window.WEDDING_CONFIG.couple) || {};
+        var subN1 = document.createElement("p");
+        subN1.setAttribute("data-reveal", "up");
+        subN1.textContent = (coupleCfg.bride && coupleCfg.bride.nickname) || "";
+        var subN2 = document.createElement("p");
+        subN2.setAttribute("data-reveal", "up");
+        var subAnd = document.createElement("span");
+        subAnd.className = "mm-subcover-and";
+        subAnd.textContent = "and";
+        subN2.appendChild(subAnd);
+        subN2.appendChild(document.createTextNode(" " + ((coupleCfg.groom && coupleCfg.groom.nickname) || "")));
+        subNames.appendChild(subN0);
+        subNames.appendChild(subN1);
+        subNames.appendChild(subN2);
+        subSec.appendChild(subNames);
+
+        openingSec.parentNode.insertBefore(subSec, openingSec);
+
+        /* Slideshow subcover — self-contained (lihat blok 10). Folder
+           mungkin kosong → hanya overlay + bg gelap, itu normal. */
+        initSubcoverSlideshow(subMedia);
+      }
+    }
+
     patchOpenButton();
     startParallax();
 

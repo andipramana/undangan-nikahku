@@ -4,6 +4,16 @@
    Base: #1a1816, Gold: #c9a96e, Fonts: Playfair+GreatVibes+Montserrat
    ================================================================ */
 
+/* ─── FONT LOKAL — Jane Austen (JaneAust.ttf, Pia Frauss, lisensi
+   personal use). BUKAN Google Fonts "Jane Austen" yang salah itu. Source
+   file: assets/fonts/JaneAust.ttf — disalin ke dist lewat build:pages
+   (cp assets/ rekursif), jadi path /assets/... sama di dev & production. */
+@font-face {
+  font-family: 'Jane Austen';
+  src: url('/assets/fonts/JaneAust.ttf') format('truetype');
+  font-display: swap;
+}
+
 /* ─── RESET & BASE ─── */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 [hidden] { display: none !important; }
@@ -318,10 +328,15 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 #cover .eyebrow {
   font-family: "Joan",serif;
   font-size: 1.125rem; color: #fff; letter-spacing: .02em;
+  /* text-transform:none eksplisit — base style.css .eyebrow memakai
+     uppercase, template ini menggantikannya (lihat subcover label juga).
+     Teks asli index.html "The Wedding Of" di-override JS jadi "The
+     Wedding of" (index.html shared tidak boleh diubah). */
+  text-transform: none;
 }
 #cover .script-names {
   font-family: "Joan",serif;
-  font-size: 2.5rem; letter-spacing: .04em; line-height: 1.2;
+  font-size: clamp(2.6rem, 12vw, 3.4rem); letter-spacing: .04em; line-height: 1.2;
   color: #e8e4de;
   display: flex; flex-direction: column; align-items: center;
 }
@@ -330,7 +345,9 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 #cover .script-names .amp-line {
   display: block;
-  font-size: .85em; color: #c9a96e;
+  /* SAMA PERSIS dengan .bride-line: warna & ukuran ikut #cover
+     .script-names (inherit #e8e4de, clamp(...)) — nama pria tidak boleh
+     emas atau lebih kecil dari nama wanita. */
 }
 #cover .guest-label {
   font-family: "Joan",serif;
@@ -381,70 +398,259 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 /* ─── LOCKED STATE ─── */
 .is-locked .invitation-body { display: none; }
 
+/* ═══════════════════════ SUbCOVER / QUOTES — layar penuh antara cover & opening ═══════════════════════ */
+/* Section BARU, dibuat dari JS (templates/modern-minimal.js, init()) — index.html
+   tidak berubah. Toggle tampil/mati lewat content.subcover.enabled; kalau mati,
+   JS tidak membuat section sama sekali (bukan sembunyi CSS). */
+#subcover.section-hero { position: relative; background: #1a1816; }
+#subcover .hero-overlay--flat {
+  background: linear-gradient(180deg,
+    rgba(20,18,16,.12) 0%, rgba(20,18,16,.08) 40%,
+    rgba(20,18,16,.22) 75%, rgba(20,18,16,.38) 100%);
+}
+#subcover .hero-media img { filter: brightness(.62) saturate(1.08); }
+
+/* Quote: kanan atas, teks script miring */
+.mm-subcover-quote {
+  position: absolute;
+  /* 84px: fab navigasi (.nav-fab, fixed 44px + 1.1rem) menempati kanan-atas;
+     quote harus mulai di bawahnya supaya tidak tertutup. */
+  top: 84px;
+  right: 20px;
+  z-index: 2;
+  text-align: right;
+  max-width: 62%;
+}
+.mm-subcover-quote p {
+  font-family: "Jane Austen", cursive;
+  font-size: clamp(1.1rem, 5.5vw, 1.5rem);
+  line-height: 1.25;
+  color: #F5F1EB;
+  margin: 0;
+}
+.mm-subcover-quote p + p { margin-top: .1rem; }
+
+/* Nama: kiri bawah, Joan */
+.mm-subcover-names {
+  position: absolute;
+  left: 20px;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  z-index: 2;
+  text-align: left;
+}
+.mm-subcover-names p {
+  font-family: "Joan", serif;
+  margin: 0;
+  color: #F5F1EB;
+}
+.mm-subcover-names p:nth-child(1) {
+  /* 'The Wedding of' — font SAMA dengan eyebrow cover (Joan). Jane
+     Austen HANYA untuk quote (.mm-subcover-quote p) dan kata "and"
+     (.mm-subcover-and). */
+  font-family: "Joan",serif;
+  font-size: 1.125rem;
+  letter-spacing: .02em;
+  /* 'The Wedding of' harus literal (o kecil) — teks JS sudah benar,
+     jangan di-uppercase oleh CSS. */
+  text-transform: none;
+  /* Semua teks kiri-bawah putih (#F5F1EB, sama dengan induk .mm-subcover-names p) */
+  color: #F5F1EB;
+  margin-bottom: .3rem;
+}
+.mm-subcover-names p:nth-child(2),
+.mm-subcover-names p:nth-child(3) {
+  font-size: clamp(2rem, 10vw, 2.6rem);
+  line-height: 1.05;
+}
+.mm-subcover-names p:nth-child(3) { margin-top: .1rem; }
+.mm-subcover-and {
+  font-family: "Jane Austen", cursive;
+  font-size: 1.15em;
+  color: #F5F1EB;
+  margin-right: .15em;
+}
+
 /* ═══════════════════════ OPENING / SAVE THE DATE ═══════════════════════ */
 #opening.section-hero { background: #1a1816; }
-#opening .hero-media img { filter: brightness(.42) saturate(1.15); }
-#opening .hero-overlay--flat {
-  background: linear-gradient(180deg, rgba(26,24,22,.25) 0%, rgba(26,24,22,.15) 55%, rgba(26,24,22,.65) 100%);
+#opening .hero-media img {
+  filter: brightness(.55) saturate(1.1);
+  object-position: center 38%;
 }
-#opening .hero-content { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+/* Ken Burns dimatikan di opening: reveal zoom (scale 1.025→1, lihat blok
+   OPENING SECTION ZOOM REVEAL) akan ditimpa animasi transform kalau aktif. */
+#opening .hero-slide.active img { animation: none; }
+#opening .hero-overlay--flat {
+  background: linear-gradient(to bottom,
+    rgba(20,18,16,.28) 0%, rgba(20,18,16,.18) 28%,
+    rgba(20,18,16,.22) 48%, rgba(20,18,16,.45) 75%, rgba(20,18,16,.68) 100%);
+}
+/* 3 zona: konten ~44-66%, countdown ~70-84%, scroll button ~84-100%.
+   .hero-content jadi containing block absolut inset:0 (pola sama seperti
+   .hero-media). TIDAK boleh pakai height:100% di dalam flow: .section-hero
+   adalah flex container (align-items:center), jadi item flex di-blockify dan
+   tetap di-center-kan — zona absolute akan menambat ke kotak setinggi konten.
+   padding:0 juga perlu — tanpa itu bottom:clamp(...) diukur dari padding-box
+   yang naik 32px (padding 2rem), bukan dari tepi viewport. */
+#opening .hero-content { position: absolute; inset: 0; padding: 0; }
+.mm-opening-content {
+  position: absolute; left: 24px; right: 24px; top: 48%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
 #opening .countdown-heading { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
 #opening .eyebrow {
-  font-family: "Great Vibes","Dancing Script",cursive;
-  font-size: 1.1rem; color: #c9a96e;
+  font-family: "Montserrat","Helvetica Neue",sans-serif;
+  font-size: 12px; font-weight: 500;
+  letter-spacing: .30em; text-transform: uppercase;
+  color: #D4B47D; margin-bottom: 10px;
 }
+#opening .mm-divider { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+#opening .mm-divider__line { width: 58px; height: 1px; background: rgba(212,180,125,.45); }
+#opening .mm-divider__diamond { width: 6px; height: 6px; transform: rotate(45deg); background: #D4B47D; }
 #opening .script-names--small {
-  font-family: "Playfair Display","Georgia",serif;
-  font-size: 1.7rem; letter-spacing: .04em; color: #e8e4de;
+  font-family: "Cormorant Garamond","Playfair Display",serif;
+  font-size: clamp(2rem, 9vw, 2.6rem);
+  font-weight: 400; line-height: .95; letter-spacing: -.01em;
+  color: #F5F1EB;
 }
 #opening .script-names--small .amp {
-  font-family: "Great Vibes","Dancing Script",cursive; font-size: .5em; color: #c9a96e;
+  font-family: inherit; font-size: 1em; font-style: italic; color: #C8A36A;
 }
 #event-date-label, .cover-countdown__date {
   font-family: "Montserrat","Helvetica Neue",sans-serif;
   font-size: .7rem; letter-spacing: .16em;
   color: rgba(232,228,222,.55);
 }
-#opening .btn-outline--light {
-  display: inline-flex; align-items: center; gap: .4rem;
-  padding: .42rem 1.4rem;
-  border: 1px solid rgba(232,228,222,.2);
+#opening #event-date-label {
   font-family: "Montserrat","Helvetica Neue",sans-serif;
-  font-size: .62rem; letter-spacing: .14em;
-  background: rgba(232,228,222,.04); color: rgba(232,228,222,.65);
-  cursor: pointer; transition: background .3s;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(255,255,255,.94); margin-bottom: 20px;
 }
-#opening .btn-outline--light:hover { background: rgba(232,228,222,.12); }
-#opening .btn-outline--light .icon-envelope { width: 13px; height: 13px; }
+#opening .btn-outline--light {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: min(270px, 70vw); height: 54px;
+  border-radius: 20px;
+  background: rgba(60,52,45,.30);
+  border: 1px solid rgba(226,202,162,.62);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  gap: 12px;
+  font-family: "Montserrat","Helvetica Neue",sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: .17em;
+  color: #E1C28D;
+  cursor: pointer;
+  transition: background .3s, border-color .3s;
+}
+#opening .btn-outline--light:hover { background: rgba(60,52,45,.45); border-color: rgba(226,202,162,.8); }
+#opening .btn-outline--light .icon-envelope { width: 18px; height: 18px; }
 
-/* Countdown */
-.countdown--plain { display: flex; gap: 1.6rem; justify-content: center; margin-top: .6rem; }
-.countdown__item { text-align: center; min-width: 44px; }
+/* Countdown — glass panel 4 kolom rata */
+.countdown--plain {
+  position: absolute; left: 24px; right: 24px;
+  bottom: clamp(105px, 13vh, 135px);
+  max-width: 340px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr); align-items: center;
+  height: 118px;
+  background: rgba(68,58,50,.30);
+  border: 1px solid rgba(238,221,195,.30);
+  border-radius: 22px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.countdown__item { position: relative; text-align: center; }
+.countdown__item:not(:last-child)::after {
+  content: ""; position: absolute; right: 0; top: 18%; bottom: 18%;
+  width: 1px; background: rgba(255,255,255,.18);
+}
 .countdown__item span {
-  font-family: "Playfair Display","Georgia",serif;
-  font-size: 2.4rem; font-weight: 200; display: block; line-height: 1;
-  color: #e8e4de;
+  font-family: "Cormorant Garamond","Playfair Display",serif;
+  font-size: 40px; font-weight: 400; display: block; line-height: 1;
+  color: #F5F0E8;
 }
 .countdown__item small {
   font-family: "Montserrat","Helvetica Neue",sans-serif;
-  font-size: .52rem; letter-spacing: .14em; text-transform: uppercase;
-  color: rgba(232,228,222,.4);
+  font-size: 10px; font-weight: 600; letter-spacing: .20em;
+  text-transform: uppercase; color: #BFA474; margin-top: 9px;
+  display: block;
 }
 .scroll-chevron {
-  color: rgba(232,228,222,.2); font-size: 1.3rem; margin-top: .4rem;
+  position: absolute; right: 18px; bottom: 24px;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: rgba(30,27,24,.30);
+  border: 1px solid rgba(212,180,125,.70);
+  display: flex; align-items: center; justify-content: center;
+  color: #D4B47D; font-size: 1.1rem;
   animation: bounceChevron 2s ease-in-out infinite;
 }
 @keyframes bounceChevron {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(6px); }
+  50% { transform: translateY(4px); }
 }
 
 /* ═══════════════════════ WE FOUND LOVE ═══════════════════════ */
 #we-found-love.section { padding: 4.5rem 1.5rem; text-align: center; }
-.wfl-slider { max-width: 290px; margin: 0 auto 2rem; overflow: hidden; }
-.wfl-slider .swiper-slide img {
-  width: 100%; aspect-ratio: 1; object-fit: cover;
-  filter: brightness(.78);
+/* Slider Swiper LAMA dihapus (.wfl-slider max-width/overflow) — diganti
+   stacked-card carousel gaya CodePen (.mm-wfl-*, dibangun JS). overflow
+   TIDAK boleh hidden: kartu yang "mengintip" keluar container ke kanan,
+   memotongnya menghancurkan efek tumpukan. Mekanisme: JS cuma pindahkan
+   node .item (.appendChild/.prepend), tata letak murni CSS nth-child. */
+.mm-wfl-carousel {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  height: 220px;
+  margin: 0 auto 1.4rem;
+}
+/* Elemen statis index.html masih membawa class .swiper — stylesheet CDN
+   Swiper memberinya overflow:hidden, yang memotong kartu mengintip.
+   Class itu tidak boleh dihapus, jadi timpa dengan selector 2-class
+   (menang spesifisitas tanpa tergantung urutan stylesheet). */
+.wfl-slider.mm-wfl-carousel { overflow: visible; }
+.mm-wfl-carousel .mm-wfl-slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.mm-wfl-item {
+  position: absolute;
+  top: 50%;
+  width: 130px;
+  height: 170px;
+  transform: translate(0, -50%);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 14px 28px rgba(0,0,0,.45);
+  transition: all .5s cubic-bezier(.22,.61,.36,1);
+  border: 1px solid rgba(212,180,125,.25);
+}
+.mm-wfl-item img {
+  width: 100%; height: 100%; object-fit: cover;
+  object-position: var(--fx, 50%) var(--fy, 50%);
+  transform: scale(var(--zoom, 1));
+  filter: brightness(.85);
+}
+.mm-wfl-item:nth-child(1), .mm-wfl-item:nth-child(2) {
+  top: 0; left: 0; transform: translate(0, 0);
+  width: 100%; height: 100%; border-radius: 16px;
+}
+.mm-wfl-item:nth-child(3) { left: 50%; }
+.mm-wfl-item:nth-child(4) { left: calc(50% + 140px); }
+.mm-wfl-item:nth-child(5) { left: calc(50% + 280px); }
+.mm-wfl-item:nth-child(n+6) { left: calc(50% + 420px); opacity: 0; }
+
+.mm-wfl-buttons {
+  display: flex; justify-content: center; gap: .9rem;
+  margin-bottom: 1.6rem;
+}
+.mm-wfl-buttons button {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(232,228,222,.06);
+  border: 1px solid rgba(212,180,125,.4);
+  color: #D4B47D; font-size: .85rem;
+  cursor: pointer; transition: background .3s, border-color .3s;
+}
+.mm-wfl-buttons button:hover {
+  background: rgba(212,180,125,.15);
+  border-color: rgba(212,180,125,.7);
 }
 .wfl-quote { max-width: 320px; margin: 0 auto; }
 .arabic-quote {
@@ -871,33 +1077,47 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 /* ─── TEXT ENTER (Save The Date opening reveal) ─── */
 #opening .text-enter {
   opacity: 0;
-  transition: opacity .75s cubic-bezier(0.22,1,0.36,1),
-              transform .75s cubic-bezier(0.22,1,0.36,1);
-  transition-delay: calc(var(--reveal-i, 0) * 70ms);
+  transition: opacity .7s cubic-bezier(.22,.61,.36,1),
+              transform .7s cubic-bezier(.22,.61,.36,1);
+  transition-delay: 0ms;
 }
 #opening .text-enter--down { transform: translateY(-14px); }
 #opening .text-enter--left { transform: translateX(-18px); }
 #opening .text-enter--up { transform: translateY(14px); }
 #opening.text-revealed .text-enter { opacity: 1; transform: none; }
 
-/* Semua elemen Save The Date ikut reveal berjenjang — termasuk tiap unit
-   countdown (Hari/Jam/Menit/Detik) yang di-render dinamis, supaya tidak ada
-   satu pun elemen yang diam tanpa animasi. */
+/* Delay eksplisit per elemen (bukan --reveal-i yang generik): urutan reveal
+   spec = eyebrow → nama → tanggal → tombol → countdown panel. */
+#opening .eyebrow { transition-delay: 0ms; }
+#opening .script-names--small { transition-delay: 120ms; }
+#opening #event-date-label { transition-delay: 250ms; }
+#opening #btn-add-calendar { transition-delay: 350ms; }
+#opening .countdown { transition-delay: 500ms; }
+
+/* Tiap unit countdown (Hari/Jam/Menit/Detik) masuk bersama panel, delay 500ms */
 #opening .countdown__item {
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity .7s cubic-bezier(0.22,1,0.36,1),
-              transform .7s cubic-bezier(0.22,1,0.36,1);
-  transition-delay: calc(var(--reveal-i, 0) * 70ms + 0.25s);
+  transition: opacity .8s cubic-bezier(.22,.61,.36,1),
+              transform .8s cubic-bezier(.22,.61,.36,1);
+  transition-delay: 500ms;
 }
 #opening.text-revealed .countdown__item { opacity: 1; transform: none; }
 
-/* ─── OPENING SECTION SLIDE-IN ─── */
-#opening.section-revealed .hero-media img {
-  transform: translateX(0);
-  transition: transform 1.5s cubic-bezier(.16,1,.3,1);
+/* Divider dekoratif ikut reveal bersama nama (delay sama 120ms) */
+#opening .mm-divider {
+  opacity: 0;
+  transition: opacity .7s cubic-bezier(.22,.61,.36,1);
+  transition-delay: 120ms;
 }
-#opening .hero-media img { transform: translateX(-6%); }
+#opening.text-revealed .mm-divider { opacity: 1; }
+
+/* ─── OPENING SECTION ZOOM REVEAL (ganti slide translateX jadi zoom scale) ─── */
+#opening.section-revealed .hero-media img {
+  transform: scale(1);
+  transition: transform 1.8s cubic-bezier(.16,1,.3,1);
+}
+#opening .hero-media img { transform: scale(1.025); }
 
 /* ─── MODAL ANIMATION ─── */
 .modal:not([hidden]) .modal__panel {
@@ -918,8 +1138,10 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .reveal-ready [data-reveal] { transform: none !important; transition: opacity .4s ease !important; }
   .reveal-ready [data-reveal].is-revealed { opacity: 1; }
-  #opening .text-enter { transform: none !important; transition: opacity .4s ease !important; }
+  #opening .text-enter { transform: none !important; transition: opacity .4s ease !important; transition-delay: 0s !important; }
   #opening.text-revealed .text-enter { opacity: 1; }
+  #opening .mm-divider { transition: opacity .4s ease !important; transition-delay: 0s !important; }
+  #opening.text-revealed .mm-divider { opacity: 1; }
   .hero-slide.active img { animation: none; }
   .scroll-chevron { animation: none; }
   #cover.is-exiting { transition: opacity .3s ease; }
@@ -931,20 +1153,25 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 /* ═══════════════════════ MOBILE ═══════════════════════ */
 @media (max-width: 430px) {
   .section { padding: 3.5rem 1.2rem; }
-  #cover .script-names { font-size: 2rem; }
+  /* #cover .script-names sudah clamp(vw) — override 2rem lama dihapus
+     supaya di HP ukuran tetap ikut clamp (bukan terkunci 2rem). */
   #cover .guest-name { font-size: 1rem; }
-  #opening .script-names--small { font-size: 1.4rem; }
   .event-card__slider { height: 65vh; min-height: 340px; }
   .event-num { font-size: 3.2rem; }
   .couple-slider { max-width: 260px; }
-  .countdown--plain { gap: 1rem; }
-  .countdown__item span { font-size: 1.8rem; }
   .gallery-grid { gap: 1px; }
   .section-eyebrow { font-size: 1rem; }
   .section-title, .section-title--script { font-size: 1.6rem; }
   .timeline-item__photo { max-width: 260px; }
-  .wfl-slider { max-width: 260px; }
+  /* .wfl-slider override 260px dihapus — carousel baru (.mm-wfl-carousel,
+     max-width 300px) sudah mobile-first; override ini cuma mengecilkan
+     container tanpa alasan. */
   #closing.section-hero { padding-top: 6rem; }
+}
+
+/* Countdown angka 40px → 36px di layar ≤ 370px (panel glass lebih sempit) */
+@media (max-width: 370px) {
+  #opening .countdown__item span { font-size: 36px; }
 }
 
 /* Ensure gallery item images are always visible */
