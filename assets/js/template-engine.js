@@ -1,12 +1,12 @@
 /** Template Engine v2 — setiap template adalah CSS stylesheet UTUH.
  *
- * Template = JSON metadata + CSS file. Engine:
- * 1. Load JSON → ambil nama, theme vars, font list, path CSS
+ * Template = JSON metadata + CSS file + optional JS file. Engine:
+ * 1. Load JSON → ambil nama, theme vars, font list, path CSS, path JS
  * 2. Inject <link> CSS template → override total layout/style
- * 3. Apply CSS variables dari theme (untuk yang pakai var)
- * 4. Section TIDAK di-hide — admin yang kontrol visibilitas
+ * 3. Jalankan JS template (kalau ada) → override behaviour
+ * 4. Apply CSS variables dari theme (untuk yang pakai var)
  *
- * Saat switch template: CSS lama dihapus, CSS baru di-inject.
+ * Saat switch template: CSS/JS lama dihapus, CSS/JS baru di-inject.
  * Style.css tetap sebagai base/reset.
  */
 (function () {
@@ -14,11 +14,10 @@
 
   let _definition = null;
   let _cssLink = null;
-  let _jsCleanup = null; // function untuk cleanup JS template sebelumnya
+  let _jsCleanup = null;
 
   /* ─── CSS injection ─── */
   function injectCSS(url) {
-    // Hapus CSS template sebelumnya
     if (_cssLink) { _cssLink.remove(); _cssLink = null; }
     if (!url) return;
     const link = document.createElement("link");
@@ -40,12 +39,9 @@
 
   /* ─── Public API ─── */
 
-  /** Muat template dari URL path (string) atau definisi (object).
-   *  @param {string|object|null} source */
   window.loadTemplate = async function (source) {
     _definition = null;
 
-    // Resolve source
     if (typeof source === "string") {
       try {
         const res = await fetch(source);
@@ -55,7 +51,6 @@
       _definition = source;
     }
 
-    // Fallback
     if (!_definition) {
       try {
         const res = await fetch("/templates/classic-elegance.json");
@@ -67,22 +62,22 @@
 
     const tpl = _definition;
 
-    // 1) Inject CSS template
+    // 1) Inject CSS
     injectCSS(tpl.css || `/templates/${tpl.id}.css`);
 
-    // 2) JS template — cleanup dulu, lalu load
+    // 2) JS template — cleanup dulu, lalu load kalau tpl.js ada
     if (_jsCleanup) { try { _jsCleanup(); } catch {}; _jsCleanup = null; }
-    const jsPath = tpl.js || `/templates/${tpl.id}.js`;
-    try {
-      const jsRes = await fetch(jsPath);
-      if (jsRes.ok) {
-        const code = await jsRes.text();
-        // Jalankan di scope terisolasi; kembalikan cleanup fn kalau ada
-        const fn = new Function("return (function(){" + code + "})()");
-        const result = fn();
-        if (typeof result === "function") _jsCleanup = result;
-      }
-    } catch {} // JS optional — tidak wajib
+    if (tpl.js) {
+      try {
+        const jsRes = await fetch(tpl.js);
+        if (jsRes.ok) {
+          const code = await jsRes.text();
+          const fn = new Function("return (function(){" + code + "})()");
+          const result = fn();
+          if (typeof result === "function") _jsCleanup = result;
+        }
+      } catch {} // JS optional
+    }
 
     // 3) Theme CSS variables
     applyTheme(tpl.theme || {});

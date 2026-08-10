@@ -3,6 +3,7 @@
   "name": "Modern Minimal",
   "version": 2,
   "css": "/templates/modern-minimal.css",
+  "js": "/templates/modern-minimal.js",
   "fonts": [
     "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
   ],
