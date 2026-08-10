@@ -8,11 +8,14 @@ return (function() {
   const coverStyle = document.createElement("style");
   coverStyle.id = "modern-cover";
   coverStyle.textContent = `
-    #cover { transition: transform 0.9s cubic-bezier(0.5,0,0.75,0); }
-    #cover.is-exiting { transform: translateX(-105%) !important; }
-    /* Opening langsung terlihat — tidak nunggu jeda */
-    #opening { opacity: 1 !important; }
-    #opening .hero-media img { transform: translateX(0) !important; }
+    #cover { position: fixed !important; inset: 0; z-index: 100; }
+    #cover.cover-visible { transform: translateX(0); opacity: 1; }
+    #cover.is-exiting { transform: translateX(-105%) !important; opacity: 1; transition: transform 0.85s cubic-bezier(0.5,0,0.75,0), opacity 0.3s ease; pointer-events: none; }
+    #invitation.is-locked .invitation-body { display: none; }
+    .is-locked { overflow: hidden; }
+    /* Opening langsung terlihat — di belakang cover */
+    #opening { opacity: 1 !important; transform: none !important; }
+    #opening .hero-media img { transform: none !important; }
     #opening .hero-content { opacity: 1 !important; }
   `;
   document.head.appendChild(coverStyle);
