@@ -377,24 +377,29 @@
 
     // Kalau client sudah memilih template berbeda (site_content.template),
     // switch sekarang — setelah payload tiba, sebelum konten diisi.
-    if (payload && payload.content && payload.content.template) {
+    // KECUALI: kalau ?template=... di URL, URL yang menang (admin preview).
+    if (!urlTpl && payload && payload.content && payload.content.template) {
       const savedTpl = payload.content.template;
       const active = window.getActiveTemplate();
       if (!active || active.id !== savedTpl) {
-        const fontLinks = document.querySelectorAll('link[data-template-font]');
-        fontLinks.forEach((l) => l.remove());
-        await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
-        tpl = window.getActiveTemplate();
-        if (tpl && tpl.fonts) {
-          tpl.fonts.forEach((url) => {
-            if (!document.querySelector(`link[href="${url}"]`)) {
-              const link = document.createElement("link");
-              link.rel = "stylesheet";
-              link.href = url;
-              link.dataset.templateFont = "1";
-              document.head.appendChild(link);
-            }
-          });
+        try {
+          const fontLinks = document.querySelectorAll('link[data-template-font]');
+          fontLinks.forEach((l) => l.remove());
+          await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
+          tpl = window.getActiveTemplate();
+          if (tpl && tpl.fonts) {
+            tpl.fonts.forEach((url) => {
+              if (!document.querySelector(`link[href="${url}"]`)) {
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = url;
+                link.dataset.templateFont = "1";
+                document.head.appendChild(link);
+              }
+            });
+          }
+        } catch (err) {
+          console.warn("Template switch gagal, tetap pakai fallback:", err);
         }
       }
     }

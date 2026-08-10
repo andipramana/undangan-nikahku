@@ -43,15 +43,8 @@
     "closing": "up"
   },
   "parallax": {
-    "enabled": true,
-    "type": "scroll-3d",
-    "perspective": 400,
-    "layers": [
-      { "selector": "#cover .hero-media img", "speed": 0.15, "z": -5 },
-      { "selector": "#opening .hero-media img", "speed": 0.2, "z": -10 },
-      { "selector": "#closing .hero-media img", "speed": 0.1, "z": -3 },
-      { "selector": ".invitation-body section", "speed": 0.04, "z": 0 }
-    ]
+    "enabled": false,
+    "type": "none"
   },
   "features": {
     "countdown": true,
