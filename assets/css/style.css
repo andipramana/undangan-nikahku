@@ -380,11 +380,14 @@ a { color: inherit; }
 .eyebrow-monogram {
   position: absolute;
   top: 50%;
-  font-family: var(--font-script);
+  /* var(--font-serif) (Playfair Display), bukan --font-script — huruf besar
+     dalam font cursive sambung terlalu berantakan/bertumpang tindih di
+     ukuran raksasa ini; serif tegas lebih terbaca sebagai monogram. */
+  font-family: var(--font-serif);
   font-size: clamp(2.5rem, 14vw, 4rem);
-  font-weight: 400;
+  font-weight: 600;
   color: #ffffff;
-  opacity: .16;
+  opacity: .28;
   z-index: 0;
   pointer-events: none;
   line-height: 1;
@@ -1555,23 +1558,6 @@ a { color: inherit; }
 .btn-maps:hover { background: var(--color-gold); color: #ffffff; }
 .btn-maps:hover svg { color: #ffffff; }
 
-/* ─── Parallax 3D (template engine) ───
-   Scroll-based depth: hanya translateY + translateZ, tidak ada rotasi
-   (rotasi menciptakan efek "game" yang terlihat murahan). Perspective
-   diset di JS pada #invitation — di sini hanya smoothing + fallback. */
-#invitation[style*="perspective"] .hero-media img,
-#invitation[style*="perspective"] .invitation-body section {
-  will-change: transform;
-  backface-visibility: hidden;
-}
-/* Parallax layer: transition untuk smoothing antar frame (opsional,
-   diaktifkan kalau browser mendukung). */
-@supports (translate: none) {
-  #invitation[style*="perspective"] .hero-media img {
-    transition: transform 0.1s linear;
-  }
-}
-
 /* ─── Reveal stagger enhancement ───
    Per-elemen reveal dengan delay bertahap. --reveal-i dikali STEP_MS
    oleh reveal.js. Di sini kita tambahkan aturan untuk elemen yang
@@ -1603,10 +1589,5 @@ a { color: inherit; }
   .reveal-ready [data-reveal],
   .reveal-ready .section > *:not([data-reveal]) {
     transform: none !important;
-  }
-  #invitation[style*="perspective"] .hero-media img,
-  #invitation[style*="perspective"] .invitation-body section {
-    transform: none !important;
-    will-change: auto;
   }
 }

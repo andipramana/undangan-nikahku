@@ -12,10 +12,16 @@
  * sudah masuk, supaya foto pertama tetap bisa dilihat dulu. */
 window.initHeroSlideshows = async function () {
   const cfg = window.WEDDING_CONFIG;
-  // Satu foto tampil PENUH sebelum diganti: jeda 7 detik, transisi 1.8 detik.
-  // Total satu siklus ≈ 8.8s — terasa tenang, tidak terburu-buru.
+  // Satu foto tampil PENUH sebelum diganti: jeda 7 detik, transisi 3.2 detik.
+  // WAJIB SAMA PERSIS dengan durasi transition .hero-slide di assets/css/style.css
+  // (classic-elegance) — kalau angka ini lebih PENDEK dari transition CSS-nya,
+  // reset inline style di bawah (baris ~109-112) memotong animasi CSS yang
+  // masih berjalan: foto yang keluar snap ke posisi akhir sebelum benar-benar
+  // selesai bergeser, dan foto yang masuk belum tiba di posisinya — celah
+  // kosong sesaat di antara keduanya. Bug ini nyata terjadi 2026-08-11 saat
+  // durasi CSS dinaikkan (dulu 1.8s) tanpa ikut menaikkan angka ini.
   const interval = cfg.heroSlideInterval || 7000;
-  const SLIDE_TRANSITION_MS = 1800;
+  const SLIDE_TRANSITION_MS = 3200;
 
   // Muat foto ketiga slideshow sekaligus
   const [coverSlides, openingSlides, closingSlides] = await Promise.all([
