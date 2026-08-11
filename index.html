@@ -135,23 +135,17 @@
       </div>
     </section>
 
-    <!-- ============ WE FOUND LOVE (slider foto 1:1 infinite + ayat quran kecil) ============ -->
-    <section id="we-found-love" class="section section--dark">
-      <!-- judul turun dari atas — satu-satunya di halaman yang begitu, jadi
-           pembuka section ini punya aksen sendiri -->
-      <h2 class="section-title--script" data-reveal="down">We Found Love</h2>
-      <div class="wfl-slider swiper" data-reveal="zoom" style="--reveal-i:1">
-        <div class="swiper-wrapper" id="wfl-slider-wrapper"></div>
-        <div class="swiper-pagination"></div>
-      </div>
-      <!-- Satu paket: bismillah, ayat, dan sumbernya tampil bersamaan —
-           tidak masuk akal kalau tamu harus scroll untuk memunculkan sumber ayat -->
-      <div class="wfl-quote" data-reveal-group>
-        <!-- dipicu barengan, tapi geraknya masing-masing: ayat turun dari atas,
-             terjemahannya naik menyambut, penanda suratnya mengembang -->
-        <p class="arabic-quote" id="wfl-arabic" data-reveal="down"></p>
-        <p class="opening-quote" id="wfl-quote" data-reveal="up" style="--reveal-i:1"></p>
-        <p class="opening-source" id="wfl-source" data-reveal="pop" style="--reveal-i:2"></p>
+    <!-- ============ WE FOUND LOVE (kertas lipat 3D full-screen + ayat quran) ============ -->
+    <!-- Judul "We Found Love" diintegrasikan sebagai label di flap pertama
+         (cover). Flap diisi JS dari folder foto 'wfl'; ayat Quran muncul
+         SETELAH semua lipatan terbuka (class .wfl-quote--revealed dari
+         we-found-love.js). -->
+    <section id="we-found-love" class="wfl-fold-section">
+      <div class="wfl-fold" id="wfl-fold"></div>
+      <div class="wfl-quote" id="wfl-quote-wrap">
+        <p class="arabic-quote" id="wfl-arabic"></p>
+        <p class="opening-quote" id="wfl-quote"></p>
+        <p class="opening-source" id="wfl-source"></p>
       </div>
     </section>
 
