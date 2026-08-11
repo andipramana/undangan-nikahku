@@ -369,6 +369,40 @@ a { color: inherit; }
 }
 .hero-content .eyebrow { color: #ffffff; font-weight: 500; }
 
+/* Monogram dekoratif M/A di belakang "The Wedding Of" (cover & opening) —
+   murni visual, aria-hidden di markup jadi tidak dibaca screen reader.
+   Mulai dari luar layar (M kiri-atas, A kanan-bawah), berhenti tumpang
+   tindih di belakang teks; M sengaja lebih tinggi dari A (tidak sejajar).
+   Transisi dipicu class reveal yang SUDAH ADA: .aos-animate (AOS) di cover,
+   .text-revealed di #opening. */
+.eyebrow-wrap { position: relative; display: inline-block; }
+.eyebrow-wrap .eyebrow { position: relative; z-index: 1; }
+.eyebrow-monogram {
+  position: absolute;
+  top: 50%;
+  font-family: var(--font-script);
+  font-size: clamp(2.5rem, 14vw, 4rem);
+  font-weight: 400;
+  color: #ffffff;
+  opacity: .16;
+  z-index: 0;
+  pointer-events: none;
+  line-height: 1;
+  transition: transform 1.4s cubic-bezier(.22,.61,.36,1), opacity 1.4s ease;
+}
+.eyebrow-monogram--m {
+  left: 50%;
+  transform: translate(-160%, -70%); /* mulai dari kiri layar, lebih tinggi */
+}
+.eyebrow-monogram--a {
+  left: 50%;
+  transform: translate(60%, -30%); /* mulai dari kanan layar, lebih rendah */
+}
+.eyebrow-wrap.aos-animate .eyebrow-monogram--m,
+#opening.text-revealed .eyebrow-monogram--m { transform: translate(-90%, -70%); }
+.eyebrow-wrap.aos-animate .eyebrow-monogram--a,
+#opening.text-revealed .eyebrow-monogram--a { transform: translate(-10%, -30%); }
+
 .script-names {
   font-family: var(--font-script);
   font-weight: 400;
@@ -407,35 +441,26 @@ a { color: inherit; }
 .btn-open:hover { background: #ffffff; color: var(--color-dark); }
 .btn-open .icon-envelope { width: 15px; height: 15px; flex: none; }
 
-/* Tombol aksi utama (kirim RSVP, kirim hadiah). Sengaja terisi penuh warna emas,
-   bukan sekadar bergaris seperti .btn-outline: ini satu-satunya aksi yang
-   diharapkan dari tamu di section-nya, jadi harus paling menonjol.
-   Emas pekat ini kontras di dua-duanya — di atas latar krem (#f7f3ea) maupun
-   latar gelap (#14120f) — jadi satu kelas ini cukup untuk kedua section.
-   Jangan pakai .btn-open di latar terang: teks & garisnya putih, dirancang untuk
-   foto gelap di cover, dan di atas krem nyaris tidak terlihat. */
+/* Tombol aksi utama (kirim RSVP, kirim hadiah). Semua tombol di halaman ini
+   memakai gaya tombol cover: kapsul putih semi-transparan (#ffffff61).
+   Warna teks tetap mengikuti konteksnya (gelap di atas latar terang, terang
+   di atas foto) supaya terbaca; hover memekatkan putih jadi penuh. */
 .btn-primary {
   font-family: var(--font-sans);
   letter-spacing: .1em;
   text-transform: uppercase;
   font-size: .82rem;
   font-weight: 600;
-  background: var(--color-gold);
-  border: 1.5px solid var(--color-gold);
+  background: #ffffff61;
+  border: none;
   color: var(--color-dark);
   padding: .85rem 2rem;
-  border-radius: 10px;
+  border-radius: 999px;
   cursor: pointer;
-  /* Shadow emas — color-mix dengan alpha yang sama, diturunkan dari
-     --color-gold supaya ikut tema (ganti warna di tab Tampilan). */
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-gold) 35%, transparent);
-  transition: background .3s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease;
+  transition: background .3s ease, color .3s ease;
 }
-/* Hover memekatkan emasnya, BUKAN menggelapkannya jadi --color-dark: di section
-   Tanda Kasih yang latarnya gelap, tombolnya akan lenyap menyatu dengan latar. */
 .btn-primary:hover {
-  background: #b8914f;
-  border-color: #b8914f;
+  background: #ffffff;
   color: var(--color-dark);
 }
 /* rsvp.js menonaktifkan tombol selama pengiriman — beri tanda yang jelas supaya
@@ -452,20 +477,20 @@ a { color: inherit; }
   letter-spacing: .12em;
   text-transform: uppercase;
   font-size: .75rem;
-  border: 1.5px solid var(--color-gold);
+  background: #ffffff61;
+  border: none;
   color: inherit;
-  background: transparent;
   padding: .75rem 1.8rem;
-  border-radius: 10px;
+  border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
   transition: background .3s ease, color .3s ease;
 }
-.btn-outline:hover { background: var(--color-gold); color: var(--color-dark); }
+.btn-outline:hover { background: #ffffff; color: var(--color-dark); }
 
 /* Tombol di atas foto (cover & countdown) — putih konsisten dengan .btn-open, bukan emas. */
 .btn-outline--light {
-  border-color: #fff; color: #fff;
+  background: #ffffff61; border: none; color: #fff;
   padding: .5rem 1rem; font-size: .68rem;
   display: inline-flex; align-items: center;
   margin-bottom: 1.5rem;
@@ -492,7 +517,7 @@ a { color: inherit; }
   transition: transform 1.8s cubic-bezier(.65,0,.35,1), opacity 1.8s ease;
 }
 #cover.cover-visible { transform: translateY(0); opacity: 1; }
-#cover.is-exiting { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+#cover.is-exiting { transform: translateX(-105%); opacity: 1; pointer-events: none; }
 
 #opening {
   opacity: 0;
@@ -836,21 +861,21 @@ a { color: inherit; }
 }
 .modal__panel {
   width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto;
-  background: var(--color-dark-2); border: 1px solid var(--color-gold);
+  background: #ffffff61; border: 1px solid var(--color-gold);
   border-radius: 14px; padding: 1.5rem;
-  color: var(--color-text-light);
+  color: var(--color-text);
   animation: fadeUp .35s ease;
 }
 .modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
 .modal__header h3 { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; margin: 0; letter-spacing: .03em; }
 .modal__close {
-  background: none; border: none; color: var(--color-gold-soft);
+  background: none; border: none; color: var(--color-gold);
   font-size: 1.8rem; line-height: 1; cursor: pointer; padding: .1rem .35rem;
 }
 .modal__field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; text-align: left; }
 .modal__field > span { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
 .modal__field select, .modal__field textarea {
-  font-family: var(--font-sans); font-size: .92rem; color: var(--color-text-light);
+  font-family: var(--font-sans); font-size: .92rem; color: var(--color-text);
   background: transparent; border: 1px solid var(--color-gold); border-radius: 8px;
   padding: .6rem .7rem; resize: vertical;
 }
@@ -900,15 +925,15 @@ a { color: inherit; }
   letter-spacing: .12em;
   text-transform: uppercase;
   font-size: .75rem;
+  background: #ffffff;
   border: none;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-gold) 22%, transparent);
-  color: var(--color-text-light);
-  background: transparent;
+  color: var(--color-dark);
   padding: .95rem .2rem;
+  border-radius: 999px;
   cursor: pointer;
   text-align: left;
   animation: navItemIn .75s cubic-bezier(.22,.61,.36,1) both;
-  transition: color .3s ease, border-color .3s ease, padding-left .3s ease;
+  transition: background .3s ease, color .3s ease, padding-left .3s ease;
 }
 @keyframes navItemIn {
   from { opacity: 0; transform: translateY(26px); }
@@ -922,11 +947,30 @@ a { color: inherit; }
 .nav-menu-list button:nth-child(5) { animation-delay: .32s; }
 .nav-menu-list button:nth-child(6) { animation-delay: .38s; }
 .nav-menu-list button:nth-child(7) { animation-delay: .44s; }
-/* Hover: teks emas menyala + garis bawah menguat + item "maju" halus ke kanan */
+/* Hover: putih penuh sedikit redup + item "maju" halus ke kanan */
 .nav-menu-list button:hover {
-  color: var(--color-gold-soft);
-  border-bottom-color: var(--color-gold);
+  background: #f2ead9;
+  color: var(--color-dark);
   padding-left: .6rem;
+}
+
+/* Tombol DI DALAM modal — putih PENUH (berbeda dari tombol luar yang
+   translucent #ffffff61), bentuk kapsul, supaya aksi di panel terang tetap
+   menonjol. Selector scoped .modal — tidak memengaruhi tombol di section. */
+.modal .btn-outline,
+.modal .btn-primary,
+.modal .gift-copy-btn {
+  background: #ffffff;
+  color: var(--color-dark);
+  border: none;
+  border-radius: 999px;
+}
+.modal .gift-copy-btn { padding: .55rem 1.2rem; }
+.modal .btn-outline:hover,
+.modal .btn-primary:hover,
+.modal .gift-copy-btn:hover {
+  background: #f2ead9;
+  color: var(--color-dark);
 }
 
 /* Kanvas QR check-in tamu — kotak putih supaya kontras QR-nya jelas saat

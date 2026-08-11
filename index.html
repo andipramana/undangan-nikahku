@@ -77,7 +77,13 @@
     <div class="cover-screen">
       <div class="hero-content hero-content--split">
         <div class="hero-content__top">
-          <p class="eyebrow" data-aos="fade-down">The Wedding Of</p>
+          <!-- data-aos dipindah ke wrapper: AOS meng-animate blok (teks + monogram
+               M/A) sekali jalan, supaya monogram ikut trigger tanpa JS baru -->
+          <div class="eyebrow-wrap" data-aos="fade-down">
+            <span class="eyebrow-monogram eyebrow-monogram--m" aria-hidden="true">M</span>
+            <span class="eyebrow-monogram eyebrow-monogram--a" aria-hidden="true">A</span>
+            <p class="eyebrow">The Wedding Of</p>
+          </div>
           <!-- Nama panggilan pasangan diisi main.js dari couple.*.nickname
                (config/Supabase), bukan hardcoded -->
           <h1 class="script-names" data-aos="zoom-in" data-aos-delay="150" id="couple-names-cover">Mita <span class="amp">&amp;</span> Andi</h1>
@@ -87,7 +93,6 @@
           <p class="guest-label" id="guest-label" data-aos="fade-up">Kepada Yth.</p>
           <p id="guest-name" class="guest-name" data-aos="fade-up" data-aos-delay="150">Bapak/Ibu/Saudara/i</p>
           <button id="btn-open" class="btn-open" type="button" data-aos="fade-up" data-aos-delay="300">
-            <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg>
             <span>Buka Undangan</span>
           </button>
           <p class="hero-note">*Mohon maaf apabila ada kesalahan penulisan nama</p>
@@ -106,7 +111,11 @@
       <div class="section-fade-bottom section-fade-bottom--dark"></div>
       <div class="hero-content">
         <div class="countdown-heading">
-          <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
+          <div class="eyebrow-wrap">
+            <span class="eyebrow-monogram eyebrow-monogram--m" aria-hidden="true">M</span>
+            <span class="eyebrow-monogram eyebrow-monogram--a" aria-hidden="true">A</span>
+            <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
+          </div>
           <p class="script-names script-names--small text-enter text-enter--left" id="couple-names-opening">Mita <span class="amp">&amp;</span> Andi</p>
           <!-- Tanggal & tahun di baris ini sengaja TANPA animasi angka —
                kurang cocok di Save The Date, tampil tenang apa adanya -->
