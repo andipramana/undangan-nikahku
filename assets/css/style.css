@@ -93,6 +93,13 @@ html, body {
   overflow-y: auto;             /* halaman scroll DI SINI, bukan di .app-frame */
   overscroll-behavior: contain;
   scroll-behavior: smooth;
+  /* Scroll-snap magnetic: proximity (BUKAN mandatory) — scroll hanya
+     "menempel" ke snap point kalau sudah hampir berhenti di dekatnya,
+     tidak memaksa SETIAP scroll berhenti. Satu-satunya elemen yang
+     men-declare scroll-snap-align adalah section We Found Love
+     classic-elegance (#we-found-love.wfl-fold-section), jadi section
+     lain/template lain tidak berubah perilaku scroll-nya. */
+  scroll-snap-type: y proximity;
   scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
   scrollbar-color: var(--color-gold) transparent;
 }
@@ -1206,19 +1213,30 @@ a { color: inherit; }
 }
 
 /* ---------- We Found Love (kertas lipat 3D full-screen + ayat quran) ---------- */
-/* Section = SATU layar penuh. SATU foto (folder wfl, sort_order awal)
-   dipotong-potong menyebar ke 7 flap — trik jigsaw referensi CodePen:
-   potongan menyatu jadi satu gambar utuh saat semua flap terbuka.
-   Geometri & potongan dihitung JS (we-found-love.js); CSS di sini cuma
-   mengatur koreografi 3D per flap via transition-delay bertingkat:
-   tahap 1 rotateX (buka jadi "kotak") → tahap 2 rotateY (pintu ganda
-   kiri-kanan, "melebar jadi persegi panjang") → tahap 3 rotateX turun
-   (akordeon memanjang sampai penuh layar). */
+/* PORT dari prototipe example/fold/ (SUDAH terverifikasi visual: potongan
+   menyatu tanpa gap, rotasi wajar) — geometri/rotasi/BLEED/z-index FINAL,
+   jangan redesign. SATU foto (folder wfl, sort_order awal) dipotong-potong
+   menyebar ke semua flap via JS (background-size seragam + position
+   terhitung, cover-fit + center) — menyatu jadi satu gambar utuh saat
+   semua flap terbuka. Koreografi CSS: toggle SATU class .wfl-fold--open,
+   transition-delay bertingkat = urutan fold 1-6:
+   a (statis) -> b/c rotateX atas/bawah jadi strip 1x3 -> d/e rotateY
+   kanan/kiri jadi 3x3 -> f/g rotateX bawah jadi full 3x9 layar penuh. */
 #we-found-love.wfl-fold-section {
   position: relative;
   height: 100svh;
   overflow: hidden;
   background: var(--color-dark);
+  /* Scroll-snap magnetic: scroller utama (.app-frame__scroll) memakai
+     scroll-snap-type: proximity dan section ini satu-satunya snap point —
+     scroll yang mendekat menempel ke batas atas section (tampil full
+     screen), bukan berhenti parsial. Hanya di-selector dengan class
+     .wfl-fold-section supaya template lain (modern-minimal) tidak kena. */
+  scroll-snap-align: start;
+  /* Variabel koreografi di-scope ke section (nama generik --speed/--step,
+     jangan bocor ke :root global yang dipakai semua template). */
+  --speed: 0.55s;
+  --step: 0.4s;
 }
 .wfl-fold {
   position: absolute;
@@ -1236,117 +1254,70 @@ a { color: inherit; }
   backface-visibility: hidden;
   transform-style: preserve-3d;
 }
-/* Bayangan tipis di tepi bawah tiap panel — ilusi lipatan antar lembar */
-.wfl-fold-panel::after {
-  content: "";
+/* Flap "a" (state awal) statis, tidak animasi — sudah di posisi akhirnya.
+   z-index PALING TINGGI dari semua flap: sebelum "b"/"c" terbuka, mereka
+   ada di posisi terlipat (backface tersembunyi) tepat bersebelahan dengan
+   "a" — z-index lebih rendah dari "a" memastikan bleed "a" selalu menang
+   kalau ada celah sub-pixel di batasnya, bukan malah ketutup elemen
+   tetangga yang technically "tak terlihat" itu. */
+.wfl-fold-panel--a { z-index: 9; }
+
+/* Semua flap lain: mulai di --rot-from (folded, di-set inline oleh JS per
+   flap sesuai axis/sudutnya), animasi ke --rot-to (0deg, flat) saat
+   .wfl-fold--open aktif. Delay bertingkat = urutan fold 1-6. */
+.wfl-fold-panel--b, .wfl-fold-panel--c,
+.wfl-fold-panel--d, .wfl-fold-panel--e,
+.wfl-fold-panel--f, .wfl-fold-panel--g {
+  transform: var(--rot-from);
+  transition: transform var(--speed) cubic-bezier(.22,.61,.36,1);
+}
+.wfl-fold-panel--b { z-index: 2; transition-delay: calc(0 * var(--step)); }
+.wfl-fold-panel--c { z-index: 2; transition-delay: calc(1 * var(--step)); }
+.wfl-fold-panel--d { z-index: 3; transition-delay: calc(2 * var(--step)); }
+.wfl-fold-panel--e { z-index: 3; transition-delay: calc(3 * var(--step)); }
+.wfl-fold-panel--f { z-index: 4; transition-delay: calc(4 * var(--step)); }
+.wfl-fold-panel--g { z-index: 5; transition-delay: calc(5 * var(--step)); }
+
+.wfl-fold--open .wfl-fold-panel--b,
+.wfl-fold--open .wfl-fold-panel--c,
+.wfl-fold--open .wfl-fold-panel--d,
+.wfl-fold--open .wfl-fold-panel--e,
+.wfl-fold--open .wfl-fold-panel--f,
+.wfl-fold--open .wfl-fold-panel--g {
+  transform: var(--rot-to);
+}
+
+/* --- Wash putih transparan di atas SELURUH foto setelah kertas terbuka
+   penuh (pola sama seperti background-color:#fffa di referensi CodePen,
+   yang menutupi seluruh panel info) — bukan cuma di sekitar kotak teks. --- */
+.wfl-wash {
   position: absolute;
   inset: 0;
+  z-index: 8;
+  background: #ffffff61;
+  opacity: 0;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent 22%);
+  transition: opacity .8s ease;
 }
-/* --- Tahap 1 (rotateX): buka jadi "kotak" --- */
-/* flap1 = cover awal yang tampak; saat buka lipat TURUN ke bawah menghilang,
-   sambil flap2 turun dari lipatan atas menempati baris 0-1 (kotak 2 baris). */
-.wfl-fold-panel--f1 {
-  transform-origin: bottom center;
-  transform: rotateX(0deg);
-  transition: transform var(--wfl-speed, 0.55s) cubic-bezier(0.22, 0.61, 0.36, 1);
-  transition-delay: calc(0 * var(--wfl-step, 0.4s));
-}
-.wfl-fold--open .wfl-fold-panel--f1 {
-  transform: rotateX(180deg);
-}
-.wfl-fold-panel--f2 {
-  transform-origin: top center;
-  transform: rotateX(-180deg);
-  transition: transform var(--wfl-speed, 0.55s) cubic-bezier(0.22, 0.61, 0.36, 1);
-  transition-delay: calc(1 * var(--wfl-step, 0.4s));
-}
-.wfl-fold--open .wfl-fold-panel--f2 {
-  transform: rotateX(0deg);
-}
-/* --- Tahap 2 (rotateY): pintu ganda melebar jadi "persegi panjang" --- */
-.wfl-fold-panel--f3 {
-  transform-origin: left center;
-  transform: rotateY(0deg);
-  transition: transform var(--wfl-speed, 0.55s) cubic-bezier(0.22, 0.61, 0.36, 1);
-  transition-delay: calc(2 * var(--wfl-step, 0.4s));
-}
-.wfl-fold--open .wfl-fold-panel--f3 {
-  transform: rotateY(180deg);
-}
-.wfl-fold-panel--f4 {
-  transform-origin: right center;
-  transform: rotateY(0deg);
-  transition: transform var(--wfl-speed, 0.55s) cubic-bezier(0.22, 0.61, 0.36, 1);
-  transition-delay: calc(3 * var(--wfl-step, 0.4s));
-}
-.wfl-fold--open .wfl-fold-panel--f4 {
-  transform: rotateY(-180deg);
-}
-/* flap5 = panel tengah baris 2-3, tersembunyi di belakang pintu, muncul
-   setelah pintu selesai berayun (delay = 4 * step). */
-.wfl-fold-panel--f5 {
-  visibility: hidden;
-  transition: visibility 0s calc(4 * var(--wfl-step, 0.4s));
-}
-.wfl-fold--open .wfl-fold-panel--f5 {
-  visibility: visible;
-}
-/* --- Tahap 3 (rotateX): akordeon lanjut turun sampai penuh layar --- */
-.wfl-fold-panel--f6 {
-  transform-origin: top center;
-  transform: rotateX(-180deg);
-  transition: transform var(--wfl-speed, 0.55s) cubic-bezier(0.22, 0.61, 0.36, 1);
-  transition-delay: calc(4 * var(--wfl-step, 0.4s));
-}
-.wfl-fold--open .wfl-fold-panel--f6 {
-  transform: rotateX(0deg);
-}
-.wfl-fold-panel--f7 {
-  transform-origin: top center;
-  transform: rotateX(-180deg);
-  transition: transform var(--wfl-speed, 0.55s) cubic-bezier(0.22, 0.61, 0.36, 1);
-  transition-delay: calc(5 * var(--wfl-step, 0.4s));
-}
-.wfl-fold--open .wfl-fold-panel--f7 {
-  transform: rotateX(0deg);
-}
-/* Judul section sebagai label di flap2 (kotak, baris 0-1) */
-.wfl-fold-title {
-  position: absolute;
-  left: 1.25rem;
-  right: 1.25rem;
-  bottom: 1.1rem;
-  text-align: center;
-  font-family: var(--font-script);
-  font-size: clamp(2rem, 6vw, 2.7rem);
-  color: var(--color-text-light);
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55), 0 2px 3px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
-}
-/* Ayat quran + terjemahan + sumber: muncul SETELAH semua lipatan terbuka,
-   di TENGAH layar (overlay di atas foto utuh). Panel gelap blur tipis di
-   belakang teks supaya terbaca di foto terang apa pun. */
+.wfl-wash--revealed { opacity: 1; }
+
+/* --- Quote (ayat quran + terjemahan + sumber), tengah layar, setelah semua
+   terbuka. Backdrop sendiri DILEPAS (blur/bg) karena wash di atas sudah
+   menerangi seluruh foto — teks di sini tinggal ikut wash-nya, diberi
+   shadow tipis supaya tetap kebaca. Isi 3 paragraf diisi main.js. --- */
 .wfl-quote {
   position: absolute;
   left: 50%;
   top: 50%;
   width: max-content;
   max-width: 88%;
-  z-index: 6;
+  z-index: 10;
   text-align: center;
-  /* Putih transparan seperti overlay di referensi CodePen (#fffa di belakang
-     teks) dan konsisten dengan gaya tombol/modal putih transparan lain di
-     template ini (#ffffff61). */
-  background: #ffffff61;
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  border-radius: 14px;
   padding: 1.1rem 1.6rem;
   opacity: 0;
+  color: var(--color-dark);
   transform: translate(-50%, -50%) translateY(14px);
-  transition: opacity 0.8s ease 0.15s, transform 0.8s ease 0.15s;
+  transition: opacity .8s ease .15s, transform .8s ease .15s;
 }
 .wfl-quote--revealed {
   opacity: 1;
@@ -1357,7 +1328,7 @@ a { color: inherit; }
 .wfl-quote .opening-source {
   margin: 0;
   line-height: 1.8;
-  /* Backdrop sekarang terang — teks jadi gelap (bukan putih+shadow gelap
+  /* Wash di belakang terang — teks jadi gelap (bukan putih+shadow gelap
      seperti sebelumnya) supaya tetap kontras. */
   color: var(--color-dark);
   text-shadow: none;
@@ -1379,9 +1350,9 @@ a { color: inherit; }
 }
 /* Aksesibilitas: tanpa animasi, langsung tampil final state. */
 @media (prefers-reduced-motion: reduce) {
-  #we-found-love.wfl-fold-section,
   .wfl-fold-panel,
-  .wfl-quote {
+  .wfl-quote,
+  .wfl-wash {
     transition: none;
   }
 }

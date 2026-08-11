@@ -136,12 +136,16 @@
     </section>
 
     <!-- ============ WE FOUND LOVE (kertas lipat 3D full-screen + ayat quran) ============ -->
-    <!-- Judul "We Found Love" diintegrasikan sebagai label di flap pertama
-         (cover). Flap diisi JS dari folder foto 'wfl'; ayat Quran muncul
-         SETELAH semua lipatan terbuka (class .wfl-quote--revealed dari
-         we-found-love.js). -->
+    <!-- Satu foto dari folder 'wfl' dipotong-potong menyebar ke 7 flap (a-g,
+         grid 3x9) — menyatu jadi satu gambar utuh saat semua terbuka. Flap
+         diisi JS (we-found-love.js); wash putih + ayat Quran muncul SETELAH
+         semua lipatan terbuka (class .wfl-wash--revealed /
+         .wfl-quote--revealed). Section ini SATU-SATUNYA snap point scroll di
+         app (.app-frame__scroll scroll-snap-type: proximity) — scroll yang
+         mendekat menempel supaya section tampil full screen. -->
     <section id="we-found-love" class="wfl-fold-section">
       <div class="wfl-fold" id="wfl-fold"></div>
+      <div class="wfl-wash" id="wfl-wash"></div>
       <div class="wfl-quote" id="wfl-quote-wrap">
         <p class="arabic-quote" id="wfl-arabic"></p>
         <p class="opening-quote" id="wfl-quote"></p>
