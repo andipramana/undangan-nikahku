@@ -93,6 +93,16 @@ html, body {
   overflow-y: auto;             /* halaman scroll DI SINI, bukan di .app-frame */
   overscroll-behavior: contain;
   scroll-behavior: smooth;
+  /* PROXIMITY, bukan mandatory: mandatory memaksa scroll SELALU mendarat di
+     snap point terdekat begitu discroll berhenti — karena section panjang di
+     antara Save The Date 2 dan Closing (Event/Gallery/RSVP/dst) sama sekali
+     tidak punya snap point, mandatory bikin scroll dari situ "melompat"
+     langsung ke snap point berikutnya (Closing), skip semua section di
+     antaranya. Proximity cuma menempel kalau scroll sudah berhenti DEKAT
+     sebuah snap point — aman untuk section panjang yang jauh dari snap point
+     manapun. 6 section full-screen: cover/opening/couple-bride/couple-groom/
+     save-the-date-2/closing. */
+  scroll-snap-type: y proximity;
   scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
   scrollbar-color: var(--color-gold) transparent;
 }
@@ -178,6 +188,7 @@ a { color: inherit; }
   overflow: hidden;
   text-align: center;
   color: var(--color-text-light);
+  scroll-snap-align: start; /* semua .section-hero full-screen by design → snap point */
 }
 .section-hero--short { min-height: 90dvh; }
 
@@ -723,7 +734,7 @@ a { color: inherit; }
       kanan, mempelai pria dari kiri, seolah keduanya saling mendekat.
       opacity sengaja dibiarkan 1: kalau ikut fade seperti varian lain, fotonya
       terlihat "menyala di tengah jalan" alih-alih benar-benar meluncur masuk.
-      Selagi di luar layar ia sudah dikurung #couple.section (overflow: hidden),
+      Selagi di luar layar ia sudah dikurung .couple-solo.section (overflow: hidden),
       jadi tidak pernah terlihat maupun memicu scroll. -- */
 .reveal-ready [data-reveal="enter-right"]            { opacity: 1; transform: translateX(100%) scale(1.06); }
 .reveal-ready [data-reveal="enter-left"]             { opacity: 1; transform: translateX(-100%) scale(1.06); }
@@ -768,7 +779,7 @@ a { color: inherit; }
    Transform foto mempelai sengaja dipasang di .couple-block, BUKAN di
    .couple-slider — .couple-slider adalah root Swiper, dan menaruh scale di situ
    berisiko membuat Swiper salah mengukur lebar slide saat init. */
-#love-story.section, #couple.section { overflow: hidden; }
+#love-story.section, .couple-solo.section { overflow: hidden; }
 
 /* ---------- Opening quote ---------- */
 /* Teks polos di atas foto hero (BUKAN kartu/kotak) — cuma tipografi:
@@ -1189,15 +1200,49 @@ a { color: inherit; }
 .livestream-actions svg { width: 15px; height: 15px; }
 
 /* ---------- RSVP ---------- */
-#rsvp.section { background: #efe8d8; }
 .rsvp-wrap { max-width: 480px; margin: 1.8rem auto 0; }
+/* Foto prewedding jadi background KARTU FORM reservasi (bukan section).
+   Fotonya lapisan ::before dengan ukuran & posisi TETAP: tinggi dihitung
+   dari aspect-ratio foto terhadap LEBAR kartu (lebar tidak pernah berubah),
+   top:0 — saat form memanjang (dropdown Jumlah Tamu muncul), gambar TIDAK
+   ikut discale ulang/digeser. ::after overlay cream + blur menutupi
+   SELURUH kartu (termasuk area di bawah foto) supaya keterbacaan konsisten
+   dan batas bawah foto tidak tampak. */
 .rsvp-form {
+  position: relative;
+  /* Kurung ::before/::after yang z-index:-1 supaya tetap berada DI ATAS background
+     kartu sendiri (bukan jatuh ke belakang background section) — tanpa ini,
+     background solid apa pun di kartu bakal menutupi foto. */
+  isolation: isolate;
+  overflow: hidden; /* foto tidak bocor keluar radius 18px */
   padding: 1.4rem;
   display: flex; flex-direction: column; gap: 1rem; text-align: left;
-  background: rgba(255,255,255,.48);
+  /* Kartu TRANSPARAN: foto bg prewedding terlihat di belakang. Yang solid
+     (putih) hanya field input/select/textarea & pill — sesuai permintaan user. */
+  background: transparent;
   border: 1px solid rgba(201,166,104,.6);
   border-radius: 18px;
   box-shadow: 0 14px 34px rgba(60,47,27,.08);
+}
+.rsvp-form::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  aspect-ratio: 2485 / 3936; /* proporsi asli foto rsvp-bg.jpg */
+  background: url("../img/rsvp-bg.jpg") center / cover;
+  z-index: -1;
+  pointer-events: none;
+}
+.rsvp-form::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(247, 243, 234, .5) 0%, rgba(247, 243, 234, .3) 50%, rgba(247, 243, 234, .5) 100%);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
 }
 .rsvp-form label {
   display: flex; flex-direction: column; gap: .45rem;
@@ -1207,7 +1252,7 @@ a { color: inherit; }
 .rsvp-form input, .rsvp-form select, .rsvp-form textarea {
   width: 100%; font-family: var(--font-sans); font-size: .92rem;
   border: 1px solid rgba(117,92,48,.24); border-radius: 10px;
-  background: rgba(255,255,255,.72); padding: .75rem .85rem; color: var(--color-text);
+  background: #fff; padding: .75rem .85rem; color: var(--color-text);
   transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
 }
 .rsvp-form textarea { min-height: 6.2rem; resize: vertical; line-height: 1.6; }
@@ -1222,7 +1267,7 @@ a { color: inherit; }
 .rsvp-pill {
   grid-column: span 1; padding: .7rem .75rem;
   border: 1px solid rgba(172,136,72,.65); border-radius: 10px;
-  background: rgba(255,255,255,.48);
+  background: #fff;
   /* Warna teks di-hardcode (bukan var(--color-text)) supaya tidak ikut
      berubah jadi tak terbaca kalau var(--color-text) di-override putih
      lewat tab Tampilan admin — pill ini bg-nya selalu terang. */
@@ -1341,11 +1386,24 @@ a { color: inherit; }
 
 /* ---------- Kedua Mempelai (slideshow besar 3/4 layar + info overlay) ---------- */
 /* Full-width, tanpa rounded, rapat ke ayat quran di atasnya (tanpa heading). */
-#couple.section {
+.couple-solo.section {
   padding: 0 0 1.5rem;
 }
 .couple-block { margin-bottom: 0; }
 .couple-block:last-child { margin-bottom: 0; }
+/* Bride & Groom sekarang masing-masing section TERSENDIRI, full-screen (100dvh)
+   supaya bisa jadi snap point (lihat scroll-snap-type di .app-frame__scroll). */
+.couple-solo {
+  min-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+  scroll-snap-align: start;
+}
+.couple-solo .couple-block { width: 100%; }
+.couple-solo .couple-slider {
+  height: 100dvh;
+  max-height: none; /* dulu dibatasi 720px karena 2 slider ditumpuk di 1 section, sekarang tidak perlu */
+}
 /* Pembungkus yang meluncur masuk dari luar layar. Sengaja terpisah dari
    .couple-slider (root Swiper) supaya Swiper tidak mengukur slide dalam keadaan
    ter-transform, dan terpisah dari .couple-block supaya .couple-block bisa diam
@@ -1414,27 +1472,46 @@ a { color: inherit; }
 /* Satu sistem garis (bagian 12): semua border/divider section event berasal
    dari satu base warm brown, dibedakan hanya lewat opacity — bukan warna yang
    berbeda-beda. */
+/* min-height (bukan height tetap): kalau kontennya kebetulan lebih tinggi
+   dari 1 layar di device tertentu (font besar/aksesibilitas, alamat sangat
+   panjang), section ini tetap boleh memanjang alih-alih memotong/overflow —
+   pola yang sama dengan .section-hero di section lain. */
+/* height TETAP (bukan min-height) + overflow:hidden = jaring pengaman terakhir
+   supaya section ini TIDAK PERNAH melebihi 1 layar penuh apapun yang terjadi.
+   Supaya jarang sampai kepotong overflow-nya, SEMUA ukuran font & jarak
+   vertikal di bawah pakai clamp() berbasis `dvh` (persentase TINGGI viewport,
+   bukan vw/lebar) — otomatis mengecil di HP berlayar pendek, membesar sampai
+   batas atas di HP berlayar tinggi. Ini beda dari section lain (section-hero)
+   yang pakai min-height — section ini WAJIB pas 1 layar, bukan boleh lebih. */
 .event-hero {
   --event-line-strong: rgba(157, 124, 84, 0.58); /* outer frame + aksen */
   --event-line: rgba(157, 124, 84, 0.40);         /* divider utama */
   --event-line-soft: rgba(157, 124, 84, 0.22);    /* inner frame & detail kecil */
   text-align: center;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: clamp(.6rem, 2dvh, 1.5rem);
+  padding-bottom: clamp(.6rem, 2dvh, 1.5rem);
+  scroll-snap-align: start;
 }
-.event-hero__date { margin-bottom: 1.75rem; }
+.event-hero__date { margin-bottom: clamp(.5rem, 2.2dvh, 1.1rem); }
 .event-hero__day {
   font-family: var(--font-sans);
   text-transform: uppercase;
   letter-spacing: .3em;
-  font-size: .75rem;
+  font-size: clamp(.62rem, 1.6dvh, .75rem);
   font-weight: 500;
   color: var(--color-text);
   opacity: .75;
-  margin: 0 0 .6rem;
+  margin: 0 0 clamp(.3rem, 1dvh, .6rem);
 }
 .event-hero__num {
   font-family: var(--font-serif);
   font-weight: 400;
-  font-size: clamp(5rem, 26vw, 8rem);
+  font-size: clamp(2.6rem, 10dvh, 5.2rem);
   line-height: .9;
   color: var(--color-dark);
   margin: 0;
@@ -1443,11 +1520,11 @@ a { color: inherit; }
   font-family: var(--font-sans);
   text-transform: uppercase;
   letter-spacing: .28em;
-  font-size: .78rem;
+  font-size: clamp(.65rem, 1.6dvh, .78rem);
   font-weight: 500;
   color: var(--color-text);
   opacity: .8;
-  margin: .7rem 0 0;
+  margin: clamp(.4rem, 1.2dvh, .7rem) 0 0;
 }
 
 /* Outer frame stationery (bagian 1-2): 1px tipis, sudut membulat lembut,
@@ -1459,7 +1536,7 @@ a { color: inherit; }
   max-width: 420px;
   margin: 0 auto;
   /* breathing room dalam frame (bagian 13): konten tidak boleh dekat border */
-  padding: 2.2rem 28px 2.4rem;
+  padding: clamp(.9rem, 2.5dvh, 1.5rem) 24px clamp(1rem, 2.8dvh, 1.7rem);
   border: 1px solid var(--event-line-strong);
   border-radius: 10px;
 }
@@ -1499,7 +1576,7 @@ a { color: inherit; }
     var(--color-bg);
   pointer-events: none;
 }
-.event-block { padding: 1.5rem 0; }
+.event-block { padding: clamp(.5rem, 1.6dvh, .9rem) 0; }
 /* Divider Akad–Resepsi (bagian 6): 1px solid, 82% lebar — tidak menyentuh
    outer frame, ada whitespace kiri-kanan. Diamond kecil di tengahnya
    (bagian 7, pure CSS rotate(45deg)). */
@@ -1523,12 +1600,12 @@ a { color: inherit; }
   font-family: var(--font-sans);
   text-transform: uppercase;
   letter-spacing: .22em;
-  font-size: .95rem;
+  font-size: clamp(.75rem, 1.8dvh, .9rem);
   font-weight: 600;
   color: var(--color-dark);
-  margin: 0 0 .3rem;
+  margin: 0 0 clamp(.1rem, .4dvh, .2rem);
   position: relative;
-  padding-bottom: .6rem;
+  padding-bottom: clamp(.25rem, .8dvh, .4rem);
 }
 /* underline di bawah judul acara (bagian 8): garis pendek 76px sebagai
    visual punctuation setelah heading — bukan divider penuh lebar */
@@ -1541,36 +1618,36 @@ a { color: inherit; }
 }
 .event-block__time {
   font-family: var(--font-sans);
-  font-size: .95rem;
+  font-size: clamp(.78rem, 1.7dvh, .9rem);
   font-weight: 500;
   color: var(--color-text);
-  margin: .9rem 0 0;
+  margin: clamp(.3rem, 1dvh, .5rem) 0 0;
   letter-spacing: .04em;
 }
 .event-block__venue {
   font-family: var(--font-serif);
   font-weight: 400;
-  font-size: 1.4rem;
-  line-height: 1.25;
+  font-size: clamp(1.02rem, 2.6dvh, 1.2rem);
+  line-height: 1.15;
   color: var(--color-dark);
-  margin: .6rem 0 0;
+  margin: clamp(.25rem, .8dvh, .4rem) 0 0;
 }
 .event-block__address {
   font-family: var(--font-sans);
-  font-size: .8rem;
-  line-height: 1.6;
+  font-size: clamp(.68rem, 1.4dvh, .74rem);
+  line-height: 1.4;
   color: var(--color-text);
   opacity: .75;
-  max-width: 300px;
-  margin: .5rem auto 0;
+  max-width: 290px;
+  margin: clamp(.2rem, .7dvh, .35rem) auto 0;
 }
 /* Tombol maps = capsule asli (bagian 11): radius 999px (bukan rounded
    rectangle 8/12/16px), border 1px warm brown, background transparan,
    tanpa shadow. */
 .event-block__maps {
   display: inline-block;
-  margin-top: 1.3rem;
-  padding: 11px 22px;
+  margin-top: clamp(.4rem, 1.4dvh, .75rem);
+  padding: clamp(6px, 1.4dvh, 9px) 18px;
   border: 1px solid rgba(150, 115, 76, 0.65);
   border-radius: 999px;
   font-family: var(--font-sans);
