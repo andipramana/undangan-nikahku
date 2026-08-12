@@ -395,12 +395,12 @@
     let textRevealed = false;
     // Reveal teks "SAVE the DATE" — satu-satunya yang sengaja di-delay
     // sampai section mendarat penuh; reveal foto/section (section-revealed)
-    // tetap langsung di callback observer di bawah.
+    // dan elemen lain (text-revealed) tetap langsung di callback observer di
+    // bawah — animasi teks ini TIDAK boleh blocking tombol/tanggal/countdown.
     const revealText = () => {
       if (textRevealed) return;
       textRevealed = true;
       if (saveDateEl) saveDateEl.classList.add("is-visible");
-      setTimeout(() => std2.classList.add("text-revealed"), 1400);
     };
     // Section dianggap "full screen" kalau tepi atasnya sudah lewat viewport
     // atas. Kalau section setinggi viewport ATAU lebih, tepi bawahnya juga
@@ -424,9 +424,15 @@
 
         // 1) Foto/section reveal LANGSUNG begitu section mulai masuk layar
         //    (perilaku asli — jangan di-delay, user minta yang delay cuma
-        //    teksnya).
+        //    teksnya). text-revealed ikut bareng di sini: tombol
+        //    "Save The Date", tanggal, dan countdown (semua .text-enter)
+        //    muncul bersamaan dengan foto — tidak menunggu mask reveal
+        //    "SAVE the DATE" selesai.
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => std2.classList.add("section-revealed"));
+          requestAnimationFrame(() => {
+            std2.classList.add("section-revealed");
+            std2.classList.add("text-revealed");
+          });
         });
 
         // 2) Teks "SAVE the DATE" menunggu sampai section benar-benar
