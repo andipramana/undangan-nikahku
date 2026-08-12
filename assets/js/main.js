@@ -74,9 +74,13 @@
   async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
     // Tema custom (tab "Tampilan" di admin) — JANGAN dipanggil kalau template
-    // engine sudah aktif. Template engine mengatur semua CSS variable; theme.js
-    // menulis inline style yang akan mengalahkan CSS variable template.
-    if (!window.getActiveTemplate || !window.getActiveTemplate()) {
+    // AKTIF PUNYA CSS SENDIRI (template kustom mengelola semua CSS variable;
+    // theme.js menulis inline style yang akan mengalahkan CSS variable
+    // template). Template "base" (css: null, mis. Classic Elegance) tetap
+    // memakai style.css yang membaca variabel dari theme.js — kalau di-skip,
+    // perubahan overlay/warna di admin tidak pernah punya efek.
+    const activeTemplate = window.getActiveTemplate && window.getActiveTemplate();
+    if (!activeTemplate || !activeTemplate.css) {
       if (window.applyTheme) window.applyTheme(cfg);
     }
     document.title = cfg.siteTitle;
