@@ -1158,7 +1158,7 @@ a { color: inherit; }
   background: #ffffffcc;
   border: none;
   color: var(--color-dark);
-  max-height: 75dvh;
+  height: 75dvh;
 }
 #gift-confirm-modal .modal__header h3,
 #gift-confirm-modal .modal__close,
