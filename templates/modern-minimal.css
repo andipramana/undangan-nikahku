@@ -1307,15 +1307,15 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .gallery-item img { opacity: 1; visibility: visible; }
 .gallery-item picture { display: block; width: 100%; height: 100%; }
 
-/* ---------- Capsule event: reveal berurutan tegas, atas ke bawah ----------
-   Durasi global 1.8s bikin selisih 200ms antar elemen tenggelam — semuanya
-   tampak muncul bersamaan. Di dalam capsule: durasi lebih pendek (700ms)
-   supaya tiap elemen mendarat dulu sebelum yang berikutnya mulai, jeda antar
-   elemen lebih besar (420ms per langkah), dan gerakan naik lebih jauh supaya
-   urutan atas->bawah terlihat jelas. */
+/* ---------- Capsule event: reveal SATU-SATU berurutan, atas ke bawah ----------
+   Semua elemen (tanggal, Akad, Resepsi) satu aliran --reveal-i 0..12 yang
+   berlanjut — elemen berikutnya mulai nyaris pas elemen sebelumnya selesai
+   (durasi 420ms, step 380ms) sehingga tidak pernah ada dua elemen "tertabrak"
+   di tengah jalan. Naik kecil (24px) supaya elemen yang belum muncul tidak
+   pernah menimpa elemen di bawahnya. */
 #event .event-hero__capsule [data-reveal] {
-  transition-duration: 700ms;
-  transition-delay: calc(var(--reveal-i, 0) * 420ms);
+  transition-duration: 420ms;
+  transition-delay: calc(var(--reveal-i, 0) * 380ms);
 }
-#event .event-hero__capsule [data-reveal="up"] { transform: translateY(46px); }
-#event .event-hero__capsule [data-reveal="pop"] { transform: scale(.86); }
+#event .event-hero__capsule [data-reveal="up"] { transform: translateY(24px); }
+#event .event-hero__capsule [data-reveal="pop"] { transform: scale(.92); }

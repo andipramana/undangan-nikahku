@@ -30,7 +30,7 @@
 <!-- Font Awesome (solid saja) — self-hosted, bukan CDN. Lihat assets/fontawesome/LICENSE.txt -->
 <link rel="stylesheet" href="assets/fontawesome/css/fontawesome.min.css">
 <link rel="stylesheet" href="assets/fontawesome/css/solid.min.css">
-<link rel="stylesheet" href="assets/css/style.css?v=57">
+<link rel="stylesheet" href="assets/css/style.css?v=58">
 </head>
 <body>
 
@@ -216,11 +216,11 @@
     <!-- ============ EVENT (editorial: 1 panel, header tanggal besar + 2 blok
          acara Akad/Resepsi, TANPA foto/slider/card box) ============ -->
     <section id="event" class="section event-hero" data-snap-rail="upper">
-      <div class="event-hero__capsule">
+      <div class="event-hero__capsule" data-reveal-group>
       <!-- Header tanggal besar — SATU untuk kedua acara (akad & resepsi hari yang
            sama, cuma beda jam, lihat cfg.event di config.js). data-count dipakai
            lagi (reveal.js, sudah ada, JANGAN bikin sistem counter baru). -->
-      <div class="event-hero__date" data-reveal-group>
+      <div class="event-hero__date">
         <p class="event-hero__day" id="event-day-label" data-reveal="fade"></p>
         <p class="event-hero__num" id="event-date-num" data-reveal="pop" data-count="date" style="--reveal-i:1"></p>
         <p class="event-hero__monthyear" data-reveal="fade" style="--reveal-i:2">
@@ -229,25 +229,25 @@
       </div>
 
       <div class="event-hero__list">
-        <div class="event-block" data-reveal-group>
-          <p class="event-block__title" data-reveal="fade">Akad Nikah</p>
-          <p class="event-block__time" data-reveal="up" style="--reveal-i:1">
+        <div class="event-block">
+          <p class="event-block__title" data-reveal="fade" style="--reveal-i:3">Akad Nikah</p>
+          <p class="event-block__time" data-reveal="up" style="--reveal-i:4">
             <span id="akad-time-h" data-count="hour"></span>:<span id="akad-time-m" data-count="minute"></span> WIB
           </p>
-          <h3 class="event-block__venue" id="venue-name-akad" data-reveal="up" style="--reveal-i:2"></h3>
-          <p class="event-block__address" id="venue-address-akad" data-reveal="up" style="--reveal-i:3"></p>
-          <a id="akad-maps" class="event-block__maps" href="#" target="_blank" rel="noopener" data-reveal="fade" style="--reveal-i:4">Google Maps</a>
+          <h3 class="event-block__venue" id="venue-name-akad" data-reveal="up" style="--reveal-i:5"></h3>
+          <p class="event-block__address" id="venue-address-akad" data-reveal="up" style="--reveal-i:6"></p>
+          <a id="akad-maps" class="event-block__maps" href="#" target="_blank" rel="noopener" data-reveal="fade" style="--reveal-i:7">Google Maps</a>
         </div>
 
 
-        <div class="event-block" data-reveal-group>
-          <p class="event-block__title" data-reveal="fade">Resepsi</p>
-          <p class="event-block__time" data-reveal="up" style="--reveal-i:1">
+        <div class="event-block">
+          <p class="event-block__title" data-reveal="fade" style="--reveal-i:8">Resepsi</p>
+          <p class="event-block__time" data-reveal="up" style="--reveal-i:9">
             <span id="resepsi-time-h" data-count="hour"></span>:<span id="resepsi-time-m" data-count="minute"></span> WIB
           </p>
-          <h3 class="event-block__venue" id="venue-name-resepsi" data-reveal="up" style="--reveal-i:2"></h3>
-          <p class="event-block__address" id="venue-address-resepsi" data-reveal="up" style="--reveal-i:3"></p>
-          <a id="resepsi-maps" class="event-block__maps" href="#" target="_blank" rel="noopener" data-reveal="fade" style="--reveal-i:4">Google Maps</a>
+          <h3 class="event-block__venue" id="venue-name-resepsi" data-reveal="up" style="--reveal-i:10"></h3>
+          <p class="event-block__address" id="venue-address-resepsi" data-reveal="up" style="--reveal-i:11"></p>
+          <a id="resepsi-maps" class="event-block__maps" href="#" target="_blank" rel="noopener" data-reveal="fade" style="--reveal-i:12">Google Maps</a>
         </div>
       </div>
 
