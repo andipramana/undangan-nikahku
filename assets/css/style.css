@@ -228,12 +228,12 @@ a { color: inherit; }
 .hero-slide.exiting { transform: translateX(100%); z-index: 1; }
 /* Hanya Save The Date 1 (#opening): crossfade — foto lama fade out bersamaan
    foto baru fade in (keduanya overlap, "saat fade foto berikutnya sudah
-   masuk"). Durasi 1.8s WAJIB SAMA dengan OPENING_TRANSITION_MS di
+   masuk"). Durasi 1.2s WAJIB SAMA dengan OPENING_TRANSITION_MS di
    hero-slideshow.js. */
 #opening .hero-slide {
   transform: none;
   opacity: 0;
-  transition: opacity 1.8s ease;
+  transition: opacity 1.2s ease;
 }
 #opening .hero-slide.active { opacity: 1; }
 #opening .hero-slide.exiting { opacity: 0; }

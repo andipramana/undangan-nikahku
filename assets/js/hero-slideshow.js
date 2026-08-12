@@ -59,12 +59,12 @@ window.initHeroSlideshows = async function () {
       const items = container.querySelectorAll(".hero-slide");
       let index = 0;
       // Opening (Save The Date 1) berganti lebih cepat dari cover/closing —
-      // user minta jeda antar foto tidak kelamaan (interval 3.5s, first 2.5s).
+      // user minta jeda antar foto tidak kelamaan (interval 2.2s, first 1.5s).
       const cycleInterval = key === "opening"
-        ? (cfg.heroSlideIntervalOpening || 3500)
+        ? (cfg.heroSlideIntervalOpening || 2200)
         : interval;
       const transitionMs = key === "opening"
-        ? (cfg.heroSlideTransitionOpening || 1800)
+        ? (cfg.heroSlideTransitionOpening || 1200)
         : SLIDE_TRANSITION_MS;
 
       // Slideshow yang tidak sedang dilihat tidak perlu berjalan. #closing ada
@@ -144,8 +144,8 @@ window.initHeroSlideshows = async function () {
         // Slideshow section 2 baru berjalan saat foto pertamanya sudah tampil
         // (dipicu dari main.js lewat window.startOpeningSlideshow). Kalau main.js
         // sudah minta start lebih dulu (fetch manifest masih jalan), langsung jalan.
-        // Foto pertama tampil dulu 2.5s sebelum berganti.
-        const OPENING_FIRST_DELAY = 2500;
+        // Foto pertama tampil dulu 1.5s sebelum berganti.
+        const OPENING_FIRST_DELAY = 1500;
         window.startOpeningSlideshow = () => start(OPENING_FIRST_DELAY);
         if (window.__openingStartQueued) start(OPENING_FIRST_DELAY);
       } else {
