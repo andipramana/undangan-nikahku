@@ -1356,6 +1356,10 @@ a { color: inherit; }
    file, jadi menang: tombol Hadir tetap full width satu baris penuh. */
 .rsvp-form .rsvp-pill--full { grid-column: 1 / -1; }
 .rsvp-form .rsvp-pill:not(.is-selected) { color: var(--color-dark); }
+/* Pengaman: discope ke ID supaya specificity (1,1,0) menang atas apa pun
+   (termasuk .rsvp-form label { color:#fff }) — teks pill WAJIB gelap di atas
+   bg putih, apa pun perubahan style label. */
+#rsvp-form .rsvp-pill { color: var(--color-dark); }
 .rsvp-pill:hover { transform: translateY(-1px); }
 .rsvp-pill.is-selected { background: var(--color-gold); color: var(--color-dark); font-weight: 600; box-shadow: 0 5px 12px rgba(139,104,45,.2); }
 .rsvp-form .btn-primary { width: 100%; margin-top: .25rem; }
