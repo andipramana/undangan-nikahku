@@ -1982,15 +1982,19 @@ a { color: inherit; }
   }
 }
 
-/* ---------- Capsule event: reveal SATU-SATU berurutan, atas ke bawah ----------
-   Semua elemen (tanggal, Akad, Resepsi) satu aliran --reveal-i 0..12 yang
-   berlanjut — elemen berikutnya mulai nyaris pas elemen sebelumnya selesai
-   (durasi 420ms, step 380ms) sehingga tidak pernah ada dua elemen "tertabrak"
-   di tengah jalan. Naik kecil (24px) supaya elemen yang belum muncul tidak
-   pernah menimpa elemen di bawahnya. */
+/* ---------- Capsule event: reveal BLUR-FADE berurutan, atas ke bawah ----------
+   Elemen muncul dari buram ke tajam + fade — TANPA geseran sama sekali,
+   jadi mustahil menimpa elemen lain (transform naik dulu menutupi
+   alamat/tombol di bawahnya karena jarak antar elemen rapat). Durasi tiap
+   elemen 600ms (tenang, tidak terburu-buru), jeda 320ms per langkah —
+   bergelombang satu-satu dari atas ke bawah. */
 #event .event-hero__capsule [data-reveal] {
-  transition-duration: 420ms;
-  transition-delay: calc(var(--reveal-i, 0) * 380ms);
+  transform: none;
+  transition-property: opacity, filter;
+  transition-duration: 600ms;
+  transition-delay: calc(var(--reveal-i, 0) * 320ms);
+  filter: blur(10px);
 }
-#event .event-hero__capsule [data-reveal="up"] { transform: translateY(24px); }
-#event .event-hero__capsule [data-reveal="pop"] { transform: scale(.92); }
+#event .event-hero__capsule [data-reveal].is-revealed {
+  filter: blur(0);
+}
