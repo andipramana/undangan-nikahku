@@ -95,9 +95,10 @@ html, body {
   scroll-behavior: smooth;
   scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
 }
-/* Snap mandatory hanya hidup pada rail full-screen (cover sampai Event).
-   Konten reguler setelah Event tetap scroll bebas, jadi tidak ditarik balik
-   ke snap point terakhir. Class ini diatur main.js berdasarkan arah scroll. */
+/* Snap mandatory hanya hidup pada rail full-screen (cover, hero-hero, Event,
+   Gift). Zona bebas di antara rail (livestream/love-story/galeri/rsvp/closing)
+   tetap scroll bebas, jadi tidak ditarik balik ke snap point terakhir — class
+   ini diatur main.js berdasarkan posisi scroll. */
 .app-frame__scroll.is-snap-rail {
   scroll-snap-type: y mandatory;
 }

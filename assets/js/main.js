@@ -340,14 +340,16 @@
     });
   }
 
-  // Rail snap hanya mencakup urutan section penuh layar sampai Event. Begitu
-  // tamu bergerak melewati Event, mandatory dilepas agar section panjang
-  // sesudahnya tidak ditarik kembali ke Event. Saat kembali tepat ke Event,
-  // rail langsung aktif lagi sehingga rasa snap antar halaman penuh tetap kuat.
+  // Rail snap mencakup section full-screen: dari Cover sampai Event, lalu Gift
+  // (full-screen juga). ANTARA Event dan Gift ada zona bebas (livestream,
+  // love-story, galeri) yang TIDAK boleh kena snap mandatory — kalau class
+  // is-snap-rail masih aktif di sana, section tersebut dilewati (skip) saat
+  // discroll. Setelah melewati Gift, mandatory dilepas lagi (rsvp/closing).
   function setupSnapRail() {
     const scroller = document.querySelector(".app-frame__scroll");
     const railSections = document.querySelectorAll("[data-snap-rail]");
     const lastRail = railSections[railSections.length - 1];
+    const eventSec = document.getElementById("event");
     if (!scroller || !lastRail) return;
 
     const setMode = (target) => {
@@ -358,12 +360,12 @@
     setMode(lastRail);
 
     const releaseAfterLastRail = () => {
-      const lastRailTop = lastRail.offsetTop;
-      if (scroller.scrollTop > lastRailTop + 2) {
-        scroller.classList.remove("is-snap-rail");
-      } else if (scroller.scrollTop <= lastRailTop + 2) {
-        scroller.classList.add("is-snap-rail");
-      }
+      const st = scroller.scrollTop;
+      const gapTop = eventSec ? eventSec.offsetTop + eventSec.offsetHeight : 0;
+      const giftTop = lastRail.offsetTop;
+      const giftBottom = giftTop + scroller.clientHeight;
+      const onRail = st < gapTop - 2 || (st >= giftTop - 2 && st <= giftBottom);
+      scroller.classList.toggle("is-snap-rail", onRail);
     };
 
     scroller.addEventListener("scroll", releaseAfterLastRail, { passive: true });
