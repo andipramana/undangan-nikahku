@@ -1152,6 +1152,49 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 #opening.text-revealed .mm-divider { opacity: 1; }
 
+/* ─── QUOTES: bg gelap, kutipan bergantian (rotasi CSS murni) ─── */
+.quotes-section {
+  background: #242220;
+  color: #e8e4de;
+  text-align: center;
+}
+.quotes-stage {
+  width: min(88%, 560px);
+  margin: 0 auto;
+  display: grid;
+}
+.quotes-item {
+  grid-area: 1 / 1;
+  margin: 0;
+  opacity: 0;
+  animation: quotesCycle 18s linear infinite;
+}
+.quotes-item:nth-child(2) { animation-delay: 6s; }
+.quotes-item:nth-child(3) { animation-delay: 12s; }
+.quotes-item blockquote {
+  margin: 0;
+  font-family: "Playfair Display","Georgia",serif;
+  font-size: clamp(1.15rem, 4.4vw, 1.5rem);
+  font-style: italic;
+  line-height: 1.75;
+  color: #e8e4de;
+}
+.quotes-item figcaption {
+  margin-top: 1.15rem;
+  font-family: "Montserrat",sans-serif;
+  font-size: .68rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #c9a96e;
+}
+@keyframes quotesCycle {
+  0%   { opacity: 0; }
+  3%   { opacity: 1; }
+  28%  { opacity: 1; }
+  33%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
 /* ─── OPENING SECTION ZOOM REVEAL (ganti slide translateX jadi zoom scale) ─── */
 #opening.section-revealed .hero-media img {
   transform: scale(1);

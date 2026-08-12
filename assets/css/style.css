@@ -1376,63 +1376,29 @@ a { color: inherit; }
 
 /* ---------- RSVP ---------- */
 .rsvp-wrap { max-width: 480px; margin: 1.8rem auto 0; }
-/* Foto prewedding jadi background KARTU FORM reservasi (bukan section).
-   Fotonya lapisan ::before dengan ukuran & posisi TETAP: tinggi dihitung
-   dari aspect-ratio foto terhadap LEBAR kartu (lebar tidak pernah berubah),
-   top:0 — saat form memanjang (dropdown Jumlah Tamu muncul), gambar TIDAK
-   ikut discale ulang/digeser. ::after overlay cream + blur menutupi
-   SELURUH kartu (termasuk area di bawah foto) supaya keterbacaan konsisten
-   dan batas bawah foto tidak tampak. */
+/* Kartu FORM reservasi: putih solid — sama seperti capsule event/gift —
+   TANPA foto bg. Label gelap, field diberi border gelap. */
 .rsvp-form {
   position: relative;
-  /* Kurung ::before/::after yang z-index:-1 supaya tetap berada DI ATAS background
-     kartu sendiri (bukan jatuh ke belakang background section) — tanpa ini,
-     background solid apa pun di kartu bakal menutupi foto. */
-  isolation: isolate;
-  overflow: hidden; /* foto tidak bocor keluar radius 18px */
+  overflow: hidden;
   padding: 1.4rem;
   display: flex; flex-direction: column; gap: 1rem; text-align: left;
-  /* Kartu TRANSPARAN: foto bg prewedding terlihat di belakang. Yang solid
-     (putih) hanya field input/select/textarea & pill — sesuai permintaan user. */
-  background: transparent;
+  background: #ffffffcc;
   border: 1px solid rgba(201,166,104,.6);
   border-radius: 18px;
   box-shadow: 0 14px 34px rgba(60,47,27,.08);
-}
-.rsvp-form::before {
-  content: "";
-  position: absolute;
-  inset: 0; /* menutup penuh kartu berapa pun tinggi form — tidak ada area
-                kosong saat isi form bertambah panjang */
-  background: url("../img/rsvp-bg.jpg") center / cover;
-  transform: scale(1.12); /* zoom sedikit: tinggi foto selalu > kartu, tetap
-                             menempel (fixed) dan tidak pernah bolong */
-  z-index: -1;
-  pointer-events: none;
-}
-.rsvp-form::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(180deg, rgba(247, 243, 234, .5) 0%, rgba(247, 243, 234, .3) 50%, rgba(247, 243, 234, .5) 100%);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
-  pointer-events: none;
 }
 .rsvp-form label {
   display: flex; flex-direction: column; gap: .45rem;
   font-family: "Segoe UI", var(--font-sans); font-size: .72rem;
   font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase;
-  /* Putih + shadow: label langsung di atas foto bg kartu (kartu transparan),
-     supaya tetap terbaca apa pun kontras foto di belakangnya. */
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(20, 18, 15, .55);
+  /* Gelap — di atas kartu putih tidak perlu shadow. */
+  color: var(--color-dark);
 }
 .rsvp-form input, .rsvp-form select, .rsvp-form textarea {
   width: 100%; font-family: var(--font-sans); font-size: .92rem;
-  border: 1px solid rgba(117,92,48,.24); border-radius: 10px;
+  border: 1px solid var(--color-dark); border-radius: 10px;
   background: #fff; padding: .75rem .85rem; color: var(--color-text);
   transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
 }
@@ -1447,14 +1413,12 @@ a { color: inherit; }
 .rsvp-attendance { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .1rem; }
 .rsvp-form .rsvp-pill {
   grid-column: span 1; padding: .7rem .75rem;
-  border: 1px solid rgba(172,136,72,.65); border-radius: 10px;
+  border: 1px solid var(--color-dark); border-radius: 10px;
   background: #fff;
   /* Warna teks di-hardcode (bukan var(--color-text)) supaya tidak ikut
-     berubah jadi tak terbaca kalau var(--color-text) di-override putih
-     lewat tab Tampilan admin — pill ini bg-nya selalu terang. Selector
-     discope ke .rsvp-form supaya specificity (0,2,0) menang atas
-     .rsvp-form label { color:#fff } — tanpa ini teks pill ikut putih
-     (putih di atas putih → tak terlihat). */
+     berubah jadi tak terbaca kalau var di-override lewat tab Tampilan
+     admin — pill ini bg-nya selalu terang. Selector discope ke
+     .rsvp-form supaya specificity (0,2,0) menang atas .rsvp-form label. */
   color: var(--color-dark);
   font-family: var(--font-sans); font-size: .82rem; cursor: pointer;
   transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
@@ -1891,6 +1855,51 @@ a { color: inherit; }
   line-height: 1.7;
   color: #ffffff;
   text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
+}
+
+/* ---------- Quotes (bg gelap, kutipan bergantian antara Our Story & Galeri) ----------
+   Rotasi murni CSS: satu siklus 18s, tiap kutipan tampil 6s lalu fade. Item
+   bertumpuk di sel grid yang sama (grid-area 1/1) sehingga tinggi section
+   stabil mengikuti kutipan terpanjang. */
+.quotes-section {
+  background: #14120f; /* gelap pekat, teks krem di atasnya */
+  color: #f4eee3;
+  text-align: center;
+}
+.quotes-stage {
+  width: min(88%, 560px);
+  margin: 0 auto;
+  display: grid; /* semua item di sel yang sama */
+}
+.quotes-item {
+  grid-area: 1 / 1;
+  margin: 0;
+  opacity: 0;
+  animation: quotesCycle 18s linear infinite;
+}
+.quotes-item:nth-child(2) { animation-delay: 6s; }
+.quotes-item:nth-child(3) { animation-delay: 12s; }
+.quotes-item blockquote {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 4.4vw, 1.5rem);
+  line-height: 1.75;
+  color: #f4eee3;
+}
+.quotes-item figcaption {
+  margin-top: 1.15rem;
+  font-family: var(--font-label);
+  font-size: .7rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(244, 238, 227, .6);
+}
+@keyframes quotesCycle {
+  0%   { opacity: 0; }
+  3%   { opacity: 1; }
+  28%  { opacity: 1; }
+  33%  { opacity: 0; }
+  100% { opacity: 0; }
 }
 
 /* ─── Reveal stagger enhancement ───
