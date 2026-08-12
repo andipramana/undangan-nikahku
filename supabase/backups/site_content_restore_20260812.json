@@ -1,0 +1,356 @@
+{
+  "siteTitle": "Mita & Andi — The Wedding",
+  "guestParam": "to",
+  "defaultGuestName": "Bapak/Ibu/Saudara/i",
+  "couple": {
+    "bride": {
+      "name": "Mita Meliana",
+      "nickname": "Mita",
+      "instagram": "",
+      "father": "Yayan Taryana",
+      "mother": "Ani Kuswati",
+      "photo": "assets/img/foto_profile/bride.jpg"
+    },
+    "groom": {
+      "name": "Andi Pramana",
+      "nickname": "Andi",
+      "instagram": "",
+      "father": "Nandar Suhendar",
+      "mother": "Elin Herlina",
+      "photo": "assets/img/foto_profile/groom.jpg"
+    }
+  },
+  "opening": {
+    "arabicQuote": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    "quote": "“Dan segala sesuatu Kami ciptakan berpasang-pasangan agar kamu mengingat (kebesaran Allah).”",
+    "source": "QS. Az-Zariyat: 49"
+  },
+  "event": {
+    "akad": {
+      "end": "10.00",
+      "label": "Akad Nikah",
+      "start": "08.00",
+      "venue": {
+        "name": "Gedung Mayang Arum",
+        "address": "Jl. Raya Ciwidey Km 27 No. 66,\nPasir Jambu, Jawa Barat",
+        "mapsUrl": "https://www.google.com/maps/place/Gedung+Serba+Guna+Mayang+Arum/@-7.0845385,107.4794338,17z/data=!3m1!4b1!4m6!3m5!1s0x2e68ed591c50eddf:0xf8909b0439095130!8m2!3d-7.0845385!4d107.4820087!16s%2Fg%2F1pzqy5txh!18m1!1e1?entry=ttu&amp;amp;amp;amp;amp;amp;amp;g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
+      }
+    },
+    "venue": {
+      "name": "Gedung Mayang Arum",
+      "address": "Jl. Raya Ciwidey Km 27 No. 66,\nPasir Jambu, Jawa Barat",
+      "mapsUrl": "https://www.google.com/maps/place/Gedung+Serba+Guna+Mayang+Arum/@-7.0845385,107.4794338,17z/data=!3m1!4b1!4m6!3m5!1s0x2e68ed591c50eddf:0xf8909b0439095130!8m2!3d-7.0845385!4d107.4820087!16s%2Fg%2F1pzqy5txh!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
+    },
+    "dateISO": "2026-08-25",
+    "resepsi": {
+      "end": "14.00",
+      "label": "Resepsi",
+      "start": "11.00",
+      "venue": {
+        "name": "Gedung Mayang Arum",
+        "address": "Jl. Raya Ciwidey Km 27 No. 66,\nPasir Jambu, Jawa Barat",
+        "mapsUrl": "https://www.google.com/maps/place/Gedung+Serba+Guna+Mayang+Arum/@-7.0845385,107.4794338,17z/data=!3m1!4b1!4m6!3m5!1s0x2e68ed591c50eddf:0xf8909b0439095130!8m2!3d-7.0845385!4d107.4820087!16s%2Fg%2F1pzqy5txh!18m1!1e1?entry=ttu&amp;amp;amp;amp;amp;amp;amp;g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
+      }
+    },
+    "dayLabel": "Selasa",
+    "dateLabel": "25 Agustus 2026",
+    "countdownTarget": "2026-08-25T08:00:00+07:00"
+  },
+  "dresscode": {
+    "text": "Dengan hormat, kami mengundang Anda untuk mengenakan warna pilihan ini di hari pernikahan kami.",
+    "colors": [
+      "#c9a668",
+      "#b5c4a8",
+      "#93a9c2",
+      "#e6c3c0",
+      "#f1ead9"
+    ]
+  },
+  "livestream": {
+    "youtube": "",
+    "instagram": "",
+    "tiktok": ""
+  },
+  "galleryVideo": {
+    "youtube": ""
+  },
+  "quotePhoto": {
+    "photo": "assets/img/foto_quote/photo.jpg",
+    "quote": "Marriage is not about age; it's about finding the right person."
+  },
+  "subcover": {
+    "enabled": true,
+    "quoteLine1": "All because two people",
+    "quoteLine2": "fell in love ..."
+  },
+  "loveStory": [
+    {
+      "date": "2022",
+      "title": "Awal Perkenalan",
+      "photo": "assets/img/foto_story/01.jpg",
+      "text": "Dipertemukan lewat teman yang sama, obrolan singkat berlanjut jadi kebiasaan menanyakan kabar setiap hari."
+    },
+    {
+      "date": "2023",
+      "title": "Mulai Menjalin Kasih",
+      "photo": "assets/img/foto_story/02.jpg",
+      "text": "Setelah saling mengenal lebih dekat, kami memutuskan untuk melangkah bersama dan saling menguatkan."
+    },
+    {
+      "date": "2025",
+      "title": "Lamaran",
+      "photo": "assets/img/foto_story/03.jpg",
+      "text": "Direstui kedua keluarga, hari lamaran menjadi langkah awal menuju jenjang yang lebih serius."
+    },
+    {
+      "date": "25 Agustus 2026",
+      "title": "Hari Bahagia",
+      "photo": "assets/img/foto_story/04.jpg",
+      "text": "Dengan mengucap Bismillah, kami memutuskan untuk melanjutkan hubungan ke jenjang pernikahan."
+    }
+  ],
+  "gift": {
+    "contactCPP": "",
+    "contactCPW": "",
+    "accounts": [
+      {
+        "bank": "Bank BCA",
+        "number": "1234567890",
+        "holder": "Mita Meliana",
+        "owner": "cpw"
+      },
+      {
+        "bank": "Bank Mandiri",
+        "number": "0987654321",
+        "holder": "Andi Pramana",
+        "owner": "cpp"
+      }
+    ],
+    "address": {
+      "recipient": "Mita Meliana",
+      "phone": "0812-0000-0000",
+      "detail": "Alamat pengiriman kado — silakan diperbarui sesuai kebutuhan."
+    }
+  },
+  "giftRecommendations": [],
+  "hero": {
+    "coverManifest": "assets/img/foto_cover/manifest.json",
+    "openingManifest": "assets/img/foto_opening/manifest.json",
+    "closingManifest": "assets/img/foto_closing/manifest.json"
+  },
+  "heroSlideInterval": 4500,
+  "coupleSlides": {
+    "brideManifest": "assets/img/foto_bride/manifest.json",
+    "groomManifest": "assets/img/foto_groom/manifest.json"
+  },
+  "weFoundLove": {
+    "manifest": "assets/img/foto_slider_section_1/manifest.json"
+  },
+  "gallery": {
+    "manifest": "assets/img/foto_gallery/manifest.json"
+  },
+  "audio": {
+    "src": "assets/audio/backsound.mp3",
+    "title": "Backsound"
+  },
+  "supabase": {
+    "url": "https://rxqolwczphehbzrzmisa.supabase.co",
+    "anonKey": "sb_publishable_Jzx2_m5-93yZfJu7SVuMUg_ZPVOg7xg",
+    "wishesTable": "wishes"
+  },
+  "closing": {
+    "text": "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu."
+  },
+  "template": "classic-elegance",
+  "theme": {
+    "colors": {
+      "bg": "#f7f3ea",
+      "dark": "#14120f",
+      "gold": "#c9a668",
+      "text": "#2b2620",
+      "dark2": "#1c1914",
+      "goldSoft": "#e6d7b3",
+      "textLight": "#f7f3ea"
+    },
+    "overlays": {
+      "flat": {
+        "color": "#0a0907",
+        "enabled": true
+      },
+      "quote": {
+        "color": "#301c00",
+        "enabled": true
+      },
+      "global": {
+        "color": "#c9a668",
+        "enabled": true
+      },
+      "closing": {
+        "color": "#0a0907",
+        "enabled": true
+      }
+    }
+  },
+  "typography": {
+    "elements": {
+      "cover-names": {
+        "size": 50,
+        "family": "Playfair Display",
+        "weight": 400
+      }
+    }
+  },
+  "visualEditor": {
+    "elements": {
+      "text.auto::1": {
+        "text": {
+          "value": "Mita & Andi"
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "transform": "translate(0px, 0px)"
+        },
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::5": {},
+      "text.auto::7": {
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::14": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "transform": "translate(0px, 0px)"
+        },
+        "typography": {
+          "color": "#ffffff",
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::19": {
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::22": {
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::24": {
+        "typography": {
+          "color": "#1b150d"
+        }
+      },
+      "text.auto::25": {
+        "typography": {
+          "color": "#1b150d",
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::26": {},
+      "text.auto::28": {
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::29": {},
+      "text.auto::30": {},
+      "text.auto::37": {
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::46": {
+        "text": {
+          "value": "Live"
+        },
+        "position": {
+          "x": 0,
+          "y": 0,
+          "transform": "translate(0px, 0px)"
+        }
+      },
+      "text.auto::47": {
+        "text": {
+          "value": "Live Streaming"
+        },
+        "typography": {
+          "color": "#dadada",
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::51": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "transform": "translate(0px, 0px)"
+        },
+        "typography": {
+          "color": "#ffffff",
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::52": {
+        "typography": {
+          "color": "#ffffff",
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::61": {
+        "typography": {
+          "color": "#12100e",
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::62": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "transform": "translate(0px, 0px)"
+        },
+        "typography": {
+          "color": "#12100e",
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::63": {
+        "typography": {
+          "color": "#ffffff"
+        }
+      },
+      "text.auto::73": {
+        "typography": {
+          "color": "#ffffff"
+        }
+      },
+      "text.auto::81": {
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::86": {
+        "position": {
+          "x": 0,
+          "y": 0,
+          "transform": "translate(0px, 0px)"
+        },
+        "typography": {
+          "fontFamily": "Playfair Display"
+        }
+      },
+      "text.auto::87": {
+        "text": {
+          "value": "Made with ❤ by Mita & Iyow"
+        }
+      }
+    }
+  },
+  "guestGreetings": [],
+  "defaultGuestGreeting": "Yth. Bapak/Ibu/Saudara/i"
+}

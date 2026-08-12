@@ -499,10 +499,10 @@ a { color: inherit; }
 /* Nama mempelai di Cover & Save The Date 1 kapital semua (Closing dibiarkan
    apa adanya, tidak diminta). */
 #couple-names-cover, #couple-names-opening { text-transform: uppercase; }
-/* "MITA & ANDI" di Cover kejauhan lebih besar dari section lain (base
-   .script-names clamp 3rem-5rem) — diperkecil khusus di sini, mendekati
-   ukuran .script-names--small yang dipakai Save The Date/Closing. */
-#couple-names-cover { font-size: clamp(1.5rem, 7vw, 2.4rem); margin-top: .9rem; }
+/* "MITA & ANDI" di Cover dibuat LEBIH KECIL dari nama di Save The Date 1
+   (#couple-names-opening) — cover cuma pemanis, jangan sampai mendominasi.
+   Base .script-names clamp 3rem-5rem jelas kebesaran. */
+#couple-names-cover { font-size: clamp(1.3rem, 6vw, 2rem); margin-top: .9rem; }
 /* Nama di Save The Date 1 balik ke panggilan pendek "Mita & Andi" (bukan nama
    lengkap lagi) — boleh dibesarkan lagi karena teksnya sudah pendek. */
 #couple-names-opening { font-size: clamp(1.8rem, 7vw, 2.6rem); margin-top: .9rem; }
@@ -891,6 +891,7 @@ a { color: inherit; }
 /* Judul script di dark section (livestream/love-story) tetap putih walau base
    rule di atas sekarang coklat tua (untuk section terang). */
 .section--dark .section-title--script { color: #fff; }
+#gallery .section-title--script { color: var(--color-dark); }
 .section-desc {
   max-width: 480px; margin: -1.5rem auto 2rem;
   line-height: 1.7; font-size: .95rem;
@@ -1303,13 +1304,12 @@ a { color: inherit; }
 }
 .rsvp-form label {
   display: flex; flex-direction: column; gap: .45rem;
-  font-family: "Segoe UI", var(--font-sans); font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase;
-  /* Putih + shadow: label langsung di atas foto bg kartu (kartu transparan),
-     supaya tetap terbaca apa pun kontras foto di belakangnya. */
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(20, 18, 15, .55);
+  /* Samakan label field dengan heading DOA & UCAPAN: kecil, renggang, gold-brown. */
+  font-family: var(--font-sans); font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: #85652d;
+  text-shadow: none;
 }
 .rsvp-form input, .rsvp-form select, .rsvp-form textarea {
   width: 100%; font-family: var(--font-sans); font-size: .92rem;
@@ -1344,6 +1344,7 @@ a { color: inherit; }
    .rsvp-form .rsvp-pill (grid-column: span 1) — dan muncul BELAKANG di
    file, jadi menang: tombol Hadir tetap full width satu baris penuh. */
 .rsvp-form .rsvp-pill--full { grid-column: 1 / -1; }
+.rsvp-form .rsvp-pill:not(.is-selected) { color: var(--color-dark); }
 .rsvp-pill:hover { transform: translateY(-1px); }
 .rsvp-pill.is-selected { background: var(--color-gold); color: var(--color-dark); font-weight: 600; box-shadow: 0 5px 12px rgba(139,104,45,.2); }
 .rsvp-form .btn-primary { width: 100%; margin-top: .25rem; }
