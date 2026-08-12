@@ -1981,3 +1981,16 @@ a { color: inherit; }
     transform: none !important;
   }
 }
+
+/* ---------- Capsule event: reveal berurutan tegas, atas ke bawah ----------
+   Durasi global 1.8s bikin selisih 200ms antar elemen tenggelam — semuanya
+   tampak muncul bersamaan. Di dalam capsule: durasi lebih pendek (700ms)
+   supaya tiap elemen mendarat dulu sebelum yang berikutnya mulai, jeda antar
+   elemen lebih besar (420ms per langkah), dan gerakan naik lebih jauh supaya
+   urutan atas->bawah terlihat jelas. */
+#event .event-hero__capsule [data-reveal] {
+  transition-duration: 700ms;
+  transition-delay: calc(var(--reveal-i, 0) * 420ms);
+}
+#event .event-hero__capsule [data-reveal="up"] { transform: translateY(46px); }
+#event .event-hero__capsule [data-reveal="pop"] { transform: scale(.86); }
