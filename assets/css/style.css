@@ -472,22 +472,27 @@ a { color: inherit; }
 #opening .eyebrow-monogram {
   transition: opacity .6s ease 1s, transform 2.2s cubic-bezier(.22,.61,.36,1) 1.8s;
 }
-#opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-90%, -70%); }
-#opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-10%, -30%); }
+#opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-86%, -70%); }
+/* A diakhiri sedikit LEBIH TINGGI (-38% vs -30% awal) dan mulai sedikit
+   melewati tengah (-14%) — keduanya saling tumpang tindih ringan. */
+#opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-14%, -38%); }
 
 /* --- Cover: monogram BARU mulai animasi setelah SEMUA animasi AOS lain di
    section itu selesai (elemen AOS terakhir = #btn-open, data-aos-delay
    300ms + durasi AOS 1600ms = kelar ~1900ms) — delay 2s aman di atas itu.
    Animasi "mendekat" (transform) dibuat sedikit lebih lambat (2s, dulu
    1.4s), dan jarak akhir M-A sedikit lebih jauh (dulu -90%/-10% = 80pp,
-   sekarang -100%/0% = 100pp) dibanding versi opening. */
+   sekarang -93%/-7% = 86pp) dibanding versi opening — tapi tetap
+   tumpang tindih ringan. */
 #cover .eyebrow-monogram {
   /* Sama pola: fade-in beres di 2.6s, JEDA .2s (dulu .6s, dirasa kelamaan —
      transform baru mulai di 2.8s), lalu mendekat pelan (2.8s durasi). */
   transition: opacity .6s ease 2s, transform 2.8s cubic-bezier(.22,.61,.36,1) 2.8s;
 }
-.eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-100%, -70%); }
-.eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(0%, -30%); }
+.eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -70%); }
+/* A naik sedikit (-38%) dan sedikit melewati tengah (-7%) — overlap ringan
+   dengan M, sama seperti versi opening. */
+.eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -38%); }
 
 .script-names {
   font-family: var(--font-script);
