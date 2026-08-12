@@ -1157,6 +1157,9 @@ a { color: inherit; }
   color: #fff;
 }
 #gift-confirm-modal .modal__hint { color: #fff; opacity: .85; }
+/* Panel Konfirmasi WA dibatasi 6/8 tinggi layar (75dvh) — lebih ramping dari
+   panel modal umum (88vh); isi berlebih discroll di dalam panel. */
+#gift-confirm-modal .modal__panel { max-height: 75dvh; }
 /* Modal QR check-in & Menu — bg transparan-putih (sama dengan FAB), tanpa
    border, teks coklat #846d57. */
 #qr-checkin-modal .modal__panel,
