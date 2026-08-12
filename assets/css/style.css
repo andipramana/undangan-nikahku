@@ -1303,21 +1303,24 @@ a { color: inherit; }
   /* Kartu putih solid, font hitam. */
   background: #fff; color: var(--color-dark);
 }
-.gift-account__bank { font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-dark); }
-.gift-account__number { font-size: .95rem; letter-spacing: .05em; }
-.gift-account__holder { font-size: .75rem; opacity: .75; }
+/* Kolom teks rekening boleh menyusut (wrap) — yang mengecil font-nya, bukan
+   kartu keluar capsule. */
+.gift-account > div { flex: 1; min-width: 0; }
+.gift-account__bank { font-family: var(--font-serif); font-size: clamp(.8rem, 4vw, 1.1rem); color: var(--color-dark); }
+.gift-account__number { font-size: clamp(.72rem, 3.6vw, .95rem); letter-spacing: .05em; overflow-wrap: anywhere; }
+.gift-account__holder { font-size: clamp(.6rem, 2.9vw, .75rem); opacity: .75; }
 .gift-copy-btn {
   border: 1px solid var(--color-dark); background: none; color: var(--color-dark);
   border-radius: 999px; padding: .4rem .9rem; font-size: .7rem; cursor: pointer; white-space: nowrap;
 }
 .gift-address {
   border: 1px dashed var(--color-gold); border-radius: 10px; padding: 1rem 1.25rem;
-  text-align: left; font-size: .88rem; line-height: 1.6;
+  text-align: left; font-size: clamp(.66rem, 3.3vw, .88rem); line-height: 1.6;
   display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
   /* Sama: kartu putih solid, font hitam. */
   background: #fff; color: var(--color-dark);
 }
-.gift-address__text { flex: 1; min-width: 0; }
+.gift-address__text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .gift-address__copy { align-self: flex-end; flex: none; }
 .gift-note { font-size: .7rem; opacity: .6; margin-top: .75rem; }
 
