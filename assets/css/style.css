@@ -1818,43 +1818,26 @@ a { color: inherit; }
   box-shadow: 0 2px 8px rgba(0, 0, 0, .2), inset 0 0 0 2px #fff;
 }
 
-/* ---------- Foto Quote (full-width 1:1, tanpa rounded, overlay golden hour gelap) ---------- */
+/* ---------- Quote (bg gelap solid + teks quote — tanpa foto) ---------- */
 .quote-section {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1; /* persegi: 1:1 terhadap lebar layar */
   overflow: hidden;
-  background: var(--color-dark);
-}
-.quote-section picture,
-.quote-section img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-.quote-overlay {
-  position: absolute;
-  inset: 0;
-  /* layer golden hour agak gelap agar teks putih tetap terbaca */
-  background: var(--overlay-quote, linear-gradient(180deg, rgba(48, 32, 13, .55) 0%, rgba(20, 13, 5, .62) 100%));
-}
-.quote-text {
-  position: absolute;
-  inset: 0;
+  background: #14120f; /* gelap pekat — teks krem di tengah */
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.quote-text {
   margin: 0;
   padding: 2rem;
   text-align: center;
-  font-family: var(--font-serif);
+  font-family: "EB Garamond", Georgia, serif;
   font-style: italic;
-  font-weight: 300;
   font-size: clamp(1.15rem, 4.6vw, 1.9rem);
   line-height: 1.7;
-  color: #ffffff;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
+  color: #f4eee3;
 }
 
 /* ---------- Quotes (bg gelap, kutipan bergantian antara Our Story & Galeri) ----------
@@ -1900,6 +1883,32 @@ a { color: inherit; }
   28%  { opacity: 1; }
   33%  { opacity: 0; }
   100% { opacity: 0; }
+}
+
+/* ---------- EB Garamond: cover, quotes, Our Story, dan capsule gift ----------
+   Semua teks di area tersebut memakai EB Garamond (dimuat via Google Fonts di
+   index.html). Rule ini sengaja di AKHIR file dan lebih spesifik dari rule
+   asli tiap elemen, supaya menang tanpa !important. */
+#cover .eyebrow,
+.eyebrow-monogram,
+#cover .script-names,
+#cover .guest-label,
+#cover .guest-name,
+#cover .btn-open,
+#cover .hero-note,
+#quote .quote-text,
+.quotes-item blockquote,
+#love-story .section-title--script,
+.timeline-item .timeline-date,
+.timeline-item h4,
+.timeline-item p,
+.gift-capsule .section-title,
+.gift-capsule .section-desc,
+.gift-account__bank,
+.gift-account__number,
+.gift-account__holder,
+.gift-address {
+  font-family: "EB Garamond", Georgia, serif;
 }
 
 /* ─── Reveal stagger enhancement ───
