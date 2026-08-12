@@ -314,28 +314,45 @@
     contactPage = Math.min(contactPage, pageCount);
     const visible = filtered.slice((contactPage - 1) * contactPageSize, contactPage * contactPageSize);
     const totalSent = contacts.filter(c => c.sent).length;
+    const empty = !contacts.length;
     root.innerHTML = `
       <section class="wa-contact-shell">
         <div class="wa-contact-toolbar">
-          <label class="wa-contact-search"><span>Cari kontak</span><input class="input" id="wa-contact-search" type="search" value="${esc(contactSearch)}" placeholder="Nama atau nomor"></label>
-          <div class="wa-contact-toolbar__filters">
-            <label><span>Status</span><select class="input" id="wa-contact-filter"><option value="all" ${contactFilter==="all"?"selected":""}>Semua (${contacts.length})</option><option value="pending" ${contactFilter==="pending"?"selected":""}>Belum (${contacts.length-totalSent})</option><option value="sent" ${contactFilter==="sent"?"selected":""}>Terkirim (${totalSent})</option></select></label>
-            <label><span>Tampil</span><select class="input" id="wa-contact-page-size">${CONTACT_PAGE_SIZES.map(n=>`<option value="${n}" ${n===contactPageSize?"selected":""}>${n} / halaman</option>`).join("")}</select></label>
+          <div class="wa-contact-search"><input class="input" id="wa-contact-search" type="search" value="${esc(contactSearch)}" placeholder="Cari nama atau nomor" aria-label="Cari nama atau nomor"><button type="button" id="wa-contact-search-button" aria-label="Fokus pencarian" title="Cari"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg></button></div>
+          <div class="wa-status-filters" role="group" aria-label="Filter status">
+            ${[["all", `Semua ${contacts.length}`], ["pending", `Belum ${contacts.length-totalSent}`], ["sent", `Terkirim ${totalSent}`]].map(([value, label]) => `<button type="button" class="wa-status-filter${contactFilter===value ? " is-active" : ""}" data-filter="${value}" aria-pressed="${contactFilter===value}">${label}</button>`).join("")}
           </div>
         </div>
-        <p class="wa-contact-result muted">Menampilkan ${visible.length ? ((contactPage-1)*contactPageSize+1) : 0}–${Math.min(contactPage*contactPageSize, filtered.length)} dari ${filtered.length} kontak</p>
-        <div class="wa-contact-list">${visible.map(({contact:c,index:i}) => `
+        <div class="wa-contact-list">${empty ? `<p class="wa-contact-empty">Belum ada kontak — impor CSV/Excel atau tambah manual.</p>` : visible.map(({contact:c,index:i}) => `
           <article class="wa-contact-row wa-contact-row--${c.sent ? "sent" : "pending"}" data-i="${i}">
-            <input type="checkbox" class="wa-contact-sent" data-i="${i}" ${c.sent ? "checked" : ""} aria-label="Tandai ${esc(c.name)} sudah dikirim">
-            <div class="wa-contact-name"><strong>${esc(c.name)}</strong><small>${esc(c.phone)}</small></div>
-            <span class="wa-contact-status">${c.sent ? "Terkirim" : "Belum dikirim"}</span>
+            <div class="wa-contact-name"><strong>${esc(c.name)}</strong></div>
+            <button type="button" class="wa-contact-sent wa-contact-status" data-i="${i}" data-sent="${!c.sent}" aria-pressed="${c.sent}" title="${c.sent ? "Tandai belum dikirim" : "Tandai terkirim"}">${c.sent ? "Terkirim" : "Belum"}</button>
+            <button type="button" class="wa-contact-send wa-wa-icon" data-i="${i}" aria-label="Kirim WhatsApp ke ${esc(c.name)}" title="Kirim WhatsApp"><img src="assets/img/whatsapp.png" alt="" aria-hidden="true"></button>
+            <div class="wa-contact-phone">${esc(c.phone)}</div>
             <label class="wa-contact-template-wrap"><span>Template</span><select class="wa-contact-template" data-i="${i}" aria-label="Template pesan untuk ${esc(c.name)}"><option value="">Default</option>${templates.map(t => `<option value="${t.id}" ${c.template_id===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label>
-            <div class="wa-contact-actions"><button type="button" class="btn btn--tiny wa-contact-send" data-i="${i}" title="Buka WhatsApp dengan pesan siap kirim">Kirim WA</button><button type="button" class="btn btn--tiny btn--danger wa-contact-del" data-i="${i}" aria-label="Hapus kontak ${esc(c.name)}">Hapus</button></div>
-          </article>`).join("") || `<p class="muted">Tidak ada kontak untuk filter ini.</p>`}</div>
-        <nav class="wa-pagination" aria-label="Halaman kontak"><button class="btn btn--tiny" id="wa-prev" ${contactPage===1?"disabled":""}>← Sebelumnya</button><span>Halaman ${contactPage} dari ${pageCount}</span><button class="btn btn--tiny" id="wa-next" ${contactPage===pageCount?"disabled":""}>Berikutnya →</button></nav>
+            <button type="button" class="wa-contact-del" data-i="${i}" aria-label="Hapus kontak ${esc(c.name)}" title="Hapus kontak">×</button>
+          </article>`).join("") || `<p class="wa-contact-empty">Tidak ada kontak untuk pencarian atau filter ini.</p>`}</div>
+        <footer class="wa-pagination"><span class="wa-contact-result">${visible.length ? ((contactPage-1)*contactPageSize+1) : 0}–${Math.min(contactPage*contactPageSize, filtered.length)} / ${filtered.length}</span><label><span>Tampil</span><select class="input" id="wa-contact-page-size">${CONTACT_PAGE_SIZES.map(n=>`<option value="${n}" ${n===contactPageSize?"selected":""}>${n}</option>`).join("")}</select></label><button class="btn btn--tiny" id="wa-prev" ${contactPage===1?"disabled":""}>Prev</button><span>${contactPage}/${pageCount}</span><button class="btn btn--tiny" id="wa-next" ${contactPage===pageCount?"disabled":""}>Next</button></footer>
       </section>`;
-    root.querySelector("#wa-contact-search").oninput=e=>{contactSearch=e.target.value;contactPage=1;renderContacts();};
-    root.querySelector("#wa-contact-filter").onchange=e=>{contactFilter=e.target.value;contactPage=1;renderContacts();};
+    root.querySelectorAll("[data-filter]").forEach((button) => {
+      button.onclick = () => { contactFilter = button.dataset.filter; contactPage = 1; renderContacts(); };
+    });
+    const searchInput = root.querySelector("#wa-contact-search");
+    searchInput.oninput=e=>{
+      let nextSearch = e.target.value;
+      // Nomor Indonesia yang diawali 0 langsung diseragamkan ke 62 supaya
+      // pencarian cocok dengan format nomor kontak yang tersimpan.
+      if (/^0\d*$/.test(nextSearch)) nextSearch = normalizePhone(nextSearch);
+      const selectionStart = nextSearch.length;
+      const selectionEnd = selectionStart;
+      contactSearch = nextSearch;
+      contactPage = 1;
+      renderContacts();
+      const restoredInput = root.querySelector("#wa-contact-search");
+      restoredInput.focus();
+      restoredInput.setSelectionRange(selectionStart, selectionEnd);
+    };
+    root.querySelector("#wa-contact-search-button").onclick=()=>root.querySelector("#wa-contact-search").focus();
     root.querySelector("#wa-contact-page-size").onchange=e=>{contactPageSize=Number(e.target.value);localStorage.setItem(pageSizeKey,String(contactPageSize));contactPage=1;renderContacts();};
     root.querySelector("#wa-prev").onclick=()=>{contactPage--;renderContacts();}; root.querySelector("#wa-next").onclick=()=>{contactPage++;renderContacts();};
   }
@@ -351,6 +368,7 @@
     if (!c) return;
     if (el.classList.contains("wa-contact-send")) sendTo(c, el);
     else if (el.classList.contains("wa-contact-del")) removeContact(c, el);
+    else if (el.classList.contains("wa-contact-sent")) toggleSent(c, el, el.dataset.sent === "true");
   });
 
   contactsEl.addEventListener("change", (e) => {
@@ -358,19 +376,17 @@
     if (!el) return;
     const c = contacts[Number(el.dataset.i)];
     if (!c) return;
-    if (el.classList.contains("wa-contact-sent")) toggleSent(c, el);
-    else if (el.classList.contains("wa-contact-template")) changeTemplate(c, el);
+    if (el.classList.contains("wa-contact-template")) changeTemplate(c, el);
   });
 
-  async function toggleSent(c, box) {
-    const sent = box.checked;
+  async function toggleSent(c, control, nextSent) {
+    const sent = typeof nextSent === "boolean" ? nextSent : !c.sent;
     const patch = { sent, sent_at: sent ? new Date().toISOString() : null };
     const { error } = await window.AdminAPI.query(
       sb.from("wa_contacts").update(patch).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
       "Penyimpanan status"
     );
     if (error) {
-      box.checked = !sent; // rollback UI — DB tidak berubah
       toast("Gagal menyimpan status: " + error.message, true);
       return;
     }
@@ -406,10 +422,7 @@
     }
     const msg = buildMessage(bodyFor(c), c);
     window.open(`https://wa.me/${c.phone}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
-    if (!c.sent) {
-      const box = btn.closest(".wa-contact-row").querySelector(".wa-contact-sent");
-      if (box) toggleSent(c, box);
-    }
+    if (!c.sent) toggleSent(c, btn, true);
   }
 
   async function removeContact(c, btn) {

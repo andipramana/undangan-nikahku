@@ -13,7 +13,7 @@ const checks = [
   ["guard hanya admin", /allowedRoles:\s*\["admin", "root_owner"\]/.test(runtime)],
   ["route tenant WA tersedia", /kind === "wa"/.test(routing) && /"wa.html"/.test(routing)],
   ["visual terang memakai token sendiri", css.includes("--wa-paper") && css.includes("--wa-green")],
-  ["pencarian dan list compact tersedia", page.includes("wa-contacts") && css.includes("wa-contact-shell") && css.includes("wa-contact-toolbar__filters")]
+  ["pencarian dan list compact tersedia", page.includes("wa-contacts") && css.includes("wa-contact-shell") && css.includes("wa-status-filters")]
 ];
 for (const [label, pass] of checks) {
   if (!pass) throw new Error(`FAIL: ${label}`);
