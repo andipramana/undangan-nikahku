@@ -11,13 +11,15 @@ const [css, modernCss, page, main, nav] = await Promise.all([
 const railIds = ["opening", "couple-bride", "couple-groom", "save-the-date-2", "event"];
 const baseScrollerRule = css.match(/\.app-frame__scroll\s*\{([\s\S]*?)\n\}/)?.[1] || "";
 const checks = [
-  ["mandatory hanya pada class rail", /\.app-frame__scroll\.is-snap-rail\s*\{\s*scroll-snap-type:\s*y mandatory;/.test(css)],
+  ["mandatory hanya pada mode rail", /\.app-frame__scroll\.snap-mode--upper,\s*\.app-frame__scroll\.snap-mode--gift\s*\{\s*scroll-snap-type:\s*y mandatory;/.test(css)],
   ["mandatory tidak global", !/scroll-snap-type:\s*y mandatory;/.test(baseScrollerRule)],
-  ["semua rail berhenti satu per satu", /\.app-frame__scroll\.is-snap-rail \[data-snap-rail\][\s\S]*scroll-snap-stop:\s*always;/.test(css)],
+  ["rail atas hanya mengenali marker upper", /snap-mode--upper \[data-snap-rail="upper"\][\s\S]*scroll-snap-stop:\s*always;/.test(css)],
+  ["rail gift hanya mengenali marker gift", /snap-mode--gift \[data-snap-rail="gift"\][\s\S]*scroll-snap-stop:\s*always;/.test(css)],
   ["couple classic tepat satu viewport", /\.couple-solo\.section\s*\{[\s\S]*height:\s*100dvh;[\s\S]*padding:\s*0;/.test(css)],
-  ["modern minimal mendukung rail dan couple baru", /\.app-frame__scroll\.is-snap-rail \[data-snap-rail\][\s\S]*scroll-snap-stop:\s*always;/.test(modernCss) && /\.couple-solo\.section\s*\{[\s\S]*height:\s*100dvh;/.test(modernCss)],
-  ["semua section rail diberi penanda", railIds.every((id) => new RegExp(`<section id="${id}"[^>]*data-snap-rail`).test(page))],
-  ["controller mengatur class rail", /function setupSnapRail\(/.test(main) && /window\.setInvitationSnapMode\s*=\s*setMode/.test(main)],
+  ["modern minimal mendukung dua rail", /snap-mode--upper \[data-snap-rail="upper"\][\s\S]*scroll-snap-stop:\s*always;/.test(modernCss) && /snap-mode--gift \[data-snap-rail="gift"\][\s\S]*scroll-snap-stop:\s*always;/.test(modernCss)],
+  ["semua section rail atas diberi marker", railIds.every((id) => new RegExp(`<section id="${id}"[^>]*data-snap-rail="upper"`).test(page))],
+  ["gift diberi marker rail terpisah", /<section id="gift"[^>]*data-snap-rail="gift"/.test(page)],
+  ["controller memakai mode upper dan gift", /function setupSnapRail\(/.test(main) && /snap-mode--upper/.test(main) && /snap-mode--gift/.test(main)],
   ["menu memilih mode snap target", /window\.setInvitationSnapMode\) window\.setInvitationSnapMode\(target\)/.test(nav)],
   ["menu Mempelai menuju bride", /\["couple-bride", "Mempelai"\]/.test(nav)]
 ];

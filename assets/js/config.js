@@ -99,7 +99,7 @@ window.WEDDING_CONFIG = {
     // Foto full-width 1:1 di bawah kartu dresscode. Ganti isi folder
     // foto_quote (jpg + webp, nama photo) untuk memakai foto lain.
     photo: "assets/img/foto_quote/photo.jpg",
-    quote: "Marriage is not about age; it's about finding the right person."
+    quote: "Two different paths, quietly choosing the same direction."
   },
 
   subcover: {

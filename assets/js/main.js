@@ -340,40 +340,77 @@
     });
   }
 
-  // Rail snap mencakup section full-screen: dari Cover sampai Event, lalu Gift
-  // (full-screen juga). ANTARA Event dan Gift ada zona bebas (livestream,
-  // love-story, galeri) yang TIDAK boleh kena snap mandatory — kalau class
-  // is-snap-rail masih aktif di sana, section tersebut dilewati (skip) saat
-  // discroll. Setelah melewati Gift, mandatory dilepas lagi (rsvp/closing).
+  // Dua rail snap terpisah: rail atas berakhir di Event, lalu konten naratif
+  // bebas sampai Galeri. Gift adalah rail tunggal baru setelahnya, jadi tidak
+  // mungkin lagi menjadi target snap ketika user keluar dari Event.
   function setupSnapRail() {
     const scroller = document.querySelector(".app-frame__scroll");
-    const railSections = document.querySelectorAll("[data-snap-rail]");
-    const lastRail = railSections[railSections.length - 1];
     const eventSec = document.getElementById("event");
-    if (!scroller || !lastRail) return;
+    const giftSec = document.getElementById("gift");
+    if (!scroller || !eventSec || !giftSec) return;
 
-    const setMode = (target) => {
-      const isRail = !!(target && target.matches && target.matches("[data-snap-rail]"));
-      scroller.classList.toggle("is-snap-rail", isRail);
+    let mode = "upper";
+    let lastScrollTop = scroller.scrollTop;
+    let inputDirection = 0;
+    const applyMode = (nextMode) => {
+      mode = nextMode;
+      scroller.classList.toggle("snap-mode--upper", mode === "upper");
+      scroller.classList.toggle("snap-mode--gift", mode === "gift");
     };
-    window.setInvitationSnapMode = setMode;
-    setMode(lastRail);
+    const targetMode = (target) => target && target.dataset.snapRail === "upper"
+      ? "upper"
+      : target && target.dataset.snapRail === "gift"
+        ? "gift"
+        : "free";
 
-    const releaseAfterLastRail = () => {
-      const st = scroller.scrollTop;
-      const gapTop = eventSec ? eventSec.offsetTop + eventSec.offsetHeight : 0;
-      const giftTop = lastRail.offsetTop;
-      const giftBottom = giftTop + scroller.clientHeight;
-      const onRail = st < gapTop - 2 || (st >= giftTop - 2 && st <= giftBottom);
-      scroller.classList.toggle("is-snap-rail", onRail);
+    window.setInvitationSnapMode = (target) => applyMode(targetMode(target));
+    applyMode("upper");
+
+    const isFullViewport = (section) => {
+      const rect = section.getBoundingClientRect();
+      return rect.top <= 2 && rect.bottom >= scroller.clientHeight - 2;
     };
-
-    scroller.addEventListener("scroll", releaseAfterLastRail, { passive: true });
-    scroller.addEventListener("wheel", (event) => {
-      const rect = lastRail.getBoundingClientRect();
-      if (event.deltaY > 0 && rect.top <= 2 && rect.bottom >= window.innerHeight - 2) {
-        scroller.classList.remove("is-snap-rail");
+    const releaseDownwardExit = () => {
+      if (inputDirection <= 0) return;
+      if ((mode === "upper" && isFullViewport(eventSec)) ||
+          (mode === "gift" && isFullViewport(giftSec))) {
+        applyMode("free");
       }
+    };
+
+    const updateFromScroll = () => {
+      const st = scroller.scrollTop;
+      const delta = st - lastScrollTop;
+      if (delta) inputDirection = Math.sign(delta);
+      lastScrollTop = st;
+
+      const eventTop = eventSec.offsetTop;
+      const eventBottom = eventTop + eventSec.offsetHeight;
+      const giftTop = giftSec.offsetTop;
+      const giftBottom = giftTop + giftSec.offsetHeight;
+      const viewBottom = st + scroller.clientHeight;
+
+      if (mode === "upper" && st >= eventTop - 2) applyMode("free");
+      if (mode === "gift" && (st < giftTop - 2 || st >= giftBottom - 2)) applyMode("free");
+
+      // Gift baru jadi kandidat saat didekati dari zona Galeri dengan arah turun.
+      // Karena CSS mode gift hanya mendaftarkan Gift, browser akan mendarat di
+      // sana tanpa pernah melewati Our Story atau Galeri.
+      if (mode === "free" && inputDirection > 0 && st >= eventBottom - 2 &&
+          st < giftTop && viewBottom >= giftTop) {
+        applyMode("gift");
+      }
+      // Kembali dari gap ke Event dari arah naik menghidupkan rail atas lagi.
+      if (mode === "free" && inputDirection < 0 && st < eventBottom &&
+          st >= eventTop - scroller.clientHeight) {
+        applyMode("upper");
+      }
+    };
+
+    scroller.addEventListener("scroll", updateFromScroll, { passive: true });
+    scroller.addEventListener("wheel", (event) => {
+      inputDirection = Math.sign(event.deltaY);
+      releaseDownwardExit();
     }, { passive: true });
 
     let touchY = null;
@@ -382,10 +419,8 @@
     }, { passive: true });
     scroller.addEventListener("touchmove", (event) => {
       const y = event.touches[0] && event.touches[0].clientY;
-      const rect = lastRail.getBoundingClientRect();
-      if (touchY !== null && y < touchY && rect.top <= 2 && rect.bottom >= window.innerHeight - 2) {
-        scroller.classList.remove("is-snap-rail");
-      }
+      if (touchY !== null && y !== undefined) inputDirection = Math.sign(touchY - y);
+      releaseDownwardExit();
     }, { passive: true });
   }
 

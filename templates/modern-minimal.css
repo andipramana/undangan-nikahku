@@ -65,10 +65,12 @@ body::before {
 }
 .app-frame__scroll::-webkit-scrollbar { width: 5px; }
 .app-frame__scroll::-webkit-scrollbar-thumb { background: rgba(201,169,110,.35); border-radius: 3px; }
-.app-frame__scroll.is-snap-rail {
+.app-frame__scroll.snap-mode--upper,
+.app-frame__scroll.snap-mode--gift {
   scroll-snap-type: y mandatory;
 }
-.app-frame__scroll.is-snap-rail [data-snap-rail] {
+.app-frame__scroll.snap-mode--upper [data-snap-rail="upper"],
+.app-frame__scroll.snap-mode--gift [data-snap-rail="gift"] {
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
@@ -815,29 +817,38 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 
 /* ═══════════════════════ LOVE STORY ═══════════════════════ */
-#love-story.section { padding: 4rem 1.5rem; }
+/* Kartu perjalanan memakai kanvas yang sama dengan galeri. */
+#love-story.section {
+  padding: 4rem 1.5rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+#love-story .section-eyebrow,
+#love-story .section-title--script { color: var(--color-dark); }
 .timeline { max-width: 340px; margin: 0 auto; }
 .timeline-item { text-align: center; margin-bottom: 3rem; border: none; padding: 0; }
 .timeline-item__photo {
   width: 100%; max-width: 300px; margin: 0 auto 1rem; display: block;
-  filter: brightness(.78); aspect-ratio: 16/10; object-fit: cover;
+  filter: brightness(.92); aspect-ratio: 16/10; object-fit: cover;
   object-position: var(--fx, 50%) var(--fy, 50%);
 }
 .timeline-date {
   font-family: "Great Vibes","Dancing Script",cursive;
-  font-size: .95rem; color: #c9a96e; display: block; margin-bottom: .2rem;
+  font-size: .95rem; color: #85652d; display: block; margin-bottom: .2rem;
 }
 .timeline-item h4 {
   font-family: "Playfair Display","Georgia",serif;
-  font-size: 1.1rem; color: #e8e4de; margin-bottom: .3rem;
+  font-size: 1.1rem; color: var(--color-dark); margin-bottom: .3rem;
 }
 .timeline-item p {
   font-family: "Montserrat","Helvetica Neue",sans-serif;
-  font-size: .72rem; color: rgba(232,228,222,.5); line-height: 1.6;
+  font-size: .72rem; color: var(--color-text); line-height: 1.6;
 }
 
 /* ═══════════════════════ GALLERY — masonry grid ═══════════════════════ */
 #gallery.section { padding: 4rem 0; }
+#gallery .section-eyebrow,
+#gallery .section-title--script { color: var(--color-dark); }
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -872,7 +883,14 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .gallery-video__frame { width: 100%; height: 100%; border: none; }
 
 /* ═══════════════════════ GIFT ═══════════════════════ */
-#gift.section { padding: 4rem 1.5rem; text-align: center; }
+#gift.section {
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
 .gift-actions { margin-top: 1rem; display: flex; justify-content: center; }
 .gift-panel {
   background: #242220; border: none; border-radius: 0;
