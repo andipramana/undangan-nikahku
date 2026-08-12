@@ -1160,23 +1160,23 @@ a { color: inherit; }
 /* Panel Konfirmasi WA dibatasi 6/8 tinggi layar (75dvh) — lebih ramping dari
    panel modal umum (88vh); isi berlebih discroll di dalam panel. */
 #gift-confirm-modal .modal__panel { max-height: 75dvh; }
-/* Modal QR check-in & Menu — bg transparan-putih (sama dengan FAB), tanpa
-   border, teks coklat #846d57. */
+/* Modal QR check-in & Menu — bg putih lebih solid (opacity dinaikkan dari
+   transparan FAB), tanpa border, teks gelap agar selalu terbaca. */
 #qr-checkin-modal .modal__panel,
 #nav-menu-modal .modal__panel {
-  background: #ffffff61;
+  background: #ffffffcc;
   border: none;
-  color: #846d57;
+  color: var(--color-dark);
 }
 #qr-checkin-modal .modal__header h3,
 #qr-checkin-modal .modal__close,
 #nav-menu-modal .modal__header h3,
 #nav-menu-modal .modal__close {
-  color: #846d57;
+  color: var(--color-dark);
 }
-#nav-menu-modal .nav-menu-list button { color: #846d57; }
+#nav-menu-modal .nav-menu-list button { color: var(--color-dark); }
 #nav-menu-modal .nav-menu-list button:hover { background: #846d57; color: #fff; }
-#qr-checkin-modal .qr-modal__hint { color: #846d57; opacity: .85; }
+#qr-checkin-modal .qr-modal__hint { color: var(--color-dark); opacity: .85; }
 /* Field input Konfirmasi WA: putih (bukan transparan) supaya teks isian jelas
    di atas panel modal yang coklat — teks isian gelap agar terbaca. */
 #gift-confirm-modal .modal__field select,
