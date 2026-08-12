@@ -124,6 +124,17 @@
     document.getElementById("groom-parents").textContent =
       `Putra dari Bpk. ${cfg.couple.groom.father} & Ibu ${cfg.couple.groom.mother}`;
 
+    // Baris Instagram mempelai — tampil hanya kalau handle diisi di
+    // config/Supabase (couple.*.instagram); kalau kosong, elemen disembunyikan.
+    const fillInstagram = (el, handle) => {
+      if (!el) return;
+      const ig = (handle || "").trim().replace(/^@/, "");
+      if (!ig) { el.hidden = true; return; }
+      el.textContent = `Instagram: @${ig}`;
+    };
+    fillInstagram(document.getElementById("bride-instagram"), cfg.couple.bride.instagram);
+    fillInstagram(document.getElementById("groom-instagram"), cfg.couple.groom.instagram);
+
     // Nama panggilan pasangan di cover / Save The Date / closing — diisi dari
     // config/Supabase (couple.*.nickname), TIDAK hardcoded. Span .amp dijaga
     // supaya gaya ampersand (font script) tetap seperti sebelumnya.

@@ -721,6 +721,10 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   font-family: "Montserrat","Helvetica Neue",sans-serif;
   font-size: .65rem; color: rgba(232,228,222,.45); line-height: 1.6;
 }
+/* Baris Instagram mempelai — diisi main.js; disembunyikan kalau kosong. */
+.couple-info__instagram {
+  font-size: .68rem; color: rgba(232,228,222,.45); line-height: 1.5; margin: .35rem 0 0;
+}
 
 /* ═══════════════════════ EVENT — capsule ivory ═══════════════════════ */
 #event.event-hero {
@@ -1190,13 +1194,24 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   100% { opacity: 0; }
 }
 
-/* ─── EB Garamond: cover, quotes, Our Story, dan capsule gift ─── */
+/* ─── EB Garamond: cover, save the date, couple, quotes, story,
+   capsule gift, tombol gift, modal, form reservasi, dan footer ─── */
 #cover .eyebrow,
 #cover .script-names,
 #cover .guest-label,
 #cover .guest-name,
 #cover .btn-open span,
 #cover .hero-note,
+#opening .eyebrow,
+#opening .script-names,
+#opening .opening-quote,
+#opening .opening-source,
+#couple-bride .couple-info *,
+#couple-groom .couple-info *,
+#save-the-date-2 .save-date span,
+#save-the-date-2 .btn-outline,
+#save-the-date-2 .countdown *,
+#save-the-date-2 #event-date-label,
 #quote .quote-text,
 .quotes-item blockquote,
 #love-story .section-title--script,
@@ -1206,6 +1221,15 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .timeline-item p,
 #gift .section-title,
 #gift .section-desc,
+#gift .btn-outline,
+#gift .btn-text,
+#gift-confirm-modal .modal__panel *,
+#gift-recs-modal .modal__panel *,
+#nav-menu-modal .modal__panel *,
+#qr-checkin-modal .modal__panel *,
+.rsvp-form,
+.rsvp-form *,
+.site-footer *,
 .gift-account__bank,
 .gift-account__number,
 .gift-account__name,

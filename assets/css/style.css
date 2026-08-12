@@ -472,10 +472,11 @@ a { color: inherit; }
 #opening .eyebrow-monogram {
   transition: opacity .6s ease 1s, transform 2.2s cubic-bezier(.22,.61,.36,1) 1.8s;
 }
-#opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-86%, -70%); }
-/* A diakhiri sedikit LEBIH TINGGI (-38% vs -30% awal) dan mulai sedikit
-   melewati tengah (-14%) — keduanya saling tumpang tindih ringan. */
-#opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-14%, -38%); }
+/* M turun sedikit (dari -70% ke -58%), A naik sedikit (dari -30% awal ke
+   -48%) — keduanya saling mendekat vertikal, dan mulai sedikit melewati
+   tengah (-14%) — tumpang tindih ringan. */
+#opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-86%, -58%); }
+#opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-14%, -48%); }
 
 /* --- Cover: monogram BARU mulai animasi setelah SEMUA animasi AOS lain di
    section itu selesai (elemen AOS terakhir = #btn-open, data-aos-delay
@@ -489,10 +490,10 @@ a { color: inherit; }
      transform baru mulai di 2.8s), lalu mendekat pelan (2.8s durasi). */
   transition: opacity .6s ease 2s, transform 2.8s cubic-bezier(.22,.61,.36,1) 2.8s;
 }
-.eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -70%); }
-/* A naik sedikit (-38%) dan sedikit melewati tengah (-7%) — overlap ringan
-   dengan M, sama seperti versi opening. */
-.eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -38%); }
+.eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -58%); }
+/* M turun sedikit, A naik sedikit (sama seperti versi opening) dan sedikit
+   melewati tengah (-7%) — overlap ringan dengan M. */
+.eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -48%); }
 
 .script-names {
   font-family: var(--font-script);
@@ -1623,7 +1624,8 @@ a { color: inherit; }
 .couple-info {
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  padding: 2rem 1.5rem 1.25rem;
+  /* padding bawah naik sedikit — ruang untuk baris Instagram di bawah parents */
+  padding: 2rem 1.5rem 1.6rem;
   text-align: center;
   z-index: 3;
 }
@@ -1649,6 +1651,14 @@ a { color: inherit; }
   color: var(--color-text-light);
   opacity: .85;
   margin: 0;
+}
+/* Baris Instagram mempelai — diisi main.js; disembunyikan kalau kosong. */
+.couple-info__instagram {
+  font-size: .78rem;
+  line-height: 1.5;
+  color: var(--color-text-light);
+  opacity: .85;
+  margin: .45rem 0 0;
 }
 
 /* ---------- Event (editorial: 1 panel, header tanggal besar + 2 blok acara,
@@ -1890,10 +1900,11 @@ a { color: inherit; }
   100% { opacity: 0; }
 }
 
-/* ---------- EB Garamond: cover, quotes, Our Story, dan capsule gift ----------
-   Semua teks di area tersebut memakai EB Garamond (dimuat via Google Fonts di
-   index.html). Rule ini sengaja di AKHIR file dan lebih spesifik dari rule
-   asli tiap elemen, supaya menang tanpa !important. */
+/* ---------- EB Garamond: cover, save the date, couple, quotes, story,
+   capsule gift, tombol gift, modal, form reservasi, dan footer ----------
+   Semua teks di area tersebut memakai EB Garamond (dimuat via Google Fonts
+   di index.html). Rule ini sengaja di AKHIR file dan lebih spesifik dari
+   rule asli tiap elemen, supaya menang tanpa !important. */
 #cover .eyebrow,
 .eyebrow-monogram,
 #cover .script-names,
@@ -1901,6 +1912,16 @@ a { color: inherit; }
 #cover .guest-name,
 #cover .btn-open,
 #cover .hero-note,
+#opening .eyebrow,
+#opening .script-names,
+#opening .opening-quote,
+#opening .opening-source,
+#couple-bride .couple-info *,
+#couple-groom .couple-info *,
+#save-the-date-2 .save-date span,
+#save-the-date-2 .btn-outline,
+#save-the-date-2 .countdown *,
+#save-the-date-2 #event-date-label,
 #quote .quote-text,
 .quotes-item blockquote,
 #love-story .section-title--script,
@@ -1909,6 +1930,15 @@ a { color: inherit; }
 .timeline-item p,
 .gift-capsule .section-title,
 .gift-capsule .section-desc,
+.gift-capsule .btn-outline,
+.gift-capsule .btn-text,
+#gift-confirm-modal .modal__panel *,
+#gift-recs-modal .modal__panel *,
+#nav-menu-modal .modal__panel *,
+#qr-checkin-modal .modal__panel *,
+.rsvp-form,
+.rsvp-form *,
+.site-footer *,
 .gift-account__bank,
 .gift-account__number,
 .gift-account__holder,
