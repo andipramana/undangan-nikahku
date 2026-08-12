@@ -472,11 +472,11 @@ a { color: inherit; }
 #opening .eyebrow-monogram {
   transition: opacity .6s ease 1s, transform 2.2s cubic-bezier(.22,.61,.36,1) 1.8s;
 }
-/* M turun sedikit (dari -70% ke -58%), A naik sedikit (dari -30% awal ke
-   -48%) — keduanya saling mendekat vertikal, dan mulai sedikit melewati
-   tengah (-14%) — tumpang tindih ringan. */
-#opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-86%, -58%); }
-#opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-14%, -48%); }
+/* M turun sedikit (dari -70% ke -64%), A naik sedikit (dari -30% awal ke
+   -51%) — keduanya saling mendekat vertikal, dan mulai sedikit melewati
+   tengah (-14%) — tumpang tindih ringan. M naik 2x lipat dari A. */
+#opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-86%, -64%); }
+#opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-14%, -51%); }
 
 /* --- Cover: monogram BARU mulai animasi setelah SEMUA animasi AOS lain di
    section itu selesai (elemen AOS terakhir = #btn-open, data-aos-delay
@@ -490,10 +490,10 @@ a { color: inherit; }
      transform baru mulai di 2.8s), lalu mendekat pelan (2.8s durasi). */
   transition: opacity .6s ease 2s, transform 2.8s cubic-bezier(.22,.61,.36,1) 2.8s;
 }
-.eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -58%); }
+.eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -64%); }
 /* M turun sedikit, A naik sedikit (sama seperti versi opening) dan sedikit
    melewati tengah (-7%) — overlap ringan dengan M. */
-.eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -48%); }
+.eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -51%); }
 
 .script-names {
   font-family: var(--font-script);
