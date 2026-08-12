@@ -720,7 +720,11 @@ a { color: inherit; }
   transition-delay: 0ms;
 }
 .save-date.is-visible .save-date__the {
-  clip-path: inset(0 0 0 0);
+  /* Inset sedikit NEGATIF di kanan (dan tipis atas/bawah): glyph cursive
+     Italianno punya ekor yang menggantung sedikit DI LUAR border-box-nya
+     sendiri ("e" di "the") — clip-path inset(0) yang pas box akan memotong
+     ekor itu. -8px/-2px memperluas area clip tanpa menggeser layout. */
+  clip-path: inset(-2px -8px -2px -8px);
   transform: translateY(0);
   transition-delay: 800ms;
 }
@@ -730,12 +734,13 @@ a { color: inherit; }
   transition-delay: 1600ms;
 }
 
-/* Reduced motion: langsung tampil utuh tanpa animasi apapun. */
+/* Reduced motion: langsung tampil utuh tanpa animasi apapun. none (bukan
+   inset(0)) supaya ekor glyph cursive yang meluber juga tidak terpotong. */
 @media (prefers-reduced-motion: reduce) {
   .save-date__save,
   .save-date__the,
   .save-date__date {
-    clip-path: inset(0 0 0 0) !important;
+    clip-path: none !important;
     transform: none !important;
     transition: none !important;
   }
