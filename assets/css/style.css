@@ -1202,18 +1202,22 @@ a { color: inherit; }
 .gift-account {
   border: 1px solid var(--color-gold); border-radius: 10px; padding: 1rem 1.25rem;
   display: flex; justify-content: space-between; align-items: center; gap: 1rem; text-align: left;
+  /* Kartu terang (light primary) di atas section coklat, font gelap. */
+  background: var(--color-gold-soft); color: var(--color-dark);
 }
-.gift-account__bank { font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-text-light); }
+.gift-account__bank { font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-dark); }
 .gift-account__number { font-size: .95rem; letter-spacing: .05em; }
 .gift-account__holder { font-size: .75rem; opacity: .75; }
 .gift-copy-btn {
-  border: 1px solid var(--color-gold); background: none; color: var(--color-text-light);
+  border: 1px solid var(--color-gold); background: none; color: var(--color-dark);
   border-radius: 999px; padding: .4rem .9rem; font-size: .7rem; cursor: pointer; white-space: nowrap;
 }
 .gift-address {
   border: 1px dashed var(--color-gold); border-radius: 10px; padding: 1rem 1.25rem;
   text-align: left; font-size: .88rem; line-height: 1.6;
   display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+  /* Sama: kartu terang (light primary), font gelap. */
+  background: var(--color-gold-soft); color: var(--color-dark);
 }
 .gift-address__text { flex: 1; min-width: 0; }
 .gift-address__copy { align-self: flex-end; flex: none; }
