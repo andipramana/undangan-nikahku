@@ -566,10 +566,9 @@ a { color: inherit; }
   cursor: default;
   box-shadow: none;
 }
-/* Kirim Konfirmasi (RSVP) sengaja dibalik dari .btn-primary default (putih
-   translucent + teks gelap): background primary coklat tua, teks putih. */
-#rsvp-submit { background: #826b57; color: #fff; }
-#rsvp-submit:hover { background: #6e5947; color: #fff; }
+/* Kirim Konfirmasi (RSVP): putih solid dengan teks hitam. */
+#rsvp-submit { background: #fff; color: var(--color-dark); }
+#rsvp-submit:hover { background: #f2ead9; color: var(--color-dark); }
 
 .btn-outline {
   display: inline-flex; align-items: center; gap: .5rem;
@@ -911,9 +910,9 @@ a { color: inherit; }
 .gift-capsule.is-open .section-title,
 .gift-capsule.is-open .section-desc { display: none; }
 /* Tombol aksi di capsule (Kirim Hadiah / Rekomendasi Kado / Konfirmasi
-   Pengiriman): coklat #846d57, teks putih. */
-.gift-capsule .btn-outline { background: #846d57; color: #fff; }
-.gift-capsule .btn-outline:hover { background: #6e5947; color: #fff; }
+   Pengiriman): putih dengan teks hitam. */
+.gift-capsule .btn-outline { background: #fff; color: var(--color-dark); }
+.gift-capsule .btn-outline:hover { background: #f2ead9; color: var(--color-dark); }
 .gift-capsule .btn-text { color: var(--color-dark); }
 .section--dark .section-eyebrow { color: var(--color-text-light); }
 
@@ -1166,10 +1165,10 @@ a { color: inherit; }
   color: var(--color-dark);
 }
 #gift-confirm-modal .modal__hint { color: var(--color-dark); opacity: .85; }
-/* Tombol aksi modal: coklat #846d57 dengan teks putih — senada dengan
-   tombol panel Kirim Hadiah. */
-#gift-confirm-modal #gift-confirm-send { background: #846d57; color: #fff; }
-#gift-confirm-modal #gift-confirm-send:hover { background: #6e5947; color: #fff; }
+/* Tombol aksi modal: putih dengan teks hitam — senada dengan tombol panel
+   Kirim Hadiah. */
+#gift-confirm-modal #gift-confirm-send { background: #fff; color: var(--color-dark); }
+#gift-confirm-modal #gift-confirm-send:hover { background: #f2ead9; color: var(--color-dark); }
 /* Modal QR check-in & Menu — bg putih lebih solid (opacity dinaikkan dari
    transparan FAB), tanpa border, teks gelap agar selalu terbaca. */
 #qr-checkin-modal .modal__panel,
@@ -1792,8 +1791,8 @@ a { color: inherit; }
 .event-block__time { margin: clamp(.25rem, .8dvh, .45rem) 0 0; color: var(--event-muted); font-family: var(--font-sans); font-size: clamp(.62rem, 1.55dvh, .76rem); font-weight: 600; letter-spacing: .05em; }
 .event-block__venue { margin: clamp(.45rem, 1.35dvh, .72rem) 0 0; color: var(--event-ink); font-family: "Cormorant Garamond", var(--font-serif); font-size: clamp(1rem, 2.35dvh, 1.2rem); font-weight: 500; line-height: 1.05; }
 .event-block__address { max-width: 250px; margin: clamp(.28rem, .9dvh, .45rem) auto 0; color: var(--event-muted); font-family: var(--font-sans); font-size: clamp(.57rem, 1.3dvh, .67rem); line-height: 1.45; overflow-wrap: anywhere; white-space: pre-line; }
-.event-block__maps { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; margin-top: clamp(.45rem, 1.4dvh, .7rem); padding: clamp(5px, 1.15dvh, 7px) clamp(1.1rem, 5vw, 1.55rem); border: 0; border-radius: 999px; background: var(--event-map); color: #fffdf8; font-family: var(--font-sans); font-size: clamp(.57rem, 1.35dvh, .67rem); font-weight: 700; letter-spacing: .04em; text-decoration: none; transition: background .2s ease, transform .2s ease; }
-.event-block__maps:hover { background: #6d5847; transform: translateY(-1px); }
+.event-block__maps { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; margin-top: clamp(.45rem, 1.4dvh, .7rem); padding: clamp(5px, 1.15dvh, 7px) clamp(1.1rem, 5vw, 1.55rem); border: 0; border-radius: 999px; background: #fff; color: var(--event-ink); font-family: var(--font-sans); font-size: clamp(.57rem, 1.35dvh, .67rem); font-weight: 700; letter-spacing: .04em; text-decoration: none; transition: background .2s ease, transform .2s ease; }
+.event-block__maps:hover { background: #f2ead9; transform: translateY(-1px); }
 .event-block__maps:focus-visible { outline: 2px solid var(--event-ink); outline-offset: 3px; }
 @media (max-height: 620px) {
   .event-hero__capsule { width: min(84vw, 330px); height: 96dvh; padding-top: .9rem; padding-bottom: .9rem; }
