@@ -975,6 +975,11 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   background: rgba(201,169,110,.1); color: #c9a96e;
   border-color: rgba(201,169,110,.22);
 }
+/* Feedback klik rsvp.js (class is-selected): gelap, teks putih */
+.rsvp-pill.is-selected {
+  background: #1a1816; color: #fff;
+  border-color: rgba(232,228,222,.3);
+}
 .rsvp-status { font-family: "Montserrat","Helvetica Neue",sans-serif; font-size: .68rem; margin-top: .4rem; }
 #rsvp-submit { margin-top: .5rem; }
 .wishes-heading { display: flex; align-items: center; gap: .8rem; margin: 2.5rem 0 1rem; }

@@ -1439,7 +1439,7 @@ a { color: inherit; }
    bg putih, apa pun perubahan style label. */
 #rsvp-form .rsvp-pill { color: var(--color-dark); }
 .rsvp-pill:hover { transform: translateY(-1px); }
-.rsvp-pill.is-selected { background: var(--color-gold); color: var(--color-dark); font-weight: 600; box-shadow: 0 5px 12px rgba(139,104,45,.2); }
+.rsvp-pill.is-selected { background: var(--color-dark); color: #fff; font-weight: 600; box-shadow: 0 5px 12px rgba(20,18,15,.3); }
 .rsvp-form .btn-primary { width: 100%; margin-top: .25rem; }
 .rsvp-status { text-align: center; font-size: .82rem; min-height: 1.2em; margin: 0; color: #6e5730; }
 
