@@ -499,10 +499,10 @@ a { color: inherit; }
 /* Nama mempelai di Cover & Save The Date 1 kapital semua (Closing dibiarkan
    apa adanya, tidak diminta). */
 #couple-names-cover, #couple-names-opening { text-transform: uppercase; }
-/* "MITA & ANDI" di Cover dibuat LEBIH KECIL dari nama di Save The Date 1
+/* "MITA & ANDI" di Cover dibuat jauh LEBIH KECIL dari nama di Save The Date 1
    (#couple-names-opening) — cover cuma pemanis, jangan sampai mendominasi.
    Base .script-names clamp 3rem-5rem jelas kebesaran. */
-#couple-names-cover { font-size: clamp(1.3rem, 6vw, 2rem); margin-top: .9rem; }
+#couple-names-cover { font-size: clamp(1.05rem, 4.8vw, 1.5rem); margin-top: .9rem; }
 /* Nama di Save The Date 1 balik ke panggilan pendek "Mita & Andi" (bukan nama
    lengkap lagi) — boleh dibesarkan lagi karena teksnya sudah pendek. */
 #couple-names-opening { font-size: clamp(1.8rem, 7vw, 2.6rem); margin-top: .9rem; }
@@ -965,6 +965,15 @@ a { color: inherit; }
 .venue p { line-height: 1.6; font-size: .9rem; margin-bottom: 1.25rem; opacity: .85; }
 
 /* ---------- Love story timeline ---------- */
+/* Samakan kanvas Perjalanan Kami dengan Galeri agar transisinya lebih tenang.
+   Section ini sebelumnya memakai modifier .section--dark, maka seluruh teks
+   yang mewarisi putih harus ditetapkan kembali ke warna gelap. */
+#love-story.section {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+#love-story .section-eyebrow,
+#love-story .section-title--script { color: var(--color-dark); }
 .timeline { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.5rem; }
 .timeline-item { text-align: left; } /* tanpa garis timeline di kiri foto */
 .timeline-item__photo {
@@ -972,9 +981,9 @@ a { color: inherit; }
   border-radius: 10px; border: 1px solid var(--color-gold);
   margin-bottom: 1rem;
 }
-.timeline-item .timeline-date { color: var(--color-text-light); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
-.timeline-item h4 { font-family: var(--font-serif); font-size: 1.3rem; margin: .3rem 0; color: var(--color-text-light); }
-.timeline-item p { margin: 0; font-size: .9rem; line-height: 1.6; opacity: .85; }
+.timeline-item .timeline-date { color: #85652d; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
+.timeline-item h4 { font-family: var(--font-serif); font-size: 1.3rem; margin: .3rem 0; color: var(--color-dark); }
+.timeline-item p { margin: 0; font-size: .9rem; line-height: 1.6; color: var(--color-text); opacity: .85; }
 
 /* ---------- Gallery (grid 4 kolom, pola: landscape / 2 potrait / landscape / 1-4+3-4 / landscape / 2 potrait / landscape) ---------- */
 .gallery-grid {
