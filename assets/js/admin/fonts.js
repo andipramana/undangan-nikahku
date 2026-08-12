@@ -41,7 +41,7 @@
       ["gift-title", "Judul Gift", "#gift .section-title", "Tanda Kasih", { family:"Poppins", size:30, weight:500 }],
       ["gift-content", "Rekening & rekomendasi kado", ".gift-account__bank, .gift-account__number, .gift-rec-card__name, .gift-rec-card__price", "Wedding Gift", { family:"Poppins", size:16, weight:500 }],
       ["gift-button", "Tombol Gift", "#gift .btn-primary, #gift .btn-outline, #gift .btn-text", "KIRIM HADIAH", { family:"Poppins", size:14, weight:500 }],
-      ["rsvp-title", "Judul RSVP", "#rsvp .section-title", "Konfirmasi Kehadiran", { family:"Poppins", size:30, weight:500 }],
+      ["rsvp-title", "Judul RSVP", "#rsvp .section-title", "Doa & Ucapan", { family:"Poppins", size:30, weight:500 }],
       ["rsvp-form", "Label, input & tombol RSVP", ".rsvp-form label, .rsvp-form input, .rsvp-form select, .rsvp-form textarea, .rsvp-pill, #rsvp-submit", "Kirim Konfirmasi", { family:"Poppins", size:14, weight:500 }],
       ["wishes", "Daftar ucapan", ".wishes-heading p, .wishes-intro, .wish-card__name, .wish-card__status, .wish-card__message", "Nadia Pratama · Semoga bahagia", { family:"Poppins", size:14, weight:400 }]
     ]},

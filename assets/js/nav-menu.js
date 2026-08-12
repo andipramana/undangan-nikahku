@@ -23,7 +23,7 @@ window.initNavMenu = function () {
     ["love-story", "Perjalanan Kami"],
     ["gallery", "Galeri"],
     ["gift", "Tanda Kasih"],
-    ["rsvp", "Konfirmasi Kehadiran"]
+    ["rsvp", "Doa & Ucapan"]
   ];
   if (document.getElementById("livestream")) {
     items.splice(2, 0, ["livestream", "Live Streaming"]);
