@@ -1724,6 +1724,9 @@ a { color: inherit; }
   opacity: .75;
   max-width: 290px;
   margin: clamp(.2rem, .7dvh, .35rem) auto 0;
+  /* Alamat boleh 2 baris: admin mengetik Enter di field alamat → \n
+     tersimpan di data → textContent + pre-line menampilkannya baris baru. */
+  white-space: pre-line;
 }
 /* Tombol maps = capsule asli (bagian 11): radius 999px (bukan rounded
    rectangle 8/12/16px), border 1px warm brown, background transparan,
