@@ -99,10 +99,12 @@ html, body {
    Gift). Zona bebas di antara rail (livestream/love-story/galeri/rsvp/closing)
    tetap scroll bebas, jadi tidak ditarik balik ke snap point terakhir — class
    ini diatur main.js berdasarkan posisi scroll. */
-.app-frame__scroll.is-snap-rail {
+.app-frame__scroll.snap-mode--upper,
+.app-frame__scroll.snap-mode--gift {
   scroll-snap-type: y mandatory;
 }
-.app-frame__scroll.is-snap-rail [data-snap-rail] {
+.app-frame__scroll.snap-mode--upper [data-snap-rail="upper"],
+.app-frame__scroll.snap-mode--gift [data-snap-rail="gift"] {
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
@@ -132,7 +134,7 @@ a { color: inherit; }
 /* ---------- Preloader ---------- */
 #preloader {
   position: fixed; inset: 0; z-index: 9999;
-  background: var(--color-dark);
+  background: var(--color-bg);
   display: flex; align-items: center; justify-content: center;
   transition: opacity .6s ease, visibility .6s ease;
 }
@@ -1555,6 +1557,13 @@ a { color: inherit; }
   height: 100dvh;
   min-height: 0;
   padding: 0;
+}
+/* Bride & Groom: bg krem (bukan gelap) — saat foto meluncur masuk (reveal
+   enter-left/right), area yang tersingkap berwarna krem senada halaman lain. */
+#couple-bride.section,
+#couple-groom.section {
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 .couple-block { margin-bottom: 0; }
 .couple-block:last-child { margin-bottom: 0; }
