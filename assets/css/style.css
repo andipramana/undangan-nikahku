@@ -1378,10 +1378,11 @@ a { color: inherit; }
 .rsvp-form::before {
   content: "";
   position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  aspect-ratio: 2485 / 3936; /* proporsi asli foto rsvp-bg.jpg */
+  inset: 0; /* menutup penuh kartu berapa pun tinggi form — tidak ada area
+                kosong saat isi form bertambah panjang */
   background: url("../img/rsvp-bg.jpg") center / cover;
+  transform: scale(1.12); /* zoom sedikit: tinggi foto selalu > kartu, tetap
+                             menempel (fixed) dan tidak pernah bolong */
   z-index: -1;
   pointer-events: none;
 }
