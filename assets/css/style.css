@@ -1314,12 +1314,13 @@ a { color: inherit; }
 }
 .rsvp-form label {
   display: flex; flex-direction: column; gap: .45rem;
-  /* Samakan label field dengan heading DOA & UCAPAN: kecil, renggang, gold-brown. */
-  font-family: var(--font-sans); font-size: .66rem;
-  font-weight: 600;
-  letter-spacing: .16em; text-transform: uppercase;
-  color: #85652d;
-  text-shadow: none;
+  font-family: "Segoe UI", var(--font-sans); font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  /* Putih + shadow: label langsung di atas foto bg kartu (kartu transparan),
+     supaya tetap terbaca apa pun kontras foto di belakangnya. */
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(20, 18, 15, .55);
 }
 .rsvp-form input, .rsvp-form select, .rsvp-form textarea {
   width: 100%; font-family: var(--font-sans); font-size: .92rem;
