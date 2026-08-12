@@ -1708,6 +1708,9 @@ a { color: inherit; }
 .gift-floral--bottom-left { left: -12px; bottom: -8px; width: clamp(120px, 34vw, 160px); }
 .gift-floral--stem-right { right: -10px; top: 14dvh; width: clamp(130px, 36vw, 180px); }
 .gift-capsule .gift-floral--small { left: 6px; bottom: 10px; width: clamp(50px, 14vw, 68px); }
+/* Semua bunga di halaman Tanda Kasih dibuat samar — opacity 0.25 supaya hanya
+   menjadi aksen halus, tidak menyaingi konten capsule. */
+#gift [class*="gift-floral"] { opacity: .25; }
 .event-hero__date { position: relative; z-index: 1; flex: 0 0 auto; margin-bottom: clamp(.65rem, 2.4dvh, 1.25rem); }
 .event-hero__day {
   margin: 0 0 clamp(.18rem, .8dvh, .38rem);
