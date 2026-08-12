@@ -335,6 +335,53 @@
     });
   }
 
+  // Rail snap hanya mencakup urutan section penuh layar sampai Event. Begitu
+  // tamu bergerak melewati Event, mandatory dilepas agar section panjang
+  // sesudahnya tidak ditarik kembali ke Event. Saat kembali tepat ke Event,
+  // rail langsung aktif lagi sehingga rasa snap antar halaman penuh tetap kuat.
+  function setupSnapRail() {
+    const scroller = document.querySelector(".app-frame__scroll");
+    const railSections = document.querySelectorAll("[data-snap-rail]");
+    const lastRail = railSections[railSections.length - 1];
+    if (!scroller || !lastRail) return;
+
+    const setMode = (target) => {
+      const isRail = !!(target && target.matches && target.matches("[data-snap-rail]"));
+      scroller.classList.toggle("is-snap-rail", isRail);
+    };
+    window.setInvitationSnapMode = setMode;
+    setMode(lastRail);
+
+    const releaseAfterLastRail = () => {
+      const lastRailTop = lastRail.offsetTop;
+      if (scroller.scrollTop > lastRailTop + 2) {
+        scroller.classList.remove("is-snap-rail");
+      } else if (scroller.scrollTop <= lastRailTop + 2) {
+        scroller.classList.add("is-snap-rail");
+      }
+    };
+
+    scroller.addEventListener("scroll", releaseAfterLastRail, { passive: true });
+    scroller.addEventListener("wheel", (event) => {
+      const rect = lastRail.getBoundingClientRect();
+      if (event.deltaY > 0 && rect.top <= 2 && rect.bottom >= window.innerHeight - 2) {
+        scroller.classList.remove("is-snap-rail");
+      }
+    }, { passive: true });
+
+    let touchY = null;
+    scroller.addEventListener("touchstart", (event) => {
+      touchY = event.touches[0] && event.touches[0].clientY;
+    }, { passive: true });
+    scroller.addEventListener("touchmove", (event) => {
+      const y = event.touches[0] && event.touches[0].clientY;
+      const rect = lastRail.getBoundingClientRect();
+      if (touchY !== null && y < touchY && rect.top <= 2 && rect.bottom >= window.innerHeight - 2) {
+        scroller.classList.remove("is-snap-rail");
+      }
+    }, { passive: true });
+  }
+
   // Save The Date 2 ada jauh di bawah (setelah #couple) — beda dari #opening
   // yang dipicu sekali saat amplop dibuka (revealOpening di atas), section ini
   // baru boleh reveal saat benar-benar discroll ke layar, supaya animasi
@@ -486,6 +533,7 @@
     }
 
     await populateContent();
+    setupSnapRail();
     setupOpenButton();
     setupSaveTheDate2Reveal();
     if (window.initHeroSlideshows) window.initHeroSlideshows();

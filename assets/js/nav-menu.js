@@ -18,7 +18,7 @@ window.initNavMenu = function () {
 
   // [id section, label] — urut sesuai posisi section di halaman.
   const items = [
-    ["couple", "Mempelai"],
+    ["couple-bride", "Mempelai"],
     ["event", "Acara"],
     ["love-story", "Perjalanan Kami"],
     ["gallery", "Galeri"],
@@ -52,14 +52,16 @@ window.initNavMenu = function () {
     if (e.target === modal) close();
   });
 
-  // Klik item → tutup menu dulu, baru scroll pelan ke section-nya. Kalau
-  // target entah kenapa sudah tidak ada (mis. livestream dihapus runtime),
-  // klik hanya menutup menu tanpa scroll.
+  // Klik item → tutup menu dulu, lalu pilih mode scroll sesuai target. Rail
+  // full-screen tetap mandatory; target konten reguler harus bebas dari snap
+  // supaya browser tidak menariknya kembali ke Event.
   list.addEventListener("click", (e) => {
     const item = e.target.closest("[data-scroll]");
     if (!item) return;
     const target = document.querySelector(item.dataset.scroll);
     close();
-    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!target) return;
+    if (window.setInvitationSnapMode) window.setInvitationSnapMode(target);
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 };

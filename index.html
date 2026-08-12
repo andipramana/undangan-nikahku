@@ -104,7 +104,7 @@
   <div class="invitation-body">
 
     <!-- ============ SAVE THE DATE 1 (eyebrow + nama + ayat quran di atas foto hero) ============ -->
-    <section id="opening" class="section-hero section-hero--anchor-right-bottom">
+    <section id="opening" class="section-hero section-hero--anchor-right-bottom" data-snap-rail>
       <div class="hero-media" id="opening-media">
         <div class="hero-overlay hero-overlay--flat"></div>
       </div>
@@ -134,7 +134,7 @@
          pasangan) — reveal bride & groom terpicu terpisah lagi, masing-masing saat
          section-nya sendiri masuk layar. .couple-reveal tetap membungkus root Swiper,
          bukan menimpanya, supaya Swiper tidak salah mengukur slide gara-gara transform. -->
-    <section id="couple-bride" class="section section--dark couple-solo">
+    <section id="couple-bride" class="section section--dark couple-solo" data-snap-rail>
       <div class="couple-block" data-reveal-group data-reveal-early>
         <div class="couple-reveal" data-reveal="enter-right">
           <div class="couple-slider swiper" id="bride-slider">
@@ -150,7 +150,7 @@
       </div>
     </section>
 
-    <section id="couple-groom" class="section section--dark couple-solo">
+    <section id="couple-groom" class="section section--dark couple-solo" data-snap-rail>
       <div class="couple-block" data-reveal-group data-reveal-early>
         <div class="couple-reveal" data-reveal="enter-left">
           <div class="couple-slider swiper" id="groom-slider">
@@ -173,7 +173,7 @@
          background-image di #save-the-date-2-media — class
          .section-hero--static-bg menandai ini ke CSS. Tanggal diisi
          countdown.js; id event-date-label TANPA animasi angka (tampil tenang). -->
-    <section id="save-the-date-2" class="section-hero section-hero--anchor-right-bottom section-hero--static-bg">
+    <section id="save-the-date-2" class="section-hero section-hero--anchor-right-bottom section-hero--static-bg" data-snap-rail>
       <div class="hero-media" id="save-the-date-2-media">
         <div class="hero-overlay hero-overlay--flat"></div>
       </div>
@@ -204,7 +204,7 @@
 
     <!-- ============ EVENT (editorial: 1 panel, header tanggal besar + 2 blok
          acara Akad/Resepsi, TANPA foto/slider/card box) ============ -->
-    <section id="event" class="section event-hero">
+    <section id="event" class="section event-hero" data-snap-rail>
       <!-- Header tanggal besar — SATU untuk kedua acara (akad & resepsi hari yang
            sama, cuma beda jam, lihat cfg.event di config.js). data-count dipakai
            lagi (reveal.js, sudah ada, JANGAN bikin sistem counter baru). -->
