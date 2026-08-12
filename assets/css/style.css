@@ -905,12 +905,11 @@ a { color: inherit; }
    di dalam capsule tanpa overflow. */
 .gift-capsule.is-open .section-title,
 .gift-capsule.is-open .section-desc { display: none; }
-/* Tombol & teks di dalam capsule krem harus gelap (bukan putih transparan). */
-.gift-capsule .btn-outline { background: rgba(255, 255, 255, .65); color: var(--color-dark); }
+/* Tombol aksi di capsule (Kirim Hadiah / Rekomendasi Kado / Konfirmasi
+   Pengiriman): coklat #846d57, teks putih. */
+.gift-capsule .btn-outline { background: #846d57; color: #fff; }
+.gift-capsule .btn-outline:hover { background: #6e5947; color: #fff; }
 .gift-capsule .btn-text { color: var(--color-dark); }
-/* Teks tombol Kirim Hadiah memakai coklat senada bg section #gift. */
-.gift-capsule #btn-gift-toggle { color: #836c57; }
-.gift-capsule #btn-gift-toggle:hover { color: #6e5947; }
 .section--dark .section-eyebrow { color: var(--color-text-light); }
 
 .section-title {
@@ -1135,6 +1134,24 @@ a { color: inherit; }
 .modal__field select:focus, .modal__field textarea:focus { outline: none; border-color: var(--color-gold-soft); }
 .modal__panel .btn-primary { width: 100%; }
 .modal__hint { font-size: .7rem; opacity: .6; margin: .9rem 0 0; text-align: center; }
+
+/* Modal Konfirmasi Pengiriman & Rekomendasi Kado — senada dengan tombol
+   aksinya: bg coklat #846d57, tanpa border, semua teks putih agar visible. */
+#gift-confirm-modal .modal__panel,
+#gift-recs-modal .modal__panel {
+  background: #846d57;
+  border: none;
+  color: #fff;
+}
+#gift-confirm-modal .modal__header h3,
+#gift-confirm-modal .modal__close,
+#gift-recs-modal .modal__header h3,
+#gift-recs-modal .modal__close,
+#gift-confirm-modal .modal__field > span,
+#gift-recs-modal .modal__field > span {
+  color: #fff;
+}
+#gift-confirm-modal .modal__hint { color: #fff; opacity: .85; }
 
 /* Elemen dalam modal Konfirmasi Pengiriman & Rekomendasi Kado muncul
    BERURUTAN (stagger) setiap modal dibuka. Dipakai animasi keyframes (bukan
