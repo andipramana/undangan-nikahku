@@ -889,6 +889,7 @@ a { color: inherit; }
 }
 .gift-capsule {
   position: relative;
+  z-index: 1;
   width: min(74vw, 300px);
   height: min(94dvh, 760px);
   display: flex;
@@ -1695,8 +1696,8 @@ a { color: inherit; }
    menempel pojok section, tangkai horizontal di kanan tengah, 1 aksen kecil
    dalam capsule. */
 .gift-floral--top-left { top: -10px; left: -16px; z-index: 3; width: clamp(180px, 50vw, 240px); }
-.gift-floral--top-left-extra { top: clamp(90px, 26dvh, 140px); left: -14px; z-index: 3; width: clamp(100px, 30vw, 140px); }
-.gift-floral--juntaian { top: -8px; left: -10px; z-index: 2; width: clamp(84px, 26vw, 128px); }
+.gift-floral--top-left-extra { top: clamp(90px, 26dvh, 140px); left: -14px; z-index: 0; width: clamp(100px, 30vw, 140px); }
+.gift-floral--juntaian { top: -8px; left: -10px; z-index: 0; width: clamp(84px, 26vw, 128px); }
 .gift-floral--bottom-left { left: -12px; bottom: -8px; width: clamp(120px, 34vw, 160px); }
 .gift-floral--stem-right { right: -10px; top: 14dvh; width: clamp(130px, 36vw, 180px); }
 .gift-capsule .gift-floral--small { left: 6px; bottom: 10px; width: clamp(50px, 14vw, 68px); }
