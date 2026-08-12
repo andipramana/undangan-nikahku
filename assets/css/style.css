@@ -499,10 +499,10 @@ a { color: inherit; }
 /* Nama mempelai di Cover & Save The Date 1 kapital semua (Closing dibiarkan
    apa adanya, tidak diminta). */
 #couple-names-cover, #couple-names-opening { text-transform: uppercase; }
-/* "MITA & ANDI" di Cover dibuat jauh LEBIH KECIL dari nama di Save The Date 1
-   (#couple-names-opening) — cover cuma pemanis, jangan sampai mendominasi.
-   Base .script-names clamp 3rem-5rem jelas kebesaran. */
-#couple-names-cover { font-size: clamp(1.05rem, 4.8vw, 1.5rem); margin-top: .9rem; }
+/* "MITA & ANDI" di Cover disamakan ukurannya dengan nama di Save The Date 1
+   (#couple-names-opening) — sama persis clamp-nya. Base .script-names
+   clamp 3rem-5rem jelas kebesaran. */
+#couple-names-cover { font-size: clamp(1.8rem, 7vw, 2.6rem); margin-top: .9rem; }
 /* Nama di Save The Date 1 balik ke panggilan pendek "Mita & Andi" (bukan nama
    lengkap lagi) — boleh dibesarkan lagi karena teksnya sudah pendek. */
 #couple-names-opening { font-size: clamp(1.8rem, 7vw, 2.6rem); margin-top: .9rem; }
