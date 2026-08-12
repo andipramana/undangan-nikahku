@@ -1140,26 +1140,32 @@ a { color: inherit; }
 .modal__panel .btn-primary { width: 100%; }
 .modal__hint { font-size: .7rem; opacity: .6; margin: .9rem 0 0; text-align: center; }
 
-/* Modal Konfirmasi Pengiriman & Rekomendasi Kado — senada dengan tombol
-   aksinya: bg coklat #846d57, tanpa border, semua teks putih agar visible. */
-#gift-confirm-modal .modal__panel,
+/* Modal Rekomendasi Kado — senada dengan tombol aksinya: bg coklat #846d57,
+   tanpa border, semua teks putih agar visible. */
 #gift-recs-modal .modal__panel {
   background: #846d57;
   border: none;
   color: #fff;
 }
-#gift-confirm-modal .modal__header h3,
-#gift-confirm-modal .modal__close,
 #gift-recs-modal .modal__header h3,
-#gift-recs-modal .modal__close,
-#gift-confirm-modal .modal__field > span,
-#gift-recs-modal .modal__field > span {
+#gift-recs-modal .modal__close {
   color: #fff;
 }
-#gift-confirm-modal .modal__hint { color: #fff; opacity: .85; }
-/* Panel Konfirmasi WA dibatasi 6/8 tinggi layar (75dvh) — lebih ramping dari
-   panel modal umum (88vh); isi berlebih discroll di dalam panel. */
-#gift-confirm-modal .modal__panel { max-height: 75dvh; }
+/* Modal Konfirmasi Pengiriman — sama dengan modal QR & Menu: bg putih solid
+   (#ffffffcc), tanpa border, teks gelap agar selalu terbaca. Panel dibatasi
+   6/8 tinggi layar (75dvh); isi berlebih discroll di dalam panel. */
+#gift-confirm-modal .modal__panel {
+  background: #ffffffcc;
+  border: none;
+  color: var(--color-dark);
+  max-height: 75dvh;
+}
+#gift-confirm-modal .modal__header h3,
+#gift-confirm-modal .modal__close,
+#gift-confirm-modal .modal__field > span {
+  color: var(--color-dark);
+}
+#gift-confirm-modal .modal__hint { color: var(--color-dark); opacity: .85; }
 /* Modal QR check-in & Menu — bg putih lebih solid (opacity dinaikkan dari
    transparan FAB), tanpa border, teks gelap agar selalu terbaca. */
 #qr-checkin-modal .modal__panel,
