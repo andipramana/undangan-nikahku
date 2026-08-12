@@ -978,9 +978,14 @@ a { color: inherit; }
 #love-story .section-eyebrow,
 #love-story .section-title--script { color: var(--color-dark); }
 .timeline { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.5rem; }
-.timeline-item { text-align: left; } /* tanpa garis timeline di kiri foto */
+/* Foto dipersempit ke 6/8 (75%) lebar kontainer (≈ layar di HP) dan diposisikan
+   ke sisi sesuai arah reveal-nya — slide dari kiri -> rata kiri, dari kanan ->
+   rata kanan; teks ikut rata ke sisi yang sama supaya jelas foto mana milik
+   teks mana. */
+.timeline-item { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.timeline-item--right { align-items: flex-end; text-align: right; }
 .timeline-item__photo {
-  width: 100%; aspect-ratio: 16/10; object-fit: cover;
+  width: 75%; aspect-ratio: 16/10; object-fit: cover;
   border-radius: 10px; border: 1px solid var(--color-gold);
   margin-bottom: 1rem;
 }

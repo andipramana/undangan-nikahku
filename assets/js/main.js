@@ -236,8 +236,9 @@
         const pan = p
           ? ` style="--fx:${p.focalX ?? 50}%; --fy:${p.focalY ?? 50}%; --zoom:${p.zoom ?? 1}"`
           : "";
+        const side = i % 2 ? "left" : "right";
         return `
-      <div class="timeline-item" data-reveal="${i % 2 ? "slide-left" : "slide-right"}" data-reveal-group>
+      <div class="timeline-item timeline-item--${side}" data-reveal="slide-${side}" data-reveal-group>
         ${imgSrc ? `<img class="timeline-item__photo" src="${esc(imgSrc)}" alt="${esc(item.title)}"${pan}>` : ""}
         <span class="timeline-date" data-reveal="down" data-count style="--reveal-i:1">${esc(item.date)}</span>
         <h4 data-reveal="pop" style="--reveal-i:2">${esc(item.title)}</h4>
