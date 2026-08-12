@@ -1690,10 +1690,13 @@ a { color: inherit; }
 .event-floral--stem-right { top: 16dvh; right: -8px; z-index: 3; width: clamp(56px, 18vw, 78px); }
 .event-hero__capsule .event-floral--stem-left { left: -8px; bottom: 2dvh; z-index: 3; width: clamp(42px, 13vw, 58px); }
 /* Bunga Tanda Kasih — aset putih, letak mengikuti referensi capsule event:
-   4 aksen di pojok section (kiri atas & kanan bawah memakai posisi event
-   standar), tangkai horizontal di kanan tengah, 1 aksen kecil dalam capsule. */
+   kiri atas & juntaian nempel pojok kiri atas CAPSULE (dalam), kanan bawah &
+   kiri bawah menempel pojok section, tangkai horizontal di kanan tengah,
+   1 aksen kecil dalam capsule. */
 .gift-floral--bottom-left { left: -12px; bottom: -8px; width: clamp(120px, 34vw, 160px); }
 .gift-floral--stem-right { right: -10px; top: 14dvh; width: clamp(130px, 36vw, 180px); }
+.gift-capsule .gift-floral--top-left { top: -10px; left: -16px; z-index: 3; width: clamp(180px, 50vw, 240px); }
+.gift-capsule .gift-floral--juntaian { top: clamp(96px, 30dvh, 150px); left: -8px; z-index: 3; width: clamp(84px, 26vw, 128px); }
 .gift-capsule .gift-floral--small { left: 6px; bottom: 10px; width: clamp(50px, 14vw, 68px); }
 .event-hero__date { position: relative; z-index: 1; flex: 0 0 auto; margin-bottom: clamp(.65rem, 2.4dvh, 1.25rem); }
 .event-hero__day {
