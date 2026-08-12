@@ -411,11 +411,13 @@
       if (mode === "upper" && st >= eventTop - 2) applyMode("free");
       if (mode === "gift" && (st < giftTop - 2 || st >= giftBottom - 2)) applyMode("free");
 
-      // Gift baru jadi kandidat saat didekati dari zona Galeri dengan arah turun.
-      // Karena CSS mode gift hanya mendaftarkan Gift, browser akan mendarat di
-      // sana tanpa pernah melewati Our Story atau Galeri.
+      // Gift sengaja memakai ambang masuk yang lebih dalam daripada rail atas:
+      // tamu bisa melihat dan menelusuri bagian akhir Galeri tanpa sedikit
+      // kemunculan Gift langsung ditarik magnet. Baru setelah sekitar 45% Gift
+      // masuk ke viewport, rail Gift aktif dan menyelesaikan landing-nya.
+      const giftSnapThreshold = giftTop + Math.min(giftSec.offsetHeight, scroller.clientHeight) * .45;
       if (mode === "free" && inputDirection > 0 && st >= eventBottom - 2 &&
-          st < giftTop && viewBottom >= giftTop) {
+          st < giftTop && viewBottom >= giftSnapThreshold) {
         applyMode("gift");
       }
       // Kembali dari gap ke Event dari arah naik menghidupkan rail atas lagi.
