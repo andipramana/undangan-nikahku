@@ -10,14 +10,15 @@
   const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   // Root routes (/admin/, /admin-qr/) are distinct from tenant routes
   // (/siti-dan-ujang/admin/).
-  const rootSurface = parts[0] === "admin" ? "admin" : parts[0] === "admin-qr" ? "admin-qr" : null;
+  const rootSurface = parts[0] === "admin" ? "admin" : parts[0] === "admin-qr" ? "admin-qr" : parts[0] === "wa" ? "wa" : null;
   const slug = rootSurface ? "root" : (parts[0] && slugPattern.test(parts[0]) ? parts[0] : "root");
-  const surface = rootSurface || (parts[1] === "admin" ? "admin" : parts[1] === "admin-qr" ? "admin-qr" : "invitation");
+  const surface = rootSurface || (parts[1] === "admin" ? "admin" : parts[1] === "admin-qr" ? "admin-qr" : parts[1] === "wa" ? "wa" : "invitation");
 
   // 404 fallback initially opens index.html. Switch static shell before it
   // renders when the requested route is an admin surface.
   if (routeFromQuery && location.pathname.endsWith("index.html") && surface !== "invitation") {
-    location.replace(`/${surface === "admin" ? "admin.html" : "admin-qr.html"}?__tenant_route=${encodeURIComponent(routeFromQuery)}`);
+    const shell = surface === "admin" ? "admin.html" : surface === "admin-qr" ? "admin-qr.html" : "wa.html";
+    location.replace(`/${shell}?__tenant_route=${encodeURIComponent(routeFromQuery)}`);
     return;
   }
 
@@ -44,6 +45,7 @@
     path(kind) {
       if (kind === "admin") return slug === "root" ? "/admin/" : `/${slug}/admin/`;
       if (kind === "admin-qr") return slug === "root" ? "/admin-qr/" : `/${slug}/admin-qr/`;
+      if (kind === "wa") return slug === "root" ? "/wa/" : `/${slug}/wa/`;
       return basePath;
     },
     storagePath(filename) {

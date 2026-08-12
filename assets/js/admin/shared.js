@@ -136,13 +136,13 @@
 
   const tenant = window.TenantContext || { slug: "root", invitationId: null, setInvitation() {} };
 
-  async function requireTenantAccess() {
+  async function requireTenantAccess(allowedRoles) {
     const { data, error } = await query(
       sb.rpc("get_my_invitation_access", { p_slug: tenant.slug }),
       "Verifikasi akses undangan"
     );
     const access = Array.isArray(data) ? data[0] : null;
-    if (error || !access || !access.invitation_id) {
+    if (error || !access || !access.invitation_id || (allowedRoles && !allowedRoles.includes(access.role))) {
       await sb.auth.signOut();
       throw new Error("Akun ini tidak berhak mengakses undangan ini.");
     }
@@ -221,7 +221,7 @@
   function initAdminAuth(opts) {
     async function showApp() {
       try {
-        await requireTenantAccess();
+        await requireTenantAccess(opts.allowedRoles);
         document.getElementById("login-screen").hidden = true;
         document.getElementById("app").hidden = false;
         if (opts.onSignedIn) opts.onSignedIn();

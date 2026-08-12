@@ -18,6 +18,8 @@
     onSignedIn: async () => {
       const preview = document.getElementById("preview-invitation");
       if (preview) preview.href = window.AdminAPI.tenant.path();
+      const waWorkspace = document.getElementById("wa-workspace-link");
+      if (waWorkspace) waWorkspace.href = window.AdminAPI.tenant.path("wa");
       if (window.ContentPanel && window.ContentPanel.load) await window.ContentPanel.load();
       // Menu lompat-section butuh fieldset #sec-... yang baru ada setelah form
       // tab Teks dirender — init di sini, bukan di awal halaman.
@@ -26,10 +28,8 @@
     tabHandlers: {
       photos: () => { if (window.PhotosPanel) window.PhotosPanel.load(); },
       wishes: () => { if (window.WishesPanel) window.WishesPanel.load(); },
-      // Kirim WA hanya ada di admin.html — admin-qr.html tidak punya tab ini
-      // (fitur broadcast di luar scope check-in), jadi handler ini tidak pernah
-      // dipanggil di sana.
-      wa: () => { if (window.WaBlast) window.WaBlast.load(); },
+      // Pengiriman WA punya workspace terang sendiri; tidak lagi dimuat sebagai
+      // panel gelap di sini (tautan di top-level admin.html menuju /<slug>/wa/).
       // Tampilan juga khusus admin.html (tema warna di luar scope check-in).
       tampilan: () => { if (window.ThemePanel) window.ThemePanel.load(); },
       fonts: () => { if (window.FontsPanel) window.FontsPanel.load(); },

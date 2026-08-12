@@ -3,7 +3,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const dist = path.join(root, "dist");
-const rootFiles = ["index.html", "admin.html", "admin-qr.html", "register.html", "404.html", "CNAME"];
+const rootFiles = ["index.html", "admin.html", "admin-qr.html", "wa.html", "register.html", "404.html", "CNAME"];
 const routedFiles = ["home/index.html", "demo/index.html"];
 
 // Clear contents of dist WITHOUT removing the dist directory itself (Windows can
@@ -39,9 +39,12 @@ const required = [
   "assets/img/favicon.png",
   "assets/css/style.css",
   "assets/css/admin.css",
+  "assets/css/wa.css",
   "assets/js/template-engine.js",
   "assets/js/config.js",
   "assets/js/tenant.js",
+  "assets/js/wa.js",
+  "assets/js/admin/wa-blast.js",
   "assets/js/register.js",
   "templates/classic-elegance.json",
   "templates/modern-minimal.json",

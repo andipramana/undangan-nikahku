@@ -40,8 +40,10 @@
   let templates = [];
   const CONTACT_PAGE_SIZES = [20, 50, 100];
   let contactFilter = "all";
+  let contactSearch = "";
   let contactPage = 1;
-  let contactPageSize = Number(localStorage.getItem("admin-wa-page-size")) || 50;
+  const pageSizeKey = `wa-page-size-${window.AdminAPI.tenant.slug}`;
+  let contactPageSize = Number(localStorage.getItem(pageSizeKey)) || 50;
   if (!CONTACT_PAGE_SIZES.includes(contactPageSize)) contactPageSize = 50;
 
   // Pengaturan tab WA (migration 0007, baris tunggal id=1) — link undangan
@@ -302,28 +304,39 @@
   function renderContacts() {
     const root = document.getElementById("wa-contacts");
     if (!contacts.length) { root.innerHTML = `<p class="muted">Belum ada kontak — import CSV/Excel atau tambah manual.</p>`; return; }
-    const filtered = contacts.map((contact, index) => ({ contact, index })).filter(({ contact }) => contactFilter === "all" || (contactFilter === "sent" ? !!contact.sent : !contact.sent));
+    const filtered = contacts.map((contact, index) => ({ contact, index })).filter(({ contact }) => {
+      const matchesStatus = contactFilter === "all" || (contactFilter === "sent" ? !!contact.sent : !contact.sent);
+      const keyword = contactSearch.trim().toLowerCase();
+      const matchesSearch = !keyword || contact.name.toLowerCase().includes(keyword) || contact.phone.includes(keyword);
+      return matchesStatus && matchesSearch;
+    });
     const pageCount = Math.max(1, Math.ceil(filtered.length / contactPageSize));
     contactPage = Math.min(contactPage, pageCount);
     const visible = filtered.slice((contactPage - 1) * contactPageSize, contactPage * contactPageSize);
     const totalSent = contacts.filter(c => c.sent).length;
     root.innerHTML = `
-      <div class="wa-contact-toolbar">
-        <label>Status <select class="input" id="wa-contact-filter"><option value="all" ${contactFilter==="all"?"selected":""}>Semua (${contacts.length})</option><option value="pending" ${contactFilter==="pending"?"selected":""}>Belum dikirim (${contacts.length-totalSent})</option><option value="sent" ${contactFilter==="sent"?"selected":""}>Sudah dikirim (${totalSent})</option></select></label>
-        <label>Tampil <select class="input" id="wa-contact-page-size">${CONTACT_PAGE_SIZES.map(n=>`<option value="${n}" ${n===contactPageSize?"selected":""}>${n}</option>`).join("")}</select> per halaman</label>
-      </div>
-      <p class="wa-contact-result muted">Menampilkan ${visible.length ? ((contactPage-1)*contactPageSize+1) : 0}–${Math.min(contactPage*contactPageSize, filtered.length)} dari ${filtered.length} kontak</p>
-      <div class="wa-contact-list">${visible.map(({contact:c,index:i}) => `
-        <div class="wa-contact-row wa-contact-row--${c.sent ? "sent" : "pending"}" data-i="${i}">
-          <input type="checkbox" class="wa-contact-sent" data-i="${i}" ${c.sent ? "checked" : ""} aria-label="Tandai sudah dikirim">
-          <div class="wa-contact-name"><strong>${esc(c.name)}</strong><small>${esc(c.phone)}</small></div>
-          <span class="wa-contact-status">${c.sent ? "✓ Terkirim" : "Belum dikirim"}</span>
-          <select class="wa-contact-template" data-i="${i}" title="Template pesan"><option value="">Default</option>${templates.map(t => `<option value="${t.id}" ${c.template_id===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select>
-          <button type="button" class="btn btn--tiny wa-contact-send" data-i="${i}" title="Buka WhatsApp dengan pesan siap kirim">Kirim</button><button type="button" class="btn btn--tiny btn--danger wa-contact-del" data-i="${i}" aria-label="Hapus kontak">&times;</button>
-        </div>`).join("") || `<p class="muted">Tidak ada kontak untuk filter ini.</p>`}</div>
-      <nav class="wa-pagination" aria-label="Halaman kontak"><button class="btn btn--tiny" id="wa-prev" ${contactPage===1?"disabled":""}>← Sebelumnya</button><span>Halaman ${contactPage} dari ${pageCount}</span><button class="btn btn--tiny" id="wa-next" ${contactPage===pageCount?"disabled":""}>Berikutnya →</button></nav>`;
+      <section class="wa-contact-shell">
+        <div class="wa-contact-toolbar">
+          <label class="wa-contact-search"><span>Cari kontak</span><input class="input" id="wa-contact-search" type="search" value="${esc(contactSearch)}" placeholder="Nama atau nomor"></label>
+          <div class="wa-contact-toolbar__filters">
+            <label><span>Status</span><select class="input" id="wa-contact-filter"><option value="all" ${contactFilter==="all"?"selected":""}>Semua (${contacts.length})</option><option value="pending" ${contactFilter==="pending"?"selected":""}>Belum (${contacts.length-totalSent})</option><option value="sent" ${contactFilter==="sent"?"selected":""}>Terkirim (${totalSent})</option></select></label>
+            <label><span>Tampil</span><select class="input" id="wa-contact-page-size">${CONTACT_PAGE_SIZES.map(n=>`<option value="${n}" ${n===contactPageSize?"selected":""}>${n} / halaman</option>`).join("")}</select></label>
+          </div>
+        </div>
+        <p class="wa-contact-result muted">Menampilkan ${visible.length ? ((contactPage-1)*contactPageSize+1) : 0}–${Math.min(contactPage*contactPageSize, filtered.length)} dari ${filtered.length} kontak</p>
+        <div class="wa-contact-list">${visible.map(({contact:c,index:i}) => `
+          <article class="wa-contact-row wa-contact-row--${c.sent ? "sent" : "pending"}" data-i="${i}">
+            <input type="checkbox" class="wa-contact-sent" data-i="${i}" ${c.sent ? "checked" : ""} aria-label="Tandai ${esc(c.name)} sudah dikirim">
+            <div class="wa-contact-name"><strong>${esc(c.name)}</strong><small>${esc(c.phone)}</small></div>
+            <span class="wa-contact-status">${c.sent ? "Terkirim" : "Belum dikirim"}</span>
+            <label class="wa-contact-template-wrap"><span>Template</span><select class="wa-contact-template" data-i="${i}" aria-label="Template pesan untuk ${esc(c.name)}"><option value="">Default</option>${templates.map(t => `<option value="${t.id}" ${c.template_id===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label>
+            <div class="wa-contact-actions"><button type="button" class="btn btn--tiny wa-contact-send" data-i="${i}" title="Buka WhatsApp dengan pesan siap kirim">Kirim WA</button><button type="button" class="btn btn--tiny btn--danger wa-contact-del" data-i="${i}" aria-label="Hapus kontak ${esc(c.name)}">Hapus</button></div>
+          </article>`).join("") || `<p class="muted">Tidak ada kontak untuk filter ini.</p>`}</div>
+        <nav class="wa-pagination" aria-label="Halaman kontak"><button class="btn btn--tiny" id="wa-prev" ${contactPage===1?"disabled":""}>← Sebelumnya</button><span>Halaman ${contactPage} dari ${pageCount}</span><button class="btn btn--tiny" id="wa-next" ${contactPage===pageCount?"disabled":""}>Berikutnya →</button></nav>
+      </section>`;
+    root.querySelector("#wa-contact-search").oninput=e=>{contactSearch=e.target.value;contactPage=1;renderContacts();};
     root.querySelector("#wa-contact-filter").onchange=e=>{contactFilter=e.target.value;contactPage=1;renderContacts();};
-    root.querySelector("#wa-contact-page-size").onchange=e=>{contactPageSize=Number(e.target.value);localStorage.setItem("admin-wa-page-size",String(contactPageSize));contactPage=1;renderContacts();};
+    root.querySelector("#wa-contact-page-size").onchange=e=>{contactPageSize=Number(e.target.value);localStorage.setItem(pageSizeKey,String(contactPageSize));contactPage=1;renderContacts();};
     root.querySelector("#wa-prev").onclick=()=>{contactPage--;renderContacts();}; root.querySelector("#wa-next").onclick=()=>{contactPage++;renderContacts();};
   }
 

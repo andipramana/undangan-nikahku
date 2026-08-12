@@ -65,6 +65,13 @@ body::before {
 }
 .app-frame__scroll::-webkit-scrollbar { width: 5px; }
 .app-frame__scroll::-webkit-scrollbar-thumb { background: rgba(201,169,110,.35); border-radius: 3px; }
+.app-frame__scroll.is-snap-rail {
+  scroll-snap-type: y mandatory;
+}
+.app-frame__scroll.is-snap-rail [data-snap-rail] {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
 html.no-scroll .app-frame__scroll { overflow: hidden; }
 
 /* ─── PRELOADER ─── */
@@ -668,6 +675,28 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 
 /* ═══════════════════════ COUPLE ═══════════════════════ */
+/* Bride/Groom modern memakai DOM section terpisah, bukan #couple lama.
+   Tinggi tepat satu viewport menjaga jarak titik snap konsisten. */
+.couple-solo.section {
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.couple-solo .couple-block,
+.couple-solo .couple-reveal,
+.couple-solo .couple-slider {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.couple-solo .couple-slider { max-width: none; position: relative; overflow: hidden; }
+.couple-solo .couple-slider .swiper-slide img { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; }
+.couple-solo .couple-info {
+  position: absolute; inset: auto 0 0; z-index: 3;
+  padding: 3rem 1.5rem 2rem;
+  background: linear-gradient(0deg, #1a1816 0%, rgba(26,24,22,.7) 45%, transparent 100%);
+}
 #couple.section { padding: 4rem 0; }
 .couple-block { margin: 2.5rem 0; text-align: center; }
 .couple-slider { max-width: 300px; margin: 0 auto; overflow: hidden; }

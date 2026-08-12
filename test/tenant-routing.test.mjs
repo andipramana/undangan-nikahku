@@ -7,10 +7,12 @@ import {
   storagePath
 } from "../scripts/tenant-routing.mjs";
 
-test("tenant route parses public and admin surfaces", () => {
+test("tenant route parses public, admin, and WhatsApp surfaces", () => {
   assert.deepEqual(parseInvitationRoute("/siti-dan-ujang/"), { slug: "siti-dan-ujang", surface: "invitation" });
   assert.deepEqual(parseInvitationRoute("/siti-dan-ujang/admin/"), { slug: "siti-dan-ujang", surface: "admin" });
   assert.deepEqual(parseInvitationRoute("/siti-dan-ujang/admin-qr/"), { slug: "siti-dan-ujang", surface: "admin-qr" });
+  assert.deepEqual(parseInvitationRoute("/siti-dan-ujang/wa/"), { slug: "siti-dan-ujang", surface: "wa" });
+  assert.deepEqual(parseInvitationRoute("/wa/"), { slug: "root", surface: "wa" });
 });
 
 test("tenant route rejects unrecognized nested paths", () => {
@@ -21,6 +23,8 @@ test("tenant route rejects unrecognized nested paths", () => {
 test("tenant paths preserve root and isolate non-root slugs", () => {
   assert.equal(invitationPath("root", "admin"), "/admin/");
   assert.equal(invitationPath("siti-dan-ujang", "admin"), "/siti-dan-ujang/admin/");
+  assert.equal(invitationPath("root", "wa"), "/wa/");
+  assert.equal(invitationPath("siti-dan-ujang", "wa"), "/siti-dan-ujang/wa/");
   assert.equal(storagePath("siti-dan-ujang", "cover/01.webp"), "siti-dan-ujang/cover/01.webp");
   assert.throws(() => storagePath("siti-dan-ujang", "../other/secret.webp"));
 });

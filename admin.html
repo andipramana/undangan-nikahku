@@ -58,7 +58,7 @@
     <button type="button" class="tab tab--active" data-tab="content">Teks</button>
     <button type="button" class="tab" data-tab="photos">Foto</button>
     <button type="button" class="tab" data-tab="wishes">Ucapan</button>
-    <button type="button" class="tab" data-tab="wa">Kirim WA</button>
+    <a id="wa-workspace-link" class="tab" href="/wa/">Kirim WA</a>
     <button type="button" class="tab" data-tab="tampilan">Tampilan</button>
     <button type="button" class="tab" data-tab="fonts">Font</button>
     <button type="button" class="tab" data-tab="editor-visual">Editor Visual</button>
@@ -104,47 +104,10 @@
   </div>
 
   <!-- ============ TAB KIRIM WA ============ -->
-  <!-- Broadcast SATU-PER-SATU (BUKAN bulk otomatis): import daftar kontak,
-       atur template pesan, lalu tiap baris punya tombol yang membuka wa.me —
-       admin sendiri yang menekan tombol kirim FINAL di aplikasi WhatsApp.
-       Banner di bawah sengaja teks, bukan mekanisme pemblokiran. Isi daftar
-       dirender wa-blast.js. -->
+  <!-- Workspace WhatsApp sekarang punya halaman terang sendiri agar alur
+       pengiriman tidak bercampur dengan editor undangan. -->
   <main id="tab-wa" class="panel" hidden>
-    <div class="wa-toolbar">
-      <label class="upload-wrap">
-        <span class="btn btn--primary">Import CSV / Excel…</span>
-        <input type="file" id="wa-import" accept=".csv,.xlsx,.xls" hidden>
-      </label>
-      <button type="button" class="btn btn--ghost" id="wa-add">+ Tambah kontak</button>
-    </div>
-    <p id="wa-summary" class="muted wa-summary"></p>
-    <!-- Tidak mengganggu daftar kontak: peringatan, link dan template disimpan
-         dalam details yang bisa ditutup. Tetap terbuka saat pertama kali agar
-         konfigurasi awal tidak terlewat. -->
-    <details class="wa-config" open>
-      <summary>Pengaturan pengiriman, link & template</summary>
-      <p class="warning" id="wa-warning">Kirim satu-per-satu dengan jeda wajar antar
-      kontak (mis. beberapa detik), JANGAN buka puluhan tab sekaligus dalam hitungan
-      detik — nomor WA bisa kena pembatasan sementara oleh WhatsApp. Untuk
-      ratusan-ribuan kontak, pertimbangkan WhatsApp Business App atau sebar
-      pengiriman ke beberapa hari.</p>
-      <!-- Link undangan + template default tersimpan tenant-scoped di wa_settings. -->
-      <div class="wa-settings">
-      <p class="wa-templates-title">Pengaturan</p>
-      <label class="form-field">
-        <span>Link undangan</span>
-        <input type="url" id="wa-link" class="input" placeholder="https://undangan.andipramana.com/">
-      </label>
-      <label class="form-field">
-        <span>Template Default</span>
-        <textarea id="wa-default-template" class="input wa-template-body" rows="5"
-                  placeholder="Pesan bawaan kontak tanpa template kustom. Token: ${tamu} ${CPP} ${CPW} ${link}"></textarea>
-      </label>
-      <button type="button" class="btn btn--primary" id="wa-settings-save">Simpan pengaturan</button>
-      </div>
-      <div id="wa-templates"></div>
-    </details>
-    <div id="wa-contacts"></div>
+    <p class="muted">Gunakan menu <strong>Kirim WA</strong> untuk membuka workspace pengiriman.</p>
   </main>
 
   <!-- ============ TAB TAMPILAN ============ -->
@@ -226,30 +189,7 @@
   </div>
 </div>
 
-<!-- ============ MODAL TAMBAH KONTAK (tab Kirim WA) ============ -->
-<!-- Satu kontak manual — nomor dinormalisasi (08xx/+62/62 → 62xx) oleh
-     wa-blast.js sebelum disimpan, sama seperti jalur import. -->
-<div id="wa-add-modal" class="modal" hidden>
-  <div class="modal__panel">
-    <div class="modal__header">
-      <h3>Tambah kontak</h3>
-      <button type="button" class="modal__close" id="wa-add-close" aria-label="Tutup">&times;</button>
-    </div>
-    <div class="form-grid">
-      <label class="form-field">
-        <span>Nama</span>
-        <input type="text" id="wa-add-name" placeholder="Nama tamu">
-      </label>
-      <label class="form-field">
-        <span>Nomor WA</span>
-        <input type="tel" id="wa-add-phone" placeholder="08xx / +62xx / 62xx">
-      </label>
-    </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn--primary" id="wa-add-save">Simpan</button>
-    </div>
-  </div>
-</div>
+<!-- Modal tambah kontak kini dimiliki workspace /<slug>/wa/ sendiri. -->
 
 <!-- Tombol "Simpan semua" — dipindah keluar dari form (dulu dirender content.js
      di dalam scroller) supaya bisa position:fixed tanpa ikut hanyut. Atribut
@@ -284,12 +224,7 @@
 <script src="assets/js/admin/photos.js"></script>
 <script src="assets/js/admin/editor.js"></script>
 <script src="assets/js/admin/wishes.js"></script>
-<!-- SheetJS untuk import .xlsx di tab Kirim WA — dimuat lewat CDN, pola sama
-     seperti jsQR di admin-qr.html. wa-blast.js memakainya hanya kalau admin
-     mengimpor file Excel; tanpa itu library ini tidak dipanggil sama sekali. -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="assets/js/admin/wa-blast.js"></script>
 <script src="assets/js/admin/theme.js"></script>
 <script src="assets/js/admin/fonts.js"></script>
 <script src="assets/js/visual-editor/registry.js"></script>

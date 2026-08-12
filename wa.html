@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="/">
+<meta name="robots" content="noindex">
+<title>WhatsApp Undangan</title>
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="assets/css/wa.css">
+</head>
+<body>
+<div class="wa-shell">
+  <div id="login-screen" class="wa-login">
+    <form id="login-form" class="wa-login__card">
+      <p class="wa-kicker">WORKSPACE UNDANGAN</p>
+      <h1>Kirim WhatsApp dengan lebih rapi.</h1>
+      <p>Masuk dengan akun admin untuk mengelola daftar tamu undangan ini.</p>
+      <label>Email admin<input type="email" id="login-username" autocomplete="username" required></label>
+      <label>Kata sandi<input type="password" id="login-password" autocomplete="current-password" required></label>
+      <button type="submit" id="login-submit" class="wa-button wa-button--primary">Masuk ke workspace</button>
+      <p id="login-error" class="wa-error" role="alert"></p>
+    </form>
+  </div>
+
+  <main id="app" hidden>
+    <header class="wa-header">
+      <a id="wa-back-invitation" class="wa-brand" href="/" target="_blank" rel="noopener"><span>✦</span> Undangan</a>
+      <div class="wa-header__identity"><p class="wa-kicker">PENGIRIMAN UNDANGAN</p><h1 id="wa-page-title">WhatsApp</h1></div>
+      <button type="button" id="btn-logout" class="wa-button wa-button--quiet">Keluar</button>
+    </header>
+
+    <div class="wa-layout">
+      <section class="wa-workspace">
+        <div class="wa-hero">
+          <div><p class="wa-kicker">DAFTAR TAMU</p><h2>Kirim satu per satu, tetap personal.</h2><p>Setiap tombol hanya membuka satu chat WhatsApp dengan pesan yang sudah disiapkan.</p></div>
+          <div class="wa-toolbar wa-toolbar--actions">
+            <label class="wa-button wa-button--primary"><span>Impor CSV / Excel</span><input type="file" id="wa-import" accept=".csv,.xlsx,.xls" hidden></label>
+            <button type="button" class="wa-button wa-button--secondary" id="wa-add">Tambah kontak</button>
+          </div>
+        </div>
+        <p id="wa-summary" class="wa-summary"></p>
+        <div id="wa-contacts" class="wa-contacts" aria-live="polite"></div>
+      </section>
+
+      <aside class="wa-settings-column">
+        <details class="wa-config" open>
+          <summary><span>Pengaturan pesan</span><small>Link &amp; template</small></summary>
+          <p id="wa-warning" class="wa-notice">Kirim dengan jeda wajar dan selesaikan satu chat sebelum membuka kontak berikutnya.</p>
+          <div class="wa-settings">
+            <label>Link undangan<input type="url" id="wa-link" placeholder="https://undangan.andipramana.com/"></label>
+            <label>Template default<textarea id="wa-default-template" rows="8" placeholder="Token: ${tamu} ${CPP} ${CPW} ${link}"></textarea></label>
+            <p class="wa-token-help">Token tersedia: <code>${tamu}</code> <code>${CPP}</code> <code>${CPW}</code> <code>${link}</code></p>
+            <button type="button" class="wa-button wa-button--primary" id="wa-settings-save">Simpan pengaturan</button>
+          </div>
+          <div id="wa-templates"></div>
+        </details>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<div id="wa-add-modal" class="wa-modal" hidden>
+  <div class="wa-modal__card" role="dialog" aria-modal="true" aria-labelledby="wa-add-title">
+    <div class="wa-modal__head"><h2 id="wa-add-title">Tambah kontak</h2><button type="button" id="wa-add-close" class="wa-icon-button" aria-label="Tutup">×</button></div>
+    <label>Nama tamu<input id="wa-add-name" autocomplete="name"></label>
+    <label>Nomor WhatsApp<input id="wa-add-phone" inputmode="tel" placeholder="08123456789"></label>
+    <button type="button" id="wa-add-save" class="wa-button wa-button--primary">Simpan kontak</button>
+  </div>
+</div>
+<div id="toast" class="wa-toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/tenant.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/js/admin/shared.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="assets/js/admin/wa-blast.js"></script>
+<script src="assets/js/wa.js"></script>
+</body>
+</html>

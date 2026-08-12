@@ -101,6 +101,10 @@ html, body {
 .app-frame__scroll.is-snap-rail {
   scroll-snap-type: y mandatory;
 }
+.app-frame__scroll.is-snap-rail [data-snap-rail] {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
 .app-frame__scroll {
   scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
   scrollbar-color: var(--color-gold) transparent;
@@ -1336,7 +1340,10 @@ a { color: inherit; }
   font-family: var(--font-sans); font-size: .82rem; cursor: pointer;
   transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
 }
-.rsvp-pill--full { grid-column: 1 / -1; }
+/* Discope ke .rsvp-form supaya specificity (0,2,0) sama dengan
+   .rsvp-form .rsvp-pill (grid-column: span 1) — dan muncul BELAKANG di
+   file, jadi menang: tombol Hadir tetap full width satu baris penuh. */
+.rsvp-form .rsvp-pill--full { grid-column: 1 / -1; }
 .rsvp-pill:hover { transform: translateY(-1px); }
 .rsvp-pill.is-selected { background: var(--color-gold); color: var(--color-dark); font-weight: 600; box-shadow: 0 5px 12px rgba(139,104,45,.2); }
 .rsvp-form .btn-primary { width: 100%; margin-top: .25rem; }
@@ -1448,22 +1455,28 @@ a { color: inherit; }
 /* ---------- Kedua Mempelai (slideshow besar 3/4 layar + info overlay) ---------- */
 /* Full-width, tanpa rounded, rapat ke ayat quran di atasnya (tanpa heading). */
 .couple-solo.section {
-  padding: 0 0 1.5rem;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
 }
 .couple-block { margin-bottom: 0; }
 .couple-block:last-child { margin-bottom: 0; }
-/* Bride & Groom sekarang masing-masing section TERSENDIRI, full-screen (100dvh)
-   supaya bisa jadi snap point (lihat scroll-snap-type di .app-frame__scroll). */
+/* Bride & Groom masing-masing adalah satu snap point tepat setinggi viewport.
+   Reset padding section penting: slider juga memenuhi tinggi section, jadi
+   padding tambahan akan membuat titik snap bergeser lebih dari satu layar. */
 .couple-solo {
-  min-height: 100dvh;
   display: flex;
   align-items: stretch;
   scroll-snap-align: start;
 }
-.couple-solo .couple-block { width: 100%; }
+.couple-solo .couple-block,
+.couple-solo .couple-reveal,
 .couple-solo .couple-slider {
-  height: 100dvh;
-  max-height: none; /* dulu dibatasi 720px karena 2 slider ditumpuk di 1 section, sekarang tidak perlu */
+  width: 100%;
+  height: 100%;
+}
+.couple-solo .couple-slider {
+  max-height: none; /* section terpisah, jadi tidak lagi dibatasi tinggi slider lama */
 }
 /* Pembungkus yang meluncur masuk dari luar layar. Sengaja terpisah dari
    .couple-slider (root Swiper) supaya Swiper tidak mengukur slide dalam keadaan
