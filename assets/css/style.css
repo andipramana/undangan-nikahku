@@ -1861,49 +1861,33 @@ a { color: inherit; }
   color: #f4eee3;
 }
 
-/* ---------- Quotes (bg gelap, kutipan bergantian antara Our Story & Galeri) ----------
-   Rotasi murni CSS: satu siklus 18s, tiap kutipan tampil 6s lalu fade. Item
-   bertumpuk di sel grid yang sama (grid-area 1/1) sehingga tinggi section
-   stabil mengikuti kutipan terpanjang. */
+/* ---------- Quotes (bg gelap, satu kutipan statis antara Our Story & Galeri)
+   Tinggi persegi SAMA dengan section quote 1 (aspect-ratio 1/1), teks
+   center di tengah container. ---------- */
 .quotes-section {
+  aspect-ratio: 1 / 1; /* sama tinggi dengan #quote (persegi) */
   background: #14120f; /* gelap pekat, teks krem di atasnya */
   color: #f4eee3;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .quotes-stage {
   width: min(88%, 560px);
-  margin: 0 auto;
-  display: grid; /* semua item di sel yang sama */
+  display: grid;
+  place-items: center;
 }
 .quotes-item {
   grid-area: 1 / 1;
   margin: 0;
-  opacity: 0;
-  animation: quotesCycle 18s linear infinite;
 }
-.quotes-item:nth-child(2) { animation-delay: 6s; }
-.quotes-item:nth-child(3) { animation-delay: 12s; }
 .quotes-item blockquote {
   margin: 0;
   font-family: var(--font-serif);
   font-size: clamp(1.15rem, 4.4vw, 1.5rem);
   line-height: 1.75;
   color: #f4eee3;
-}
-.quotes-item figcaption {
-  margin-top: 1.15rem;
-  font-family: var(--font-label);
-  font-size: .7rem;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: rgba(244, 238, 227, .6);
-}
-@keyframes quotesCycle {
-  0%   { opacity: 0; }
-  3%   { opacity: 1; }
-  28%  { opacity: 1; }
-  33%  { opacity: 0; }
-  100% { opacity: 0; }
 }
 
 /* ---------- EB Garamond: cover, save the date, couple, quotes, story,
