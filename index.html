@@ -15,7 +15,7 @@
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 <!-- Font Awesome (solid saja) — self-hosted, bukan CDN. Lihat assets/fontawesome/LICENSE.txt -->
@@ -135,18 +135,33 @@
       </div>
     </section>
 
-    <!-- ============ WE FOUND LOVE (kertas lipat 3D full-screen + ayat quran) ============ -->
-    <!-- Satu foto dari folder 'wfl' dipotong-potong menyebar ke 7 flap (a-g,
-         grid 3x9) — menyatu jadi satu gambar utuh saat semua terbuka. Flap
-         diisi JS (we-found-love.js); wash putih + ayat Quran muncul SETELAH
-         semua lipatan terbuka (class .wfl-wash--revealed /
-         .wfl-quote--revealed). Section ini SATU-SATUNYA snap point scroll di
-         app (.app-frame__scroll scroll-snap-type: proximity) — scroll yang
-         mendekat menempel supaya section tampil full screen. -->
+    <!-- ============ WE FOUND LOVE (kartu lipat 3D "M & A" + ayat quran) ============ -->
+    <!-- Port dari example/fold/ (checkbox tersembunyi #wfl-more-info yang
+         men-drive SEMUA animasi lewat CSS :checked, murni CSS — lihat
+         CATATAN-IMPLEMENTASI-FOLD.md di folder itu utk detail jebakan).
+         Foto folder 'wfl' di-set we-found-love.js sebagai var(--img) di
+         section; checkbox di-centang SEKALI (via JS) saat section masuk
+         viewport, TIDAK PERNAH ditutup lagi (konsisten pola "sekali
+         reveal" section lain). .wfl-photo-full menimpa 3 kolom foto biar
+         gak ada garis sambungan; .wfl-verse (ayat) muncul di atasnya.
+         Section ini SATU-SATUNYA snap point scroll di app (.app-frame__scroll
+         scroll-snap-type: proximity). -->
     <section id="we-found-love" class="wfl-fold-section">
-      <div class="wfl-fold" id="wfl-fold"></div>
-      <div class="wfl-wash" id="wfl-wash"></div>
-      <div class="wfl-quote" id="wfl-quote-wrap">
+      <input type="checkbox" id="wfl-more-info" aria-hidden="true" tabindex="-1">
+
+      <div class="wfl-outer">
+        <div class="wfl-mi">
+          <div class="wfl-flap2"></div>
+          <div class="wfl-flap1"></div>
+          <div class="wfl-flap5"><div class="wfl-info"></div></div>
+          <div class="wfl-flap4"><div class="wfl-info"></div></div>
+          <div class="wfl-flap3"><div class="wfl-info"></div></div>
+        </div>
+      </div>
+
+      <div class="wfl-photo-full"></div>
+
+      <div class="wfl-verse" id="wfl-quote-wrap">
         <p class="arabic-quote" id="wfl-arabic"></p>
         <p class="opening-quote" id="wfl-quote"></p>
         <p class="opening-source" id="wfl-source"></p>
@@ -156,39 +171,45 @@
     <!-- ============ COUPLE (slideshow foto besar 3/4 layar + info mempelai) ============ -->
     <section id="couple" class="section section--dark">
 
-      <!-- Mempelai wanita — foto MELUNCUR MASUK DARI LUAR LAYAR SEBELAH KANAN.
+      <!-- Mempelai wanita + pria digabung SATU data-reveal-group: keduanya (dan
+           slideshow-nya masing-masing) tampil BARENGAN begitu pasangan ini masuk
+           layar, bukan wanita duluan lalu pria menyusul (dulu 2 grup terpisah,
+           kepicu di waktu berbeda karena posisi Y berbeda di halaman).
            .couple-block yang jadi pemicu (dia diam di tempat), .couple-reveal yang
-           bergerak. Pemisahan ini wajib: kalau elemen yang diobservasi itu sendiri
+           bergerak. Pemisahan wajib: kalau elemen yang diobservasi itu sendiri
            yang digeser ke luar layar, dia tidak pernah bersinggungan dengan layar
            sehingga tidak pernah terpicu — dan tidak akan pernah masuk.
            .couple-reveal juga membungkus root Swiper, bukan menimpanya, supaya
            Swiper tidak salah mengukur slide gara-gara transform. -->
-      <div class="couple-block" data-reveal-group data-reveal-early>
-        <div class="couple-reveal" data-reveal="enter-right">
-          <div class="couple-slider swiper" id="bride-slider">
-            <div class="swiper-wrapper" id="bride-slider-wrapper"></div>
-            <div class="couple-fade"></div>
-            <!-- ikut terbawa masuk bersama fotonya; gerak masing-masing berbeda -->
-            <div class="couple-info">
-              <p class="couple-info__label" data-reveal="down">The Bride</p>
-              <h3 class="couple-info__name" id="bride-name" data-reveal="pop" style="--reveal-i:1"></h3>
-              <p class="couple-info__parents" id="bride-parents" data-reveal="up" style="--reveal-i:2"></p>
+      <div class="couple-pair" data-reveal-group data-reveal-early>
+        <!-- Mempelai wanita — foto MELUNCUR MASUK DARI LUAR LAYAR SEBELAH KANAN. -->
+        <div class="couple-block">
+          <div class="couple-reveal" data-reveal="enter-right">
+            <div class="couple-slider swiper" id="bride-slider">
+              <div class="swiper-wrapper" id="bride-slider-wrapper"></div>
+              <div class="couple-fade"></div>
+              <!-- ikut terbawa masuk bersama fotonya; gerak masing-masing berbeda -->
+              <div class="couple-info">
+                <p class="couple-info__label" data-reveal="down">The Bride</p>
+                <h3 class="couple-info__name" id="bride-name" data-reveal="pop" style="--reveal-i:1"></h3>
+                <p class="couple-info__parents" id="bride-parents" data-reveal="up" style="--reveal-i:2"></p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Mempelai pria — DARI LUAR LAYAR SEBELAH KIRI, berlawanan dengan mempelai
-           wanita, seolah keduanya meluncur saling mendekat -->
-      <div class="couple-block" data-reveal-group data-reveal-early>
-        <div class="couple-reveal" data-reveal="enter-left">
-          <div class="couple-slider swiper" id="groom-slider">
-            <div class="swiper-wrapper" id="groom-slider-wrapper"></div>
-            <div class="couple-fade"></div>
-            <div class="couple-info">
-              <p class="couple-info__label" data-reveal="down">The Groom</p>
-              <h3 class="couple-info__name" id="groom-name" data-reveal="pop" style="--reveal-i:1"></h3>
-              <p class="couple-info__parents" id="groom-parents" data-reveal="up" style="--reveal-i:2"></p>
+        <!-- Mempelai pria — DARI LUAR LAYAR SEBELAH KIRI, berlawanan dengan mempelai
+             wanita, seolah keduanya meluncur saling mendekat -->
+        <div class="couple-block">
+          <div class="couple-reveal" data-reveal="enter-left">
+            <div class="couple-slider swiper" id="groom-slider">
+              <div class="swiper-wrapper" id="groom-slider-wrapper"></div>
+              <div class="couple-fade"></div>
+              <div class="couple-info">
+                <p class="couple-info__label" data-reveal="down">The Groom</p>
+                <h3 class="couple-info__name" id="groom-name" data-reveal="pop" style="--reveal-i:1"></h3>
+                <p class="couple-info__parents" id="groom-parents" data-reveal="up" style="--reveal-i:2"></p>
+              </div>
             </div>
           </div>
         </div>

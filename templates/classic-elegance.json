@@ -3,7 +3,7 @@
   "name": "Classic Elegance",
   "version": 2,
   "fonts": [
-    "https://fonts.googleapis.com/css2?family=Beau+Rivage&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap"
+    "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap"
   ],
   "theme": {
     "--color-bg": "#f7f3ea",
@@ -14,7 +14,7 @@
     "--color-text": "#2b2620",
     "--color-text-light": "#f7f3ea",
     "--font-serif": "\"Poppins\", \"Segoe UI\", sans-serif",
-    "--font-script": "\"Beau Rivage\", cursive",
+    "--font-script": "\"EB Garamond\", sans-serif",
     "--font-sans": "\"Poppins\", \"Segoe UI\", sans-serif",
     "--font-label": "\"Alegreya Sans\", \"Segoe UI\", sans-serif",
     "--overlay-closing": "linear-gradient(180deg, rgba(10,9,7,.7) 0%, rgba(10,9,7,.78) 50%, rgba(10,9,7,.88) 100%)"
