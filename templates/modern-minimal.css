@@ -721,9 +721,15 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   font-family: "Montserrat","Helvetica Neue",sans-serif;
   font-size: .65rem; color: rgba(232,228,222,.45); line-height: 1.6;
 }
-/* Baris Instagram mempelai — diisi main.js; disembunyikan kalau kosong. */
+/* Baris Instagram mempelai — diisi main.js; disembunyikan kalau kosong.
+   Link ke profil (target _blank), digarisbawahi supaya jelas bisa diklik. */
 .couple-info__instagram {
   font-size: .68rem; color: rgba(232,228,222,.45); line-height: 1.5; margin: .35rem 0 0;
+}
+.couple-info__instagram a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ═══════════════════════ EVENT — capsule ivory ═══════════════════════ */

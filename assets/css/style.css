@@ -1652,13 +1652,19 @@ a { color: inherit; }
   opacity: .85;
   margin: 0;
 }
-/* Baris Instagram mempelai — diisi main.js; disembunyikan kalau kosong. */
+/* Baris Instagram mempelai — diisi main.js; disembunyikan kalau kosong.
+   Link ke profil (target _blank), digarisbawahi supaya jelas bisa diklik. */
 .couple-info__instagram {
   font-size: .78rem;
   line-height: 1.5;
   color: var(--color-text-light);
   opacity: .85;
   margin: .45rem 0 0;
+}
+.couple-info__instagram a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ---------- Event (editorial: 1 panel, header tanggal besar + 2 blok acara,

@@ -126,11 +126,18 @@
 
     // Baris Instagram mempelai — tampil hanya kalau handle diisi di
     // config/Supabase (couple.*.instagram); kalau kosong, elemen disembunyikan.
+    // Link bisa diklik ke profil instagram.com/<handle> (tab baru).
     const fillInstagram = (el, handle) => {
       if (!el) return;
       const ig = (handle || "").trim().replace(/^@/, "");
       if (!ig) { el.hidden = true; return; }
-      el.textContent = `Instagram: @${ig}`;
+      el.innerHTML = "";
+      const a = document.createElement("a");
+      a.href = `https://instagram.com/${encodeURIComponent(ig)}`;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = `Instagram: @${ig}`;
+      el.appendChild(a);
     };
     fillInstagram(document.getElementById("bride-instagram"), cfg.couple.bride.instagram);
     fillInstagram(document.getElementById("groom-instagram"), cfg.couple.groom.instagram);
