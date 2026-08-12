@@ -1170,8 +1170,6 @@ a { color: inherit; }
    tombol panel Kirim Hadiah. */
 #gift-confirm-modal #gift-confirm-send { background: #846d57; color: #fff; }
 #gift-confirm-modal #gift-confirm-send:hover { background: #6e5947; color: #fff; }
-/* Textarea Pesan memanjang mengisi ruang panel yang sudah 75dvh. */
-#gift-confirm-modal .modal__field textarea { min-height: 12rem; }
 /* Modal QR check-in & Menu — bg putih lebih solid (opacity dinaikkan dari
    transparan FAB), tanpa border, teks gelap agar selalu terbaca. */
 #qr-checkin-modal .modal__panel,
