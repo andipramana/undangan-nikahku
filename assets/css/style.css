@@ -874,8 +874,35 @@ a { color: inherit; }
   background: var(--color-bg);
 }
 .section--dark { background: var(--color-dark); color: var(--color-text-light); }
-/* Section Tanda Kasih (gift): bg coklat tua solid khusus, beda dari section gelap lain. */
-#gift { background: #836c57; }
+/* Section Tanda Kasih (gift): full-screen + snap seperti event, bg coklat
+   tetap, konten dibungkus capsule krem (pola sama dengan .event-hero__capsule). */
+#gift.section {
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: clamp(.6rem, 2dvh, 1.25rem);
+  background: #836c57;
+  scroll-snap-align: start;
+}
+.gift-capsule {
+  width: min(74vw, 300px);
+  height: min(94dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.35rem, 4.4dvh, 2.45rem) clamp(1.45rem, 6.5vw, 2.1rem);
+  border: 3px solid #bba17a;
+  border-radius: 999px;
+  background: #fffdf8 url("../img/event-capsule-paper.png") center / cover no-repeat;
+  color: var(--color-text);
+}
+.gift-capsule .section-eyebrow,
+.gift-capsule .section-title { color: var(--color-dark); }
+.gift-capsule .section-desc { color: var(--color-text); }
+/* Tombol & teks di dalam capsule krem harus gelap (bukan putih transparan). */
+.gift-capsule .btn-outline { background: rgba(255, 255, 255, .65); color: var(--color-dark); }
+.gift-capsule .btn-text { color: var(--color-dark); }
 .section--dark .section-eyebrow { color: var(--color-text-light); }
 
 .section-title {
@@ -1795,13 +1822,13 @@ a { color: inherit; }
    tidak, jadi tanpa pengecualian ini tombol Kirim Hadiah / Live Streaming
    tersembunyi selamanya) dan .event-hero__list (wrapper blok acara #event,
    reveal dipasang per anaknya). */
-.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list):not(.event-hero__capsule):not(.event-floral) {
+.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list):not(.event-hero__capsule):not(.gift-capsule):not(.event-floral) {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
               transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.reveal-ready .section > *.is-revealed:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list) {
+.reveal-ready .section > *.is-revealed:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list):not(.gift-capsule) {
   opacity: 1;
   transform: translateY(0);
 }
