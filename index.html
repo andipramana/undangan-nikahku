@@ -44,7 +44,7 @@
 
 <!-- Floating audio player — icon play/pause ditukar oleh audio-player.js
      lewat class fas fa-play / fas fa-pause, mengikuti status audio -->
-<button id="audio-toggle" class="audio-fab" type="button" aria-label="Putar musik">
+<button id="audio-toggle" class="audio-fab" type="button" aria-label="Putar musik" hidden>
   <i class="fas fa-play" id="audio-toggle-icon" aria-hidden="true"></i>
 </button>
 <audio id="bg-audio" loop preload="none"></audio>
@@ -181,7 +181,7 @@
       <!-- Typography editorial "SAVE the DATE" — dekorasi murni di atas foto,
            terpisah dari .hero-content (posisinya absolute sendiri, bukan ikut
            flow tanggal/tombol/countdown di bawahnya). -->
-      <div class="save-date text-enter text-enter--left" aria-hidden="true">
+      <div class="save-date" aria-hidden="true">
         <span class="save-date__save">Save</span>
         <span class="save-date__the">the</span>
         <span class="save-date__date">Date</span>

@@ -71,4 +71,9 @@ window.initAudioPlayer = function () {
   });
 
   window.playBackgroundAudio = play;
+
+  // Tombol musik baru muncul setelah amplop dibuka — sebelum itu audio memang
+  // belum bisa autoplay (diblokir browser) jadi tombolnya tidak ada gunanya
+  // terlihat lebih dulu.
+  window.whenInvitationOpen(() => { btn.hidden = false; });
 };

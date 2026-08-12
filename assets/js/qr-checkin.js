@@ -21,7 +21,9 @@ window.initQrCheckin = function () {
   const params = new URLSearchParams(location.search);
   if (!params.get(cfg.guestParam)) return;
 
-  btn.hidden = false;
+  // Baru muncul setelah amplop dibuka, sama seperti tombol musik — sebelum
+  // itu belum ada gunanya ditampilkan (guest belum masuk ke undangannya).
+  window.whenInvitationOpen(() => { btn.hidden = false; });
   btn.addEventListener("click", () => {
     if (!window.qrcode) {
       window.showToast && window.showToast("Gagal memuat QR (cek koneksi)");

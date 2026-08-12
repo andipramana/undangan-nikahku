@@ -93,16 +93,17 @@ html, body {
   overflow-y: auto;             /* halaman scroll DI SINI, bukan di .app-frame */
   overscroll-behavior: contain;
   scroll-behavior: smooth;
-  /* PROXIMITY, bukan mandatory: mandatory memaksa scroll SELALU mendarat di
-     snap point terdekat begitu discroll berhenti — karena section panjang di
-     antara Save The Date 2 dan Closing (Event/Gallery/RSVP/dst) sama sekali
-     tidak punya snap point, mandatory bikin scroll dari situ "melompat"
-     langsung ke snap point berikutnya (Closing), skip semua section di
-     antaranya. Proximity cuma menempel kalau scroll sudah berhenti DEKAT
-     sebuah snap point — aman untuk section panjang yang jauh dari snap point
-     manapun. 6 section full-screen: cover/opening/couple-bride/couple-groom/
-     save-the-date-2/closing. */
-  scroll-snap-type: y proximity;
+  /* MANDATORY (snap kuat/memaksa) — aman dipakai di sini karena 5 section
+     full-screen pertama (cover/opening/couple-bride/couple-groom/
+     save-the-date-2) BERURUTAN LANGSUNG tanpa jeda section panjang di
+     antaranya, jadi mandatory tidak akan pernah "melompat jauh" antar snap
+     point. #closing SENGAJA dikeluarkan dari daftar snap point (lihat
+     scroll-snap-align: none di rule #closing) — dia terpisah jauh oleh
+     section-section panjang (Event/Gallery/RSVP/dst) yang tidak boleh ikut
+     snap, dan karena closing adalah section PALING BAWAH, scroll ke ujung
+     halaman otomatis membuatnya tampil penuh 1 layar tanpa perlu snap
+     paksa juga. */
+  scroll-snap-type: y mandatory;
   scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
   scrollbar-color: var(--color-gold) transparent;
 }
@@ -191,6 +192,10 @@ a { color: inherit; }
   scroll-snap-align: start; /* semua .section-hero full-screen by design → snap point */
 }
 .section-hero--short { min-height: 90dvh; }
+/* #closing dikecualikan dari snap point (lihat penjelasan scroll-snap-type
+   di .app-frame__scroll) — terpisah jauh dari cluster full-screen pertama
+   oleh section-section panjang, jadi TIDAK ikut snap paksa. */
+#closing { scroll-snap-align: none; }
 
 /* Section hero dengan foto STATIS (bukan slideshow Ken Burns) — foto di-set
    lewat JS sebagai inline background-image di .hero-media, jadi cukup
@@ -456,10 +461,11 @@ a { color: inherit; }
    lain di section ini selesai reveal. Teks lain (.script-names delay .1s,
    .opening-verse delay .2s) dipicu bareng #opening.text-revealed dan beres
    paling lambat di .2s + .75s = .95s sesudahnya — makanya opacity monogram
-   sengaja ditunda ke 1s (baru mulai fade-in SETELAH itu), lanjut jeda .5s,
-   baru geser mendekat (delay transform 2.1s, durasi tetap 2.2s). */
+   sengaja ditunda ke 1s (baru mulai fade-in SETELAH itu), lanjut jeda .2s
+   (dulu .5s, dirasa kelamaan), baru geser mendekat (delay transform 1.8s,
+   durasi tetap 2.2s). */
 #opening .eyebrow-monogram {
-  transition: opacity .6s ease 1s, transform 2.2s cubic-bezier(.22,.61,.36,1) 2.1s;
+  transition: opacity .6s ease 1s, transform 2.2s cubic-bezier(.22,.61,.36,1) 1.8s;
 }
 #opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-90%, -70%); }
 #opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-10%, -30%); }
@@ -471,9 +477,9 @@ a { color: inherit; }
    1.4s), dan jarak akhir M-A sedikit lebih jauh (dulu -90%/-10% = 80pp,
    sekarang -100%/0% = 100pp) dibanding versi opening. */
 #cover .eyebrow-monogram {
-  /* Sama pola: fade-in beres di 2.6s, JEDA .6s (transform baru mulai di 3.2s),
-     lalu mendekat pelan (2.8s, dulu 2s). */
-  transition: opacity .6s ease 2s, transform 2.8s cubic-bezier(.22,.61,.36,1) 3.2s;
+  /* Sama pola: fade-in beres di 2.6s, JEDA .2s (dulu .6s, dirasa kelamaan —
+     transform baru mulai di 2.8s), lalu mendekat pelan (2.8s durasi). */
+  transition: opacity .6s ease 2s, transform 2.8s cubic-bezier(.22,.61,.36,1) 2.8s;
 }
 .eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-100%, -70%); }
 .eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(0%, -30%); }
@@ -695,13 +701,17 @@ a { color: inherit; }
    teks utuh sejak awal, mask-nya yang membuka progresif. Trigger class
    .is-visible dipasang JS (main.js, setupSaveTheDate2Reveal — observer yang
    SUDAH ADA, lihat langkah JS). */
+/* Durasi per-kata sengaja tidak terlalu panjang (1s), tapi DELAY antar kata
+   dibuat LEBIH BESAR dari durasinya sendiri (800ms/1600ms) — supaya kata
+   berikutnya baru mulai bergerak SETELAH kata sebelumnya benar-benar selesai
+   (sequential), bukan cuma stagger tipis yang keliatan bareng. */
 .save-date__save,
 .save-date__the,
 .save-date__date {
   clip-path: inset(0 100% 0 0);
   transform: translateY(4px);
-  transition: clip-path 1.2s cubic-bezier(.22, 1, .36, 1),
-              transform 1.2s cubic-bezier(.22, 1, .36, 1);
+  transition: clip-path 1s cubic-bezier(.22, 1, .36, 1),
+              transform 1s cubic-bezier(.22, 1, .36, 1);
   will-change: clip-path;
 }
 .save-date.is-visible .save-date__save {
@@ -712,12 +722,12 @@ a { color: inherit; }
 .save-date.is-visible .save-date__the {
   clip-path: inset(0 0 0 0);
   transform: translateY(0);
-  transition-delay: 120ms;
+  transition-delay: 800ms;
 }
 .save-date.is-visible .save-date__date {
   clip-path: inset(0 0 0 0);
   transform: translateY(0);
-  transition-delay: 220ms;
+  transition-delay: 1600ms;
 }
 
 /* Reduced motion: langsung tampil utuh tanpa animasi apapun. */
