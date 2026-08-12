@@ -109,7 +109,6 @@
     document.getElementById("guest-name").textContent = guestName;
     document.getElementById("guest-label").textContent = resolveGreeting(cfg, guestName, matchedGroup);
 
-    document.getElementById("wfl-arabic").textContent = cfg.opening.arabicQuote;
     document.getElementById("wfl-quote").textContent = cfg.opening.quote;
     document.getElementById("wfl-source").textContent = `— ${cfg.opening.source} —`;
 
@@ -124,9 +123,11 @@
     // Nama panggilan pasangan di cover / Save The Date / closing — diisi dari
     // config/Supabase (couple.*.nickname), TIDAK hardcoded. Span .amp dijaga
     // supaya gaya ampersand (font script) tetap seperti sebelumnya.
-    const fillCoupleNames = (el) => {
+    const fillCoupleNames = (el, useFullName) => {
       if (!el) return;
-      el.innerHTML = `${esc(cfg.couple.bride.nickname)} <span class="amp">&amp;</span> ${esc(cfg.couple.groom.nickname)}`;
+      const bride = useFullName ? cfg.couple.bride.name : cfg.couple.bride.nickname;
+      const groom = useFullName ? cfg.couple.groom.name : cfg.couple.groom.nickname;
+      el.innerHTML = `${esc(bride)} <span class="amp">&amp;</span> ${esc(groom)}`;
     };
     fillCoupleNames(document.getElementById("couple-names-cover"));
     fillCoupleNames(document.getElementById("couple-names-opening"));
@@ -331,6 +332,27 @@
     });
   }
 
+  // Save The Date 2 ada jauh di bawah (setelah #couple) — beda dari #opening
+  // yang dipicu sekali saat amplop dibuka (revealOpening di atas), section ini
+  // baru boleh reveal saat benar-benar discroll ke layar, supaya animasi
+  // slide-in-nya tidak "kepakai habis" duluan sebelum tamu sampai di sana.
+  function setupSaveTheDate2Reveal() {
+    const std2 = document.getElementById("save-the-date-2");
+    if (!std2 || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => std2.classList.add("section-revealed"));
+        });
+        setTimeout(() => std2.classList.add("text-revealed"), 1400);
+      },
+      { threshold: 0.25 }
+    );
+    observer.observe(std2);
+  }
+
   window.showToast = function (message) {
     const toast = document.getElementById("toast");
     if (!toast) return;
@@ -410,6 +432,7 @@
 
     await populateContent();
     setupOpenButton();
+    setupSaveTheDate2Reveal();
     if (window.initHeroSlideshows) window.initHeroSlideshows();
 
     if (window.initCountdown) window.initCountdown();
@@ -417,7 +440,6 @@
     if (window.initGift) window.initGift();
     if (window.initRsvp) window.initRsvp();
     if (window.initGallery) window.initGallery();
-    if (window.initWeFoundLove) window.initWeFoundLove();
     if (window.initCoupleSliders) window.initCoupleSliders();
     if (window.initEventCards) window.initEventCards();
     // Modul yang merender/menghapus elemen (livestream, QR check-in) WAJIB

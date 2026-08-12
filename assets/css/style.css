@@ -93,13 +93,6 @@ html, body {
   overflow-y: auto;             /* halaman scroll DI SINI, bukan di .app-frame */
   overscroll-behavior: contain;
   scroll-behavior: smooth;
-  /* Scroll-snap magnetic: proximity (BUKAN mandatory) — scroll hanya
-     "menempel" ke snap point kalau sudah hampir berhenti di dekatnya,
-     tidak memaksa SETIAP scroll berhenti. Satu-satunya elemen yang
-     men-declare scroll-snap-align adalah section We Found Love
-     classic-elegance (#we-found-love.wfl-fold-section), jadi section
-     lain/template lain tidak berubah perilaku scroll-nya. */
-  scroll-snap-type: y proximity;
   scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
   scrollbar-color: var(--color-gold) transparent;
 }
@@ -146,7 +139,7 @@ a { color: inherit; }
 .audio-fab {
   position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 500;
   width: 40px; height: 40px; border-radius: 50%;
-  background: #ffffff61; border: 1.5px solid var(--color-gold);
+  background: #ffffff61; border: none;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: #ffffff;
 }
@@ -159,9 +152,9 @@ a { color: inherit; }
 .qr-fab {
   position: fixed; right: 1.1rem; bottom: calc(1.1rem + 40px + .9rem); z-index: 500;
   width: 40px; height: 40px; border-radius: 50%;
-  background: #ffffff61; border: 1.5px solid var(--color-gold);
+  background: #ffffff61; border: none;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--color-gold);
+  cursor: pointer; color: var(--color-dark);
 }
 .qr-fab svg { width: 18px; height: 18px; }
 
@@ -171,9 +164,9 @@ a { color: inherit; }
 .nav-fab {
   position: fixed; top: 1.1rem; right: 1.1rem; z-index: 500;
   width: 48px; height: 48px; border-radius: 50%;
-  background: #ffffff61; border: 1.5px solid var(--color-gold);
+  background: #ffffff61; border: none;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--color-gold);
+  cursor: pointer; color: var(--color-dark);
 }
 .nav-fab svg { width: 22px; height: 22px; }
 
@@ -187,6 +180,11 @@ a { color: inherit; }
   color: var(--color-text-light);
 }
 .section-hero--short { min-height: 90dvh; }
+
+/* Section hero dengan foto STATIS (bukan slideshow Ken Burns) — foto di-set
+   lewat JS sebagai inline background-image di .hero-media, jadi cukup
+   cover+center supaya tampil penuh seperti slideshow biasa. */
+.section-hero--static-bg .hero-media { background-size: cover; background-position: center; }
 
 .hero-media { position: absolute; inset: 0; overflow: hidden; }
 .hero-media img {
@@ -281,9 +279,30 @@ a { color: inherit; }
 .countdown-heading .eyebrow { text-align: center; }
 .countdown-heading .script-names { text-align: center; margin: .1rem 0; }
 
+/* Save The Date 2: rata kiri (bukan center seperti Save The Date 1), sejajar
+   dengan typography "SAVE the DATE" yang mulai di left: 7.5%. Hanya section
+   ini yang di-override — #opening (Save The Date 1) tetap center. */
+#save-the-date-2 .hero-content { text-align: left; padding-left: 7.5%; }
+#save-the-date-2 .countdown-heading { text-align: left; }
+#save-the-date-2 .cover-countdown__date { text-align: left; }
+/* .countdown--plain default: width 80% + 4 item flex:1 dengan text-align:center
+   — digit pertama jadi ketengahan DI DALAM slot-nya sendiri, bukan nempel ke
+   tepi kiri kontainer (itu sebabnya masih ada "spasi" sebelum elemen lain yang
+   rata kiri). Untuk Save The Date 2: lebar auto + flex-start + tiap item rata
+   kiri, supaya digit pertama ("Hari") benar-benar nempel di tepi kiri yang
+   sama dengan tanggal/tombol/teks SAVE the DATE di atasnya. */
+#save-the-date-2 .countdown--plain {
+  width: auto; margin-left: 0; margin-right: auto;
+  justify-content: flex-start; gap: 1.5rem;
+}
+#save-the-date-2 .countdown--plain .countdown__item { flex: none; text-align: left; }
+/* Hari/Jam/Menit dikasih padding kanan tambahan (Detik dibiarkan, tidak perlu
+   jarak setelah item terakhir) supaya barisnya lebih lebar/lega. */
+#save-the-date-2 .countdown--plain .countdown__item:not(:last-child) { padding-right: 1rem; }
+
 .scroll-chevron {
   display: block; margin-top: 1.25rem;
-  font-size: 1.4rem; color: var(--color-gold-soft);
+  font-size: 1.4rem; color: #ffffff;
   animation: chevron-bounce 1.8s ease-in-out infinite;
 }
 @keyframes chevron-bounce { 0%,100% { transform: translateY(0); opacity:.6; } 50% { transform: translateY(6px); opacity:1; } }
@@ -372,10 +391,13 @@ a { color: inherit; }
   text-transform: uppercase;
   letter-spacing: .35em;
   font-size: .7rem;
-  color: var(--color-gold-soft);
+  color: var(--color-dark);
   margin: 0 0 .75rem;
 }
 .hero-content .eyebrow { color: #ffffff; font-weight: 500; }
+/* Eyebrow di semua hero section (cover/opening/closing, bg foto gelap) tetap
+   putih walau base rule di atas sekarang coklat tua (untuk section terang). */
+.section-hero .eyebrow { color: #fff; }
 
 /* Monogram dekoratif M/A di belakang "The Wedding Of" (cover & opening) —
    murni visual, aria-hidden di markup jadi tidak dibaca screen reader.
@@ -405,7 +427,10 @@ a { color: inherit; }
   z-index: 0;
   pointer-events: none;
   line-height: 1;
-  transition: opacity .6s ease, transform 1.4s cubic-bezier(.22,.61,.36,1) .6s;
+  /* Fade-in (opacity, .6s) selesai dulu, JEDA .5s (delay transform dimulai di
+     1.1s, bukan langsung nyambung di .6s), BARU geser mendekat pelan-pelan
+     (transform 2.2s, dulu 1.4s — sengaja diperlambat). */
+  transition: opacity .6s ease, transform 2.2s cubic-bezier(.22,.61,.36,1) 1.1s;
 }
 .eyebrow-monogram--m {
   left: 50%;
@@ -416,7 +441,15 @@ a { color: inherit; }
   transform: translate(60%, -30%); /* mulai dari kanan layar, lebih rendah */
 }
 
-/* --- Opening/Save The Date: timing bawaan (base di atas), jarak akhir asli. --- */
+/* --- Opening/Save The Date: monogram BARU mulai animasi setelah SEMUA teks
+   lain di section ini selesai reveal. Teks lain (.script-names delay .1s,
+   .opening-verse delay .2s) dipicu bareng #opening.text-revealed dan beres
+   paling lambat di .2s + .75s = .95s sesudahnya — makanya opacity monogram
+   sengaja ditunda ke 1s (baru mulai fade-in SETELAH itu), lanjut jeda .5s,
+   baru geser mendekat (delay transform 2.1s, durasi tetap 2.2s). */
+#opening .eyebrow-monogram {
+  transition: opacity .6s ease 1s, transform 2.2s cubic-bezier(.22,.61,.36,1) 2.1s;
+}
 #opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-90%, -70%); }
 #opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-10%, -30%); }
 
@@ -427,7 +460,9 @@ a { color: inherit; }
    1.4s), dan jarak akhir M-A sedikit lebih jauh (dulu -90%/-10% = 80pp,
    sekarang -100%/0% = 100pp) dibanding versi opening. */
 #cover .eyebrow-monogram {
-  transition: opacity .6s ease 2s, transform 2s cubic-bezier(.22,.61,.36,1) 2.6s;
+  /* Sama pola: fade-in beres di 2.6s, JEDA .6s (transform baru mulai di 3.2s),
+     lalu mendekat pelan (2.8s, dulu 2s). */
+  transition: opacity .6s ease 2s, transform 2.8s cubic-bezier(.22,.61,.36,1) 3.2s;
 }
 .eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-100%, -70%); }
 .eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(0%, -30%); }
@@ -442,6 +477,16 @@ a { color: inherit; }
 }
 .script-names--small { font-size: clamp(2rem, 8vw, 3rem); }
 .amp { padding: 0 .1em; }
+/* Nama mempelai di Cover & Save The Date 1 kapital semua (Closing dibiarkan
+   apa adanya, tidak diminta). */
+#couple-names-cover, #couple-names-opening { text-transform: uppercase; }
+/* "MITA & ANDI" di Cover kejauhan lebih besar dari section lain (base
+   .script-names clamp 3rem-5rem) — diperkecil khusus di sini, mendekati
+   ukuran .script-names--small yang dipakai Save The Date/Closing. */
+#couple-names-cover { font-size: clamp(1.5rem, 7vw, 2.4rem); margin-top: .9rem; }
+/* Nama di Save The Date 1 balik ke panggilan pendek "Mita & Andi" (bukan nama
+   lengkap lagi) — boleh dibesarkan lagi karena teksnya sudah pendek. */
+#couple-names-opening { font-size: clamp(1.8rem, 7vw, 2.6rem); margin-top: .9rem; }
 
 .hero-date {
   letter-spacing: .25em;
@@ -499,6 +544,10 @@ a { color: inherit; }
   cursor: default;
   box-shadow: none;
 }
+/* Kirim Konfirmasi (RSVP) sengaja dibalik dari .btn-primary default (putih
+   translucent + teks gelap): background primary coklat tua, teks putih. */
+#rsvp-submit { background: var(--color-dark); color: #fff; }
+#rsvp-submit:hover { background: var(--color-dark-2); color: #fff; }
 
 .btn-outline {
   display: inline-block;
@@ -529,7 +578,7 @@ a { color: inherit; }
 
 .btn-text {
   background: none; border: none; text-decoration: underline;
-  color: var(--color-gold-soft); cursor: pointer; font-family: var(--font-sans);
+  color: var(--color-text-light); cursor: pointer; font-family: var(--font-sans);
   margin-top: 1rem;
 }
 
@@ -570,9 +619,65 @@ a { color: inherit; }
 .text-enter--up { transform: translateY(28px); }
 #opening.text-revealed .text-enter { opacity: 1; transform: translate(0, 0); }
 #opening.text-revealed .script-names.text-enter { transition-delay: .1s; }
-#opening.text-revealed .cover-countdown__date.text-enter { transition-delay: .2s; }
-#opening.text-revealed #btn-add-calendar.text-enter { transition-delay: .3s; }
-#opening.text-revealed .countdown--plain.text-enter { transition-delay: .4s; }
+#opening.text-revealed .opening-verse.text-enter { transition-delay: .2s; }
+
+/* Save The Date 2 (section baru setelah #couple): pola reveal sama persis dengan
+   #opening, tapi foto statis tanpa slideshow. Stagger hanya untuk 3 elemen yang
+   ada di section ini (tanggal/tombol/countdown) — yang lama sudah pindah ke sini. */
+#save-the-date-2 {
+  opacity: 0;
+  transform: translate(-20px, 20px);
+  transition: opacity 2.4s ease, transform 1.8s cubic-bezier(.22,.61,.36,1);
+}
+#save-the-date-2.section-revealed { opacity: 1; transform: translate(0, 0); }
+#save-the-date-2.text-revealed .text-enter { opacity: 1; transform: translate(0, 0); }
+#save-the-date-2.text-revealed .save-date.text-enter { transition-delay: 0s; }
+#save-the-date-2.text-revealed #btn-add-calendar.text-enter { transition-delay: .15s; }
+#save-the-date-2.text-revealed .cover-countdown__date.text-enter { transition-delay: .25s; }
+#save-the-date-2.text-revealed .countdown--plain.text-enter { transition-delay: .35s; }
+
+/* Typography editorial "SAVE the DATE" di atas foto Save The Date 2 — komposisi
+   majalah fashion: serif besar (Cormorant Garamond) + script (Italianno) yang
+   sedikit overlap di tengah, BUKAN heading section biasa. Murni dekoratif
+   (aria-hidden), terpisah dari .hero-content supaya posisinya bisa absolute
+   sendiri tanpa ikut align-center konten tanggal/tombol/countdown di bawahnya. */
+.save-date {
+  position: absolute;
+  left: 7.5%;
+  top: 53%;
+  transform: translateY(-50%);
+  z-index: 3;
+  color: rgba(255, 255, 255, .97);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+.save-date__save,
+.save-date__date {
+  display: block;
+  width: max-content;
+  font-family: "Cormorant Garamond", var(--font-serif);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: .78;
+  letter-spacing: -.045em;
+}
+.save-date__save { font-size: clamp(76px, 22vw, 118px); }
+.save-date__date { font-size: clamp(82px, 24vw, 126px); }
+.save-date__the {
+  display: block;
+  width: max-content;
+  position: relative;
+  font-family: "Italianno", cursive;
+  font-weight: 400;
+  font-size: clamp(72px, 20vw, 108px);
+  line-height: .55;
+  letter-spacing: -.02em;
+  margin-top: -.12em;
+  margin-left: .05em;
+  margin-bottom: -.12em;
+  z-index: 2;
+}
 
 /* ---------- Scroll-reveal section di bawah cover ([data-reveal]) ----------
    Perluasan dari pola .text-enter di atas, tapi dipicu IntersectionObserver
@@ -681,9 +786,33 @@ a { color: inherit; }
 #love-story.section, #couple.section { overflow: hidden; }
 
 /* ---------- Opening quote ---------- */
-.arabic-quote { font-size: 1.6rem; margin: 0 0 1rem; color: var(--color-gold-soft); }
-.opening-quote { font-family: var(--font-serif); font-size: 1.25rem; line-height: 1.7; font-style: italic; }
-.opening-source { margin-top: .75rem; font-size: .8rem; letter-spacing: .1em; opacity: .8; }
+/* Teks polos di atas foto hero (BUKAN kartu/kotak) — cuma tipografi:
+   Cormorant Garamond untuk ayat, Poppins uppercase kecil untuk sumber.
+   Warna putih (bukan coklat tua) karena tidak ada container terang di
+   belakangnya lagi — teks langsung di atas foto, sama seperti .script-names/
+   .eyebrow di section ini. */
+.opening-verse {
+  margin-top: 1.4rem;
+  text-align: center;
+}
+.opening-quote {
+  font-family: "Cormorant Garamond", var(--font-serif);
+  font-weight: 400;
+  font-style: normal;
+  font-size: clamp(1.05rem, 3.8vw, 1.25rem);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+.opening-source {
+  margin-top: .6rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: .62rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .75);
+}
 
 /* ---------- Generic sections ---------- */
 .section {
@@ -692,7 +821,7 @@ a { color: inherit; }
   background: var(--color-bg);
 }
 .section--dark { background: var(--color-dark); color: var(--color-text-light); }
-.section--dark .section-eyebrow { color: var(--color-gold); }
+.section--dark .section-eyebrow { color: var(--color-text-light); }
 
 .section-title {
   font-size: clamp(1.8rem, 6vw, 2.4rem);
@@ -702,10 +831,13 @@ a { color: inherit; }
   font-family: var(--font-script);
   font-weight: 400;
   font-size: clamp(2.6rem, 9vw, 3.4rem);
-  color: var(--color-gold);
+  color: var(--color-dark);
   margin-bottom: 2.5rem;
   line-height: 1;
 }
+/* Judul script di dark section (livestream/love-story) tetap putih walau base
+   rule di atas sekarang coklat tua (untuk section terang). */
+.section--dark .section-title--script { color: #fff; }
 .section-desc {
   max-width: 480px; margin: -1.5rem auto 2rem;
   line-height: 1.7; font-size: .95rem;
@@ -734,11 +866,11 @@ a { color: inherit; }
   background: linear-gradient(180deg, transparent, rgba(10,9,7,.55) 45%, rgba(10,9,7,.92) 100%);
   text-align: center;
 }
-.couple-name { font-size: 1.4rem; color: var(--color-gold-soft); margin-bottom: .35rem; }
+.couple-name { font-size: 1.4rem; color: var(--color-text-light); margin-bottom: .35rem; }
 .couple-parents { font-size: .8rem; line-height: 1.55; opacity: .9; color: var(--color-text-light); }
 .couple-divider {
   font-family: var(--font-script);
-  font-size: 2.5rem; color: var(--color-gold);
+  font-size: 2.5rem; color: var(--color-text-light);
 }
 
 /* ---------- Event + Countdown ---------- */
@@ -753,7 +885,7 @@ a { color: inherit; }
   width: 72px; padding: .9rem 0;
 }
 .countdown__item span {
-  display: block; font-family: var(--font-serif); font-size: 1.7rem; color: var(--color-gold);
+  display: block; font-family: var(--font-serif); font-size: 1.7rem; color: var(--color-text-light);
 }
 .countdown__item small { font-family: var(--font-label); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
 
@@ -798,8 +930,8 @@ a { color: inherit; }
   border-radius: 10px; border: 1px solid var(--color-gold);
   margin-bottom: 1rem;
 }
-.timeline-item .timeline-date { color: var(--color-gold); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
-.timeline-item h4 { font-family: var(--font-serif); font-size: 1.3rem; margin: .3rem 0; color: var(--color-gold-soft); }
+.timeline-item .timeline-date { color: var(--color-text-light); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
+.timeline-item h4 { font-family: var(--font-serif); font-size: 1.3rem; margin: .3rem 0; color: var(--color-text-light); }
 .timeline-item p { margin: 0; font-size: .9rem; line-height: 1.6; opacity: .85; }
 
 /* ---------- Gallery (grid 4 kolom, pola: landscape / 2 potrait / landscape / 1-4+3-4 / landscape / 2 potrait / landscape) ---------- */
@@ -856,7 +988,7 @@ a { color: inherit; }
   width: 64px; height: 64px; border-radius: 50%;
   background: rgba(20, 18, 15, .65); border: 2px solid var(--color-gold);
   display: flex; align-items: center; justify-content: center;
-  color: var(--color-gold-soft); pointer-events: none;
+  color: var(--color-text-light); pointer-events: none;
 }
 .gallery-video__play svg { width: 26px; height: 26px; margin-left: 3px; }
 .gallery-video__frame { display: block; width: 100%; height: 100%; border: 0; }
@@ -872,7 +1004,7 @@ a { color: inherit; }
 .lightbox img { max-width: 100%; max-height: 88vh; border-radius: 6px; }
 .lightbox__close {
   position: absolute; top: 1rem; right: 1.25rem;
-  background: none; border: none; color: var(--color-gold-soft);
+  background: none; border: none; color: var(--color-text-light);
   font-size: 2.2rem; cursor: pointer; line-height: 1;
 }
 
@@ -888,21 +1020,21 @@ a { color: inherit; }
 }
 .modal__panel {
   width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto;
-  background: #ffffff61; border: 1px solid var(--color-gold);
+  background: var(--color-dark); border: 1px solid var(--color-gold);
   border-radius: 14px; padding: 1.5rem;
-  color: var(--color-text);
+  color: var(--color-text-light);
   animation: fadeUp .35s ease;
 }
 .modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
 .modal__header h3 { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; margin: 0; letter-spacing: .03em; }
 .modal__close {
-  background: none; border: none; color: var(--color-gold);
+  background: none; border: none; color: var(--color-text-light);
   font-size: 1.8rem; line-height: 1; cursor: pointer; padding: .1rem .35rem;
 }
 .modal__field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; text-align: left; }
 .modal__field > span { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
 .modal__field select, .modal__field textarea {
-  font-family: var(--font-sans); font-size: .92rem; color: var(--color-text);
+  font-family: var(--font-sans); font-size: .92rem; color: var(--color-text-light);
   background: transparent; border: 1px solid var(--color-gold); border-radius: 8px;
   padding: .6rem .7rem; resize: vertical;
 }
@@ -952,9 +1084,9 @@ a { color: inherit; }
   letter-spacing: .12em;
   text-transform: uppercase;
   font-size: .75rem;
-  background: #ffffff;
+  background: none;
   border: none;
-  color: var(--color-dark);
+  color: #ffffff;
   padding: .95rem .2rem;
   border-radius: 999px;
   cursor: pointer;
@@ -1018,11 +1150,11 @@ a { color: inherit; }
   border: 1px solid var(--color-gold); border-radius: 10px; padding: 1rem 1.25rem;
   display: flex; justify-content: space-between; align-items: center; gap: 1rem; text-align: left;
 }
-.gift-account__bank { font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-gold-soft); }
+.gift-account__bank { font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-text-light); }
 .gift-account__number { font-size: .95rem; letter-spacing: .05em; }
 .gift-account__holder { font-size: .75rem; opacity: .75; }
 .gift-copy-btn {
-  border: 1px solid var(--color-gold); background: none; color: var(--color-gold-soft);
+  border: 1px solid var(--color-gold); background: none; color: var(--color-text-light);
   border-radius: 999px; padding: .4rem .9rem; font-size: .7rem; cursor: pointer; white-space: nowrap;
 }
 .gift-address {
@@ -1072,7 +1204,7 @@ a { color: inherit; }
   font-size: 2rem; height: 100%;
 }
 .gift-rec-card__body { padding: .7rem .8rem .85rem; display: flex; flex-direction: column; gap: .3rem; }
-.gift-rec-card__name { font-family: var(--font-serif); font-size: .9rem; color: var(--color-gold-soft); }
+.gift-rec-card__name { font-family: var(--font-serif); font-size: .9rem; color: var(--color-text-light); }
 .gift-rec-card__price { font-size: .78rem; opacity: .8; }
 .gift-rec-card__body .btn-outline {
   margin-top: .4rem; padding: .5rem 1rem; font-size: .68rem; text-align: center;
@@ -1118,7 +1250,11 @@ a { color: inherit; }
 .rsvp-pill {
   grid-column: span 1; padding: .7rem .75rem;
   border: 1px solid rgba(172,136,72,.65); border-radius: 10px;
-  background: rgba(255,255,255,.48); color: var(--color-text);
+  background: rgba(255,255,255,.48);
+  /* Warna teks di-hardcode (bukan var(--color-text)) supaya tidak ikut
+     berubah jadi tak terbaca kalau var(--color-text) di-override putih
+     lewat tab Tampilan admin — pill ini bg-nya selalu terang. */
+  color: var(--color-dark);
   font-family: var(--font-sans); font-size: .82rem; cursor: pointer;
   transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
 }
@@ -1231,306 +1367,6 @@ a { color: inherit; }
   }
 }
 
-/* ---------- We Found Love (kartu lipat 3D "M & A" + ayat quran) ---------- */
-/* Port dari example/fold/ (CATATAN-IMPLEMENTASI-FOLD.md di situ — baca dulu
-   kalau mau redesign, banyak jebakan yang didokumentasikan). Checkbox
-   tersembunyi #wfl-more-info men-drive SEMUA animasi via CSS `:checked ~`
-   (murni CSS); we-found-love.js CUMA set var(--img) + centang checkbox
-   SEKALI saat section masuk viewport. Foto DIREGANG (background-size:300%
-   di 3 arah), BUKAN cover/contain — disengaja, konsisten dgn overlay.
-   .wfl-photo-full WAJIB ada — tanpa itu muncul garis sambungan tipis antar
-   3 kolom foto (lihat §4 file .md; JANGAN coba hilangkan garis dengan
-   overlap antar panel, sudah terbukti jalan buntu di sana). */
-#we-found-love.wfl-fold-section {
-  position: relative;
-  height: 100svh;
-  overflow: hidden;
-  background: var(--color-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Scroll-snap magnetic: scroller utama (.app-frame__scroll) memakai
-     scroll-snap-type: proximity dan section ini satu-satunya snap point —
-     scroll yang mendekat menempel ke batas atas section (tampil full
-     screen), bukan berhenti parsial. Hanya di-selector dengan class
-     .wfl-fold-section supaya template lain (modern-minimal) tidak kena. */
-  scroll-snap-align: start;
-}
-
-#wfl-more-info {
-  appearance: none;
-  position: fixed;
-  top: -100%;
-  left: -100%;
-}
-
-.wfl-mi {
-  --wfl-open-text: "and\A so it\A begin ..";
-  --wfl-alt-text: "M & A";
-  /* Posisi X crop foto (0%=ujung kiri foto, 100%=ujung kanan foto). Dipakai
-     flap1/flap2 (::after, versi terlipat) dan flap3/flap4 (::before, versi
-     "swing-in") supaya gambar tetap konsisten geser sama arah di semua
-     tahap animasi. */
-  --wfl-crop-kanan: 75%;
-  --wfl-crop-kiri: 25%;
-
-  position: relative;
-  width: calc(100vw / 3);
-  height: calc(100svh / 3);
-  background-image: var(--img);
-  background-position: var(--wfl-crop-kanan) 50%;
-  background-size: 300% 300%;
-  transition: transform .5s;
-  transform-style: preserve-3d;
-  perspective: 100em;
-}
-.wfl-outer {
-  filter: drop-shadow(.4em .2em 1em rgba(0, 0, 0, .28));
-}
-.wfl-mi > * {
-  position: absolute;
-  transform-style: preserve-3d;
-}
-.wfl-mi > *::before,
-.wfl-mi > *::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-}
-
-.wfl-flap1 {
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform-origin: top;
-  transition: transform .5s 1.5s;
-}
-.wfl-flap1::before {
-  content: var(--wfl-open-text);
-  background-color: #eee;
-  border: 2px solid var(--color-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: pre-line;
-  font-family: var(--font-script);
-  color: var(--color-dark);
-}
-.wfl-flap1::after {
-  background-image: var(--img);
-  background-position: var(--wfl-crop-kanan) 0%;
-  background-size: 300% 300%;
-  transform: rotateX(180deg);
-}
-
-.wfl-flap2 {
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  transform-origin: bottom right;
-  transition: transform .5s 1s;
-}
-.wfl-flap2::before {
-  content: var(--wfl-alt-text);
-  background-color: #eee;
-  border: 2px solid var(--color-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-script);
-  color: var(--color-dark);
-}
-.wfl-flap2::after {
-  background-image: var(--img);
-  background-position: var(--wfl-crop-kanan) 100%;
-  background-size: 300% 300%;
-  transform: rotateX(180deg);
-}
-
-.wfl-flap3 {
-  top: -100%;
-  left: 0;
-  width: 100%;
-  height: 300%;
-  transform-origin: right;
-  visibility: hidden;
-  transition: visibility 0s 1s, transform .5s .5s;
-}
-.wfl-flap3::before {
-  background-image: var(--img);
-  background-position: var(--wfl-crop-kanan) 50%;
-  background-size: 300% 100%;
-}
-.wfl-flap3 .wfl-info { background-position: right; }
-.wfl-flap3 .wfl-info::after { left: -200%; }
-
-.wfl-flap4 {
-  top: -100%;
-  left: 0;
-  width: 100%;
-  height: 300%;
-  transform-origin: left;
-  visibility: hidden;
-  transition: visibility 0s 1s, transform .5s;
-}
-.wfl-flap4::before {
-  background-image: var(--img);
-  background-position: var(--wfl-crop-kiri) 50%;
-  background-size: 300% 100%;
-}
-.wfl-flap4::after { content: unset; }
-.wfl-flap4 .wfl-info { background-position: left; }
-.wfl-flap4 .wfl-info::after { left: 0%; }
-
-.wfl-flap5 {
-  top: -100%;
-  left: 0;
-  width: 100%;
-  height: 300%;
-  visibility: hidden;
-  transform: rotateY(180deg);
-  transition: visibility 0s .5s;
-}
-.wfl-flap5 .wfl-info { background-position: center; }
-.wfl-flap5 .wfl-info::after { left: -100%; }
-
-.wfl-mi .wfl-info {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background-image: var(--img);
-  background-size: 300% 100%;
-  transform: rotateY(180deg);
-  backface-visibility: hidden;
-  overflow: hidden;
-  transform-style: preserve-3d;
-}
-.wfl-mi .wfl-info::after {
-  content: "";
-  border: 2px solid var(--color-dark);
-  position: absolute;
-  top: 0;
-  width: 300%;
-  height: 100%;
-  background-color: #ffffff2b;
-}
-
-/* --- Full open: foto utuh menimpa 3 panel (hilangkan garis sambungan);
-   ayat quran naik ke level section, DI ATAS overlay (§5.3/§5.6 file .md:
-   dalam panel = terperangkap stacking context lokal, gak bisa naik). --- */
-.wfl-photo-full {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  width: 100vw;
-  height: 100svh;
-  background-image: var(--img);
-  background-size: 100% 100%;
-  border: 2px solid var(--color-dark);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  z-index: 5;
-  transition: opacity .3s ease 0s, visibility 0s linear .3s;
-}
-.wfl-photo-full::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: #ffffff2b;
-}
-
-.wfl-verse {
-  /* absolute (BUKAN fixed) relatif ke #we-found-love.wfl-fold-section
-     (position:relative) — fixed sempat kebawa ke section lain karena
-     containing-block-nya jadi viewport asli, bukan section ayat ini. */
-  position: absolute;
-  left: 5%;
-  width: 90%;
-  bottom: 10%;
-  z-index: 10;
-  background-color: #faf6ee;
-  border: 1px solid rgba(150, 118, 78, .35);
-  border-radius: 1em;
-  padding: 1.1rem 1.6rem;
-  text-align: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity .3s ease 0s, visibility 0s linear .3s;
-}
-.wfl-verse .arabic-quote,
-.wfl-verse .opening-quote,
-.wfl-verse .opening-source {
-  margin: 0;
-  line-height: 1.8;
-  color: #40362e;
-  text-shadow: none;
-}
-.wfl-verse .arabic-quote {
-  font-size: 1.35rem;
-}
-.wfl-verse .opening-quote {
-  margin-top: .5rem;
-  font-size: 0.95rem;
-  opacity: .85;
-}
-.wfl-verse .opening-source {
-  margin-top: .6rem;
-  padding-top: .6rem;
-  border-top: 1px solid rgba(150, 118, 78, .18);
-  font-size: 0.68rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #8a6d4b;
-}
-
-#wfl-more-info:checked ~ .wfl-photo-full,
-#wfl-more-info:checked ~ .wfl-verse {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity .3s ease 1.9s;
-}
-
-#wfl-more-info:checked ~ .wfl-outer > .wfl-mi > .wfl-flap1 {
-  pointer-events: none;
-  transform: rotateX(180deg);
-  transition: transform .5s;
-}
-#wfl-more-info:checked ~ .wfl-outer > .wfl-mi > .wfl-flap2 {
-  transform: rotateX(-180deg);
-  transition: transform .5s .5s;
-}
-#wfl-more-info:checked ~ .wfl-outer > .wfl-mi > .wfl-flap3 {
-  transform: rotateY(180deg);
-  visibility: visible;
-  transition: visibility 0s 1s, transform .5s 1s;
-}
-#wfl-more-info:checked ~ .wfl-outer > .wfl-mi > .wfl-flap4 {
-  transform: rotateY(-180deg);
-  visibility: visible;
-  transition: visibility 0s 1s, transform .5s 1.5s;
-}
-#wfl-more-info:checked ~ .wfl-outer > .wfl-mi > .wfl-flap5 {
-  visibility: visible;
-  transition: visibility 0s 1s;
-}
-
-/* Aksesibilitas: tanpa animasi, langsung tampil final state (we-found-love.js
-   langsung men-centang checkbox tanpa observer kalau prefers-reduced-motion). */
-@media (prefers-reduced-motion: reduce) {
-  .wfl-mi, .wfl-flap1, .wfl-flap2, .wfl-flap3, .wfl-flap4, .wfl-flap5,
-  .wfl-photo-full, .wfl-verse {
-    transition: none !important;
-  }
-}
-
 /* ---------- Kedua Mempelai (slideshow besar 3/4 layar + info overlay) ---------- */
 /* Full-width, tanpa rounded, rapat ke ayat quran di atasnya (tanpa heading). */
 #couple.section {
@@ -1582,7 +1418,7 @@ a { color: inherit; }
   text-transform: uppercase;
   letter-spacing: .35em;
   font-size: .65rem;
-  color: var(--color-gold);
+  color: var(--color-text-light);
   margin: 0 0 .35rem;
 }
 .couple-info__name {
@@ -1640,7 +1476,7 @@ a { color: inherit; }
   font-weight: 700;
   letter-spacing: .35em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--color-dark);
   margin: 0;
 }
 .dresscode-text {
@@ -1736,7 +1572,7 @@ a { color: inherit; }
   font-weight: 700;
   letter-spacing: .35em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--color-dark);
   white-space: nowrap;
   transform: rotate(-90deg);
   transform-origin: center;
@@ -1793,10 +1629,10 @@ a { color: inherit; }
   font-size: .9rem;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--color-gold-soft);
+  color: var(--color-dark);
   margin: .15rem 0 0;
 }
-.event-time { font-size: 1.05rem; font-weight: 600; color: var(--color-gold); margin: .25rem 0 0; letter-spacing: .08em; }
+.event-time { font-size: 1.05rem; font-weight: 600; color: var(--color-dark); margin: .25rem 0 0; letter-spacing: .08em; }
 
 /* Lokasi di bawah tanggal, dipisah garis tipis */
 .event-place {
@@ -1823,7 +1659,7 @@ a { color: inherit; }
   text-decoration: none;
   transition: background .3s ease, color .3s ease;
 }
-.btn-maps svg { width: .9rem; height: .9rem; color: var(--color-gold); }
+.btn-maps svg { width: .9rem; height: .9rem; color: var(--color-dark); }
 .btn-maps:hover { background: var(--color-gold); color: #ffffff; }
 .btn-maps:hover svg { color: #ffffff; }
 

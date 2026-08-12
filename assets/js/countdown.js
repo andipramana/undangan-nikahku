@@ -110,14 +110,14 @@ window.initCountdown = function () {
 
   // Tunggu sampai teks section countdown benar-benar masuk layar (class
   // text-revealed dipasang main.js). Kalau sudah/belum ada elemennya, mulai
-  // langsung.
-  const opening = document.getElementById("opening");
-  if (opening && !opening.classList.contains("text-revealed")) {
+  // langsung. (Tanggal/countdown sekarang ada di #save-the-date-2, bukan #opening.)
+  const std2 = document.getElementById("save-the-date-2");
+  if (std2 && !std2.classList.contains("text-revealed")) {
     new MutationObserver((mutations, obs) => {
-      if (!opening.classList.contains("text-revealed")) return;
+      if (!std2.classList.contains("text-revealed")) return;
       obs.disconnect();
       start();
-    }).observe(opening, { attributes: true, attributeFilter: ["class"] });
+    }).observe(std2, { attributes: true, attributeFilter: ["class"] });
   } else {
     start();
   }

@@ -15,7 +15,7 @@
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&family=Cormorant+Garamond:wght@400&family=Italianno&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 <!-- Font Awesome (solid saja) — self-hosted, bukan CDN. Lihat assets/fontawesome/LICENSE.txt -->
@@ -103,7 +103,7 @@
 
   <div class="invitation-body">
 
-    <!-- ============ COUNTDOWN (section biasa, tetap bisa di-scroll ulang, foto auto-slide seperti cover) ============ -->
+    <!-- ============ SAVE THE DATE 1 (eyebrow + nama + ayat quran di atas foto hero) ============ -->
     <section id="opening" class="section-hero section-hero--anchor-right-bottom">
       <div class="hero-media" id="opening-media">
         <div class="hero-overlay hero-overlay--flat"></div>
@@ -117,54 +117,12 @@
             <p class="eyebrow text-enter text-enter--down">The Wedding Of</p>
           </div>
           <p class="script-names script-names--small text-enter text-enter--left" id="couple-names-opening">Mita <span class="amp">&amp;</span> Andi</p>
-          <!-- Tanggal & tahun di baris ini sengaja TANPA animasi angka —
-               kurang cocok di Save The Date, tampil tenang apa adanya -->
-          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"></p>
         </div>
-        <a id="btn-add-calendar" class="btn-outline btn-outline--light text-enter text-enter--left" href="#" target="_blank" rel="noopener">
-          <svg class="icon-envelope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-          Save The Date
-        </a>
-        <div class="countdown countdown--plain text-enter text-enter--up">
-          <div class="countdown__item" style="--reveal-i:0"><span id="cd-days">00</span><small>Hari</small></div>
-          <div class="countdown__item" style="--reveal-i:1"><span id="cd-hours">00</span><small>Jam</small></div>
-          <div class="countdown__item" style="--reveal-i:2"><span id="cd-minutes">00</span><small>Menit</small></div>
-          <div class="countdown__item" style="--reveal-i:3"><span id="cd-seconds">00</span><small>Detik</small></div>
+        <div class="opening-verse text-enter text-enter--up">
+          <p class="opening-quote" id="wfl-quote"></p>
+          <p class="opening-source" id="wfl-source"></p>
         </div>
         <span class="scroll-chevron" aria-hidden="true">&#8964;</span>
-      </div>
-    </section>
-
-    <!-- ============ WE FOUND LOVE (kartu lipat 3D "M & A" + ayat quran) ============ -->
-    <!-- Port dari example/fold/ (checkbox tersembunyi #wfl-more-info yang
-         men-drive SEMUA animasi lewat CSS :checked, murni CSS — lihat
-         CATATAN-IMPLEMENTASI-FOLD.md di folder itu utk detail jebakan).
-         Foto folder 'wfl' di-set we-found-love.js sebagai var(--img) di
-         section; checkbox di-centang SEKALI (via JS) saat section masuk
-         viewport, TIDAK PERNAH ditutup lagi (konsisten pola "sekali
-         reveal" section lain). .wfl-photo-full menimpa 3 kolom foto biar
-         gak ada garis sambungan; .wfl-verse (ayat) muncul di atasnya.
-         Section ini SATU-SATUNYA snap point scroll di app (.app-frame__scroll
-         scroll-snap-type: proximity). -->
-    <section id="we-found-love" class="wfl-fold-section">
-      <input type="checkbox" id="wfl-more-info" aria-hidden="true" tabindex="-1">
-
-      <div class="wfl-outer">
-        <div class="wfl-mi">
-          <div class="wfl-flap2"></div>
-          <div class="wfl-flap1"></div>
-          <div class="wfl-flap5"><div class="wfl-info"></div></div>
-          <div class="wfl-flap4"><div class="wfl-info"></div></div>
-          <div class="wfl-flap3"><div class="wfl-info"></div></div>
-        </div>
-      </div>
-
-      <div class="wfl-photo-full"></div>
-
-      <div class="wfl-verse" id="wfl-quote-wrap">
-        <p class="arabic-quote" id="wfl-arabic"></p>
-        <p class="opening-quote" id="wfl-quote"></p>
-        <p class="opening-source" id="wfl-source"></p>
       </div>
     </section>
 
@@ -212,6 +170,42 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SAVE THE DATE 2 (tanggal + tombol + countdown, foto statis) ============ -->
+    <!-- Blok tanggal/tombol/countdown yang tadinya di #opening — dipindah ke sini
+         (id-nya TETAP SAMA, isi otomatis jalan karena JS cari by ID). Foto STATIS
+         (bukan slideshow Ken Burns) di-set hero-slideshow.js sebagai inline
+         background-image di #save-the-date-2-media — class
+         .section-hero--static-bg menandai ini ke CSS. Tanggal diisi
+         countdown.js; id event-date-label TANPA animasi angka (tampil tenang). -->
+    <section id="save-the-date-2" class="section-hero section-hero--anchor-right-bottom section-hero--static-bg">
+      <div class="hero-media" id="save-the-date-2-media">
+        <div class="hero-overlay hero-overlay--flat"></div>
+      </div>
+      <div class="section-fade-bottom section-fade-bottom--dark"></div>
+      <!-- Typography editorial "SAVE the DATE" — dekorasi murni di atas foto,
+           terpisah dari .hero-content (posisinya absolute sendiri, bukan ikut
+           flow tanggal/tombol/countdown di bawahnya). -->
+      <div class="save-date text-enter text-enter--left" aria-hidden="true">
+        <span class="save-date__save">Save</span>
+        <span class="save-date__the">the</span>
+        <span class="save-date__date">Date</span>
+      </div>
+      <div class="hero-content">
+        <a id="btn-add-calendar" class="btn-outline btn-outline--light text-enter text-enter--left" href="#" target="_blank" rel="noopener">
+          Save The Date
+        </a>
+        <div class="countdown-heading">
+          <p class="cover-countdown__date text-enter text-enter--left" id="event-date-label"></p>
+        </div>
+        <div class="countdown countdown--plain text-enter text-enter--up">
+          <div class="countdown__item" style="--reveal-i:0"><span id="cd-days">00</span><small>Hari</small></div>
+          <div class="countdown__item" style="--reveal-i:1"><span id="cd-hours">00</span><small>Jam</small></div>
+          <div class="countdown__item" style="--reveal-i:2"><span id="cd-minutes">00</span><small>Menit</small></div>
+          <div class="countdown__item" style="--reveal-i:3"><span id="cd-seconds">00</span><small>Detik</small></div>
         </div>
       </div>
     </section>
@@ -307,7 +301,6 @@
     <!-- ============ LIVE STREAMING (opsional per platform — lihat livestream.js.
          Ketiga URL kosong = section DIHAPUS dari DOM oleh JS, bukan disembunyikan) ============ -->
     <section id="livestream" class="section section--dark">
-      <p class="section-eyebrow" data-reveal="up">Live</p>
       <h2 class="section-title--script" data-reveal="up" style="--reveal-i:1">Live Streaming</h2>
       <p class="section-desc" data-reveal="up" style="--reveal-i:2">
         Tidak bisa hadir langsung? Saksikan momen bahagia kami lewat siaran langsung.
@@ -357,7 +350,7 @@
            DI DALAM panel) -> klik Rekomendasi Kado -> modal. Tombol rekomendasi
            dihapus gift.js kalau daftar kado kosong. -->
       <div class="gift-actions">
-        <button id="btn-gift-toggle" class="btn-primary" type="button" data-reveal="up" style="--reveal-i:3">Kirim Hadiah</button>
+        <button id="btn-gift-toggle" class="btn-outline" type="button" data-reveal="up" style="--reveal-i:3">Kirim Hadiah</button>
       </div>
 
       <!-- Panel rekening: satu paket, muncul utuh begitu dibuka -->
@@ -534,7 +527,6 @@
 <script src="assets/js/reveal.js"></script>
 <script src="assets/js/countdown.js"></script>
 <script src="assets/js/gallery.js"></script>
-<script src="assets/js/we-found-love.js"></script>
 <script src="assets/js/couple-sliders.js"></script>
 <script src="assets/js/event-cards.js"></script>
 <script src="assets/js/audio-player.js"></script>

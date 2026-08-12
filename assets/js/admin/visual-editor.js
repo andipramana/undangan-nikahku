@@ -86,6 +86,16 @@
       opening.style.setProperty("transform", "none", "important");
       opening.style.setProperty("visibility", "visible", "important");
     }
+    // Save The Date 2: sama seperti #opening (section statis di preview editor).
+    // Tidak butuh fallback foto karena fotonya statis via inline background-image
+    // dari hero-slideshow.js, bukan <picture>/<img> seperti slideshow biasa.
+    const std2 = doc.getElementById("save-the-date-2");
+    if (std2) {
+      std2.classList.add("section-revealed", "text-revealed");
+      std2.style.setProperty("opacity", "1", "important");
+      std2.style.setProperty("transform", "none", "important");
+      std2.style.setProperty("visibility", "visible", "important");
+    }
     // Bekukan slider/hero pada slide pertama yang sedang aktif. Runtime boleh
     // tetap selesai memuat, namun tidak ada perubahan visual pada canvas.
     doc.querySelectorAll(".hero-slide").forEach((el, index) => {

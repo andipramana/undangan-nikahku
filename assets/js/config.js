@@ -29,8 +29,8 @@ window.WEDDING_CONFIG = {
   opening: {
     arabicQuote: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
     quote:
-      "“Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang.”",
-    source: "QS. Ar-Rum: 21"
+      "“Dan segala sesuatu Kami ciptakan berpasang-pasangan agar kamu mengingat (kebesaran Allah).”",
+    source: "QS. Az-Zariyat: 49"
   },
 
   event: {
