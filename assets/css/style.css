@@ -703,17 +703,17 @@ a { color: inherit; }
    teks utuh sejak awal, mask-nya yang membuka progresif. Trigger class
    .is-visible dipasang JS (main.js, setupSaveTheDate2Reveal — observer yang
    SUDAH ADA, lihat langkah JS). */
-/* Durasi per-kata sengaja tidak terlalu panjang (1s), tapi DELAY antar kata
-   dibuat LEBIH BESAR dari durasinya sendiri (800ms/1600ms) — supaya kata
-   berikutnya baru mulai bergerak SETELAH kata sebelumnya benar-benar selesai
-   (sequential), bukan cuma stagger tipis yang keliatan bareng. */
+/* Durasi per-kata: semuanya 0.5s (versi 0.3/0.2/0.3 terasa terlalu cepat di
+   HP — user minta coba 0.5). Delay antar kata = kata berikutnya mulai
+   SETELAH kata sebelumnya selesai + celah 50ms: the mulai 550ms (Save
+   selesai 500ms), Date mulai 1100ms (the selesai 1050ms). Total ~1.6s. */
 .save-date__save,
 .save-date__the,
 .save-date__date {
   clip-path: inset(0 100% 0 0);
   transform: translateY(4px);
-  transition: clip-path 1s cubic-bezier(.22, 1, .36, 1),
-              transform 1s cubic-bezier(.22, 1, .36, 1);
+  transition: clip-path .5s cubic-bezier(.22, 1, .36, 1),
+              transform .5s cubic-bezier(.22, 1, .36, 1);
   will-change: clip-path;
 }
 .save-date.is-visible .save-date__save {
@@ -728,12 +728,12 @@ a { color: inherit; }
      ekor itu. -8px/-2px memperluas area clip tanpa menggeser layout. */
   clip-path: inset(-2px -8px -2px -8px);
   transform: translateY(0);
-  transition-delay: 800ms;
+  transition-delay: 550ms;
 }
 .save-date.is-visible .save-date__date {
   clip-path: inset(0 0 0 0);
   transform: translateY(0);
-  transition-delay: 1600ms;
+  transition-delay: 1100ms;
 }
 
 /* Reduced motion: langsung tampil utuh tanpa animasi apapun. none (bukan

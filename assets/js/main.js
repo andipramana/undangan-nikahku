@@ -403,10 +403,18 @@
       setTimeout(() => std2.classList.add("text-revealed"), 1400);
     };
     // Section dianggap "full screen" kalau tepi atasnya sudah lewat viewport
-    // atas dan tepi bawahnya sudah melewati batas bawah viewport.
+    // atas. Kalau section setinggi viewport ATAU lebih, tepi bawahnya juga
+    // harus melewati batas bawah viewport; kalau section lebih PENDEK dari
+    // viewport (tingginya cuma kontennya saja — #save-the-date-2 tidak punya
+    // min-height 100dvh), posisi snap start (top <= 0) sudah dianggap penuh.
+    // Kalau tidak, isFullScreen() tidak akan pernah true dan teks tidak akan
+    // pernah muncul walau user sudah diam di section itu.
     const isFullScreen = () => {
       const r = std2.getBoundingClientRect();
-      return r.top <= 0 && r.bottom >= window.innerHeight - 1;
+      if (r.top > 0) return false;
+      return r.height >= window.innerHeight - 1
+        ? r.bottom >= window.innerHeight - 1
+        : true;
     };
 
     const observer = new IntersectionObserver(
@@ -422,33 +430,35 @@
         });
 
         // 2) Teks "SAVE the DATE" menunggu sampai section benar-benar
-        //    mendarat PENUH (scroll-snap mandatory) + jeda 350ms biar
+        //    mendarat PENUH (scroll-snap mandatory) + jeda 150ms biar
         //    "settle" dulu — supaya user bener-bener lihat teksnya full
         //    screen baru mask membuka. scrollend fire setelah scroll
         //    (termasuk snap) selesai; kalau user berhenti di section lain,
         //    cek isFullScreen gagal dan tunggu gesture berikutnya.
         const startWhenFull = () => {
           if (!isFullScreen()) return;
-          setTimeout(revealText, 350);
+          setTimeout(revealText, 150);
         };
-        if ("onscrollend" in window && scroller) {
-          scroller.addEventListener("scrollend", startWhenFull);
-        } else {
-          // Fallback browser tanpa scrollend: polling rAF sampai penuh.
-          const t0 = performance.now();
-          const tick = () => {
-            if (isFullScreen()) { setTimeout(revealText, 350); return; }
-            if (performance.now() - t0 > 3000) {
-              // Macet (mis. section lebih tinggi dari viewport): reveal teks
-              // saja kalau masih kelihatan, supaya tidak hilang selamanya.
-              const r = std2.getBoundingClientRect();
-              if (r.bottom > 0 && r.top < window.innerHeight) revealText();
-              return;
-            }
-            requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
+        // Polling cadangan jalan untuk SEMUA browser, bukan cuma yang tanpa
+        // scrollend: scrollend hanya cek SATU KALI — kalau cek pertama gagal
+        // (mis. address bar HP masih bergerak saat scrollend fire, atau snap
+        // belum selesai), tidak ada retry dan teks tidak pernah muncul walau
+        // user sudah diam di section. Polling mengecek terus sampai reveal
+        // (tiap frame saat scroll/snap masih bergerak, tiap 400ms setelah
+        // itu — getBoundingClientRect murah kalau layout tidak berubah).
+        const t0 = performance.now();
+        const tick = () => {
+          if (textRevealed) return;
+          if (isFullScreen()) { setTimeout(revealText, 150); return; }
+          const r = std2.getBoundingClientRect();
+          const visible = r.bottom > 0 && r.top < window.innerHeight;
+          // Cadangan: section kelihatan tapi lama tidak pernah penuh (mis.
+          // lebih tinggi dari viewport) → reveal saja supaya teks tidak
+          // hilang selamanya.
+          if (visible && performance.now() - t0 > 4000) { revealText(); return; }
+          setTimeout(tick, performance.now() - t0 < 1500 ? 0 : 400);
+        };
+        setTimeout(tick, 0);
       },
       { threshold: 0.25 }
     );
