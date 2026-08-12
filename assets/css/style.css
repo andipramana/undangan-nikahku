@@ -1163,6 +1163,13 @@ a { color: inherit; }
 }
 #gift-confirm-modal .modal__hint { color: #fff; opacity: .85; }
 #qr-checkin-modal .qr-modal__hint { color: #fff; opacity: .85; }
+/* Field input Konfirmasi WA: putih (bukan transparan) supaya teks isian jelas
+   di atas panel modal yang coklat — teks isian gelap agar terbaca. */
+#gift-confirm-modal .modal__field select,
+#gift-confirm-modal .modal__field textarea {
+  background: #fff;
+  color: var(--color-dark);
+}
 
 /* Elemen dalam modal Konfirmasi Pengiriman & Rekomendasi Kado muncul
    BERURUTAN (stagger) setiap modal dibuka. Dipakai animasi keyframes (bukan
