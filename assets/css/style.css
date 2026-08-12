@@ -1987,19 +1987,18 @@ a { color: inherit; }
   }
 }
 
-/* ---------- Capsule event: reveal BLUR-FADE berurutan, atas ke bawah ----------
-   Elemen muncul dari buram ke tajam + fade — TANPA geseran sama sekali,
-   jadi mustahil menimpa elemen lain (transform naik dulu menutupi
-   alamat/tombol di bawahnya karena jarak antar elemen rapat). Durasi tiap
-   elemen 600ms (tenang, tidak terburu-buru), jeda 320ms per langkah —
-   bergelombang satu-satu dari atas ke bawah. */
+/* ---------- Capsule event: reveal ZOOM-IN berurutan, atas ke bawah ----------
+   Elemen mengembang dari kecil (scale .82) + fade ke ukuran asli. Zoom ke
+   dalam dari tengah elemen tidak pernah menimpa elemen di bawahnya, jadi
+   bisa overlap: elemen berikutnya mulai di TENGAH yang sebelumnya (step
+   350ms = setengah durasi 700ms) — terasa mengalir, tidak menunggu satu
+   per satu selesai. */
 #event .event-hero__capsule [data-reveal] {
-  transform: none;
-  transition-property: opacity, filter;
-  transition-duration: 600ms;
-  transition-delay: calc(var(--reveal-i, 0) * 320ms);
-  filter: blur(10px);
+  transform: scale(.82);
+  transition-property: opacity, transform;
+  transition-duration: 700ms;
+  transition-delay: calc(var(--reveal-i, 0) * 350ms);
 }
 #event .event-hero__capsule [data-reveal].is-revealed {
-  filter: blur(0);
+  transform: scale(1);
 }
