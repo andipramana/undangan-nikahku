@@ -847,7 +847,7 @@ a { color: inherit; }
 .reveal-ready [data-reveal="zoom"].is-revealed       { transform: scale(1); }
 
 /* Durasi per jenis konten — makin besar & makin "foto", makin pelan. */
-.reveal-ready .couple-reveal[data-reveal]  { --reveal-dur: 2.8s; }
+.reveal-ready .couple-reveal[data-reveal]  { --reveal-dur: 2.2s; }
 .reveal-ready #quote-picture[data-reveal]  { --reveal-dur: 2.5s; }
 .reveal-ready .timeline-item[data-reveal]  { --reveal-dur: 2.1s; }
 .reveal-ready .gallery-item[data-reveal]   { --reveal-dur: 1.9s; }
