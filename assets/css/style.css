@@ -1,6 +1,6 @@
 :root {
   --color-bg: #f7f3ea;
-  --color-dark: #14120f;
+  --color-dark: #8e7253;
   --color-dark-2: #1c1914;
   --color-gold: #c9a668;
   --color-gold-soft: #e6d7b3;
@@ -891,6 +891,7 @@ a { color: inherit; }
 /* Judul script di dark section (livestream/love-story) tetap putih walau base
    rule di atas sekarang coklat tua (untuk section terang). */
 .section--dark .section-title--script { color: #fff; }
+#gallery .section-eyebrow,
 #gallery .section-title--script { color: var(--color-dark); }
 .section-desc {
   max-width: 480px; margin: -1.5rem auto 2rem;
