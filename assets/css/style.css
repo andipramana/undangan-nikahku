@@ -1166,6 +1166,10 @@ a { color: inherit; }
   color: var(--color-dark);
 }
 #gift-confirm-modal .modal__hint { color: var(--color-dark); opacity: .85; }
+/* Tombol aksi modal: coklat #846d57 dengan teks putih — senada dengan
+   tombol panel Kirim Hadiah. */
+#gift-confirm-modal #gift-confirm-send { background: #846d57; color: #fff; }
+#gift-confirm-modal #gift-confirm-send:hover { background: #6e5947; color: #fff; }
 /* Modal QR check-in & Menu — bg putih lebih solid (opacity dinaikkan dari
    transparan FAB), tanpa border, teks gelap agar selalu terbaca. */
 #qr-checkin-modal .modal__panel,
