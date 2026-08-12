@@ -210,87 +210,49 @@
       </div>
     </section>
 
-    <!-- ============ EVENT (2 kartu portrait: slider pasangan + info acara) ============ -->
-    <section id="event" class="section">
-      <p class="section-eyebrow" data-reveal="up">Wedding</p>
-      <h2 class="section-title--script" data-reveal="up" style="--reveal-i:1">Event</h2>
+    <!-- ============ EVENT (editorial: 1 panel, header tanggal besar + 2 blok
+         acara Akad/Resepsi, TANPA foto/slider/card box) ============ -->
+    <section id="event" class="section event-hero">
+      <!-- Header tanggal besar — SATU untuk kedua acara (akad & resepsi hari yang
+           sama, cuma beda jam, lihat cfg.event di config.js). data-count dipakai
+           lagi (reveal.js, sudah ada, JANGAN bikin sistem counter baru). -->
+      <div class="event-hero__date" data-reveal-group>
+        <p class="event-hero__day" id="event-day-label" data-reveal="fade"></p>
+        <p class="event-hero__num" id="event-date-num" data-reveal="pop" data-count="date" style="--reveal-i:1"></p>
+        <p class="event-hero__monthyear" data-reveal="fade" style="--reveal-i:2">
+          <span id="event-month-label"></span> <span id="event-year-label" data-count></span>
+        </p>
+      </div>
 
-      <!-- Akad Nikah -->
-      <!-- data-reveal-group DI SINI (bukan lagi di .event-card__info) — supaya
-           nama & detail acara terpicu BARENGAN dengan kartu/slideshow-nya,
-           bukan trigger scroll terpisah yang baru menyala setelah tamu
-           discroll lebih jauh (posisi .event-card__info ada di bagian bawah
-           kartu setinggi 90vh, jadi trigger sendirinya selalu telat). -->
-      <article class="event-card" data-reveal="tilt-left" data-reveal-group>
-        <div class="event-card__slider swiper" id="event-akad-slider">
-          <div class="swiper-wrapper" id="event-akad-wrapper"></div>
+      <div class="event-hero__list">
+        <div class="event-block" data-reveal-group>
+          <p class="event-block__title" data-reveal="fade">Akad Nikah</p>
+          <p class="event-block__time" data-reveal="up" style="--reveal-i:1">
+            <span id="akad-time-h" data-count="hour"></span>:<span id="akad-time-m" data-count="minute"></span> WIB
+          </p>
+          <h3 class="event-block__venue" id="venue-name-akad" data-reveal="up" style="--reveal-i:2"></h3>
+          <p class="event-block__address" id="venue-address-akad" data-reveal="up" style="--reveal-i:3"></p>
+          <a id="akad-maps" class="event-block__maps" href="#" target="_blank" rel="noopener" data-reveal="fade" style="--reveal-i:4">Google Maps</a>
         </div>
-        <!-- Satu paket: nama acara, tanggal, jam, dan lokasinya adalah satu
-             kesatuan informasi — muncul bersamaan, bukan dicicil per scroll -->
-        <div class="event-card__info">
-          <!-- varian "fade" (tanpa transform) — label ini sudah dirotate -90deg -->
-          <p class="event-label" data-reveal="fade">Akad Nikah</p>
-          <div class="event-detail">
-            <div class="event-date" data-reveal="pop" style="--reveal-i:1">
-              <p class="event-day" id="akad-day"></p>
-              <hr class="event-divider">
-              <!-- angka tanggal berputar cepat 1 -> 25 sambil bloknya naik -->
-              <p class="event-num" id="akad-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
-              <p class="event-month" id="akad-month"></p>
-              <!-- Tahun animasi ramp naik biasa (data-count tanpa nilai) — ikut
-                   sistem reveal seperti event-num supaya count-up-nya terpicu.
-                   --reveal-i:3 = muncul menyusul day/date/month, tidak serentak
-                   dengan angka tanggal. -->
-              <p class="event-year" id="akad-year" data-reveal="fade" data-count style="--reveal-i:3"></p>
-              <!-- Jam & menit dipecah jadi dua span supaya tiap angka bisa
-                   count-up sendiri (overshoot jam ke 24, menit ke 60) -->
-              <p class="event-time"><span id="akad-time-h" data-reveal="fade" data-count="hour" style="--reveal-i:4"></span>:<span id="akad-time-m" data-reveal="fade" data-count="minute" style="--reveal-i:5"></span></p>
-            </div>
-            <div class="event-place" data-reveal="up" style="--reveal-i:2">
-              <h3 id="venue-name-akad"></h3>
-              <p id="venue-address-akad"></p>
-              <a id="akad-maps" class="btn-maps" href="#" target="_blank" rel="noopener">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
-                Google Maps
-              </a>
-            </div>
-          </div>
-        </div>
-      </article>
 
-      <!-- Resepsi -->
-      <!-- miring ke arah berlawanan dari kartu Akad, supaya dua kartu berurutan
-           tidak terasa mengulang gerakan yang sama persis -->
-      <article class="event-card" data-reveal="tilt-right" data-reveal-group>
-        <div class="event-card__slider swiper" id="event-resepsi-slider">
-          <div class="swiper-wrapper" id="event-resepsi-wrapper"></div>
+        <hr class="event-hero__divider">
+
+        <div class="event-block" data-reveal-group>
+          <p class="event-block__title" data-reveal="fade">Resepsi</p>
+          <p class="event-block__time" data-reveal="up" style="--reveal-i:1">
+            <span id="resepsi-time-h" data-count="hour"></span>:<span id="resepsi-time-m" data-count="minute"></span> WIB
+          </p>
+          <h3 class="event-block__venue" id="venue-name-resepsi" data-reveal="up" style="--reveal-i:2"></h3>
+          <p class="event-block__address" id="venue-address-resepsi" data-reveal="up" style="--reveal-i:3"></p>
+          <a id="resepsi-maps" class="event-block__maps" href="#" target="_blank" rel="noopener" data-reveal="fade" style="--reveal-i:4">Google Maps</a>
         </div>
-        <div class="event-card__info">
-          <p class="event-label" data-reveal="fade">Resepsi</p>
-          <div class="event-detail">
-            <div class="event-date" data-reveal="pop" style="--reveal-i:1">
-              <p class="event-day" id="resepsi-day"></p>
-              <hr class="event-divider">
-              <p class="event-num" id="resepsi-date" data-reveal="fade" data-count="date" style="--reveal-i:1"></p>
-              <p class="event-month" id="resepsi-month"></p>
-              <p class="event-year" id="resepsi-year" data-reveal="fade" data-count style="--reveal-i:3"></p>
-              <p class="event-time"><span id="resepsi-time-h" data-reveal="fade" data-count="hour" style="--reveal-i:4"></span>:<span id="resepsi-time-m" data-reveal="fade" data-count="minute" style="--reveal-i:5"></span></p>
-            </div>
-            <div class="event-place" data-reveal="up" style="--reveal-i:2">
-              <h3 id="venue-name-resepsi"></h3>
-              <p id="venue-address-resepsi"></p>
-              <a id="resepsi-maps" class="btn-maps" href="#" target="_blank" rel="noopener">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
-                Google Maps
-              </a>
-            </div>
-          </div>
-        </div>
-      </article>
+      </div>
 
       <!-- Dresscode (kartu kecil 1/4 layar) -->
-      <!-- Kartu kecil, satu paket: judul + keterangan + bulatan warnanya -->
-      <article class="dresscode-card" data-reveal="rise" data-reveal-group>
+      <!-- Kartu kecil, satu paket: judul + keterangan + bulatan warnanya.
+           DISEMBUNYIKAN sementara (user belum pakai dresscode) — tinggal
+           hapus atribut `hidden` ini kalau nanti mau ditampilkan lagi. -->
+      <article class="dresscode-card" data-reveal="rise" data-reveal-group hidden>
         <p class="dresscode-label" data-reveal="down" style="--reveal-i:1">Dresscode</p>
         <p class="dresscode-text" id="dresscode-text" data-reveal="up" style="--reveal-i:2"></p>
         <!-- tiap bulatan warna dapat reveal sendiri, dipasang di main.js -->
@@ -528,7 +490,6 @@
 <script src="assets/js/countdown.js"></script>
 <script src="assets/js/gallery.js"></script>
 <script src="assets/js/couple-sliders.js"></script>
-<script src="assets/js/event-cards.js"></script>
 <script src="assets/js/audio-player.js"></script>
 <script src="assets/js/gift.js"></script>
 <script src="assets/js/rsvp.js"></script>

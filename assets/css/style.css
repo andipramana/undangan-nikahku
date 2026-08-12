@@ -550,15 +550,16 @@ a { color: inherit; }
 #rsvp-submit:hover { background: var(--color-dark-2); color: #fff; }
 
 .btn-outline {
-  display: inline-block;
+  display: inline-flex; align-items: center; gap: .5rem;
   font-family: var(--font-sans);
-  letter-spacing: .12em;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  font-size: .75rem;
+  font-size: .8rem;
+  font-weight: 500;
   background: #ffffff61;
   border: none;
-  color: inherit;
-  padding: .75rem 1.8rem;
+  color: #ffffff;
+  padding: .65rem 1.6rem;
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
@@ -738,21 +739,6 @@ a { color: inherit; }
   transition-delay: calc(.5s + var(--reveal-i, 0) * 200ms);
 }
 
-/* -- Kartu event: mendarat dari sedikit miring, seperti kartu undangan fisik
-      yang diletakkan di meja. Akad & Resepsi miring berlawanan. --
-   Nama & detail acara (.event-card__info) kini satu grup dengan kartunya
-   sendiri (lihat index.html) supaya terpicu bareng, bukan trigger scroll
-   terpisah yang telat karena posisinya di bawah kartu setinggi 90vh. Delay
-   di bawah membuatnya tetap terasa "menyusul" kartu yang baru mendarat --
-   .event-card durasinya 2.2s (lihat --reveal-dur di bawah), tapi delay-nya
-   SENGAJA jauh lebih pendek dari itu: kalau didekatkan ke durasi penuh,
-   namanya baru muncul setelah tamu biasanya sudah scroll lewat (pelajaran
-   yang sama seperti .couple-info di atas). 140ms per --reveal-i menyamai
-   satuan stagger default (event-date=1, event-place=2 sudah ditulis dengan
-   asumsi itu). */
-.reveal-ready .event-card__info [data-reveal] {
-  transition-delay: calc(.5s + var(--reveal-i, 0) * 140ms);
-}
 .reveal-ready [data-reveal="tilt-left"]              { transform: translateY(34px) rotate(-1.8deg); }
 .reveal-ready [data-reveal="tilt-right"]             { transform: translateY(34px) rotate(1.8deg); }
 .reveal-ready [data-reveal="tilt-left"].is-revealed,
@@ -774,7 +760,6 @@ a { color: inherit; }
 /* Durasi per jenis konten — makin besar & makin "foto", makin pelan. */
 .reveal-ready .couple-reveal[data-reveal]  { --reveal-dur: 2.8s; }
 .reveal-ready #quote-picture[data-reveal]  { --reveal-dur: 2.5s; }
-.reveal-ready .event-card[data-reveal]     { --reveal-dur: 2.2s; }
 .reveal-ready .timeline-item[data-reveal]  { --reveal-dur: 2.1s; }
 .reveal-ready .gallery-item[data-reveal]   { --reveal-dur: 1.9s; }
 
@@ -906,18 +891,6 @@ a { color: inherit; }
 .countdown--plain .countdown__item span { color: #fff; font-size: 1.15rem; }
 .countdown--plain .countdown__item small { color: #fff; opacity: .85; font-size: .6rem; }
 
-.event-grid {
-  display: grid; gap: 1.25rem;
-  grid-template-columns: 1fr; max-width: 480px; margin: 0 auto 2.5rem;
-}
-@media (min-width: 560px) { .event-grid { grid-template-columns: 1fr 1fr; } }
-.event-card {
-  border: 1px solid var(--color-gold);
-  border-radius: 10px; padding: 1.5rem 1rem;
-}
-.event-card__label { font-family: var(--font-serif); font-size: 1.3rem; margin: 0 0 .4rem; color: var(--color-text); }
-.event-card__time { margin: 0; letter-spacing: .08em; font-size: .9rem; }
-
 .venue { max-width: 420px; margin: 0 auto; }
 .venue h3 { font-size: 1.3rem; margin-bottom: .5rem; }
 .venue p { line-height: 1.6; font-size: .9rem; margin-bottom: 1.25rem; opacity: .85; }
@@ -957,7 +930,6 @@ a { color: inherit; }
    wadah foto di atas sudah overflow:hidden, jadi scale tidak bocor keluar.
    Hero tidak ikut di sini (kenburns menangani transform-nya sendiri). */
 .couple-slide img,
-.event-slide img,
 .gallery-item img,
 .timeline-item__photo,
 #quote-img {
@@ -1437,23 +1409,180 @@ a { color: inherit; }
   margin: 0;
 }
 
-/* ---------- Kartu Event (portrait rounded: slider pasangan + kanvas info) ---------- */
-/* Hilangkan padding kiri-kanan section supaya kartu selebar layar, dan padding bawah
-   supaya foto quote langsung menyambung di bawah kartu dresscode. */
-#event.section { padding-left: 0; padding-right: 0; padding-bottom: 0; }
-.event-card {
-  width: min(96%, 720px); /* sangat lebar, sisakan gap kecil kiri-kanan */
-  margin: 0 auto 2.5rem;
-  height: 90vh; /* 9/10 layar */
-  background: #ffffff;
-  border-radius: 24px;
-  overflow: hidden; /* foto tetap terpotong mengikuti sudut rounded */
-  display: flex;
-  flex-direction: column;
-  padding: 0; /* override padding CSS lama agar slider full-bleed ke kiri-atas */
-  box-shadow: 0 24px 60px rgba(0, 0, 0, .18);
+/* ---------- Event (editorial: 1 panel, header tanggal besar + 2 blok acara,
+   TANPA foto/slider/card box) ---------- */
+/* Satu sistem garis (bagian 12): semua border/divider section event berasal
+   dari satu base warm brown, dibedakan hanya lewat opacity — bukan warna yang
+   berbeda-beda. */
+.event-hero {
+  --event-line-strong: rgba(157, 124, 84, 0.58); /* outer frame + aksen */
+  --event-line: rgba(157, 124, 84, 0.40);         /* divider utama */
+  --event-line-soft: rgba(157, 124, 84, 0.22);    /* inner frame & detail kecil */
+  text-align: center;
 }
-.event-card:last-child { margin-bottom: 0; }
+.event-hero__date { margin-bottom: 1.75rem; }
+.event-hero__day {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: .3em;
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--color-text);
+  opacity: .75;
+  margin: 0 0 .6rem;
+}
+.event-hero__num {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(5rem, 26vw, 8rem);
+  line-height: .9;
+  color: var(--color-dark);
+  margin: 0;
+}
+.event-hero__monthyear {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: .28em;
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--color-text);
+  opacity: .8;
+  margin: .7rem 0 0;
+}
+
+/* Outer frame stationery (bagian 1-2): 1px tipis, sudut membulat lembut,
+   sisi kiri-kanan relatif lurus. Karakter "stationery" datang dari arch
+   tengah atas (::after) + inner frame & detail tengah bawah (::before),
+   bukan dari border-radius generik. */
+.event-hero__list {
+  position: relative;
+  max-width: 420px;
+  margin: 0 auto;
+  /* breathing room dalam frame (bagian 13): konten tidak boleh dekat border */
+  padding: 2.2rem 28px 2.4rem;
+  border: 1px solid var(--event-line-strong);
+  border-radius: 10px;
+}
+/* Inner frame (bagian 3): garis kedua 8px di dalam outer, jauh lebih samar —
+   depth stationery tanpa shadow. Detail tengah bawah (bagian 5): garis
+   vertikal pendek + titik di ujungnya, menggantung di atas garis inner bawah,
+   sejajar sumbu arch atas tapi lebih dalam (tidak persis identik). */
+.event-hero__list::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--event-line-soft);
+  border-radius: 6px;
+  background:
+    radial-gradient(circle closest-side, var(--event-line-strong) 98%, transparent) 50% calc(100% - 5px) / 4px 4px no-repeat,
+    linear-gradient(var(--event-line-strong), var(--event-line-strong)) 50% calc(100% - 15px) / 1px 10px no-repeat;
+  pointer-events: none;
+}
+/* Detail tengah atas (bagian 4): lengkung kecil setengah lingkaran pada
+   border atas, garis vertikal pendek ~11px, titik 4px di ujungnya. Background
+   solid = warna section, supaya segmen border atas yang tertutup lengkung
+   tidak terlihat ganda. */
+.event-hero__list::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 31px;
+  border: 1px solid var(--event-line-strong);
+  border-bottom: none;
+  border-radius: 14px 14px 0 0;
+  background:
+    radial-gradient(circle closest-side, var(--event-line-strong) 98%, transparent) 50% 26px / 4px 4px no-repeat,
+    linear-gradient(var(--event-line-strong), var(--event-line-strong)) 50% 15px / 1px 11px no-repeat,
+    var(--color-bg);
+  pointer-events: none;
+}
+.event-block { padding: 1.5rem 0; }
+/* Divider Akad–Resepsi (bagian 6): 1px solid, 82% lebar — tidak menyentuh
+   outer frame, ada whitespace kiri-kanan. Diamond kecil di tengahnya
+   (bagian 7, pure CSS rotate(45deg)). */
+.event-hero__divider {
+  position: relative;
+  width: 82%;
+  height: 1px;
+  margin: 0 auto;
+  border: none;
+  background: var(--event-line);
+}
+.event-hero__divider::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 5px; height: 5px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--event-line-strong);
+}
+.event-block__title {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--color-dark);
+  margin: 0 0 .3rem;
+  position: relative;
+  padding-bottom: .6rem;
+}
+/* underline di bawah judul acara (bagian 8): garis pendek 76px sebagai
+   visual punctuation setelah heading — bukan divider penuh lebar */
+.event-block__title::after {
+  content: "";
+  position: absolute; left: 50%; bottom: 0;
+  transform: translateX(-50%);
+  width: 76px; height: 1px;
+  background: var(--event-line);
+}
+.event-block__time {
+  font-family: var(--font-sans);
+  font-size: .95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: .9rem 0 0;
+  letter-spacing: .04em;
+}
+.event-block__venue {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.4rem;
+  line-height: 1.25;
+  color: var(--color-dark);
+  margin: .6rem 0 0;
+}
+.event-block__address {
+  font-family: var(--font-sans);
+  font-size: .8rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  opacity: .75;
+  max-width: 300px;
+  margin: .5rem auto 0;
+}
+/* Tombol maps = capsule asli (bagian 11): radius 999px (bukan rounded
+   rectangle 8/12/16px), border 1px warm brown, background transparan,
+   tanpa shadow. */
+.event-block__maps {
+  display: inline-block;
+  margin-top: 1.3rem;
+  padding: 11px 22px;
+  border: 1px solid rgba(150, 115, 76, 0.65);
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .03em;
+  color: #8a6d4b;
+  background: transparent;
+  text-decoration: none;
+  transition: background .25s ease, color .25s ease;
+}
+.event-block__maps:hover { background: rgba(150, 115, 76, .08); }
 
 /* ---------- Kartu Dresscode (kartu kecil 1/4 layar, border sama dengan event card) ---------- */
 .dresscode-card {
@@ -1538,131 +1667,6 @@ a { color: inherit; }
   text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
 }
 
-/* 4/10 atas kartu: slider foto pasangan, penuh menyentuh tepi kartu */
-.event-card__slider {
-  height: 40%;
-  flex: none;
-  overflow: hidden;
-  width: 100%;
-}
-.event-card__slider .swiper-wrapper,
-.event-card__slider .swiper-slide { height: 100%; }
-.event-slide picture,
-.event-slide img { width: 100%; height: 100%; display: block; }
-.event-slide img { object-fit: cover; }
-
-/* 6/10 bawah kartu: kanvas bersih info acara, 2 kolom — 1/4 label acara, 3/4 detail */
-.event-card__info {
-  flex: 0 0 60%; /* 6/10 dari tinggi kartu, bukan dari layar */
-  display: grid;
-  /* minmax(0, …) agar kolom label tidak ikut melebar saat tulisannya diperbesar —
-     label tetap di 1/4, detail tetap di 3/4 tanpa bergeser */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
-  color: var(--color-text);
-  background: #ffffff;
-  padding: 1.5rem .75rem 1.5rem 0;
-  min-height: 0;
-}
-
-/* Kolom 1 (1/4): label acara vertikal, center horizontal & vertikal */
-.event-label {
-  font-family: var(--font-label);
-  font-size: clamp(1.35rem, 5vw, 2.2rem); /* label acara dibesarkan */
-  min-width: 0; /* jangan paksa kolom label melebar karena teks nowrap */
-  font-weight: 700;
-  letter-spacing: .35em;
-  text-transform: uppercase;
-  color: var(--color-dark);
-  white-space: nowrap;
-  transform: rotate(-90deg);
-  transform-origin: center;
-  align-self: center;
-  justify-self: center;
-  margin: 0;
-}
-
-/* Kolom 2: tanggal di atas, lokasi di bawahnya (digabung) */
-.event-detail {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1.1rem;
-  min-width: 0;
-  padding-right: .5rem;
-  padding-left: .9rem; /* ruang agar garis pemisah tidak menempel teks */
-  position: relative;
-}
-/* Garis pemisah vertikal antara kolom label acara dan kolom detail */
-.event-detail::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 1rem;
-  bottom: 1rem;
-  border-left: 1px solid color-mix(in srgb, var(--color-gold) 40%, transparent);
-}
-.event-date {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: .3rem;
-}
-.event-day { font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; opacity: .7; margin: 0; }
-.event-divider {
-  width: 2.5rem;
-  border: none;
-  border-top: 1px solid var(--color-gold);
-  margin: .35rem auto;
-}
-.event-num {
-  font-family: var(--font-script);
-  font-size: clamp(3rem, 12vw, 4.2rem);
-  line-height: 1;
-  color: var(--color-text);
-  margin: 0;
-}
-.event-month { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; opacity: .7; margin: 0; }
-/* Tahun di kartu event — dipisah dari bulan supaya bisa animasi count-up
-   sendiri (data-count di index.html); sedikit lebih menonjol dari bulan. */
-.event-year {
-  font-size: .9rem;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--color-dark);
-  margin: .15rem 0 0;
-}
-.event-time { font-size: 1.05rem; font-weight: 600; color: var(--color-dark); margin: .25rem 0 0; letter-spacing: .08em; }
-
-/* Lokasi di bawah tanggal, dipisah garis tipis */
-.event-place {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding-top: 1.1rem;
-  border-top: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
-}
-.event-place h3 { font-size: .95rem; margin: 0 0 .3rem; line-height: 1.3; }
-.event-place p { font-size: .7rem; line-height: 1.55; opacity: .75; margin: 0 0 .9rem; }
-.btn-maps {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .45rem .8rem;
-  border: 1px solid var(--color-gold);
-  border-radius: 10px;
-  color: var(--color-text);
-  font-size: .7rem;
-  letter-spacing: .06em;
-  text-decoration: none;
-  transition: background .3s ease, color .3s ease;
-}
-.btn-maps svg { width: .9rem; height: .9rem; color: var(--color-dark); }
-.btn-maps:hover { background: var(--color-gold); color: #ffffff; }
-.btn-maps:hover svg { color: #ffffff; }
-
 /* ─── Reveal stagger enhancement ───
    Per-elemen reveal dengan delay bertahap. --reveal-i dikali STEP_MS
    oleh reveal.js. Di sini kita tambahkan aturan untuk elemen yang
@@ -1677,14 +1681,19 @@ a { color: inherit; }
    sendiri tidak pernah ditandai .is-revealed (reveal.js cuma meregister
    elemen ber-data-reveal), wrapper-nya opacity:0 SELAMANYA — menyembunyikan
    semua foto di dalamnya meski tiap foto sudah benar ter-reveal individual.
-   Fix: kecualikan kedua ID wrapper ini secara eksplisit. */
-.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list) {
+   Fix: kecualikan kedua ID wrapper ini secara eksplisit. Kasus yang sama
+   menyusul: .gift-actions & .livestream-actions (wrapper polos di #gift /
+   #livestream — tombol di dalamnya punya data-reveal sendiri, wrapper-nya
+   tidak, jadi tanpa pengecualian ini tombol Kirim Hadiah / Live Streaming
+   tersembunyi selamanya) dan .event-hero__list (wrapper blok acara #event,
+   reveal dipasang per anaknya). */
+.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list) {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
               transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.reveal-ready .section > *.is-revealed:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list) {
+.reveal-ready .section > *.is-revealed:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list) {
   opacity: 1;
   transform: translateY(0);
 }

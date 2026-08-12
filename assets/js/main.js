@@ -138,7 +138,7 @@
     // Kartu event: tanggal (Selasa / 25 / Agustus / 2026 / jam) + venue +
     // tombol maps. dateLabel mis. "25 Agustus 2026" dipecah jadi hari "25",
     // bulan "Agustus", tahun "2026" — tahun dianimasikan count-up sendiri
-    // (#akad-year, data-count tanpa nilai).
+    // (#event-year-label, data-count tanpa nilai).
     const parts = cfg.event.dateLabel.split(" ");
     const dayNum = parts[0];
     const month = parts[1] || "";
@@ -148,11 +148,14 @@
     // & tahunnya sengaja TANPA animasi angka (kurang cocok di sana).
     document.getElementById("event-date-label").textContent = `${cfg.event.dayLabel}, ${cfg.event.dateLabel}`;
 
+    // Header tanggal besar #event (SATU untuk akad+resepsi: cfg.event cuma
+    // punya SATU tanggal — akad & resepsi beda jam saja, lihat config.js).
+    document.getElementById("event-day-label").textContent = cfg.event.dayLabel;
+    document.getElementById("event-date-num").textContent = dayNum;
+    document.getElementById("event-month-label").textContent = month;
+    document.getElementById("event-year-label").textContent = year;
+
     ["akad", "resepsi"].forEach((key) => {
-      document.getElementById(`${key}-day`).textContent = cfg.event.dayLabel;
-      document.getElementById(`${key}-date`).textContent = dayNum;
-      document.getElementById(`${key}-month`).textContent = month;
-      document.getElementById(`${key}-year`).textContent = year;
       // Jam & menit diisi ke span terpisah (#akad-time-h/m) — tiap angka
       // count-up sendiri (overshoot jam ke 24, menit ke 60). Format config
       // "HH.MM", dinormalisasi dulu ke "HH:MM" lalu dipecah.
@@ -441,7 +444,6 @@
     if (window.initRsvp) window.initRsvp();
     if (window.initGallery) window.initGallery();
     if (window.initCoupleSliders) window.initCoupleSliders();
-    if (window.initEventCards) window.initEventCards();
     // Modul yang merender/menghapus elemen (livestream, QR check-in) WAJIB
     // sebelum initReveal: tombol/section yang baru dibuat harus ikut
     // terdaftar ke observer reveal pada pemindaian awal.
