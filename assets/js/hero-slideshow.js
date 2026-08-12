@@ -1,6 +1,6 @@
-/** Cover/opening/closing: slideshow foto bergilir dengan efek Ken Burns + slide filmstrip
- * (foto lama geser keluar ke kiri, foto baru masuk dari kanan — sempat kelihatan
- * bersebelahan saat transisi, bukan crossfade opacity).
+/** Cover/opening/closing: slideshow foto bergilir dengan efek Ken Burns +
+ * crossfade (foto lama fade out bersamaan foto baru fade in, keduanya
+ * overlap — diatur CSS .hero-slide per template).
  *
  * Foto diambil dari payload Supabase (folder cover/opening/closing) dengan
  * cadangan manifest lokal. Zoom per foto (--zoom) diterapkan lewat keyframe

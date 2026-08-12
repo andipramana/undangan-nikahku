@@ -215,15 +215,16 @@ a { color: inherit; }
      ditangani keyframe kenburns di atas */
   object-position: var(--fx, 50%) var(--fy, 50%);
 }
-/* Slide bergeser dari kiri ke kanan (filmstrip) saat berganti, bukan crossfade opacity —
-   foto baru masuk dari kiri, foto lama keluar ke kanan, sempat bersebelahan. */
+/* Crossfade: foto lama fade out bersamaan dengan foto baru fade in (keduanya
+   tumpuk & overlap — "saat fade, foto berikutnya sudah masuk"). Durasi 3.2s
+   WAJIB SAMA dengan SLIDE_TRANSITION_MS di hero-slideshow.js. */
 .hero-slide {
   position: absolute; inset: 0; overflow: hidden;
-  transform: translateX(-100%);
-  transition: transform 3.2s cubic-bezier(.65,0,.35,1);
+  opacity: 0;
+  transition: opacity 3.2s ease;
 }
-.hero-slide.active { transform: translateX(0); z-index: 1; }
-.hero-slide.exiting { transform: translateX(100%); z-index: 1; }
+.hero-slide.active { opacity: 1; z-index: 1; }
+.hero-slide.exiting { opacity: 0; z-index: 1; }
 .kenburns { animation: kenburns 9s ease-in-out infinite alternate; }
 /* Zoom admin (--zoom) dimasukkan KE DALAM keyframe, bukan transform biasa di
    elemen — animasi selalu menimpa transform statis, jadi --zoom di luar
