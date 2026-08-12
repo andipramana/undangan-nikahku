@@ -341,13 +341,17 @@
   // slide-in-nya tidak "kepakai habis" duluan sebelum tamu sampai di sana.
   function setupSaveTheDate2Reveal() {
     const std2 = document.getElementById("save-the-date-2");
+    const saveDateEl = std2 && std2.querySelector(".save-date");
     if (!std2 || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => std2.classList.add("section-revealed"));
+          requestAnimationFrame(() => {
+            std2.classList.add("section-revealed");
+            if (saveDateEl) saveDateEl.classList.add("is-visible");
+          });
         });
         setTimeout(() => std2.classList.add("text-revealed"), 1400);
       },

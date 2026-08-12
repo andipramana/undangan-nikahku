@@ -691,6 +691,46 @@ a { color: inherit; }
   z-index: 2;
 }
 
+/* Masked line reveal (clip-path kiri->kanan, BUKAN typewriter/fade biasa) —
+   teks utuh sejak awal, mask-nya yang membuka progresif. Trigger class
+   .is-visible dipasang JS (main.js, setupSaveTheDate2Reveal — observer yang
+   SUDAH ADA, lihat langkah JS). */
+.save-date__save,
+.save-date__the,
+.save-date__date {
+  clip-path: inset(0 100% 0 0);
+  transform: translateY(4px);
+  transition: clip-path 1.2s cubic-bezier(.22, 1, .36, 1),
+              transform 1.2s cubic-bezier(.22, 1, .36, 1);
+  will-change: clip-path;
+}
+.save-date.is-visible .save-date__save {
+  clip-path: inset(0 0 0 0);
+  transform: translateY(0);
+  transition-delay: 0ms;
+}
+.save-date.is-visible .save-date__the {
+  clip-path: inset(0 0 0 0);
+  transform: translateY(0);
+  transition-delay: 120ms;
+}
+.save-date.is-visible .save-date__date {
+  clip-path: inset(0 0 0 0);
+  transform: translateY(0);
+  transition-delay: 220ms;
+}
+
+/* Reduced motion: langsung tampil utuh tanpa animasi apapun. */
+@media (prefers-reduced-motion: reduce) {
+  .save-date__save,
+  .save-date__the,
+  .save-date__date {
+    clip-path: inset(0 0 0 0) !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 /* ---------- Scroll-reveal section di bawah cover ([data-reveal]) ----------
    Perluasan dari pola .text-enter di atas, tapi dipicu IntersectionObserver
    (assets/js/reveal.js) alih-alih setTimeout. Semua state tersembunyi digantung
@@ -1246,8 +1286,13 @@ a { color: inherit; }
 }
 .rsvp-form label {
   display: flex; flex-direction: column; gap: .45rem;
-  color: #65543a; font-size: .72rem; font-weight: 600;
+  font-family: "Segoe UI", var(--font-sans); font-size: .72rem;
+  font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase;
+  /* Putih + shadow: label langsung di atas foto bg kartu (kartu transparan),
+     supaya tetap terbaca apa pun kontras foto di belakangnya. */
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(20, 18, 15, .55);
 }
 .rsvp-form input, .rsvp-form select, .rsvp-form textarea {
   width: 100%; font-family: var(--font-sans); font-size: .92rem;
@@ -1264,13 +1309,16 @@ a { color: inherit; }
 
 /* Tombol pilihan kehadiran capsule: Hadir full-width, Tidak Hadir & Ragu setengah */
 .rsvp-attendance { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .1rem; }
-.rsvp-pill {
+.rsvp-form .rsvp-pill {
   grid-column: span 1; padding: .7rem .75rem;
   border: 1px solid rgba(172,136,72,.65); border-radius: 10px;
   background: #fff;
   /* Warna teks di-hardcode (bukan var(--color-text)) supaya tidak ikut
      berubah jadi tak terbaca kalau var(--color-text) di-override putih
-     lewat tab Tampilan admin — pill ini bg-nya selalu terang. */
+     lewat tab Tampilan admin — pill ini bg-nya selalu terang. Selector
+     discope ke .rsvp-form supaya specificity (0,2,0) menang atas
+     .rsvp-form label { color:#fff } — tanpa ini teks pill ikut putih
+     (putih di atas putih → tak terlihat). */
   color: var(--color-dark);
   font-family: var(--font-sans); font-size: .82rem; cursor: pointer;
   transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
