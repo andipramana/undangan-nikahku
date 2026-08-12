@@ -59,10 +59,13 @@ window.initHeroSlideshows = async function () {
       const items = container.querySelectorAll(".hero-slide");
       let index = 0;
       // Opening (Save The Date 1) berganti lebih cepat dari cover/closing —
-      // user minta jeda antar foto tidak kelamaan (interval 5.5s, first 4.5s).
+      // user minta jeda antar foto tidak kelamaan (interval 3.5s, first 2.5s).
       const cycleInterval = key === "opening"
-        ? (cfg.heroSlideIntervalOpening || 5500)
+        ? (cfg.heroSlideIntervalOpening || 3500)
         : interval;
+      const transitionMs = key === "opening"
+        ? (cfg.heroSlideTransitionOpening || 1800)
+        : SLIDE_TRANSITION_MS;
 
       // Slideshow yang tidak sedang dilihat tidak perlu berjalan. #closing ada
       // jauh di bawah halaman, dan #cover tetap tinggal di DOM (position: fixed,
@@ -121,12 +124,12 @@ window.initHeroSlideshows = async function () {
           // eslint-disable-next-line no-unused-expressions
           current.offsetHeight; // force reflow supaya reset posisi tidak animasi/terlihat
           current.style.transition = "";
-        }, SLIDE_TRANSITION_MS);
+        }, transitionMs);
 
         index = nextIndex;
         // Jeda penuh dulu untuk melihat foto yang baru masuk, BARU transisi berikutnya
         // (tidak pakai setInterval agar pergantian tidak pernah menumpuk).
-        setTimeout(cycle, cycleInterval + SLIDE_TRANSITION_MS);
+        setTimeout(cycle, cycleInterval + transitionMs);
       }
 
       function start(firstDelay) {
@@ -141,8 +144,8 @@ window.initHeroSlideshows = async function () {
         // Slideshow section 2 baru berjalan saat foto pertamanya sudah tampil
         // (dipicu dari main.js lewat window.startOpeningSlideshow). Kalau main.js
         // sudah minta start lebih dulu (fetch manifest masih jalan), langsung jalan.
-        // Foto pertama tampil dulu 4.5s sebelum berganti (dipercepat dari 6.5s).
-        const OPENING_FIRST_DELAY = 4500;
+        // Foto pertama tampil dulu 2.5s sebelum berganti.
+        const OPENING_FIRST_DELAY = 2500;
         window.startOpeningSlideshow = () => start(OPENING_FIRST_DELAY);
         if (window.__openingStartQueued) start(OPENING_FIRST_DELAY);
       } else {
