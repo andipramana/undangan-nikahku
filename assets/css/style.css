@@ -1491,6 +1491,16 @@ a { color: inherit; }
 }
 .couple-slider .swiper-wrapper,
 .couple-slider .swiper-slide { height: 100%; }
+/* Clip per-SLIDE untuk slide yang TIDAK tampil: gambar yang di-zoom/pan
+   (transform: scale(var(--zoom)) di .couple-slide img) meluber keluar box
+   slide-nya sendiri — tanpa clip, slide berikutnya yang zoom-nya besar bisa
+   menimpa tepi kanan slide aktif (foto 4 zoom 1.25 menutupi kanan foto 3). */
+.couple-slider .swiper-slide { overflow: hidden; }
+/* Slide yang sedang tampil DIBEBASKAN dari clip (boleh meluber kanan-kiri
+   mengikuti pan/zoom admin, sesuai keinginan) dan dinaikkan z-index: gambar
+   slide aktif menutupi beberapa pixel pertama slide berikutnya, jadi foto
+   berikutnya tidak pernah terlihat mengintip di sisi kanan layar. */
+.couple-slider .swiper-slide-active { overflow: visible; z-index: 2; }
 .couple-slide picture,
 .couple-slide img { width: 100%; height: 100%; display: block; }
 .couple-slide img { object-fit: cover; }
