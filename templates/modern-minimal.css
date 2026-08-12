@@ -848,7 +848,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .timeline-item p {
   font-family: "Montserrat","Helvetica Neue",sans-serif;
   font-size: .72rem; color: var(--color-text); line-height: 1.6;
-  max-width: min(100%, 260px); margin-inline: auto;
+  max-width: min(100%, 200px); margin-inline: auto;
 }
 
 /* ═══════════════════════ GALLERY — masonry grid ═══════════════════════ */
