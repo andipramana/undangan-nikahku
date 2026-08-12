@@ -423,15 +423,14 @@
         observer.disconnect();
 
         // 1) Foto/section reveal LANGSUNG begitu section mulai masuk layar
-        //    (perilaku asli — jangan di-delay, user minta yang delay cuma
-        //    teksnya). text-revealed ikut bareng di sini: tombol
-        //    "Save The Date", tanggal, dan countdown (semua .text-enter)
-        //    muncul bersamaan dengan foto — tidak menunggu mask reveal
-        //    "SAVE the DATE" selesai.
+        //    (perilaku asli — jangan di-delay). text-revealed (tombol
+        //    "Save The Date", tanggal, countdown — semua .text-enter)
+        //    ditunda 0.7s: muncul setelah foto settle, tapi tetap TIDAK
+        //    menunggu mask reveal "SAVE the DATE" selesai.
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             std2.classList.add("section-revealed");
-            std2.classList.add("text-revealed");
+            setTimeout(() => std2.classList.add("text-revealed"), 700);
           });
         });
 
