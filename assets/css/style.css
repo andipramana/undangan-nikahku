@@ -1035,7 +1035,7 @@ a { color: inherit; }
 }
 .timeline-item .timeline-date { color: #85652d; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
 .timeline-item h4 { font-family: var(--font-serif); font-size: 1.3rem; margin: .3rem 0; color: var(--color-dark); }
-.timeline-item p { margin: 0; font-size: .9rem; line-height: 1.6; color: var(--color-text); opacity: .85; max-width: min(100%, 220px); }
+.timeline-item p { margin: 0; font-size: .9rem; line-height: 1.6; color: var(--color-text); opacity: .85; max-width: min(100%, 260px); }
 
 /* ---------- Gallery (grid 4 kolom, pola: landscape / 2 potrait / landscape / 1-4+3-4 / landscape / 2 potrait / landscape) ---------- */
 .gallery-grid {
