@@ -215,16 +215,28 @@ a { color: inherit; }
      ditangani keyframe kenburns di atas */
   object-position: var(--fx, 50%) var(--fy, 50%);
 }
-/* Crossfade: foto lama fade out bersamaan dengan foto baru fade in (keduanya
-   tumpuk & overlap — "saat fade, foto berikutnya sudah masuk"). Durasi 3.2s
-   WAJIB SAMA dengan SLIDE_TRANSITION_MS di hero-slideshow.js. */
+/* Slide bergeser dari kiri ke kanan (filmstrip) saat berganti — foto baru
+   masuk dari kiri, foto lama keluar ke kanan, sempat bersebelahan.
+   (Khusus #opening di-override crossfade di bawah; cover & closing tetap
+   filmstrip.) */
 .hero-slide {
   position: absolute; inset: 0; overflow: hidden;
+  transform: translateX(-100%);
+  transition: transform 3.2s cubic-bezier(.65,0,.35,1);
+}
+.hero-slide.active { transform: translateX(0); z-index: 1; }
+.hero-slide.exiting { transform: translateX(100%); z-index: 1; }
+/* Hanya Save The Date 1 (#opening): crossfade — foto lama fade out bersamaan
+   foto baru fade in (keduanya overlap, "saat fade foto berikutnya sudah
+   masuk"). Durasi 3.2s WAJIB SAMA dengan SLIDE_TRANSITION_MS di
+   hero-slideshow.js. */
+#opening .hero-slide {
+  transform: none;
   opacity: 0;
   transition: opacity 3.2s ease;
 }
-.hero-slide.active { opacity: 1; z-index: 1; }
-.hero-slide.exiting { opacity: 0; z-index: 1; }
+#opening .hero-slide.active { opacity: 1; }
+#opening .hero-slide.exiting { opacity: 0; }
 .kenburns { animation: kenburns 9s ease-in-out infinite alternate; }
 /* Zoom admin (--zoom) dimasukkan KE DALAM keyframe, bukan transform biasa di
    elemen — animasi selalu menimpa transform statis, jadi --zoom di luar
