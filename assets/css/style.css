@@ -1932,6 +1932,8 @@ a { color: inherit; }
 .wishes-intro,
 .wishes-empty,
 .wish-card *,
+#closing .closing-text,
+#closing .script-names,
 .site-footer *,
 .gift-account__bank,
 .gift-account__number,

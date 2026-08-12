@@ -1229,6 +1229,8 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .wishes-intro,
 .wishes-empty,
 .wish-card *,
+#closing .closing-text,
+#closing .script-names,
 .site-footer *,
 .gift-account__bank,
 .gift-account__number,
