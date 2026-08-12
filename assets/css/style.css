@@ -1135,10 +1135,13 @@ a { color: inherit; }
 .modal__panel .btn-primary { width: 100%; }
 .modal__hint { font-size: .7rem; opacity: .6; margin: .9rem 0 0; text-align: center; }
 
-/* Modal Konfirmasi Pengiriman & Rekomendasi Kado — senada dengan tombol
-   aksinya: bg coklat #846d57, tanpa border, semua teks putih agar visible. */
+/* Modal undangan (Konfirmasi Pengiriman, Rekomendasi Kado, QR check-in,
+   Menu) — senada dengan tombol aksinya: bg coklat #846d57, tanpa border,
+   semua teks putih agar visible. */
 #gift-confirm-modal .modal__panel,
-#gift-recs-modal .modal__panel {
+#gift-recs-modal .modal__panel,
+#qr-checkin-modal .modal__panel,
+#nav-menu-modal .modal__panel {
   background: #846d57;
   border: none;
   color: #fff;
@@ -1147,11 +1150,16 @@ a { color: inherit; }
 #gift-confirm-modal .modal__close,
 #gift-recs-modal .modal__header h3,
 #gift-recs-modal .modal__close,
+#qr-checkin-modal .modal__header h3,
+#qr-checkin-modal .modal__close,
+#nav-menu-modal .modal__header h3,
+#nav-menu-modal .modal__close,
 #gift-confirm-modal .modal__field > span,
 #gift-recs-modal .modal__field > span {
   color: #fff;
 }
 #gift-confirm-modal .modal__hint { color: #fff; opacity: .85; }
+#qr-checkin-modal .qr-modal__hint { color: #fff; opacity: .85; }
 
 /* Elemen dalam modal Konfirmasi Pengiriman & Rekomendasi Kado muncul
    BERURUTAN (stagger) setiap modal dibuka. Dipakai animasi keyframes (bukan
