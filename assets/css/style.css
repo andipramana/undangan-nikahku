@@ -901,6 +901,10 @@ a { color: inherit; }
 .gift-capsule .section-eyebrow,
 .gift-capsule .section-title { color: var(--color-dark); }
 .gift-capsule .section-desc { color: var(--color-text); }
+/* Panel terbuka: judul & deskripsi disembunyikan agar rekening/alamat muat
+   di dalam capsule tanpa overflow. */
+.gift-capsule.is-open .section-title,
+.gift-capsule.is-open .section-desc { display: none; }
 /* Tombol & teks di dalam capsule krem harus gelap (bukan putih transparan). */
 .gift-capsule .btn-outline { background: rgba(255, 255, 255, .65); color: var(--color-dark); }
 .gift-capsule .btn-text { color: var(--color-dark); }

@@ -61,6 +61,10 @@ window.initGift = function () {
   toggleBtn.addEventListener("click", () => {
     panel.hidden = false;
     toggleBtn.hidden = true;
+    // Judul & deskripsi Tanda Kasih disembunyikan supaya panel rekening/alamat
+    // muat di dalam capsule tanpa overflow.
+    const capsule = toggleBtn.closest(".gift-capsule");
+    if (capsule) capsule.classList.add("is-open");
     // Isi panel baru "ada" di layar sekarang — reveal LANGSUNG semuanya,
     // tidak menunggu reveal point scroll (observer memakai rootMargin -45%:
     // elemen bawah panel tidak akan muncul sampai discroll melewati tengah
@@ -72,6 +76,8 @@ window.initGift = function () {
   hideBtn.addEventListener("click", () => {
     panel.hidden = true;
     toggleBtn.hidden = false;
+    const capsule = toggleBtn.closest(".gift-capsule");
+    if (capsule) capsule.classList.remove("is-open");
   });
 
   accountsEl.addEventListener("click", (e) => {
