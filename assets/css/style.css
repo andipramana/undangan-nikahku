@@ -565,8 +565,8 @@ a { color: inherit; }
 }
 /* Kirim Konfirmasi (RSVP) sengaja dibalik dari .btn-primary default (putih
    translucent + teks gelap): background primary coklat tua, teks putih. */
-#rsvp-submit { background: var(--color-dark); color: #fff; }
-#rsvp-submit:hover { background: var(--color-dark-2); color: #fff; }
+#rsvp-submit { background: #826b57; color: #fff; }
+#rsvp-submit:hover { background: #6e5947; color: #fff; }
 
 .btn-outline {
   display: inline-flex; align-items: center; gap: .5rem;
@@ -1560,193 +1560,110 @@ a { color: inherit; }
    dari 1 layar di device tertentu (font besar/aksesibilitas, alamat sangat
    panjang), section ini tetap boleh memanjang alih-alih memotong/overflow —
    pola yang sama dengan .section-hero di section lain. */
-/* height TETAP (bukan min-height) + overflow:hidden = jaring pengaman terakhir
-   supaya section ini TIDAK PERNAH melebihi 1 layar penuh apapun yang terjadi.
-   Supaya jarang sampai kepotong overflow-nya, SEMUA ukuran font & jarak
-   vertikal di bawah pakai clamp() berbasis `dvh` (persentase TINGGI viewport,
-   bukan vw/lebar) — otomatis mengecil di HP berlayar pendek, membesar sampai
-   batas atas di HP berlayar tinggi. Ini beda dari section lain (section-hero)
-   yang pakai min-height — section ini WAJIB pas 1 layar, bukan boleh lebih. */
+/* ---------- Event: capsule portrait ivory ----------
+   Satu bentuk capsule adalah pusat komposisi; tanpa frame bertingkat, arch,
+   diamond, atau ornamen lain supaya informasi acara tetap tenang dan formal. */
 .event-hero {
-  --event-line-strong: rgba(157, 124, 84, 0.58); /* outer frame + aksen */
-  --event-line: rgba(157, 124, 84, 0.40);         /* divider utama */
-  --event-line-soft: rgba(157, 124, 84, 0.22);    /* inner frame & detail kecil */
-  text-align: center;
+  --event-canvas: #f4eee3;
+  --event-paper: #fffdf8;
+  --event-border: #bba17a;
+  --event-ink: #3d3327;
+  --event-muted: #766b5c;
+  --event-map: #826b57;
+  position: relative;
+  isolation: isolate;
   height: 100dvh;
   overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: clamp(.6rem, 2dvh, 1.25rem);
+  background: var(--event-canvas);
+  color: var(--event-ink);
+  text-align: center;
+  scroll-snap-align: start;
+}
+.event-hero__capsule {
+  width: min(74vw, 300px);
+  height: min(94dvh, 760px);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-top: clamp(.6rem, 2dvh, 1.5rem);
-  padding-bottom: clamp(.6rem, 2dvh, 1.5rem);
-  scroll-snap-align: start;
+  padding: clamp(1.35rem, 4.4dvh, 2.45rem) clamp(1.45rem, 6.5vw, 2.1rem);
+  border: 3px solid var(--event-border);
+  border-radius: 999px;
+  background: var(--event-paper) url("../img/event-capsule-paper.png") center / cover no-repeat;
+  z-index: 2;
 }
-.event-hero__date { margin-bottom: clamp(.5rem, 2.2dvh, 1.1rem); }
+.event-floral { position: absolute; z-index: 1; display: block; height: auto; pointer-events: none; user-select: none; }
+.event-floral--top-left { top: -10px; left: -16px; z-index: 3; width: clamp(138px, 42vw, 190px); }
+.event-floral--top-left-hanging { top: clamp(112px, 31vw, 142px); left: -18px; z-index: 2; width: clamp(102px, 31vw, 138px); }
+.event-floral--bottom-right { right: -12px; bottom: -8px; width: clamp(100px, 30vw, 140px); }
+.event-floral--stem-right { top: 16dvh; right: -8px; z-index: 3; width: clamp(56px, 18vw, 78px); }
+.event-hero__capsule .event-floral--stem-left { left: -8px; bottom: 2dvh; z-index: 3; width: clamp(42px, 13vw, 58px); }
+.event-hero__date { position: relative; z-index: 1; flex: 0 0 auto; margin-bottom: clamp(.65rem, 2.4dvh, 1.25rem); }
 .event-hero__day {
+  margin: 0 0 clamp(.18rem, .8dvh, .38rem);
+  color: var(--event-muted);
   font-family: var(--font-sans);
+  font-size: clamp(.55rem, 1.45dvh, .68rem);
+  font-weight: 600;
+  letter-spacing: .25em;
   text-transform: uppercase;
-  letter-spacing: .3em;
-  font-size: clamp(.62rem, 1.6dvh, .75rem);
-  font-weight: 500;
-  color: var(--color-text);
-  opacity: .75;
-  margin: 0 0 clamp(.3rem, 1dvh, .6rem);
 }
 .event-hero__num {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(2.6rem, 10dvh, 5.2rem);
-  line-height: .9;
-  color: var(--color-dark);
   margin: 0;
+  color: var(--event-ink);
+  font-family: "Cormorant Garamond", var(--font-serif);
+  font-size: clamp(2.2rem, 8.5dvh, 4.25rem);
+  font-weight: 500;
+  line-height: .78;
 }
 .event-hero__monthyear {
+  margin: clamp(.25rem, .9dvh, .55rem) 0 0;
+  color: var(--event-muted);
   font-family: var(--font-sans);
-  text-transform: uppercase;
-  letter-spacing: .28em;
-  font-size: clamp(.65rem, 1.6dvh, .78rem);
-  font-weight: 500;
-  color: var(--color-text);
-  opacity: .8;
-  margin: clamp(.4rem, 1.2dvh, .7rem) 0 0;
-}
-
-/* Outer frame stationery (bagian 1-2): 1px tipis, sudut membulat lembut,
-   sisi kiri-kanan relatif lurus. Karakter "stationery" datang dari arch
-   tengah atas (::after) + inner frame & detail tengah bawah (::before),
-   bukan dari border-radius generik. */
-.event-hero__list {
-  position: relative;
-  max-width: 420px;
-  margin: 0 auto;
-  /* breathing room dalam frame (bagian 13): konten tidak boleh dekat border */
-  padding: clamp(.9rem, 2.5dvh, 1.5rem) 24px clamp(1rem, 2.8dvh, 1.7rem);
-  border: 1px solid var(--event-line-strong);
-  border-radius: 10px;
-}
-/* Inner frame (bagian 3): garis kedua 8px di dalam outer, jauh lebih samar —
-   depth stationery tanpa shadow. Detail tengah bawah (bagian 5): garis
-   vertikal pendek + titik di ujungnya, menggantung di atas garis inner bawah,
-   sejajar sumbu arch atas tapi lebih dalam (tidak persis identik). */
-.event-hero__list::before {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border: 1px solid var(--event-line-soft);
-  border-radius: 6px;
-  background:
-    radial-gradient(circle closest-side, var(--event-line-strong) 98%, transparent) 50% calc(100% - 5px) / 4px 4px no-repeat,
-    linear-gradient(var(--event-line-strong), var(--event-line-strong)) 50% calc(100% - 15px) / 1px 10px no-repeat;
-  pointer-events: none;
-}
-/* Detail tengah atas (bagian 4): lengkung kecil setengah lingkaran pada
-   border atas, garis vertikal pendek ~11px, titik 4px di ujungnya. Background
-   solid = warna section, supaya segmen border atas yang tertutup lengkung
-   tidak terlihat ganda. */
-.event-hero__list::after {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 28px;
-  height: 31px;
-  border: 1px solid var(--event-line-strong);
-  border-bottom: none;
-  border-radius: 14px 14px 0 0;
-  background:
-    radial-gradient(circle closest-side, var(--event-line-strong) 98%, transparent) 50% 26px / 4px 4px no-repeat,
-    linear-gradient(var(--event-line-strong), var(--event-line-strong)) 50% 15px / 1px 11px no-repeat,
-    var(--color-bg);
-  pointer-events: none;
-}
-.event-block { padding: clamp(.5rem, 1.6dvh, .9rem) 0; }
-/* Divider Akad–Resepsi (bagian 6): 1px solid, 82% lebar — tidak menyentuh
-   outer frame, ada whitespace kiri-kanan. Diamond kecil di tengahnya
-   (bagian 7, pure CSS rotate(45deg)). */
-.event-hero__divider {
-  position: relative;
-  width: 82%;
-  height: 1px;
-  margin: 0 auto;
-  border: none;
-  background: var(--event-line);
-}
-.event-hero__divider::before {
-  content: "";
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 5px; height: 5px;
-  transform: translate(-50%, -50%) rotate(45deg);
-  background: var(--event-line-strong);
-}
-.event-block__title {
-  font-family: var(--font-sans);
-  text-transform: uppercase;
-  letter-spacing: .22em;
-  font-size: clamp(.75rem, 1.8dvh, .9rem);
+  font-size: clamp(.55rem, 1.4dvh, .68rem);
   font-weight: 600;
-  color: var(--color-dark);
-  margin: 0 0 clamp(.1rem, .4dvh, .2rem);
-  position: relative;
-  padding-bottom: clamp(.25rem, .8dvh, .4rem);
+  letter-spacing: .18em;
+  text-transform: uppercase;
 }
-/* underline di bawah judul acara (bagian 8): garis pendek 76px sebagai
-   visual punctuation setelah heading — bukan divider penuh lebar */
-.event-block__title::after {
-  content: "";
-  position: absolute; left: 50%; bottom: 0;
-  transform: translateX(-50%);
-  width: 76px; height: 1px;
-  background: var(--event-line);
+.event-hero__list { position: relative; z-index: 1; display: flex; flex: 0 1 auto; flex-direction: column; justify-content: center; }
+.event-block { padding: clamp(.2rem, .9dvh, .5rem) 0; }
+.event-block:first-child { text-align: right; }
+.event-block:last-child { text-align: left; }
+.event-block:first-child .event-block__address { margin-right: 0; }
+.event-block:last-child .event-block__address { margin-left: 0; }
+.event-block:first-child .event-block__maps { margin-left: auto; }
+.event-block:last-child .event-block__maps { margin-right: auto; }
+.event-hero__divider { display: block; width: clamp(145px, 48%, 205px); height: auto; margin: clamp(.7rem, 2.2dvh, 1.15rem) auto; }
+.event-block__title {
+  margin: 0;
+  color: var(--event-ink);
+  font-family: "Cormorant Garamond", var(--font-serif);
+  font-size: clamp(1rem, 2.7dvh, 1.32rem);
+  font-weight: 600;
+  letter-spacing: .14em;
+  line-height: 1.02;
+  text-transform: uppercase;
 }
-.event-block__time {
-  font-family: var(--font-sans);
-  font-size: clamp(.78rem, 1.7dvh, .9rem);
-  font-weight: 500;
-  color: var(--color-text);
-  margin: clamp(.3rem, 1dvh, .5rem) 0 0;
-  letter-spacing: .04em;
+.event-block__time { margin: clamp(.25rem, .8dvh, .45rem) 0 0; color: var(--event-muted); font-family: var(--font-sans); font-size: clamp(.62rem, 1.55dvh, .76rem); font-weight: 600; letter-spacing: .05em; }
+.event-block__venue { margin: clamp(.45rem, 1.35dvh, .72rem) 0 0; color: var(--event-ink); font-family: "Cormorant Garamond", var(--font-serif); font-size: clamp(1rem, 2.35dvh, 1.2rem); font-weight: 500; line-height: 1.05; }
+.event-block__address { max-width: 250px; margin: clamp(.28rem, .9dvh, .45rem) auto 0; color: var(--event-muted); font-family: var(--font-sans); font-size: clamp(.57rem, 1.3dvh, .67rem); line-height: 1.45; overflow-wrap: anywhere; white-space: pre-line; }
+.event-block__maps { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; margin-top: clamp(.45rem, 1.4dvh, .7rem); padding: clamp(5px, 1.15dvh, 7px) clamp(1.1rem, 5vw, 1.55rem); border: 0; border-radius: 999px; background: var(--event-map); color: #fffdf8; font-family: var(--font-sans); font-size: clamp(.57rem, 1.35dvh, .67rem); font-weight: 700; letter-spacing: .04em; text-decoration: none; transition: background .2s ease, transform .2s ease; }
+.event-block__maps:hover { background: #6d5847; transform: translateY(-1px); }
+.event-block__maps:focus-visible { outline: 2px solid var(--event-ink); outline-offset: 3px; }
+@media (max-height: 620px) {
+  .event-hero__capsule { width: min(84vw, 330px); height: 96dvh; padding-top: .9rem; padding-bottom: .9rem; }
+  .event-hero__date { margin-bottom: .45rem; }
+  .event-hero__divider { margin: .45rem auto; }
+  .event-block__maps { min-height: 26px; }
 }
-.event-block__venue {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(1.02rem, 2.6dvh, 1.2rem);
-  line-height: 1.15;
-  color: var(--color-dark);
-  margin: clamp(.25rem, .8dvh, .4rem) 0 0;
+@media (max-height: 540px) {
+  .event-hero__capsule { padding: .65rem 1.2rem; }
+  .event-hero__day { display: none; }
+  .event-hero__date { margin-bottom: .25rem; }
+  .event-hero__divider { margin: .25rem auto; }
 }
-.event-block__address {
-  font-family: var(--font-sans);
-  font-size: clamp(.68rem, 1.4dvh, .74rem);
-  line-height: 1.4;
-  color: var(--color-text);
-  opacity: .75;
-  max-width: 290px;
-  margin: clamp(.2rem, .7dvh, .35rem) auto 0;
-  /* Alamat boleh 2 baris: admin mengetik Enter di field alamat → \n
-     tersimpan di data → textContent + pre-line menampilkannya baris baru. */
-  white-space: pre-line;
-}
-/* Tombol maps = capsule asli (bagian 11): radius 999px (bukan rounded
-   rectangle 8/12/16px), border 1px warm brown, background transparan,
-   tanpa shadow. */
-.event-block__maps {
-  display: inline-block;
-  margin-top: clamp(.4rem, 1.4dvh, .75rem);
-  padding: clamp(6px, 1.4dvh, 9px) 18px;
-  border: 1px solid rgba(150, 115, 76, 0.65);
-  border-radius: 999px;
-  font-family: var(--font-sans);
-  font-size: .78rem;
-  font-weight: 500;
-  letter-spacing: .03em;
-  color: #8a6d4b;
-  background: transparent;
-  text-decoration: none;
-  transition: background .25s ease, color .25s ease;
-}
-.event-block__maps:hover { background: rgba(150, 115, 76, .08); }
 
 /* ---------- Kartu Dresscode (kartu kecil 1/4 layar, border sama dengan event card) ---------- */
 .dresscode-card {
@@ -1851,7 +1768,7 @@ a { color: inherit; }
    tidak, jadi tanpa pengecualian ini tombol Kirim Hadiah / Live Streaming
    tersembunyi selamanya) dan .event-hero__list (wrapper blok acara #event,
    reveal dipasang per anaknya). */
-.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list) {
+.reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list):not(.event-hero__capsule):not(.event-floral) {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
