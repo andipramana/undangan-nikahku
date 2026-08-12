@@ -900,12 +900,12 @@ a { color: inherit; }
   padding: clamp(1.35rem, 4.4dvh, 2.45rem) clamp(1.45rem, 6.5vw, 2.1rem);
   border: none;
   border-radius: 999px;
-  background: #ffffff61;
+  background: #ffffffcc;
   color: var(--color-text);
 }
 #gift .gift-capsule .section-eyebrow,
 #gift .gift-capsule .section-title { color: var(--color-dark); }
-.gift-capsule .section-desc { color: var(--color-text); }
+.gift-capsule .section-desc { color: var(--color-dark); }
 /* Panel terbuka: judul & deskripsi disembunyikan agar rekening/alamat muat
    di dalam capsule tanpa overflow. */
 .gift-capsule.is-open .section-title,
@@ -1696,8 +1696,8 @@ a { color: inherit; }
   --event-canvas: #f4eee3;
   --event-paper: #fffdf8;
   --event-border: #bba17a;
-  --event-ink: #3d3327;
-  --event-muted: #766b5c;
+  --event-ink: #14120f;
+  --event-muted: #14120f;
   --event-map: #826b57;
   position: relative;
   isolation: isolate;
@@ -1720,7 +1720,7 @@ a { color: inherit; }
   padding: clamp(1.35rem, 4.4dvh, 2.45rem) clamp(1.45rem, 6.5vw, 2.1rem);
   border: none;
   border-radius: 999px;
-  background: #ffffff61;
+  background: #ffffffcc;
   z-index: 2;
 }
 .event-floral { position: absolute; z-index: 1; display: block; height: auto; pointer-events: none; user-select: none; }

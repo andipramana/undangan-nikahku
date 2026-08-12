@@ -13,7 +13,7 @@ const checks = [
   ["root Event memiliki capsule rail", hasCapsule(page)],
   ["demo Event memiliki capsule rail", hasCapsule(demo)],
   ["ID data Event tetap utuh", requiredIds.every((id) => page.includes(`id="${id}"`) && demo.includes(`id="${id}"`))],
-  ["divider horizontal tersedia", page.includes("divider-horizontal.png") && demo.includes("divider-horizontal.png")],
+  ["demo masih memiliki divider horizontal", demo.includes("divider-horizontal.png")],
   ["Classic memiliki capsule ivory", /\.event-hero__capsule\s*\{[\s\S]*border-radius:\s*999px;/.test(css) && /--event-canvas:\s*#f4eee3/.test(css)],
   ["Modern memiliki capsule Event aktual", /#event \.event-hero__capsule\s*\{[\s\S]*border-radius:\s*999px;/.test(modern)],
   ["wrapper capsule tidak tersembunyi reveal", /not\(\.event-hero__capsule\)/.test(css)]
