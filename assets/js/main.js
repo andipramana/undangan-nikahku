@@ -342,18 +342,66 @@
   function setupSaveTheDate2Reveal() {
     const std2 = document.getElementById("save-the-date-2");
     const saveDateEl = std2 && std2.querySelector(".save-date");
+    const scroller = document.querySelector(".app-frame__scroll");
     if (!std2 || !("IntersectionObserver" in window)) return;
+
+    let textRevealed = false;
+    // Reveal teks "SAVE the DATE" — satu-satunya yang sengaja di-delay
+    // sampai section mendarat penuh; reveal foto/section (section-revealed)
+    // tetap langsung di callback observer di bawah.
+    const revealText = () => {
+      if (textRevealed) return;
+      textRevealed = true;
+      if (saveDateEl) saveDateEl.classList.add("is-visible");
+      setTimeout(() => std2.classList.add("text-revealed"), 1400);
+    };
+    // Section dianggap "full screen" kalau tepi atasnya sudah lewat viewport
+    // atas dan tepi bawahnya sudah melewati batas bawah viewport.
+    const isFullScreen = () => {
+      const r = std2.getBoundingClientRect();
+      return r.top <= 0 && r.bottom >= window.innerHeight - 1;
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
+
+        // 1) Foto/section reveal LANGSUNG begitu section mulai masuk layar
+        //    (perilaku asli — jangan di-delay, user minta yang delay cuma
+        //    teksnya).
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            std2.classList.add("section-revealed");
-            if (saveDateEl) saveDateEl.classList.add("is-visible");
-          });
+          requestAnimationFrame(() => std2.classList.add("section-revealed"));
         });
-        setTimeout(() => std2.classList.add("text-revealed"), 1400);
+
+        // 2) Teks "SAVE the DATE" menunggu sampai section benar-benar
+        //    mendarat PENUH (scroll-snap mandatory) + jeda 350ms biar
+        //    "settle" dulu — supaya user bener-bener lihat teksnya full
+        //    screen baru mask membuka. scrollend fire setelah scroll
+        //    (termasuk snap) selesai; kalau user berhenti di section lain,
+        //    cek isFullScreen gagal dan tunggu gesture berikutnya.
+        const startWhenFull = () => {
+          if (!isFullScreen()) return;
+          setTimeout(revealText, 350);
+        };
+        if ("onscrollend" in window && scroller) {
+          scroller.addEventListener("scrollend", startWhenFull);
+        } else {
+          // Fallback browser tanpa scrollend: polling rAF sampai penuh.
+          const t0 = performance.now();
+          const tick = () => {
+            if (isFullScreen()) { setTimeout(revealText, 350); return; }
+            if (performance.now() - t0 > 3000) {
+              // Macet (mis. section lebih tinggi dari viewport): reveal teks
+              // saja kalau masih kelihatan, supaya tidak hilang selamanya.
+              const r = std2.getBoundingClientRect();
+              if (r.bottom > 0 && r.top < window.innerHeight) revealText();
+              return;
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
       },
       { threshold: 0.25 }
     );
