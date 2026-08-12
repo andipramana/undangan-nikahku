@@ -736,12 +736,12 @@ a { color: inherit; }
      ekor itu. -8px/-2px memperluas area clip tanpa menggeser layout. */
   clip-path: inset(-2px -8px -2px -8px);
   transform: translateY(0);
-  transition-delay: 500ms; /* pas "Save" selesai (durasi .5s) — nyambung tanpa jeda */
+  transition-delay: 250ms; /* mulai di tengah "Save" — overlap, tidak ada momen diam */
 }
 .save-date.is-visible .save-date__date {
   clip-path: inset(0 0 0 0);
   transform: translateY(0);
-  transition-delay: 1000ms; /* pas "the" selesai — nyambung tanpa jeda */
+  transition-delay: 500ms; /* mulai di tengah "the" — overlap, tidak ada momen diam */
 }
 
 /* Reduced motion: langsung tampil utuh tanpa animasi apapun. none (bukan
