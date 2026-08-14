@@ -849,6 +849,16 @@ a { color: inherit; }
 /* Durasi per jenis konten — makin besar & makin "foto", makin pelan. */
 .reveal-ready .couple-reveal[data-reveal]  { --reveal-dur: 2.2s; }
 .reveal-ready #quote-picture[data-reveal]  { --reveal-dur: 2.5s; }
+/* Gift: capsule zoom-in dulu (durasi lebih cepat, kontainer bukan foto),
+   teks di dalamnya (eyebrow/judul/deskripsi/tombol) baru reveal SETELAH
+   zoom-nya kelar — delay 500ms + stagger --reveal-i seperti biasa. Selector
+   discope ke anak LANGSUNG supaya #gift-panel (dibuka lewat klik, bukan
+   scroll) tidak ikut tertunda. */
+.reveal-ready .gift-capsule[data-reveal]   { --reveal-dur: 900ms; }
+.reveal-ready .gift-capsule > [data-reveal],
+.reveal-ready .gift-actions > [data-reveal] {
+  transition-delay: calc(500ms + var(--reveal-i, 0) * 150ms);
+}
 .reveal-ready .timeline-item[data-reveal]  { --reveal-dur: 2.1s; }
 .reveal-ready .gallery-item[data-reveal]   { --reveal-dur: 1.9s; }
 
@@ -2003,18 +2013,18 @@ a { color: inherit; }
   }
 }
 
-/* ---------- Capsule event: reveal ZOOM-IN berurutan, atas ke bawah ----------
-   Elemen mengembang dari kecil (scale .82) + fade ke ukuran asli. Zoom ke
-   dalam dari tengah elemen tidak pernah menimpa elemen di bawahnya, jadi
-   bisa overlap: elemen berikutnya mulai di TENGAH yang sebelumnya (step
-   350ms = setengah durasi 700ms) — terasa mengalir, tidak menunggu satu
-   per satu selesai. */
+/* ---------- Capsule event: Akad & Resepsi SATU BATCH masing-masing ----------
+   .event-block adalah data-reveal-group: semua elemen di dalamnya (judul,
+   jam, venue, alamat, tombol Maps) reveal BERSAMAAN begitu bloknya masuk
+   layar — bukan satu-satu berurutan. Variasi datang dari JENIS animasinya
+   (down/zoom/pop/fade/up di markup), bukan dari delay berjenjang. Durasi
+   dipercepat dari default 1.8s halaman supaya terasa tegas di capsule kecil
+   ini. Blok Resepsi menyusul ~180ms setelah Akad (bukan lewat --reveal-i)
+   supaya dua batch tetap terasa berurutan meski keduanya sudah di layar
+   bersamaan (capsule setinggi hampir 1 layar penuh). */
 #event .event-hero__capsule [data-reveal] {
-  transform: scale(.82);
-  transition-property: opacity, transform;
-  transition-duration: 700ms;
-  transition-delay: calc(var(--reveal-i, 0) * 350ms);
+  transition-duration: 650ms;
 }
-#event .event-hero__capsule [data-reveal].is-revealed {
-  transform: scale(1);
+.event-hero__list .event-block:last-child [data-reveal] {
+  transition-delay: 180ms;
 }
