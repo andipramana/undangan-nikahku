@@ -302,7 +302,7 @@ a { color: inherit; }
 }
 /* Dorong konten section countdown ke bawah (anchor bawah tetap), tapi
    horizontal di-CENTER (dulu rata kanan, diganti sesuai permintaan). */
-.section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 2.5rem; }
+.section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 4.5rem; }
 .section-hero--anchor-right-bottom .hero-content {
   width: 100%; max-width: 100%;
   padding-right: .9rem; padding-left: .9rem; padding-bottom: 0;
@@ -1649,7 +1649,7 @@ a { color: inherit; }
 
 .couple-info {
   position: absolute;
-  left: 0; right: 0; bottom: 0;
+  left: 0; right: 0; bottom: 1.4rem;
   /* padding bawah naik sedikit — ruang untuk baris Instagram di bawah parents */
   padding: 2rem 1.5rem 1.6rem;
   text-align: center;
@@ -1692,6 +1692,16 @@ a { color: inherit; }
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+/* Link ikon + handle, dipasang main.js (ganti prefix teks "Instagram:" jadi
+   ikon glyph inline supaya lebih ringkas & universal). */
+.couple-info__instagram-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  text-decoration: none;
+}
+.couple-info__instagram-link span { text-decoration: underline; text-underline-offset: 2px; }
+.couple-info__instagram-link svg { flex: none; }
 
 /* ---------- Event (editorial: 1 panel, header tanggal besar + 2 blok acara,
    TANPA foto/slider/card box) ---------- */

@@ -695,7 +695,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .couple-solo .couple-slider { max-width: none; position: relative; overflow: hidden; }
 .couple-solo .couple-slider .swiper-slide img { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; }
 .couple-solo .couple-info {
-  position: absolute; inset: auto 0 0; z-index: 3;
+  position: absolute; inset: auto 0 1.4rem; z-index: 3;
   padding: 3rem 1.5rem 2rem;
   background: linear-gradient(0deg, #1a1816 0%, rgba(26,24,22,.7) 45%, transparent 100%);
 }
@@ -731,6 +731,16 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+/* Link ikon + handle, dipasang main.js (ganti prefix teks "Instagram:" jadi
+   ikon glyph inline supaya lebih ringkas & universal). */
+.couple-info__instagram-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  text-decoration: none;
+}
+.couple-info__instagram-link span { text-decoration: underline; text-underline-offset: 2px; }
+.couple-info__instagram-link svg { flex: none; }
 
 /* ═══════════════════════ EVENT — capsule ivory ═══════════════════════ */
 #event.event-hero {

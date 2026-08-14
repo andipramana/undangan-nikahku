@@ -127,6 +127,12 @@
     // Baris Instagram mempelai — tampil hanya kalau handle diisi di
     // config/Supabase (couple.*.instagram); kalau kosong, elemen disembunyikan.
     // Link bisa diklik ke profil instagram.com/<handle> (tab baru).
+    const INSTAGRAM_ICON_SVG =
+      '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">' +
+      '<rect x="2.5" y="2.5" width="19" height="19" rx="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
+      '<circle cx="12" cy="12" r="4.6" fill="none" stroke="currentColor" stroke-width="1.8"/>' +
+      '<circle cx="17.4" cy="6.6" r="1.2" fill="currentColor"/>' +
+      "</svg>";
     const fillInstagram = (el, handle) => {
       if (!el) return;
       const ig = (handle || "").trim().replace(/^@/, "");
@@ -136,7 +142,8 @@
       a.href = `https://instagram.com/${encodeURIComponent(ig)}`;
       a.target = "_blank";
       a.rel = "noopener";
-      a.textContent = `Instagram: @${ig}`;
+      a.className = "couple-info__instagram-link";
+      a.innerHTML = `${INSTAGRAM_ICON_SVG}<span>@${esc(ig)}</span>`;
       el.appendChild(a);
     };
     fillInstagram(document.getElementById("bride-instagram"), cfg.couple.bride.instagram);
