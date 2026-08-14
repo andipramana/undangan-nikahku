@@ -46,8 +46,27 @@
 
   /** Ambil payload undangan: {content, photos} | null.
    * Prioritas: Supabase → localStorage → null (undangan pakai config.js +
-   * manifest lokal seperti sebelum ada panel admin). */
+   * manifest lokal seperti sebelum ada panel admin).
+   *
+   * ?preview=1: dipakai tombol "Pratinjau undangan" di admin (lihat admin.js)
+   * — admin sudah menulis draft (get_invitation_draft, belum dipublikasikan)
+   * ke localStorage SEBELUM tab ini dibuka. Baca langsung dari situ, jangan
+   * panggil get_invitation() publik (yang sekarang membaca snapshot
+   * published_*, bukan draft). Cache kosong/rusak → lanjut alur normal di
+   * bawah (fail-open ke versi terpublikasi, bukan error). */
   window.fetchInvitation = async function () {
+    if (new URLSearchParams(location.search).get("preview") === "1") {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          tenant.setInvitation(data.invitation);
+          return data;
+        }
+      } catch (_) {
+        // cache preview rusak — jatuh ke alur normal di bawah
+      }
+    }
     if (!sb) return null;
     try {
       const { data, error } = await sb.rpc("get_invitation", { p_slug: tenant.slug });

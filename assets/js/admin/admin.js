@@ -17,7 +17,32 @@
     // Tab Teks adalah tab aktif saat app tampil — muat isinya begitu login.
     onSignedIn: async () => {
       const preview = document.getElementById("preview-invitation");
-      if (preview) preview.href = window.AdminAPI.tenant.path();
+      if (preview) {
+        preview.href = window.AdminAPI.tenant.path(); // fallback statis (mis. copy-link)
+        preview.addEventListener("click", async (ev) => {
+          ev.preventDefault();
+          // Publish membekukan tampilan tamu ke versi terakhir dipublikasikan
+          // (lihat migration 0020 + publish.js) — supaya tombol Preview tetap
+          // menunjukkan DRAFT (perubahan yang belum dipublikasikan), tulis
+          // dulu draft terkini ke cache localStorage yang sudah dibaca
+          // fetchInvitation() (wedding_invitation_v2_<slug>), baru buka tab
+          // baru dengan ?preview=1 supaya halaman tamu memakainya alih-alih
+          // memanggil RPC publik.
+          try {
+            const { data, error } = await window.AdminAPI.sb.rpc(
+              "get_invitation_draft",
+              { p_slug: window.AdminAPI.tenant.slug }
+            );
+            if (error) throw error;
+            localStorage.setItem(`wedding_invitation_v2_${window.AdminAPI.tenant.slug}`, JSON.stringify(data));
+          } catch (err) {
+            console.warn("Gagal menyiapkan pratinjau draft, tampilkan versi terpublikasi:", err);
+          }
+          const base = window.AdminAPI.tenant.path();
+          const url = base + (base.includes("?") ? "&" : "?") + "preview=1";
+          window.open(url, "_blank", "noopener");
+        });
+      }
       const waWorkspace = document.getElementById("wa-workspace-link");
       if (waWorkspace) waWorkspace.href = window.AdminAPI.tenant.path("wa");
       if (window.ContentPanel && window.ContentPanel.load) await window.ContentPanel.load();

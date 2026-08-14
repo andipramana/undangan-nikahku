@@ -553,68 +553,50 @@
     if (pre) pre.classList.add("hide");
   }
 
+  /** Suntik <link> font sebuah template (kalau belum ada). Dipisah jadi
+   * helper karena dulu blok ini terduplikasi persis di dua tempat — sekarang
+   * loadTemplate() cuma dipanggil sekali per load, jadi cukup sekali pakai. */
+  function injectTemplateFonts(tpl) {
+    if (!tpl || !tpl.fonts) return;
+    tpl.fonts.forEach((url) => {
+      if (!document.querySelector(`link[href="${url}"]`)) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = url;
+        link.dataset.templateFont = "1";
+        document.head.appendChild(link);
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", async () => {
     document.documentElement.classList.add("no-scroll");
 
-    // 0) Template engine — fallback ke classic-elegance dulu supaya warna
-    //    tidak kedip, lalu periksa payload Supabase untuk template pilihan
-    //    client (site_content.template). Kalau berbeda, switch ke template
-    //    yang benar setelah payload tiba.
-    const urlTpl = (new URLSearchParams(location.search).get("template") || "").replace(/\/+$/, "");
-    let tpl = await window.loadTemplate(
-      urlTpl ? `/templates/${encodeURIComponent(urlTpl)}.json` : null
-    );
-    if (tpl && tpl.fonts) {
-      tpl.fonts.forEach((url) => {
-        if (!document.querySelector(`link[href="${url}"]`)) {
-          const link = document.createElement("link");
-          link.rel = "stylesheet";
-          link.href = url;
-          link.dataset.templateFont = "1";
-          document.head.appendChild(link);
-        }
-      });
-    }
-
-    // 1) Satu fetch payload dari Supabase (teks + foto). Gagal → pakai
-    //    localStorage; kosong semua → undangan tetap jalan dari config.js +
-    //    manifest lokal (jaring pengaman hari-H, lihat §2.3 rencana admin).
+    // 1) Satu fetch payload dari Supabase (teks + foto — versi terpublikasi,
+    //    atau draft kalau ?preview=1 dari tombol Preview admin). Gagal →
+    //    pakai localStorage; kosong semua → undangan tetap jalan dari
+    //    config.js + manifest lokal (jaring pengaman hari-H, lihat §2.3
+    //    rencana admin).
     const payload = await window.fetchInvitation();
     if (payload && payload.content) {
       window.WEDDING_CONFIG = mergeInvitationContent(window.WEDDING_CONFIG, payload.content);
     }
     window.__PHOTO_PAYLOAD = payload && payload.photos ? payload.photos : null;
 
-    // Kalau client sudah memilih template berbeda (site_content.template),
-    // switch sekarang — setelah payload tiba, sebelum konten diisi.
-    // KECUALI: kalau ?template=... di URL, URL yang menang (admin preview).
+    // 2) Template engine — sekarang payload sudah ada, jadi template yang
+    //    benar sudah pasti diketahui SEKALI di sini (tidak perlu tebak dulu
+    //    lalu koreksi lagi kalau salah). ?template=... di URL (dipakai tab
+    //    Template admin untuk pratinjau template lain) menang atas pilihan
+    //    tersimpan tenant.
+    const urlTpl = (new URLSearchParams(location.search).get("template") || "").replace(/\/+$/, "");
     const savedTpl = ((payload && payload.content && payload.content.template)
       || (window.WEDDING_CONFIG && window.WEDDING_CONFIG.template) || "")
-      .replace(/\/+$/, ""); // strip trailing slash
-    if (!urlTpl && savedTpl) {
-      const active = window.getActiveTemplate();
-      if (!active || active.id !== savedTpl) {
-        try {
-          const fontLinks = document.querySelectorAll('link[data-template-font]');
-          fontLinks.forEach((l) => l.remove());
-          await window.loadTemplate(`/templates/${encodeURIComponent(savedTpl)}.json`);
-          tpl = window.getActiveTemplate();
-          if (tpl && tpl.fonts) {
-            tpl.fonts.forEach((url) => {
-              if (!document.querySelector(`link[href="${url}"]`)) {
-                const link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.href = url;
-                link.dataset.templateFont = "1";
-                document.head.appendChild(link);
-              }
-            });
-          }
-        } catch (err) {
-          console.warn("Template switch gagal, tetap pakai fallback:", err);
-        }
-      }
-    }
+      .replace(/\/+$/, "");
+    const targetTpl = urlTpl || savedTpl;
+    const tpl = await window.loadTemplate(
+      targetTpl ? `/templates/${encodeURIComponent(targetTpl)}.json` : null
+    );
+    injectTemplateFonts(tpl);
 
     await populateContent();
     setupSnapRail();
