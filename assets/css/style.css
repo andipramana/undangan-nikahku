@@ -302,7 +302,7 @@ a { color: inherit; }
 }
 /* Dorong konten section countdown ke bawah (anchor bawah tetap), tapi
    horizontal di-CENTER (dulu rata kanan, diganti sesuai permintaan). */
-.section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 4.5rem; }
+.section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 7rem; }
 .section-hero--anchor-right-bottom .hero-content {
   width: 100%; max-width: 100%;
   padding-right: .9rem; padding-left: .9rem; padding-bottom: 0;
@@ -855,6 +855,13 @@ a { color: inherit; }
    discope ke anak LANGSUNG supaya #gift-panel (dibuka lewat klik, bukan
    scroll) tidak ikut tertunda. */
 .reveal-ready .gift-capsule[data-reveal]   { --reveal-dur: 900ms; }
+/* Kebalikan dari varian "zoom" umum (yang MENGECIL dari 1.07->1): capsule
+   gift sengaja MEMBESAR dari kecil (.7) ke ukuran asli — override khusus,
+   specificity .gift-capsule[data-reveal="zoom"] (0,2,0) menang atas
+   [data-reveal="zoom"] biasa (0,1,0) tanpa mengganggu pemakaian "zoom" di
+   elemen lain (jam Akad/Resepsi). */
+.reveal-ready .gift-capsule[data-reveal="zoom"] { transform: scale(.7); }
+.reveal-ready .gift-capsule[data-reveal="zoom"].is-revealed { transform: scale(1); }
 .reveal-ready .gift-capsule > [data-reveal],
 .reveal-ready .gift-actions > [data-reveal] {
   transition-delay: calc(500ms + var(--reveal-i, 0) * 150ms);
@@ -1649,7 +1656,7 @@ a { color: inherit; }
 
 .couple-info {
   position: absolute;
-  left: 0; right: 0; bottom: 1.4rem;
+  left: 0; right: 0; bottom: 2.8rem;
   /* padding bawah naik sedikit — ruang untuk baris Instagram di bawah parents */
   padding: 2rem 1.5rem 1.6rem;
   text-align: center;
@@ -1694,13 +1701,13 @@ a { color: inherit; }
 }
 /* Link ikon + handle, dipasang main.js (ganti prefix teks "Instagram:" jadi
    ikon glyph inline supaya lebih ringkas & universal). */
-.couple-info__instagram-link {
+.couple-info__instagram a.couple-info__instagram-link {
   display: inline-flex;
   align-items: center;
   gap: .35em;
   text-decoration: none;
 }
-.couple-info__instagram-link span { text-decoration: underline; text-underline-offset: 2px; }
+.couple-info__instagram-link span { text-decoration: none; }
 .couple-info__instagram-link svg { flex: none; }
 
 /* ---------- Event (editorial: 1 panel, header tanggal besar + 2 blok acara,
@@ -2033,8 +2040,18 @@ a { color: inherit; }
    supaya dua batch tetap terasa berurutan meski keduanya sudah di layar
    bersamaan (capsule setinggi hampir 1 layar penuh). */
 #event .event-hero__capsule [data-reveal] {
-  transition-duration: 650ms;
+  transition-duration: 950ms;
 }
 .event-hero__list .event-block:last-child [data-reveal] {
   transition-delay: 180ms;
 }
+/* Gerakan diperbesar dari default halaman (26px/22px/scale .9-1.07) — di
+   capsule kecil ini gerakan kecil nyaris tak terlihat. */
+#event .event-hero__capsule [data-reveal="down"] { transform: translateY(-34px); }
+#event .event-hero__capsule [data-reveal="down"].is-revealed { transform: translateY(0); }
+#event .event-hero__capsule [data-reveal="up"] { transform: translateY(34px); }
+#event .event-hero__capsule [data-reveal="up"].is-revealed { transform: translateY(0); }
+#event .event-hero__capsule [data-reveal="zoom"] { transform: scale(1.18); }
+#event .event-hero__capsule [data-reveal="zoom"].is-revealed { transform: scale(1); }
+#event .event-hero__capsule [data-reveal="pop"] { transform: scale(.76); }
+#event .event-hero__capsule [data-reveal="pop"].is-revealed { transform: scale(1); }

@@ -695,7 +695,7 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .couple-solo .couple-slider { max-width: none; position: relative; overflow: hidden; }
 .couple-solo .couple-slider .swiper-slide img { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; }
 .couple-solo .couple-info {
-  position: absolute; inset: auto 0 1.4rem; z-index: 3;
+  position: absolute; inset: auto 0 2.8rem; z-index: 3;
   padding: 3rem 1.5rem 2rem;
   background: linear-gradient(0deg, #1a1816 0%, rgba(26,24,22,.7) 45%, transparent 100%);
 }
@@ -733,13 +733,13 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 }
 /* Link ikon + handle, dipasang main.js (ganti prefix teks "Instagram:" jadi
    ikon glyph inline supaya lebih ringkas & universal). */
-.couple-info__instagram-link {
+.couple-info__instagram a.couple-info__instagram-link {
   display: inline-flex;
   align-items: center;
   gap: .35em;
   text-decoration: none;
 }
-.couple-info__instagram-link span { text-decoration: underline; text-underline-offset: 2px; }
+.couple-info__instagram-link span { text-decoration: none; }
 .couple-info__instagram-link svg { flex: none; }
 
 /* ═══════════════════════ EVENT — capsule ivory ═══════════════════════ */
@@ -1113,6 +1113,10 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
    baru reveal SETELAH zoom-nya kelar — delay 500ms + stagger --reveal-i.
    Discope ke anak LANGSUNG supaya #gift-panel (dibuka lewat klik, bukan
    scroll) tidak ikut tertunda. */
+/* Kebalikan dari varian "zoom" umum (yang MENGECIL dari 1.08->1): capsule
+   gift sengaja MEMBESAR dari kecil (.7) ke ukuran asli. */
+.reveal-ready .gift-capsule[data-reveal="zoom"] { transform: scale(.7); }
+.reveal-ready .gift-capsule[data-reveal="zoom"].is-revealed { transform: scale(1); }
 .reveal-ready .gift-capsule > [data-reveal],
 .reveal-ready .gift-actions > [data-reveal] {
   transition-delay: calc(500ms + var(--reveal-i, 0) * 150ms);
@@ -1343,8 +1347,18 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
    dua batch tetap terasa berurutan meski keduanya sudah di layar bersamaan
    (capsule setinggi hampir 1 layar penuh). */
 #event .event-hero__capsule [data-reveal] {
-  transition-duration: 650ms;
+  transition-duration: 950ms;
 }
 .event-hero__list .event-block:last-child [data-reveal] {
   transition-delay: 180ms;
 }
+/* Gerakan diperbesar dari default halaman — di capsule kecil ini gerakan
+   kecil nyaris tak terlihat. */
+#event .event-hero__capsule [data-reveal="down"] { transform: translateY(-34px); }
+#event .event-hero__capsule [data-reveal="down"].is-revealed { transform: translateY(0); }
+#event .event-hero__capsule [data-reveal="up"] { transform: translateY(34px); }
+#event .event-hero__capsule [data-reveal="up"].is-revealed { transform: translateY(0); }
+#event .event-hero__capsule [data-reveal="zoom"] { transform: scale(1.18); }
+#event .event-hero__capsule [data-reveal="zoom"].is-revealed { transform: scale(1); }
+#event .event-hero__capsule [data-reveal="pop"] { transform: scale(.76); }
+#event .event-hero__capsule [data-reveal="pop"].is-revealed { transform: scale(1); }
