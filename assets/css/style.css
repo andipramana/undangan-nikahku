@@ -596,16 +596,16 @@ a { color: inherit; }
   text-transform: uppercase;
   font-size: .8rem;
   font-weight: 500;
-  background: #ffffff61;
+  background: var(--color-dark);
   border: none;
-  color: #ffffff;
+  color: #fff;
   padding: .65rem 1.6rem;
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
   transition: background .3s ease, color .3s ease;
 }
-.btn-outline:hover { background: #ffffff; color: var(--color-dark); }
+.btn-outline:hover { background: #2a251d; color: #fff; }
 
 /* Tombol di atas foto (cover & countdown) — putih konsisten dengan .btn-open, bukan emas. */
 .btn-outline--light {
@@ -1795,8 +1795,8 @@ a { color: inherit; }
 .event-block__time { margin: clamp(.25rem, .8dvh, .45rem) 0 0; color: var(--event-muted); font-family: var(--font-sans); font-size: clamp(.62rem, 1.55dvh, .76rem); font-weight: 600; letter-spacing: .05em; }
 .event-block__venue { margin: clamp(.45rem, 1.35dvh, .72rem) 0 0; color: var(--event-ink); font-family: "Cormorant Garamond", var(--font-serif); font-size: clamp(1rem, 2.35dvh, 1.2rem); font-weight: 500; line-height: 1.05; }
 .event-block__address { max-width: 250px; margin: clamp(.28rem, .9dvh, .45rem) auto 0; color: var(--event-muted); font-family: var(--font-sans); font-size: clamp(.57rem, 1.3dvh, .67rem); line-height: 1.45; overflow-wrap: anywhere; white-space: pre-line; }
-.event-block__maps { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; margin-top: clamp(.45rem, 1.4dvh, .7rem); padding: clamp(5px, 1.15dvh, 7px) clamp(1.1rem, 5vw, 1.55rem); border: 0; border-radius: 999px; background: #fff; color: var(--event-ink); font-family: var(--font-sans); font-size: clamp(.57rem, 1.35dvh, .67rem); font-weight: 700; letter-spacing: .04em; text-decoration: none; transition: background .2s ease, transform .2s ease; }
-.event-block__maps:hover { background: #f2ead9; transform: translateY(-1px); }
+.event-block__maps { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; margin-top: clamp(.45rem, 1.4dvh, .7rem); padding: clamp(5px, 1.15dvh, 7px) clamp(1.1rem, 5vw, 1.55rem); border: 0; border-radius: 999px; background: var(--event-ink); color: #fff; font-family: var(--font-sans); font-size: clamp(.57rem, 1.35dvh, .67rem); font-weight: 700; letter-spacing: .04em; text-decoration: none; transition: background .2s ease, transform .2s ease; }
+.event-block__maps:hover { background: #2a251d; }
 .event-block__maps:focus-visible { outline: 2px solid var(--event-ink); outline-offset: 3px; }
 @media (max-height: 620px) {
   .event-hero__capsule { width: min(84vw, 330px); height: 96dvh; padding-top: .9rem; padding-bottom: .9rem; }
