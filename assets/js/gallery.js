@@ -42,8 +42,8 @@ window.initGallery = async function () {
     .map((item, i) => {
       // Layout tidak lagi semata-mata urutan: setiap foto galeri dapat memilih
       // lebar dan nomor barisnya dari Tab Foto. Foto lama memakai pola legacy.
-      const cls = window.GalleryLayout.shapeAt(i, item);
-      const row = window.GalleryLayout.rowAt(i, item);
+      const cls = window.GalleryLayout.shapeAt(i, photos);
+      const row = window.GalleryLayout.rowAt(i, photos);
       const galleryRow = row + videoRowOffset;
       const src = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
       const fx = item.focalX ?? 50;

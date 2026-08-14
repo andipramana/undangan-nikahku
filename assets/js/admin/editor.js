@@ -42,6 +42,7 @@
   let folder = "";
   let ratio = 1;
   let zoom = 1;
+  let allPhotos = []; // array LENGKAP folder ini — dipakai GalleryLayout menghitung baris kumulatif
 
   window.PhotoEditor = { open };
 
@@ -53,14 +54,15 @@
    * ada hubungannya dengan yang benar-benar tampil di undangan. */
   function ratioFor(folderName, index) {
     if (folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)) {
-      return window.GalleryLayout.ratioAt(index, item);
+      return window.GalleryLayout.ratioAt(index, allPhotos);
     }
     return FOLDER_RATIO[folderName] || 1;
   }
 
-  function open(photo, folderName, index) {
+  function open(photo, folderName, index, photosList) {
     item = photo;
     folder = folderName;
+    allPhotos = photosList || [photo];
     ratio = ratioFor(folderName, index);
     zoom = Number(photo.zoom) || 1;
 
@@ -68,7 +70,7 @@
     // berubah kalau urutan fotonya diubah.
     const shape =
       folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)
-        ? ` — ${window.GalleryLayout.labelAt(index, photo)}, baris ${window.GalleryLayout.rowAt(index, photo)}`
+        ? ` — ${window.GalleryLayout.labelAt(index, allPhotos)}, baris ${window.GalleryLayout.rowAt(index, allPhotos)}`
         : "";
     const hint = document.querySelector(".editor__hint");
     if (hint) hint.textContent = `Seret foto untuk menggeser (pan)${shape}`;
