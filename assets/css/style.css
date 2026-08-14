@@ -954,10 +954,10 @@ a { color: inherit; }
    di dalam capsule tanpa overflow. */
 .gift-capsule.is-open .section-title,
 .gift-capsule.is-open .section-desc { display: none; }
-/* Tombol aksi di capsule (Kirim Hadiah / Rekomendasi Kado / Konfirmasi
-   Pengiriman): putih dengan teks hitam. */
-.gift-capsule .btn-outline { background: #fff; color: var(--color-dark); }
-.gift-capsule .btn-outline:hover { background: #f2ead9; color: var(--color-dark); }
+/* Tombol aksi di capsule (Kirim Hadiah / Rekomendasi Kado / Konfirmasi WA):
+   bg gelap + teks putih, senada tombol Google Maps & pill RSVP terpilih. */
+.gift-capsule .btn-outline { background: var(--color-dark); color: #fff; }
+.gift-capsule .btn-outline:hover { background: #2a251d; color: #fff; }
 .gift-capsule .btn-text { color: var(--color-dark); }
 .section--dark .section-eyebrow { color: var(--color-text-light); }
 
