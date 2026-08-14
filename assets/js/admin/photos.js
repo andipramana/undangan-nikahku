@@ -13,20 +13,26 @@
 (function () {
   const { sb, photoUrl, toast } = window.AdminAPI;
 
+  // Urutan dropdown SENGAJA disamakan dengan urutan section di halaman
+  // undangan (classic template) — tab Foto Cover -> Opening -> ... -> Closing
+  // mengikuti urutan tamu menggulir, supaya admin tidak bingung. "subcover"
+  // dan "wfl" sengaja TIDAK ditampilkan di sini (atas permintaan user):
+  // "subcover" sudah tidak punya section di classic (digantikan Quote/Quotes),
+  // "wfl" khusus dipakai template Modern (tidak ada section-nya di classic).
+  // Foldernya sendiri TIDAK dihapus — hanya opsi dropdown ini yang disembunyikan,
+  // data lama & konfigurasi lain (MAX_WIDTH, LOOP_FOLDERS, dst) dibiarkan utuh.
   const FOLDERS = [
     ["cover", "Cover (hero layar penuh)"],
-    ["opening", "Opening / Save The Date"],
-    ["std2", "Save The Date 2 (foto statis)"],
-    ["subcover", "Subcover (quotes setelah cover)"],
-    ["closing", "Closing (penutup)"],
+    ["opening", "Opening (setelah Cover)"],
     ["bride", "Mempelai wanita"],
     ["groom", "Mempelai pria"],
-    ["wfl", "We Found Love (1:1)"],
+    ["std2", "Save The Date 2 (foto statis)"],
     ["event", "Slider kartu event"],
-    ["gallery", "Galeri foto"],
     ["quote", "Quote foto (1:1)"],
     ["story", "Our Story (16:10)"],
-    ["gift_item", "Rekomendasi Kado (1:1)"]
+    ["gallery", "Galeri foto"],
+    ["gift_item", "Rekomendasi Kado (1:1)"],
+    ["closing", "Closing (penutup)"]
   ];
 
   // Lebar maks unggahan per folder — sama dengan TARGETS di compress-images.py
