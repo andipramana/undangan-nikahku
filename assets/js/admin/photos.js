@@ -168,8 +168,9 @@
         </div>
         <div class="photo-card__actions">
           <button type="button" class="btn btn--tiny" data-edit="${i}">Atur</button>
+          ${currentFolder === "gallery" ? "" : `
           <button type="button" class="btn btn--tiny" data-move="${i}" data-dir="-1" ${i === 0 ? "disabled" : ""}>&#9650;</button>
-          <button type="button" class="btn btn--tiny" data-move="${i}" data-dir="1" ${i === photos.length - 1 ? "disabled" : ""}>&#9660;</button>
+          <button type="button" class="btn btn--tiny" data-move="${i}" data-dir="1" ${i === photos.length - 1 ? "disabled" : ""}>&#9660;</button>`}
           <button type="button" class="btn btn--tiny btn--danger" data-del="${i}" aria-label="Hapus">&times;</button>
         </div>
       </div>`;
