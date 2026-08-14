@@ -1449,8 +1449,11 @@ a { color: inherit; }
 .rsvp-form .rsvp-pill:not(.is-selected) { color: var(--color-dark); }
 /* Pengaman: discope ke ID supaya specificity (1,1,0) menang atas apa pun
    (termasuk .rsvp-form label { color:#fff }) — teks pill WAJIB gelap di atas
-   bg putih, apa pun perubahan style label. */
-#rsvp-form .rsvp-pill { color: var(--color-dark); }
+   bg putih, apa pun perubahan style label. :not(.is-selected) supaya pill
+   yang sedang aktif (bg gelap) tidak ikut dipaksa teks gelap — sebelumnya
+   BUG: rule ini menimpa .rsvp-pill.is-selected (specificity 0,2,0 kalah dari
+   ID), teks jadi warna gelap di atas bg gelap = tak terlihat. */
+#rsvp-form .rsvp-pill:not(.is-selected) { color: var(--color-dark); }
 .rsvp-pill:hover { transform: translateY(-1px); }
 .rsvp-pill.is-selected { background: var(--color-dark); color: #fff; font-weight: 600; box-shadow: 0 5px 12px rgba(20,18,15,.3); }
 .rsvp-form .btn-primary { width: 100%; margin-top: .25rem; }
