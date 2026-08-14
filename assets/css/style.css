@@ -594,9 +594,10 @@ a { color: inherit; }
   cursor: default;
   box-shadow: none;
 }
-/* Kirim Konfirmasi (RSVP): putih solid dengan teks hitam. */
-#rsvp-submit { background: #fff; color: var(--color-dark); }
-#rsvp-submit:hover { background: #f2ead9; color: var(--color-dark); }
+/* Kirim Konfirmasi (RSVP): bg gelap + teks putih, senada tombol Google Maps/
+   Kirim Hadiah/Konfirmasi WA/Rekomendasi Kado & pill RSVP terpilih. */
+#rsvp-submit { background: var(--color-dark); color: #fff; }
+#rsvp-submit:hover { background: #2a251d; color: #fff; }
 
 .btn-outline {
   display: inline-flex; align-items: center; gap: .5rem;

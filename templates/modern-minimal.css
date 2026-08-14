@@ -993,7 +993,10 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
   border-color: rgba(232,228,222,.3);
 }
 .rsvp-status { font-family: "Montserrat","Helvetica Neue",sans-serif; font-size: .68rem; margin-top: .4rem; }
-#rsvp-submit { margin-top: .5rem; }
+/* Kirim Konfirmasi (RSVP): bg gelap + teks putih, senada tombol Google Maps/
+   Kirim Hadiah/Konfirmasi WA/Rekomendasi Kado & pill RSVP terpilih. */
+#rsvp-submit { margin-top: .5rem; background: #1a1816; color: #fff; border-color: rgba(232,228,222,.15); }
+#rsvp-submit:hover { background: #2a251d; border-color: rgba(232,228,222,.3); }
 .wishes-heading { display: flex; align-items: center; gap: .8rem; margin: 2.5rem 0 1rem; }
 .wishes-heading span { flex: 1; height: 1px; background: rgba(232,228,222,.06); }
 .wishes-heading p {
