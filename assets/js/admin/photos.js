@@ -179,10 +179,7 @@
         </div>
       </div>`;
       })
-      .join("") +
-      `<div class="photo-grid__actions">
-        <button type="button" class="btn btn--primary" id="btn-save-order" ${photos.length < 2 ? "disabled" : ""}>Simpan urutan</button>
-      </div>`;
+      .join("");
 
     // Tinggi thumbnail Galeri dihitung dari LEBAR grid yang sedang nyata
     // dirender: sama seperti guest (full slot = lebar grid / 1.6). Semua slot
@@ -213,6 +210,7 @@
         [photos[from], photos[to]] = [photos[to], photos[from]];
         if (currentFolder === "gift_item") [giftRecommendations[from], giftRecommendations[to]] = [giftRecommendations[to], giftRecommendations[from]];
         paintGrid();
+        saveOrder();
       });
     });
 
@@ -273,27 +271,23 @@
       });
     });
 
-    document.getElementById("btn-save-order").addEventListener("click", async () => {
-      const btn = document.getElementById("btn-save-order");
-      btn.disabled = true;
-      // Update berurutan — sort_order ditulis ulang dari indeks DOM.
-      for (const [i, p] of photos.entries()) {
-        if (p.sort_order === i) continue;
-        const { error } = await sb.from("photos").update({ sort_order: i }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", p.id);
-        if (error) {
-          toast("Gagal menyimpan urutan: " + error.message, true);
-          btn.disabled = false;
-          return;
-        }
-      }
-      if (currentFolder === "gift_item") {
-        try { await saveGiftRecommendations(); }
-        catch (err) { toast("Urutan foto tersimpan, tetapi detail kado gagal diselaraskan: " + err.message, true); btn.disabled = false; return; }
-      }
-      toast("Urutan tersimpan ✓");
-      btn.disabled = false;
-    });
+  }
 
+  /** Simpan urutan OTOMATIS setiap kali posisi berubah (arrow ▲▼ atau
+   * drag/drop) — tidak ada lagi tombol "Simpan urutan" terpisah. Berjalan
+   * diam-diam (tanpa toast) saat berhasil supaya klik arrow beruntun tidak
+   * memicu toast bertubi-tubi; toast hanya muncul kalau gagal. */
+  async function saveOrder() {
+    for (const [i, p] of photos.entries()) {
+      if (p.sort_order === i) continue;
+      const { error } = await sb.from("photos").update({ sort_order: i }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", p.id);
+      if (error) { toast("Gagal menyimpan urutan: " + error.message, true); return; }
+      p.sort_order = i;
+    }
+    if (currentFolder === "gift_item") {
+      try { await saveGiftRecommendations(); }
+      catch (err) { toast("Urutan foto tersimpan, tetapi detail kado gagal diselaraskan: " + err.message, true); }
+    }
   }
 
   // Drag & drop (desktop). Dipasang SEKALI di #photo-grid yang memang tidak
@@ -340,6 +334,7 @@
       photos.splice(clamp(to, 0, photos.length), 0, moved);
       dragId = null;
       paintGrid();
+      saveOrder();
     });
   })();
 

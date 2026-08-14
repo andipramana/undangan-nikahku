@@ -302,10 +302,19 @@ h1, h2 { font-weight: 500; margin: 0; }
 .color-hex.is-invalid { border-color: var(--danger); color: var(--danger); }
 
 /* ---------- Tab Foto ---------- */
+/* Sticky ke atas saat grid foto discroll & overflow — .app-frame__scroll
+   adalah scroller-nya (lihat catatan "DUA LAPIS" di atas), .panel tidak
+   punya overflow/transform sendiri jadi sticky top:0 nempel pas di batas
+   atas kolom. Bg solid supaya kartu foto yang discroll di baliknya tidak
+   tembus, padding negatif horizontal + reset supaya area solidnya selebar
+   kolom, bukan cuma selebar toolbar. */
 .photos-toolbar {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 1rem; flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin: 0 -1.25rem 1rem;
+  padding: .75rem 1.25rem;
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
 }
 .photos-toolbar label { display: flex; flex-direction: column; gap: .35rem; color: var(--text-dim); font-size: .82rem; }
 .upload-wrap { display: inline-flex !important; flex-direction: row !important; align-items: center; }
@@ -380,7 +389,6 @@ h1, h2 { font-weight: 500; margin: 0; }
 .photo-grid--gallery .photo-card--twothirds { grid-column: span 8; }
 .photo-grid--gallery .photo-card { min-width: 0; align-self:start; }
 .photo-grid--gallery .photo-card__thumb { height:var(--gallery-thumb-height, 220px); aspect-ratio:auto; }
-.photo-grid--gallery .photo-grid__actions { grid-column: 1 / -1; }
 .photo-card__meta { padding: .5rem .6rem; }
 .photo-card__name { display: block; font-size: .78rem; color: var(--text-dim); word-break: break-all; }
 .photo-card__focal { display: block; font-size: .7rem; color: var(--text-dim); opacity: .75; margin-top: .15rem; }
@@ -394,7 +402,6 @@ h1, h2 { font-weight: 500; margin: 0; }
   margin-top: .3rem;
 }
 .photo-card__layout .input { width: auto; flex: 1; padding: .25rem .4rem; font-size: .72rem; }
-.photo-grid__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
 
 /* ---------- Editor pan/zoom ---------- */
 .editor {
