@@ -30,7 +30,7 @@
 <!-- Font Awesome (solid saja) — self-hosted, bukan CDN. Lihat assets/fontawesome/LICENSE.txt -->
 <link rel="stylesheet" href="assets/fontawesome/css/fontawesome.min.css">
 <link rel="stylesheet" href="assets/fontawesome/css/solid.min.css">
-<link rel="stylesheet" href="assets/css/style.css?v=77">
+<link rel="stylesheet" href="assets/css/style.css?v=78">
 </head>
 <body>
 
@@ -216,7 +216,9 @@
     <!-- ============ EVENT (editorial: 1 panel, header tanggal besar + 2 blok
          acara Akad/Resepsi, TANPA foto/slider/card box) ============ -->
     <section id="event" class="section event-hero" data-snap-rail="upper">
-      <div class="event-hero__capsule">
+      <!-- Capsule zoom-in dulu (sama pola dengan capsule gift), konten di
+           dalamnya baru reveal SETELAH itu (delay tambahan di style.css). -->
+      <div class="event-hero__capsule" data-reveal="zoom">
       <!-- Header tanggal besar — SATU untuk kedua acara (akad & resepsi hari yang
            sama, cuma beda jam, lihat cfg.event di config.js). data-count dipakai
            lagi (reveal.js, sudah ada, JANGAN bikin sistem counter baru). -->

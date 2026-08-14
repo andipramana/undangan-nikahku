@@ -1340,7 +1340,19 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
 .gallery-item img { opacity: 1; visibility: visible; }
 .gallery-item picture { display: block; width: 100%; height: 100%; }
 
-/* ---------- Capsule event: Akad & Resepsi SATU BATCH masing-masing ----------
+/* ---------- Capsule event: SAMA POLA dengan capsule gift ----------
+   Capsule sendiri zoom-in dulu (kecil -> ukuran asli, data-reveal="zoom" di
+   kontainernya), baru konten di dalamnya (tanggal, Akad, Resepsi) reveal
+   SETELAH zoom-nya kelar — delay 500ms, mirip gift-capsule. */
+#event .event-hero__capsule[data-reveal="zoom"] {
+  transform: scale(.7);
+  transition-duration: 900ms;
+}
+#event .event-hero__capsule[data-reveal="zoom"].is-revealed {
+  transform: scale(1);
+}
+
+/* ---------- Akad & Resepsi SATU BATCH masing-masing ----------
    .event-block adalah data-reveal-group: semua elemen di dalamnya (judul,
    jam, venue, alamat, tombol Maps) reveal BERSAMAAN begitu bloknya masuk
    layar — bukan satu-satu berurutan. Variasi datang dari JENIS animasinya
@@ -1348,12 +1360,14 @@ html.no-scroll .app-frame__scroll { overflow: hidden; }
    dipercepat dari default halaman supaya terasa tegas di capsule kecil ini.
    Blok Resepsi menyusul ~180ms setelah Akad (bukan lewat --reveal-i) supaya
    dua batch tetap terasa berurutan meski keduanya sudah di layar bersamaan
-   (capsule setinggi hampir 1 layar penuh). */
+   (capsule setinggi hampir 1 layar penuh). Delay dasar 500ms supaya konten
+   baru mulai muncul setelah capsule-nya selesai zoom-in. */
 #event .event-hero__capsule [data-reveal] {
   transition-duration: 950ms;
+  transition-delay: 500ms;
 }
 .event-hero__list .event-block:last-child [data-reveal] {
-  transition-delay: 180ms;
+  transition-delay: 680ms;
 }
 /* Gerakan diperbesar dari default halaman — di capsule kecil ini gerakan
    kecil nyaris tak terlihat. */
