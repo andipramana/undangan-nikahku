@@ -301,8 +301,17 @@ a { color: inherit; }
   font-size: .85rem; color: #fff; margin: 0;
 }
 /* Dorong konten section countdown ke bawah (anchor bawah tetap), tapi
-   horizontal di-CENTER (dulu rata kanan, diganti sesuai permintaan). */
-.section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 7rem; }
+   horizontal di-CENTER (dulu rata kanan, diganti sesuai permintaan).
+   Class ini dipakai #opening (STD1) DAN #save-the-date-2 (STD2) — JANGAN naikkan
+   angka ini untuk menaikkan STD2 saja, itu ikut menggeser STD1. Kenaikan
+   khusus STD2 ada di rule ID-scoped di bawah. */
+.section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 2.5rem; }
+/* Khusus Save The Date 2: naikkan seluruh blok (tombol+tanggal+countdown)
+   supaya tidak terlalu mepet ke bawah layar DAN tombol "Save The Date"
+   dapat jarak lebih lega dari tipografi "Save the Date" di atasnya —
+   menaikkan seluruh blok otomatis melebarkan gap itu tanpa menggeser posisi
+   relatif tanggal/countdown terhadap tombol (semuanya naik bersama). */
+#save-the-date-2.section-hero--anchor-right-bottom { padding-bottom: 9rem; }
 .section-hero--anchor-right-bottom .hero-content {
   width: 100%; max-width: 100%;
   padding-right: .9rem; padding-left: .9rem; padding-bottom: 0;
