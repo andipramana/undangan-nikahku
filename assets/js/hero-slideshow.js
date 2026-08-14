@@ -154,16 +154,21 @@ window.initHeroSlideshows = async function () {
     }
   });
 
-  // Save The Date 2: 1 foto statis dari folder 'opening' yang sama, TANPA
-  // slideshow/Ken Burns — di-set sebagai inline background-image (CSS
-  // .section-hero--static-bg yang atur cover/center-nya). Ambil foto TERAKHIR
-  // (bukan pertama) di folder itu — Save The Date 1 (#opening) tetap mulai
-  // dari slide pertama, foto khusus Save The Date 2 sengaja ditambahkan di
-  // urutan paling akhir supaya keduanya tidak berebut foto yang sama.
+  // Save The Date 2: 1 foto statis, TANPA slideshow/Ken Burns — di-set
+  // sebagai inline background-image (CSS .section-hero--static-bg yang atur
+  // cover/center-nya). Folder sendiri ("std2", tab Foto admin) supaya
+  // fotonya tidak lagi numpang dari folder "opening" — admin bisa pilih foto
+  // berbeda dari Save The Date 1. Kalau folder "std2" masih kosong (tenant
+  // lama belum upload), fallback ke foto TERAKHIR folder "opening" (perilaku
+  // lama) supaya tidak ada section kosong.
   const std2Media = document.getElementById("save-the-date-2-media");
-  if (std2Media && openingSlides && openingSlides.length) {
-    const slide = openingSlides[openingSlides.length - 1];
-    const src = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
-    std2Media.style.backgroundImage = `url("${src}")`;
+  if (std2Media) {
+    const std2Slides = await window.getPhotos("std2");
+    const slide = (std2Slides && std2Slides[0]) ||
+      (openingSlides && openingSlides.length && openingSlides[openingSlides.length - 1]);
+    if (slide) {
+      const src = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
+      std2Media.style.backgroundImage = `url("${src}")`;
+    }
   }
 };

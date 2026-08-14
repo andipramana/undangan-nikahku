@@ -16,6 +16,7 @@
   const FOLDERS = [
     ["cover", "Cover (hero layar penuh)"],
     ["opening", "Opening / Save The Date"],
+    ["std2", "Save The Date 2 (foto statis)"],
     ["subcover", "Subcover (quotes setelah cover)"],
     ["closing", "Closing (penutup)"],
     ["bride", "Mempelai wanita"],
@@ -30,7 +31,7 @@
 
   // Lebar maks unggahan per folder — sama dengan TARGETS di compress-images.py
   const MAX_WIDTH = {
-    cover: 1280, opening: 1280, subcover: 1280, closing: 1280,
+    cover: 1280, opening: 1280, std2: 1280, subcover: 1280, closing: 1280,
     bride: 1280, groom: 1280,
     event: 1200, gallery: 1200,
     story: 960,
@@ -121,8 +122,8 @@
       const row = window.GalleryLayout.rowAt(index, photo);
       return { className: `photo-card--gallery photo-card--${shape}`, ratio: window.GalleryLayout.ratioAt(index, photo), row };
     }
-    const ratio = { cover: 9 / 19.5, opening: 9 / 19.5, subcover: 9 / 19.5, closing: 9 / 19.5, bride: 2 / 3, groom: 2 / 3, wfl: 1, event: 1.2, quote: 1, story: 16 / 10, gift_item: 1 }[folderName] || 1;
-    const hero = ["cover", "opening", "closing", "subcover"].includes(folderName);
+    const ratio = { cover: 9 / 19.5, opening: 9 / 19.5, std2: 9 / 19.5, subcover: 9 / 19.5, closing: 9 / 19.5, bride: 2 / 3, groom: 2 / 3, wfl: 1, event: 1.2, quote: 1, story: 16 / 10, gift_item: 1 }[folderName] || 1;
+    const hero = ["cover", "opening", "std2", "closing", "subcover"].includes(folderName);
     return { className: hero ? "photo-card--hero" : "", ratio };
   }
 

@@ -18,6 +18,7 @@
   const FOLDER_RATIO = {
     cover: 9 / 19.5,   // layar HP penuh
     opening: 9 / 19.5,
+    std2: 9 / 19.5,     // Save The Date 2 — foto statis, layar HP penuh juga
     subcover: 9 / 19.5, // layar HP penuh, sama seperti cover/opening/closing
     closing: 9 / 19.5,
     bride: 2 / 3,      // lebar layar × 75vh
