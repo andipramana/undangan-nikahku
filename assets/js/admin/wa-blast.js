@@ -23,18 +23,28 @@
 
   // Teks BAWAAN yang sopan — dipakai kalau wa_settings.default_template
   // KOSONG (= admin belum pernah menyimpan pengaturan). Paragraf dipisah
-  // \n\n; baris "…undangan digital kami di:" menyambung LANGSUNG ke baris
-  // link (SATU \n, tanpa baris kosong di antaranya). Token ${tamu}/${CPP}/
-  // ${CPW}/${link} tetap literal string biasa di sini — diganti nanti oleh
-  // buildMessage() saat tombol Kirim ditekan (pola sama dengan template kustom).
+  // \n\n; blok tanggal/jam/venue/alamat menyambung dengan SATU \n (tanpa
+  // baris kosong di antaranya), sama untuk "Kami yang berbahagia," + nama.
+  // Token ${link} tetap literal string biasa di sini — diganti nanti oleh
+  // buildMessage() saat tombol Kirim ditekan (pola sama dengan template
+  // kustom). Teks & tanggal/venue di sini disengaja HARDCODE (bukan dibaca
+  // dari config.event) — persis permintaan user, jangan diotak-atik.
   const DEFAULT_TEMPLATE_BODY =
-    "Assalamu'alaikum warahmatullahi wabarakatuh,\n\n" +
-    "Yth. ${tamu},\n\n" +
-    "Dengan penuh sukacita dan rasa syukur, kami bermaksud mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami, ${CPP} & ${CPW}.\n\n" +
-    "Informasi lengkap acara dan konfirmasi kehadiran dapat dilihat pada undangan digital kami di:\n${link}\n\n" +
-    "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu.\n\n" +
-    "Atas perhatian dan kehadirannya, kami ucapkan terima kasih.\n\n" +
-    "Wassalamu'alaikum warahmatullahi wabarakatuh.";
+    "Assalamu'alaikum warahmatullahi wabarakatuh.\n\n" +
+    "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada pernikahan kami:\n\n" +
+    "*Mita Meliana & Andi Pramana*\n\n" +
+    "🗓️ Selasa, 25 Agustus 2026\n" +
+    "🕐 Resepsi: 11.00‐14.00 WIB\n" +
+    "📍 Gedung Serbaguna Mayang Arum\n" +
+    "Jl. Raya Ciwidey No. KM 27 No. 66, Pasirjambu, Kec. Pasirjambu, Kabupaten Bandung, Jawa Barat 40972\n\n" +
+    "Klik link undangan berikut:\n\n" +
+    "${link}\n\n" +
+    "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila berkenan hadir dan memberikan doa restu.\n\n" +
+    "Atas perhatian serta doa baik yang diberikan, kami sampaikan terima kasih.\n\n" +
+    "Mohon konfirmasi kehadiran melalui form RSVP pada undangan.\n\n" +
+    "Wassalamu'alaikum warahmatullahi wabarakatuh.\n\n" +
+    "Kami yang berbahagia,\n" +
+    "🤍 Mita & Andi";
 
   let contacts = [];
   let templates = [];
