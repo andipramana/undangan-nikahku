@@ -109,7 +109,7 @@
       const slider = document.getElementById("p-editor-zoom");
       slider.value = String(zoom);
       document.getElementById("p-editor-zoom-value").textContent = zoom.toFixed(2) + "×";
-      document.getElementById("p-editor").hidden = false;
+      window.PanelUI.openModal(document.getElementById("p-editor"));
       fitPreview();
     }
 
@@ -177,10 +177,10 @@
       btn.disabled = false;
       if (error) { toast("Gagal menyimpan: " + error.message, true); return; }
       toast("Pan & zoom tersimpan ✓");
-      document.getElementById("p-editor").hidden = true;
+      window.PanelUI.closeModal(document.getElementById("p-editor"));
       if (onSaved) onSaved();
     });
-    document.getElementById("p-editor-close").addEventListener("click", () => { document.getElementById("p-editor").hidden = true; });
+    document.getElementById("p-editor-close").addEventListener("click", () => { window.PanelUI.closeModal(document.getElementById("p-editor")); });
     window.addEventListener("resize", () => { if (!document.getElementById("p-editor").hidden) fitPreview(); });
 
     return { open };

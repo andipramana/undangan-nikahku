@@ -46,16 +46,16 @@ window.PanelPages["hadiah"] = {
       box.innerHTML = items.map((item, i) => `
         <div class="p-list-row" style="margin-bottom:.6rem">
           <div class="p-list-row__fields">
-            <input type="text" class="p-input" data-i="${i}" data-k="bank" value="${escAttr(item.bank)}" placeholder="Bank">
-            <input type="text" class="p-input" data-i="${i}" data-k="number" value="${escAttr(item.number)}" placeholder="Nomor rekening">
-            <input type="text" class="p-input" data-i="${i}" data-k="holder" value="${escAttr(item.holder)}" placeholder="Atas nama">
-            <select class="p-select" data-i="${i}" data-k="owner">
+            <input type="text" class="p-input" data-i="${i}" data-k="bank" value="${escAttr(item.bank)}" placeholder="Bank" aria-label="Bank rekening ${i + 1}">
+            <input type="text" class="p-input" data-i="${i}" data-k="number" value="${escAttr(item.number)}" placeholder="Nomor rekening" aria-label="Nomor rekening ${i + 1}">
+            <input type="text" class="p-input" data-i="${i}" data-k="holder" value="${escAttr(item.holder)}" placeholder="Atas nama" aria-label="Atas nama rekening ${i + 1}">
+            <select class="p-select" data-i="${i}" data-k="owner" aria-label="Pemilik rekening ${i + 1}">
               <option value="">Tidak ikut</option>
               <option value="cpw" ${item.owner === "cpw" ? "selected" : ""}>CPW (wanita)</option>
               <option value="cpp" ${item.owner === "cpp" ? "selected" : ""}>CPP (pria)</option>
             </select>
             <label class="p-switch"><input type="checkbox" data-i="${i}" data-k="placeholder" ${item.placeholder ? "checked" : ""}><span>Sembunyikan nomor (placeholder)</span></label>
-            <textarea class="p-textarea" data-i="${i}" data-k="template" rows="3" placeholder="Pesan WA kustom (kosongkan = default). Token: \${tamu} \${CPP} \${CPW} \${LABEL}">${escAttr(item.template)}</textarea>
+            <textarea class="p-textarea" data-i="${i}" data-k="template" rows="3" placeholder="Pesan WA kustom (kosongkan = default). Token: \${tamu} \${CPP} \${CPW} \${LABEL}" aria-label="Pesan WA kustom rekening ${i + 1}">${escAttr(item.template)}</textarea>
           </div>
           <div class="p-list-row__controls">
             <button type="button" class="p-btn p-btn--tiny" data-move="${i}" data-dir="-1" ${i === 0 ? "disabled" : ""}>&#9650;</button>

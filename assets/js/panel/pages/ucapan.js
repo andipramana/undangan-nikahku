@@ -184,7 +184,7 @@ window.PanelPages["ucapan"] = {
     async function openExport() {
       const modal = outlet.querySelector("#wi-export-modal");
       const status = outlet.querySelector("#wi-export-status");
-      modal.hidden = false;
+      window.PanelUI.openModal(modal);
       status.textContent = "Memuat seluruh ucapan…";
       try {
         st.exportWishes = await fetchAllWishes();
@@ -198,8 +198,8 @@ window.PanelPages["ucapan"] = {
     outlet.querySelector("#wi-refresh").addEventListener("click", () => load(st.page));
     outlet.querySelector("#wi-export").addEventListener("click", openExport);
     outlet.querySelector("#wi-delete-all").addEventListener("click", removeAll);
-    outlet.querySelector("#wi-export-close").addEventListener("click", () => { outlet.querySelector("#wi-export-modal").hidden = true; });
-    outlet.querySelector("#wi-export-modal").addEventListener("click", (e) => { if (e.target === e.currentTarget) e.currentTarget.hidden = true; });
+    outlet.querySelector("#wi-export-close").addEventListener("click", () => { window.PanelUI.closeModal(outlet.querySelector("#wi-export-modal")); });
+    outlet.querySelector("#wi-export-modal").addEventListener("click", (e) => { if (e.target === e.currentTarget) window.PanelUI.closeModal(e.currentTarget); });
     outlet.querySelector("#wi-export-csv").addEventListener("click", exportCsv);
     outlet.querySelector("#wi-export-png").addEventListener("click", () => exportPng().catch((e) => { outlet.querySelector("#wi-export-status").textContent = "Gagal membuat PNG: " + e.message; }));
 

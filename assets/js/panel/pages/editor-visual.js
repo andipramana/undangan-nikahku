@@ -50,7 +50,7 @@ window.PanelPages["editor-visual"] = {
       </div>
     `;
     outlet.querySelector("#ve-reset-global").addEventListener("click", () => resetScope("global"));
-    const closeModal = () => { outlet.querySelector("#ve-edit-modal").hidden = true; };
+    const closeModal = () => { window.PanelUI.closeModal(outlet.querySelector("#ve-edit-modal")); };
     outlet.querySelector("#ve-modal-close").addEventListener("click", closeModal);
     outlet.querySelector("#ve-edit-modal").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeModal(); });
 
@@ -153,7 +153,7 @@ window.PanelPages["editor-visual"] = {
       R().forSection(section, doc).forEach((target) => doc.querySelectorAll(target.selector).forEach((el, index) => {
         const host = el; host.classList.add("ve-target-host");
         const b = doc.createElement("button"); b.type = "button"; b.className = "ve-pencil"; b.textContent = "✎"; b.title = "Edit: " + target.label; b.setAttribute("aria-label", b.title);
-        b.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation(); selected = { ...target, baseId: target.id, id: target.id, index }; renderInspector(); outlet.querySelector("#ve-edit-modal").hidden = false; });
+        b.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation(); selected = { ...target, baseId: target.id, id: target.id, index }; renderInspector(); window.PanelUI.openModal(outlet.querySelector("#ve-edit-modal")); });
         host.addEventListener("pointerdown", (ev) => {
           if (ev.target === b || !selected || selected.baseId !== target.id || selected.index !== index || host.dataset.veDragging) return;
           host.dataset.veDragging = "1";

@@ -21,9 +21,9 @@ window.PanelPages["cerita"] = {
       box.innerHTML = items.map((item, i) => `
         <div class="p-list-row" style="margin-bottom:.6rem">
           <div class="p-list-row__fields">
-            <input type="text" class="p-input" data-i="${i}" data-k="date" value="${escAttr(item.date)}" placeholder="Tahun">
-            <input type="text" class="p-input" data-i="${i}" data-k="title" value="${escAttr(item.title)}" placeholder="Judul babak">
-            <textarea class="p-textarea" data-i="${i}" data-k="text" rows="4" placeholder="Cerita…">${escAttr(item.text)}</textarea>
+            <input type="text" class="p-input" data-i="${i}" data-k="date" value="${escAttr(item.date)}" placeholder="Tahun" aria-label="Tahun babak ${i + 1}">
+            <input type="text" class="p-input" data-i="${i}" data-k="title" value="${escAttr(item.title)}" placeholder="Judul babak" aria-label="Judul babak ${i + 1}">
+            <textarea class="p-textarea" data-i="${i}" data-k="text" rows="4" placeholder="Cerita…" aria-label="Cerita babak ${i + 1}">${escAttr(item.text)}</textarea>
           </div>
           <div class="p-list-row__controls">
             <button type="button" class="p-btn p-btn--tiny" data-move="${i}" data-dir="-1" ${i === 0 ? "disabled" : ""}>&#9650;</button>

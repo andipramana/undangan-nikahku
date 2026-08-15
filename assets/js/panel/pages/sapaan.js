@@ -27,13 +27,13 @@ window.PanelPages["sapaan"] = {
       box.innerHTML = groups.map((g, gi) => `
         <div class="p-list-row" style="margin-bottom:.6rem">
           <div class="p-list-row__fields">
-            <input type="text" class="p-input" data-g="${gi}" data-k="label" value="${escAttr(g.label)}" placeholder="Sapaan kelompok, mis. Keluarga Besar">
-            <textarea class="p-textarea" data-g="${gi}" data-k="closing" rows="2" placeholder="Closing khusus kelompok ini (kosongkan = default)">${escAttr(g.closing)}</textarea>
+            <input type="text" class="p-input" data-g="${gi}" data-k="label" value="${escAttr(g.label)}" placeholder="Sapaan kelompok, mis. Keluarga Besar" aria-label="Label sapaan kelompok ${gi + 1}">
+            <textarea class="p-textarea" data-g="${gi}" data-k="closing" rows="2" placeholder="Closing khusus kelompok ini (kosongkan = default)" aria-label="Closing kelompok ${gi + 1}">${escAttr(g.closing)}</textarea>
             <div class="p-field"><span>Nama tamu</span>
               <div class="p-grid-2" style="gap:.4rem">
                 ${g.names.map((n, ni) => `
                   <span style="display:flex;gap:.3rem;align-items:center">
-                    <input type="text" class="p-input" data-g="${gi}" data-name-i="${ni}" value="${escAttr(n)}" placeholder="Nama tamu (persis seperti di URL)">
+                    <input type="text" class="p-input" data-g="${gi}" data-name-i="${ni}" value="${escAttr(n)}" placeholder="Nama tamu (persis seperti di URL)" aria-label="Nama tamu ${ni + 1} kelompok ${gi + 1}">
                     <button type="button" class="p-btn p-btn--tiny p-btn--danger" data-name-del="${gi}:${ni}" aria-label="Hapus nama">&times;</button>
                   </span>`).join("")}
               </div>

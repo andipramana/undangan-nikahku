@@ -85,6 +85,39 @@
     window.AdminAPI.toast(msg, isError);
   }
 
+  /** Buka .p-modal dengan aksesibilitas minimum wajib (§8 rencana): fokus
+   * pindah ke elemen pertama di dalam modal, Tab/Shift+Tab terperangkap di
+   * dalamnya, Esc menutup. Pakai ini (bukan `el.hidden = false` langsung)
+   * untuk setiap modal baru. */
+  function openModal(el) {
+    if (!el) return;
+    const trigger = document.activeElement;
+    el.hidden = false;
+    const focusable = () => [...el.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+      .filter((x) => !x.disabled && x.offsetParent !== null);
+    const first = focusable()[0];
+    if (first) first.focus();
+    function onKeydown(e) {
+      if (e.key === "Escape") { e.stopPropagation(); closeModal(el); return; }
+      if (e.key !== "Tab") return;
+      const items = focusable();
+      if (!items.length) return;
+      const firstEl = items[0], lastEl = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === firstEl) { e.preventDefault(); lastEl.focus(); }
+      else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); firstEl.focus(); }
+    }
+    el.__panelModalKeydown = onKeydown;
+    el.__panelModalTrigger = trigger;
+    el.addEventListener("keydown", onKeydown);
+  }
+  function closeModal(el) {
+    if (!el) return;
+    el.hidden = true;
+    if (el.__panelModalKeydown) { el.removeEventListener("keydown", el.__panelModalKeydown); el.__panelModalKeydown = null; }
+    if (el.__panelModalTrigger && typeof el.__panelModalTrigger.focus === "function") el.__panelModalTrigger.focus();
+    el.__panelModalTrigger = null;
+  }
+
   /** Ikon garis minimal, inline SVG — dipakai kartu navigasi & sidebar.
    * BUKAN emoji (dilarang §2.1 rencana). Satu set kecil dipakai ulang antar
    * halaman yang temanya berdekatan (mis. "image" untuk semua section
@@ -114,5 +147,5 @@
     return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.home}</svg>`;
   }
 
-  window.PanelUI = { esc, escAttr, field, textarea, select, switchRow, card, badge, pickerHex, bindColorPair, toast, icon };
+  window.PanelUI = { esc, escAttr, field, textarea, select, switchRow, card, badge, pickerHex, bindColorPair, toast, icon, openModal, closeModal };
 })();
