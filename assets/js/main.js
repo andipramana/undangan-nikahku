@@ -117,15 +117,15 @@
     document.getElementById("wfl-source").textContent = `— ${cfg.opening.source} —`;
 
     document.getElementById("bride-name").textContent = cfg.couple.bride.name;
-    // "Putri ketiga" di baris sendiri (bukan sejajar dengan "dari Bapak & Ibu")
-    // supaya tidak kepanjangan satu baris — <br> perlu innerHTML, nama ortu
+    // "Putri ketiga dari" satu baris, "Bapak X & Ibu Y" baris berikutnya
+    // (bukan tidak kepanjangan satu baris) — <br> perlu innerHTML, nama ortu
     // di-escape (esc()) karena field ini bisa diedit admin.
     document.getElementById("bride-parents").innerHTML =
-      `Putri ketiga<br>dari Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
+      `Putri ketiga dari<br>Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
 
     document.getElementById("groom-name").textContent = cfg.couple.groom.name;
     document.getElementById("groom-parents").innerHTML =
-      `Putra pertama<br>dari Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
+      `Putra pertama dari<br>Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
 
     // Baris Instagram mempelai — tampil hanya kalau handle diisi di
     // config/Supabase (couple.*.instagram); kalau kosong, elemen disembunyikan.
