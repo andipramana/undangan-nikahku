@@ -18,6 +18,10 @@ window.initQrCheckin = function () {
   const canvas = document.getElementById("qr-checkin-canvas");
   if (!btn || !modal || !canvas) return;
 
+  // Toggle admin (tab Teks > Lainnya) — default AKTIF kalau field belum
+  // pernah disimpan (tenant lama), supaya tidak tiba-tiba hilang.
+  if (cfg.qrCheckin && cfg.qrCheckin.enabled === false) return;
+
   const params = new URLSearchParams(location.search);
   if (!params.get(cfg.guestParam)) return;
 

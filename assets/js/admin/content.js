@@ -102,6 +102,11 @@
     if (typeof c.subcover.enabled !== "boolean") c.subcover.enabled = true;
     if (typeof c.subcover.quoteLine1 !== "string") c.subcover.quoteLine1 = "All because two people";
     if (typeof c.subcover.quoteLine2 !== "string") c.subcover.quoteLine2 = "fell in love ...";
+    // Tombol QR check-in melayang (qr-checkin.js) — tidak semua tenant pakai
+    // check-in di venue, default tetap AKTIF (true) supaya tenant lama yang
+    // belum pernah menyimpan field ini tidak tiba-tiba kehilangan tombolnya.
+    if (!isPlainObject(c.qrCheckin)) c.qrCheckin = {};
+    if (typeof c.qrCheckin.enabled !== "boolean") c.qrCheckin.enabled = true;
   }
 
   function isPlainObject(v) {
@@ -279,6 +284,13 @@
         `)}
 
         ${section("lainnya", "Lainnya", `
+          <label class="check-row">
+            <input type="checkbox" id="f-qr-enabled">
+            Tampilkan tombol QR check-in ke tamu
+          </label>
+          <p class="muted">Tombol melayang yang muncul untuk tamu perorangan
+          (link ber-<code>?to=</code>) berisi QR untuk dipindai petugas saat
+          check-in di venue. Matikan kalau acara tidak memakai check-in QR.</p>
           <div class="form-grid">
             ${field("Jeda slideshow hero (ms)", "f-hero-interval", "number")}
             ${field("Audio — judul", "f-audio-title")}
@@ -349,6 +361,8 @@
     set("f-gift-phone", v("gift.address.phone"));
     set("f-gift-detail", v("gift.address.detail"));
     set("f-gift-template-kado", v("gift.address.template"));
+    const cbQr = document.getElementById("f-qr-enabled");
+    if (cbQr) cbQr.checked = c.qrCheckin.enabled !== false;
     set("f-hero-interval", v("heroSlideInterval"));
     set("f-audio-src", v("audio.src"));
     set("f-audio-title", v("audio.title"));
@@ -665,6 +679,8 @@
     grab("f-subcover-quote2", "subcover.quoteLine2");
     const cbSubcoverSave = document.getElementById("f-subcover-enabled");
     if (cbSubcoverSave) setPath(content, "subcover.enabled", cbSubcoverSave.checked);
+    const cbQrSave = document.getElementById("f-qr-enabled");
+    if (cbQrSave) setPath(content, "qrCheckin.enabled", cbQrSave.checked);
     grab("f-event-iso", "event.dateISO");
     grab("f-event-label", "event.dateLabel");
     grab("f-event-day", "event.dayLabel");

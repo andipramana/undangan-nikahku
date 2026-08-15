@@ -180,6 +180,12 @@ window.WEDDING_CONFIG = {
   },
   heroSlideInterval: 4500,
 
+  // Tombol QR check-in melayang (qr-checkin.js) — hanya tampil untuk tamu
+  // perorangan (?to=...) DAN kalau enabled true. Diatur admin di tab Teks >
+  // Lainnya; default true di sini supaya perilaku offline/fallback sama
+  // dengan default seedDefaults di content.js.
+  qrCheckin: { enabled: true },
+
   coupleSlides: {
     // Slideshow besar 3/4 layar di section Kedua Mempelai (auto + bisa digeser).
     // Di-fetch dari manifest folder foto_bride / foto_groom, urutan by name.
