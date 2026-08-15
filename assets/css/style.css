@@ -695,7 +695,13 @@ a { color: inherit; }
 .save-date {
   position: absolute;
   left: 7.5%;
-  top: 53%;
+  /* 53dvh cukup di layar tinggi, tapi di layar PENDEK teks besar ini bisa
+     nabrak tombol+tanggal+countdown di bawahnya (reserved: padding-bottom
+     STD2 9rem + tinggi tombol/tanggal/countdown ~7rem + setengah tinggi blok
+     teks "Save the Date" sendiri ~6rem + margin aman ~1rem = 23rem). min()
+     memastikan PUSAT teks tidak pernah lebih rendah dari batas aman itu —
+     di layar pendek otomatis terdorong ke atas, bukan menabrak. */
+  top: min(53dvh, calc(100dvh - 23rem));
   transform: translateY(-50%);
   z-index: 3;
   color: rgba(255, 255, 255, .97);
