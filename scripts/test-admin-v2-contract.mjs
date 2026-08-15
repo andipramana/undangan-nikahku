@@ -81,6 +81,40 @@ const routerSrc = await fs.readFile("assets/js/panel/router.js", "utf8");
 check('router.js memuat link "Kirim WhatsApp" (wa.html, bukan PanelPages)', /link:\s*"wa"/.test(routerSrc));
 check('router.js memuat link "Check-in QR" (admin-qr.html, bukan PanelPages)', /link:\s*"admin-qr"/.test(routerSrc));
 
+// BUG KRITIS (dilaporkan dari HP): admin.html punya <base href="/">, jadi
+// href fragment-saja ("#/mempelai") diresolusi terhadap base itu, BUKAN
+// terhadap URL dokumen saat ini — link nav jadi menunjuk ke root (undangan
+// tamu), bukan tetap di admin.html. Jaring pengaman DUA lapis wajib ada:
+// (1) href selalu path-qualified (location.pathname + "#/..."), (2) klik
+// pada [data-nav-key] dicegat & dinavigasikan lewat location.hash= langsung
+// (jalur yang kebal terhadap base tag apa pun), bukan mengandalkan href
+// browser semata. Kalau salah satu hilang lagi di masa depan, tegaskan di
+// sini SEBELUM sampai ke pengguna — jangan menunggu laporan dari HP lagi.
+const bareFragmentHref = [...routerSrc.matchAll(/href=["'`]#/g)];
+check("router.js tidak pernah memancarkan href fragment-saja langsung di markup (harus lewat hashHref())", bareFragmentHref.length === 0);
+if (bareFragmentHref.length) console.error("  ditemukan di:", bareFragmentHref.map((m) => m[0]).join(", "));
+// Cek harus dipersempit ke BADAN fungsi hashHref() saja (bukan seluruh file)
+// — komentar di atasnya SENGAJA menyebut "location.pathname" untuk
+// menjelaskan bug-nya, jadi cek longgar ke seluruh file akan lolos palsu
+// walau isi fungsinya sudah diubah lagi jadi fragment-saja (diverifikasi
+// manual: skenario ini benar-benar dicoba dan tanpa pempersempitan ini
+// checknya salah lolos).
+const hashHrefBody = routerSrc.match(/function hashHref\(key\)\s*\{([\s\S]*?)\n  \}/);
+check("router.js: fungsi hashHref() ditemukan", !!hashHrefBody);
+check("router.js: badan hashHref() menyertakan location.pathname (bukan cuma disebut di komentar di atasnya)",
+  !!hashHrefBody && /location\.pathname/.test(hashHrefBody[1]));
+const safetyNetBody = routerSrc.match(/function bindNavClickSafetyNet\(\)\s*\{([\s\S]*?)\n  \}/);
+check("router.js: fungsi bindNavClickSafetyNet() ditemukan", !!safetyNetBody);
+check("router.js: bindNavClickSafetyNet() benar-benar memasang click handler yang membaca [data-nav-key] dan memanggil navigate()",
+  !!safetyNetBody && /addEventListener\(\s*"click"/.test(safetyNetBody[1]) && /data-nav-key/.test(safetyNetBody[1]) && /navigate\(/.test(safetyNetBody[1]));
+check('router.js: bindNavClickSafetyNet() dipanggil dari start() (bukan cuma didefinisikan)',
+  /function start\(\)\s*\{[\s\S]*?bindNavClickSafetyNet\(\)/.test(routerSrc));
+for (const pageFile of pageFiles) {
+  const src = await fs.readFile(path.join(pagesDir, pageFile), "utf8");
+  const bare = [...src.matchAll(/href=["'`]#/g)];
+  check(`${pageFile}: tidak memancarkan href fragment-saja`, bare.length === 0);
+}
+
 // ---------------------------------------------------------------------
 // 4) Field lama (§3.1) semuanya punya rumah — dicek sebagai token yang
 //    HARUS muncul di suatu tempat pada gabungan seluruh file pages/*.js.

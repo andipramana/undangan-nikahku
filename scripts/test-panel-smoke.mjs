@@ -2,9 +2,16 @@
  * Smoke test admin.html v2 di browser sungguhan — belum ada satu pun test
  * yang benar-benar mem-boot admin.html sampai sekarang; semua test lain
  * membaca source sebagai teks atau me-mount SATU halaman lewat page.setContent.
- * Ini menutup celah itu: navigasi ke beberapa rute hash beneran, pastikan
- * TIDAK ada console error / unhandled rejection, dan #p-outlet-inner
- * benar-benar terisi di tiap rute (bukan cuma tidak crash).
+ * Ini menutup celah itu: KLIK NYATA elemen navigasi (kartu hub Beranda di
+ * viewport HP, lalu sidebar di viewport desktop) — BUKAN location.hash=
+ * langsung — supaya bug href fragment-saja yang diresolusi terhadap
+ * <base href="/"> (link jadi menunjuk ke root/undangan tamu, bukan tetap di
+ * admin.html — dilaporkan dari HP, lihat komentar hashHref() di router.js)
+ * benar-benar tertangkap: location.hash= tidak kena bug itu sama sekali,
+ * jadi test yang cuma set hash tidak akan pernah mendeteksinya. Pastikan
+ * TIDAK ada console error / unhandled rejection, #p-outlet-inner benar-benar
+ * terisi di tiap rute, dan dokumen tidak pernah berpindah keluar dari
+ * admin.html (page.url() tetap mengandung "/admin.html" setelah tiap klik).
  *
  * Tidak butuh server maupun Supabase sungguhan: page.route() mencegat SEMUA
  * request ke origin palsu http://panel.test/ dan menyajikannya langsung dari
@@ -109,20 +116,58 @@ try {
   await page.goto("http://panel.test/admin.html");
   await page.locator("#app").waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
   check("layar login tersembunyi, #app tampil setelah boot", await page.locator("#app").isVisible());
+  check("#/ (Beranda, awal): #p-outlet-inner terisi", (await page.locator("#p-outlet-inner").innerHTML()).trim().length > 50);
 
-  const ROUTES = ["", "mempelai", "acara", "pengaturan", "warna"];
-  for (const route of ROUTES) {
-    const label = route || "home";
-    await page.evaluate((r) => { location.hash = "#/" + r; }, route);
+  // BUG KRITIS (dilaporkan dari HP): admin.html punya <base href="/">, dan
+  // href fragment-saja seperti "#/mempelai" diresolusi HTML terhadap base
+  // itu (bukan terhadap URL dokumen saat ini) — jadi tanpa perbaikan, link
+  // itu sebenarnya menunjuk ke http://host/#/mempelai, PATH-nya "/" (beda
+  // dari "/admin.html"), sehingga browser melakukan navigasi lintas-dokumen
+  // ke situ (halaman undangan tamu di root), bukan cuma ganti hash. Test ini
+  // WAJIB meng-KLIK elemen nav sungguhan (bukan location.hash= langsung) dan
+  // menegaskan page.url() tetap mengandung "/admin.html" — location.hash=
+  // (dipakai navigate() di router.js) tidak kena bug ini sama sekali, jadi
+  // hanya lewat klik nyata bug ini benar-benar tertangkap.
+  function stillOnAdminHtml(label) {
+    check(`${label}: dokumen TIDAK berpindah keluar dari admin.html (url: ${page.url()})`, page.url().includes("/admin.html"));
+  }
+
+  // Jalur mobile (viewport HP): kartu navigasi di hub Beranda
+  // (renderNavGridHtml(), dirender di dalam #p-outlet-inner tiap home.js
+  // mount — sidebar disembunyikan CSS di bawah 1024px, lihat panel.css).
+  const ROUTES = ["mempelai", "acara", "pengaturan", "warna"];
+  for (const key of ROUTES) {
+    await page.locator(`#p-outlet-inner [data-nav-key="${key}"]`).click();
     // router.js mount() sinkron sebagian besar tapi beberapa halaman (mis.
     // warna.js fetch foto preview) async — beri waktu microtask/network mock
     // selesai sebelum membaca outlet.
     await page.waitForTimeout(300);
+    stillOnAdminHtml(`hub Beranda: klik menu "${key}"`);
     const outletHtml = await page.locator("#p-outlet-inner").innerHTML();
-    check(`#/${label}: #p-outlet-inner benar-benar terisi`, outletHtml.trim().length > 50);
+    check(`#/${key}: #p-outlet-inner benar-benar terisi`, outletHtml.trim().length > 50);
     const headerTitle = await page.locator(".p-pageheader__title").textContent().catch(() => "");
-    check(`#/${label}: judul halaman di header terisi`, !!(headerTitle && headerTitle.trim().length));
+    check(`#/${key}: judul halaman di header terisi`, !!(headerTitle && headerTitle.trim().length));
+
+    // Balik ke Beranda lewat tombol "Kembali" (dipicu navigate() langsung,
+    // bukan href) supaya iterasi berikutnya bisa klik kartu hub lagi.
+    await page.locator("#p-back").click();
+    await page.waitForTimeout(300);
+    stillOnAdminHtml(`tombol "Kembali" dari "${key}"`);
   }
+
+  // Jalur desktop: sidebar permanen (>=1024px) — kode href-nya SAMA
+  // (navItemHref()) tapi elemennya beda dari kartu hub, dan link Beranda di
+  // sidebar punya href hardcoded terpisah (renderSidebar()) — wajib diuji
+  // sendiri, bukan diasumsikan sama dari uji kartu hub di atas.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.waitForTimeout(150);
+  await page.locator('.p-sidebar__item[data-nav-key="mempelai"]').click();
+  await page.waitForTimeout(300);
+  stillOnAdminHtml('sidebar desktop: klik "mempelai"');
+  await page.locator('.p-sidebar__item[data-nav-key="home"]').click();
+  await page.waitForTimeout(300);
+  stillOnAdminHtml('sidebar desktop: klik "Beranda"');
+  check("sidebar desktop: kembali ke Beranda, #p-outlet-inner terisi", (await page.locator("#p-outlet-inner").innerHTML()).trim().length > 50);
 
   check("tidak ada console error di sepanjang navigasi", consoleErrors.length === 0);
   if (consoleErrors.length) consoleErrors.forEach((e) => console.error("  console error:", e));
@@ -133,4 +178,4 @@ try {
 }
 
 if (failed) { console.error("\nFAIL: smoke test admin.html v2 menemukan masalah."); process.exit(1); }
-console.log("\nPASS: admin.html v2 boot bersih (tanpa error) dan merender konten nyata di 5 rute yang diuji.");
+console.log("\nPASS: admin.html v2 boot bersih (tanpa error), navigasi klik nyata (hub mobile + sidebar desktop) tetap di admin.html, dan merender konten nyata di tiap rute yang diuji.");

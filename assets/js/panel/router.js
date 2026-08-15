@@ -39,8 +39,21 @@
   const $ = (id) => document.getElementById(id);
   const pageDef = (key) => window.PanelPages && window.PanelPages[key];
 
+  /** BUG KRITIS (dilaporkan dari HP): admin.html punya <base href="/">
+   * (perlu untuk semua script/asset relatif). Href fragment-saja seperti
+   * "#/mempelai" diresolusi HTML terhadap base URL itu, BUKAN terhadap URL
+   * dokumen saat ini — jadi link itu sebenarnya menunjuk ke
+   * http://host/#/mempelai, yaitu ROOT (undangan tamu), bukan admin.html.
+   * Menambahkan location.pathname di depan membuat href-nya path-qualified
+   * dan kebal terhadap base tag apa pun isinya. `location.hash = ...`
+   * (dipakai navigate() di bawah) TIDAK kena bug ini — setter itu mengubah
+   * fragment URL dokumen saat ini secara langsung, tidak lewat resolusi
+   * referensi relatif seperti atribut href. */
+  function hashHref(key) {
+    return location.pathname + (key === "home" ? "#/" : `#/${key}`);
+  }
   function navItemKey(item) { return item.key || item.link; }
-  function navItemHref(item) { return item.link ? window.AdminAPI.tenant.path(item.link) : `#/${item.key}`; }
+  function navItemHref(item) { return item.link ? window.AdminAPI.tenant.path(item.link) : hashHref(item.key); }
   function navItemTitle(item) {
     if (item.link) return item.title;
     const p = pageDef(item.key);
@@ -67,7 +80,7 @@
     const nav = $("p-sidebar-nav");
     if (!nav) return;
     const home = pageDef("home");
-    let html = `<a class="p-sidebar__item" href="#/" data-nav-key="home">${(home && home.icon) || window.PanelUI.icon("home")}<span>Beranda</span></a>`;
+    let html = `<a class="p-sidebar__item" href="${hashHref("home")}" data-nav-key="home">${(home && home.icon) || window.PanelUI.icon("home")}<span>Beranda</span></a>`;
     NAV.forEach((group) => {
       html += `<div><p class="p-sidebar__group-label">${window.PanelUI.esc(group.group)}</p>`;
       group.items.forEach((item) => {
@@ -234,8 +247,33 @@
     refreshPublishStatus();
   }
 
+  /** Sabuk pengaman untuk bug <base href="/"> di atas: kalau href tetap saja
+   * salah lagi suatu saat (mis. lupa dipakai di halaman baru, atau
+   * location.pathname belum sempat dibersihkan tenant.js saat boot lewat
+   * redirect 404.html), klik pada [data-nav-key] TETAP dicegat di sini dan
+   * dinavigasikan lewat navigate() (location.hash=, bukan href) — jalur yang
+   * terbukti kebal terhadap base tag. Dipasang di document supaya menjangkau
+   * sidebar (statis) maupun grid kartu Beranda (dirender ulang tiap home.js
+   * mount, lewat renderNavGridHtml()) tanpa perlu pasang ulang listener tiap
+   * kali. Hanya kunci HALAMAN INTERNAL (punya entri window.PanelPages) yang
+   * dicegat — link eksternal (Kirim WhatsApp/Check-in QR ke wa.html/
+   * admin-qr.html, data-nav-key="wa"/"admin-qr") sengaja dibiarkan navigasi
+   * normal karena memang menuju halaman lain, bukan bug.
+   */
+  function bindNavClickSafetyNet() {
+    document.addEventListener("click", (e) => {
+      const el = e.target.closest("[data-nav-key]");
+      if (!el) return;
+      const key = el.dataset.navKey;
+      if (!pageDef(key)) return; // link eksternal (wa/admin-qr) — biarkan default
+      e.preventDefault();
+      navigate(key);
+    });
+  }
+
   function start() {
     renderSidebar();
+    bindNavClickSafetyNet();
     const btn = $("p-savebar-btn");
     if (btn) btn.addEventListener("click", handleSaveBarClick);
     window.addEventListener("hashchange", () => mount(resolveKey()));
