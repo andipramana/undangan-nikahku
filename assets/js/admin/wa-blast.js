@@ -25,16 +25,18 @@
   // KOSONG (= admin belum pernah menyimpan pengaturan). Paragraf dipisah
   // \n\n; blok tanggal/jam/venue/alamat menyambung dengan SATU \n (tanpa
   // baris kosong di antaranya), sama untuk "Kami yang berbahagia," + nama.
-  // Token ${link}/${CPP}/${CPW} tetap literal string biasa di sini — diganti
-  // nanti oleh buildMessage() saat tombol Kirim ditekan (pola sama dengan
-  // template kustom). ${CPP}/${CPW} = nama panggilan (couple.groom/bride.
-  // nickname), jadi baris nama render sebagai "Mita & Andi" — bukan nama
-  // lengkap. Teks & tanggal/venue lain di sini disengaja HARDCODE (bukan
-  // dibaca dari config.event) — persis permintaan user, jangan diotak-atik.
+  // Token ${link}/${CPP}/${CPW}/${namaCPP}/${namaCPW} tetap literal string
+  // biasa di sini — diganti nanti oleh buildMessage() saat tombol Kirim
+  // ditekan (pola sama dengan template kustom). Baris tebal nama pakai
+  // ${namaCPW}/${namaCPP} (NAMA LENGKAP), tanda tangan penutup pakai
+  // ${CPW}/${CPP} (nama PANGGILAN) — persis pembagian di contoh yang
+  // dikirim user, jangan disamakan jadi satu jenis token. Teks & tanggal/
+  // venue lain di sini disengaja HARDCODE (bukan dibaca dari config.event)
+  // — persis permintaan user, jangan diotak-atik.
   const DEFAULT_TEMPLATE_BODY =
     "Assalamu'alaikum warahmatullahi wabarakatuh.\n\n" +
     "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada pernikahan kami:\n\n" +
-    "*${CPW} & ${CPP}*\n\n" +
+    "*${namaCPW} & ${namaCPP}*\n\n" +
     "🗓️ Selasa, 25 Agustus 2026\n" +
     "🕐 Resepsi: 11.00‐14.00 WIB\n" +
     "📍 Gedung Serbaguna Mayang Arum\n" +
@@ -99,15 +101,21 @@
     return /^62\d{8,13}$/.test(p);
   }
 
-  /** Bangun pesan akhir dari body template + kontak baris ini. Token sama
-   * PERSIS dengan konvensi yang sudah dipakai di gift.js (${tamu}/${CPP}/
-   * ${CPW}) + ${link} — replace STRING biasa, aman dari karakter spesial. */
+  /** Bangun pesan akhir dari body template + kontak baris ini. Token dasar
+   * sama PERSIS dengan konvensi yang sudah dipakai di gift.js (${tamu}/
+   * ${CPP}/${CPW} = nama PANGGILAN) + ${link}. ${namaCPP}/${namaCPW} = nama
+   * LENGKAP (couple.*.name) — token tambahan khusus tab WA ini, dipakai
+   * kalau template butuh nama lengkap (mis. baris "Mita Meliana & Andi
+   * Pramana" tebal di template default), bukan nama panggilan seperti
+   * ${CPP}/${CPW}. Replace STRING biasa, aman dari karakter spesial. */
   function buildMessage(body, contact) {
     const couple = window.WEDDING_CONFIG.couple;
     const values = {
       "${tamu}": contact.name,
       "${CPP}": couple.groom.nickname,
       "${CPW}": couple.bride.nickname,
+      "${namaCPP}": couple.groom.name,
+      "${namaCPW}": couple.bride.name,
       "${link}": buildInviteLink(contact)
     };
     return Object.keys(values).reduce((s, token) => s.split(token).join(values[token]), body);
