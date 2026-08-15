@@ -138,6 +138,50 @@ check("tidak ada literal hex di luar :root", strayHex.length === 0);
 if (strayHex.length) console.error("  hex ditemukan:", strayHex.join(", "));
 
 // ---------------------------------------------------------------------
+// R5 (docs/rencana-admin-v2-revisi.md): kontras WCAG dibuktikan, bukan
+// diasumsikan. Parse token warna dari :root, hitung rasio kontras relative
+// luminance (WCAG 2.x), tegaskan ambang minimum. Kalau ada token yang tidak
+// lolos, PERBAIKI NILAINYA di panel.css — jangan turunkan ambang di sini.
+// ---------------------------------------------------------------------
+const tokens = {};
+if (rootMatch) {
+  for (const m of rootMatch[0].matchAll(/--(p-[a-z0-9-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g)) tokens[m[1]] = m[2];
+}
+function hexToRgb(hex) {
+  let h = hex.replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const n = parseInt(h.slice(0, 6), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function relLuminance(hex) {
+  const [r, g, b] = hexToRgb(hex).map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrastRatio(hexA, hexB) {
+  const [la, lb] = [relLuminance(hexA), relLuminance(hexB)].sort((a, b) => b - a);
+  return (la + 0.05) / (lb + 0.05);
+}
+function checkContrast(nameA, nameB, min) {
+  const a = tokens[nameA], b = tokens[nameB];
+  if (!a || !b) { check(`kontras ${nameA} vs ${nameB} (token ditemukan)`, false); return; }
+  const ratio = contrastRatio(a, b);
+  check(`kontras --${nameA} (${a}) vs --${nameB} (${b}) >= ${min}:1 (nyata: ${ratio.toFixed(2)}:1)`, ratio >= min);
+}
+
+for (const ink of ["p-ink", "p-ink-2", "p-ink-3"]) {
+  checkContrast(ink, "p-paper", 4.5);
+  checkContrast(ink, "p-canvas", 4.5);
+}
+tokens["p-white"] = "#ffffff"; // teks putih di atas tombol/badge warna solid
+for (const accent of ["p-accent", "p-ok", "p-warn", "p-danger", "p-info"]) {
+  checkContrast("p-white", accent, 4.5);
+}
+checkContrast("p-line", "p-paper", 3);
+
+// ---------------------------------------------------------------------
 // 6) admin-qr.html & wa.html tidak disentuh secara struktural — masih
 //    memuat shared.js dan modul aslinya.
 // ---------------------------------------------------------------------

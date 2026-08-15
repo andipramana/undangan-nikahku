@@ -7,8 +7,13 @@
   --p-canvas: #f6f4ef;
   --p-paper: #fffdf9;
   --p-sunken: #f0ece3;
-  --p-line: #e2ddd1;
-  --p-line-strong: #cfc7b5;
+  /* --p-line WAJIB >= 3:1 terhadap --p-paper (WCAG 1.4.11, batas non-teks
+     komponen UI seperti border input) — nilai asli #e2ddd1 cuma 1.33:1.
+     Diverifikasi otomatis di scripts/test-admin-v2-contract.mjs (R5,
+     docs/rencana-admin-v2-revisi.md); --p-line-strong ikut digelapkan
+     supaya tetap terasa lebih tegas daripada --p-line. */
+  --p-line: #918a7d;
+  --p-line-strong: #7d7566;
 
   /* Tinta — kontras dicek terhadap --p-paper (lihat catatan verifikasi di
      ringkasan eksekusi; --p-ink-3 sengaja lebih gelap dari draf awal karena
