@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import vm from "node:vm";
 
-const source = await fs.readFile("assets/js/admin/content.js", "utf8");
+const source = await fs.readFile("assets/js/panel/pages/pengaturan.js", "utf8");
 if (!source.includes('typeof window.crypto.randomUUID === "function"')) {
   throw new Error("Audio upload masih tidak punya fallback crypto.randomUUID.");
 }
