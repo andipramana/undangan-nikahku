@@ -1219,8 +1219,8 @@ a { color: inherit; }
 #gift-confirm-modal .modal__hint { color: var(--color-dark); opacity: .85; }
 /* Tombol aksi modal: putih dengan teks hitam — senada dengan tombol panel
    Kirim Hadiah. */
-#gift-confirm-modal #gift-confirm-send { background: #fff; color: var(--color-dark); }
-#gift-confirm-modal #gift-confirm-send:hover { background: #f2ead9; color: var(--color-dark); }
+#gift-confirm-modal #gift-confirm-send { background: var(--color-dark); color: #fff; }
+#gift-confirm-modal #gift-confirm-send:hover { background: #2a251d; color: #fff; }
 /* Modal QR check-in & Menu — bg putih lebih solid (opacity dinaikkan dari
    transparan FAB), tanpa border, teks gelap agar selalu terbaca. */
 #qr-checkin-modal .modal__panel,

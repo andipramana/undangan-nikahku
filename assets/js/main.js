@@ -117,12 +117,15 @@
     document.getElementById("wfl-source").textContent = `— ${cfg.opening.source} —`;
 
     document.getElementById("bride-name").textContent = cfg.couple.bride.name;
-    document.getElementById("bride-parents").textContent =
-      `Putri dari Bpk. ${cfg.couple.bride.father} & Ibu ${cfg.couple.bride.mother}`;
+    // "Putri ketiga" di baris sendiri (bukan sejajar dengan "dari Bapak & Ibu")
+    // supaya tidak kepanjangan satu baris — <br> perlu innerHTML, nama ortu
+    // di-escape (esc()) karena field ini bisa diedit admin.
+    document.getElementById("bride-parents").innerHTML =
+      `Putri ketiga<br>dari Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
 
     document.getElementById("groom-name").textContent = cfg.couple.groom.name;
-    document.getElementById("groom-parents").textContent =
-      `Putra dari Bpk. ${cfg.couple.groom.father} & Ibu ${cfg.couple.groom.mother}`;
+    document.getElementById("groom-parents").innerHTML =
+      `Putra pertama<br>dari Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
 
     // Baris Instagram mempelai — tampil hanya kalau handle diisi di
     // config/Supabase (couple.*.instagram); kalau kosong, elemen disembunyikan.
@@ -191,6 +194,13 @@
       const t = String(cfg.event[key].start || "").replace(".", ":").split(":");
       document.getElementById(`${key}-time-h`).textContent = t[0] || "";
       document.getElementById(`${key}-time-m`).textContent = t[1] || "";
+      // Jam selesai (mis. "10.00") — teks statis, tidak ikut count-up seperti
+      // jam mulai (yang jadi fokus utama animasinya).
+      const tEnd = String(cfg.event[key].end || "").replace(".", ":").split(":");
+      const endH = document.getElementById(`${key}-time-end-h`);
+      const endM = document.getElementById(`${key}-time-end-m`);
+      if (endH) endH.textContent = tEnd[0] || "";
+      if (endM) endM.textContent = tEnd[1] || "";
       // Venue per event (event.akad.venue / event.resepsi.venue, lihat
       // seedDefaults di content.js) — data lama yang belum disimpan ulang
       // hanya punya event.venue tunggal: fallback ke situ supaya venue
