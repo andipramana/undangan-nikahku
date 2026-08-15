@@ -38,7 +38,6 @@ const required = [
   ".nojekyll",
   "assets/img/favicon.png",
   "assets/css/style.css",
-  "assets/css/admin.css",
   "assets/css/panel.css",
   "assets/css/wa.css",
   "assets/js/template-engine.js",

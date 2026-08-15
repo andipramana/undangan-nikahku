@@ -40,33 +40,33 @@
   }
   async function loadClients() {
     clientsPanel.hidden = false;
-    clientsList.innerHTML = "<p class='muted'>Memuat daftar client…</p>";
+    clientsList.innerHTML = "<p class='p-muted'>Memuat daftar client…</p>";
     try {
       await ensureRootLogin();
       const { clients } = await invoke({ action: "list" });
       clientsList.innerHTML = clients?.length ? clients.map(client => {
         const admin = client.members?.find(m => m.role === "admin")?.email || "—";
         const qr = client.members?.find(m => m.role === "admin_qr")?.email || "—";
-        return `<article class="client-row" data-id="${esc(client.id)}" data-name="${esc(client.display_name)}">
-          <div class="client-row__main"><strong>${esc(client.display_name)}</strong><small>/${esc(client.slug)}/ · dibuat ${new Date(client.created_at).toLocaleDateString("id-ID")}</small><small>Admin: ${esc(admin)} · QR: ${esc(qr)}</small></div>
-          <span class="client-status client-status--${client.is_active ? "active" : "inactive"}">${client.is_active ? "Aktif" : "Nonaktif"}</span>
-          <div class="client-row__actions"><button type="button" class="btn btn--tiny" data-client-edit>Edit</button><button type="button" class="btn btn--tiny" data-client-toggle>${client.is_active ? "Nonaktifkan" : "Aktifkan"}</button><button type="button" class="btn btn--tiny btn--danger" data-client-delete>Hapus</button></div>
+        return `<article class="p-list-row" data-id="${esc(client.id)}" data-name="${esc(client.display_name)}" style="margin-bottom:.6rem">
+          <div class="p-list-row__fields"><strong>${esc(client.display_name)}</strong><span class="p-muted" style="font-size:.78rem;display:block">/${esc(client.slug)}/ · dibuat ${new Date(client.created_at).toLocaleDateString("id-ID")}</span><span class="p-muted" style="font-size:.78rem;display:block">Admin: ${esc(admin)} · QR: ${esc(qr)}</span>
+          <span class="p-badge p-badge--${client.is_active ? "ok" : "warn"}">${client.is_active ? "Aktif" : "Nonaktif"}</span></div>
+          <div class="p-list-row__controls"><button type="button" class="p-btn p-btn--tiny" data-client-edit>Edit</button><button type="button" class="p-btn p-btn--tiny" data-client-toggle>${client.is_active ? "Nonaktifkan" : "Aktifkan"}</button><button type="button" class="p-btn p-btn--tiny p-btn--danger" data-client-delete>Hapus</button></div>
         </article>`;
-      }).join("") : "<p class='muted'>Belum ada client selain undangan root.</p>";
-    } catch (err) { clientsList.innerHTML = `<p class="warning">Gagal memuat client: ${esc(err.message || err)}</p>`; }
+      }).join("") : "<p class='p-muted'>Belum ada client selain undangan root.</p>";
+    } catch (err) { clientsList.innerHTML = `<p class="p-warning p-warning--danger">Gagal memuat client: ${esc(err.message || err)}</p>`; }
   }
   clientsList.addEventListener("click", async event => {
-    const button = event.target.closest("button"); const row = event.target.closest(".client-row");
+    const button = event.target.closest("button"); const row = event.target.closest(".p-list-row");
     if (!button || !row) return;
     const invitationId = row.dataset.id; const currentName = row.dataset.name;
     try {
       if (button.hasAttribute("data-client-edit")) {
         const displayName = prompt("Nama client / judul undangan:", currentName);
         if (!displayName?.trim()) return;
-        await invoke({ action:"update", invitationId, displayName:displayName.trim(), isActive:!row.querySelector(".client-status").classList.contains("client-status--inactive") });
+        await invoke({ action:"update", invitationId, displayName:displayName.trim(), isActive:!row.querySelector(".p-badge").classList.contains("p-badge--warn") });
         await loadClients();
       } else if (button.hasAttribute("data-client-toggle")) {
-        const isActive = row.querySelector(".client-status").classList.contains("client-status--active");
+        const isActive = row.querySelector(".p-badge").classList.contains("p-badge--ok");
         if (!confirm(`${isActive ? "Nonaktifkan" : "Aktifkan"} client "${currentName}"?`)) return;
         await invoke({ action:"update", invitationId, displayName:currentName, isActive:!isActive }); await loadClients();
       } else if (button.hasAttribute("data-client-delete")) {
@@ -110,7 +110,7 @@
     try {
       await ensureRootLogin();
       const data = await invoke({ action:"create", slug, displayName:get("display-name"), brideName:get("bride-name"), groomName:get("groom-name"), adminEmail:get("admin-email"), adminPassword:document.getElementById("admin-password").value, qrEmail:get("qr-email"), qrPassword:document.getElementById("qr-password").value });
-      result.hidden=false; result.innerHTML=`<p class="muted">Undangan berhasil dibuat. Email Admin dan Admin QR otomatis terdaftar di Supabase Auth.</p><ul><li><a href="${data.urls.invitation}" target="_blank">Undangan</a></li><li><a href="${data.urls.admin}" target="_blank">Admin</a></li><li><a href="${data.urls.adminQr}" target="_blank">Admin QR</a></li></ul>`;
+      result.hidden=false; result.innerHTML=`<p class="p-muted">Undangan berhasil dibuat. Email Admin dan Admin QR otomatis terdaftar di Supabase Auth.</p><ul><li><a href="${data.urls.invitation}" target="_blank">Undangan</a></li><li><a href="${data.urls.admin}" target="_blank">Admin</a></li><li><a href="${data.urls.adminQr}" target="_blank">Admin QR</a></li></ul>`;
       form.reset(); await loadClients();
     } catch (err) { message.textContent=err.message || "Gagal membuat undangan."; }
     finally { submit.disabled=false; }

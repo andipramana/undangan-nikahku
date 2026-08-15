@@ -10,48 +10,41 @@
 <meta name="robots" content="noindex">
 <title>Check-in — Mita &amp; Andi</title>
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
-<link rel="stylesheet" href="assets/css/admin.css">
+<link rel="stylesheet" href="assets/css/panel.css">
 </head>
 <body>
 
-<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css. DUA LAPIS:
-     .app-frame = containing block (transform) elemen position:fixed (.toast)
-     dan TIDAK discroll; .app-frame__scroll = scroller isi halaman, TANPA
-     transform, supaya scroll di dalamnya tidak ikut menyeret .toast keluar
-     layar (perangkap: transform+overflow-y:auto di elemen yang sama membuat
-     fixed descendant ikut hanyut saat discroll). -->
-<div class="app-frame">
-
-<div class="app-frame__scroll">
 <!-- ============ LAYAR LOGIN ============ -->
-<!-- Struktur id sama persis dengan admin.html — shared.js menanganinya.
-     Akun admin-qr dibuat manual via SQL Editor (lihat migration 0004). -->
-<div id="login-screen" class="login-screen">
-  <form id="login-form" class="login-card">
-    <h1>Check-in Tamu</h1>
-    <p class="login-hint">Mita &amp; Andi — The Wedding</p>
+<!-- Struktur id sama persis dengan admin.html — shared.js/core.js menanganinya. -->
+<div id="login-screen" class="p-login-screen">
+  <form id="login-form" class="p-login-card">
+    <p class="p-kicker">Check-in Tamu</p>
+    <h1>Masuk untuk memindai.</h1>
+    <p class="p-hint">Mita &amp; Andi — The Wedding</p>
     <label>
       Email admin
-      <input type="email" id="login-username" autocomplete="username" required>
+      <input class="p-input" type="email" id="login-username" autocomplete="username" required>
     </label>
     <label>
       Kata sandi
-      <input type="password" id="login-password" autocomplete="current-password" required>
+      <input class="p-input" type="password" id="login-password" autocomplete="current-password" required>
     </label>
-    <button type="submit" class="btn btn--primary" id="login-submit">Masuk</button>
-    <p id="login-error" class="login-error" role="alert"></p>
+    <button type="submit" class="p-btn p-btn--primary" id="login-submit">Masuk</button>
+    <p id="login-error" class="p-login-error" role="alert"></p>
   </form>
 </div>
 
 <!-- ============ APLIKASI ============ -->
-<div id="app" hidden>
-  <header class="topbar">
-    <h1>Check-in — Mita &amp; Andi</h1>
-    <div class="topbar__actions">
-      <button type="button" class="btn btn--ghost" id="btn-logout">Keluar</button>
-    </div>
+<div id="app" hidden style="max-width:640px;margin:0 auto;padding:var(--p-4)">
+  <header class="p-toolbar" style="margin-bottom:var(--p-4)">
+    <h1 style="font-family:var(--p-font-display);font-size:1.4rem;margin:0">Check-in — Mita &amp; Andi</h1>
+    <button type="button" class="p-btn p-btn--ghost" id="btn-logout">Keluar</button>
   </header>
 
+  <!-- core.js (dipakai bareng admin.html & wa.html) meng-query-select .tab/
+       .panel secara struktural untuk tahu tab mana yang aktif — nama kelas
+       ini TIDAK bisa diganti tanpa mengubah core.js. Direstyle dengan token
+       panel di bawah, bukan diganti nama. -->
   <nav class="tabs">
     <button type="button" class="tab tab--active" data-tab="checkin">Scan QR</button>
     <button type="button" class="tab" data-tab="livestream">Live Streaming</button>
@@ -59,10 +52,10 @@
 
   <!-- ============ TAB SCAN QR ============ -->
   <main id="tab-checkin" class="panel">
-    <div class="scan-toolbar">
-      <button type="button" class="btn btn--primary" id="btn-scan">Mulai scan</button>
-      <button type="button" class="btn btn--ghost" id="btn-scan-stop" hidden>Hentikan scan</button>
-      <button type="button" class="btn btn--ghost" id="btn-checkins-refresh">Muat ulang daftar</button>
+    <div class="p-toolbar">
+      <button type="button" class="p-btn p-btn--primary" id="btn-scan">Mulai scan</button>
+      <button type="button" class="p-btn p-btn--ghost" id="btn-scan-stop" hidden>Hentikan scan</button>
+      <button type="button" class="p-btn p-btn--ghost" id="btn-checkins-refresh">Muat ulang daftar</button>
     </div>
     <!-- Video kamera belakang + status scan. Canvas sengaja tersembunyi —
          hanya dipakai membaca frame untuk jsQR, bukan untuk ditampilkan. -->
@@ -77,36 +70,29 @@
        0004: dengan check hanya mengizinkan key `livestream` berubah).
        Disimpan via shared.saveLivestream — SELECT → ubah → UPSERT. -->
   <main id="tab-livestream" class="panel" hidden>
-    <fieldset class="form-section">
-      <legend>Link siaran langsung</legend>
-      <p class="muted" style="margin-top:.25rem">URL kosong = platform itu tidak
-      ditampilkan; kosongkan semuanya untuk menyembunyikan section Live
-      Streaming di undangan.</p>
-      <div class="form-grid">
-        <label class="form-field">
+    <section class="p-card">
+      <h2 class="p-card__title">Link siaran langsung</h2>
+      <p class="p-card__desc">URL kosong = platform itu tidak ditampilkan; kosongkan semuanya untuk menyembunyikan section Live Streaming di undangan.</p>
+      <div class="p-grid-2">
+        <label class="p-field">
           <span>YouTube</span>
-          <input type="url" id="f-live-youtube" placeholder="https://youtube.com/…">
+          <input class="p-input" type="url" id="f-live-youtube" placeholder="https://youtube.com/…">
         </label>
-        <label class="form-field">
+        <label class="p-field">
           <span>Instagram</span>
-          <input type="url" id="f-live-instagram" placeholder="https://instagram.com/…">
-        </label>
-        <label class="form-field">
-          <span>TikTok</span>
-          <input type="url" id="f-live-tiktok" placeholder="https://tiktok.com/…">
+          <input class="p-input" type="url" id="f-live-instagram" placeholder="https://instagram.com/…">
         </label>
       </div>
-      <div class="form-actions">
-        <button type="button" class="btn btn--primary" id="btn-save-livestream">Simpan</button>
-      </div>
-    </fieldset>
+      <label class="p-field">
+        <span>TikTok</span>
+        <input class="p-input" type="url" id="f-live-tiktok" placeholder="https://tiktok.com/…">
+      </label>
+      <button type="button" class="p-btn p-btn--primary" id="btn-save-livestream">Simpan</button>
+    </section>
   </main>
 </div>
-</div><!-- /app-frame__scroll -->
 
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-</div><!-- /app-frame -->
+<div id="toast" class="p-toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/tenant.js"></script>

@@ -3,9 +3,11 @@ import path from "node:path";
 
 const dist = path.resolve("dist");
 const publicFiles = ["index.html", "home/index.html", "demo/index.html", "admin.html", "admin-qr.html", "wa.html", "register.html", "404.html", "CNAME", ".nojekyll"];
-const runtimeAssets = ["assets/img/favicon.png", "assets/css/style.css", "assets/css/admin.css", "assets/css/wa.css", "assets/css/landing.css", "assets/js/config.js", "assets/js/tenant.js", "assets/js/wa.js", "assets/js/register.js", "assets/js/landing-motion.js"];
+const runtimeAssets = ["assets/img/favicon.png", "assets/css/style.css", "assets/css/panel.css", "assets/css/wa.css", "assets/css/landing.css", "assets/js/config.js", "assets/js/tenant.js", "assets/js/wa.js", "assets/js/register.js", "assets/js/landing-motion.js"];
 for (const file of [...publicFiles, ...runtimeAssets]) await access(path.join(dist, file));
-for (const forbidden of ["supabase", "scripts", "docs", ".env.example", "package.json", "package-lock.json"]) {
+// assets/css/admin.css dihapus di R2 (docs/rencana-admin-v2-revisi.md) —
+// admin-qr.html dan register.html sekarang terang, memakai panel.css.
+for (const forbidden of ["supabase", "scripts", "docs", ".env.example", "package.json", "package-lock.json", "assets/css/admin.css"]) {
   try { await access(path.join(dist, forbidden)); throw new Error(`Private/source path leaked to dist: ${forbidden}`); }
   catch (error) { if (error.code !== "ENOENT") throw error; }
 }

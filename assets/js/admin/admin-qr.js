@@ -22,7 +22,7 @@
 
   async function loadCheckins() {
     const root = document.getElementById("checkins-root");
-    root.innerHTML = "<p class='muted'>Memuat daftar check-in…</p>";
+    root.innerHTML = "<p class='p-muted'>Memuat daftar check-in…</p>";
 
     const { data, error, count } = await window.AdminAPI.query(
       sb.from("checkins").select("*", { count: "exact" }).eq("invitation_id", window.AdminAPI.tenant.invitationId).order("checked_in_at", { ascending: false }),
@@ -31,8 +31,8 @@
 
     if (error) {
       root.innerHTML =
-        `<p class="warning">Gagal memuat check-in: ${esc(error.message)}</p>` +
-        `<button type="button" class="btn btn--primary" id="checkins-retry">Coba lagi</button>`;
+        `<p class="p-warning p-warning--danger">Gagal memuat check-in: ${esc(error.message)}</p>` +
+        `<button type="button" class="p-btn p-btn--primary" id="checkins-retry">Coba lagi</button>`;
       document.getElementById("checkins-retry").addEventListener("click", loadCheckins);
       return;
     }
@@ -46,29 +46,30 @@
 
     if (!checkins.length) {
       root.innerHTML =
-        `<p class="muted">Belum ada tamu yang check-in.</p>` +
-        `<p class="muted" style="font-size:.8rem">Arahkan kamera ke QR tamu (tombol QR di pojok kiri bawah undangan).</p>`;
+        `<p class="p-muted">Belum ada tamu yang check-in.</p>` +
+        `<p class="p-muted" style="font-size:.8rem">Arahkan kamera ke QR tamu (tombol QR di pojok kiri bawah undangan).</p>`;
       return;
     }
 
     const totalGuests = checkins.reduce((sum, c) => sum + (Number(c.guest_count) || 1), 0);
     root.innerHTML = `
-      <div class="wish-summary">
-        <span><strong>${count ?? checkins.length}</strong> check-in</span>
-        <span class="muted">total ${totalGuests} orang</span>
-      </div>
-      <div class="wish-list">
+      <p class="p-hint" style="margin-bottom:.75rem">
+        <strong style="color:var(--p-ink)">${count ?? checkins.length}</strong> check-in ·
+        total ${totalGuests} orang
+      </p>
+      <div>
         ${checkins
           .map(
             (c, i) => `
-          <article class="wish-row">
-            <div class="wish-row__head">
+          <article class="p-list-row" style="margin-bottom:.5rem">
+            <div class="p-list-row__fields">
               <strong>${esc(c.guest_name)}</strong>
-              <span class="muted">${Number(c.guest_count) || 1} orang</span>
-              <time class="muted">${fmtDate(c.checked_in_at)}</time>
-              <button type="button" class="btn btn--tiny btn--danger" data-del="${i}" aria-label="Hapus check-in ${esc(c.guest_name)}">Hapus</button>
+              <span class="p-muted" style="font-size:.78rem"> · ${Number(c.guest_count) || 1} orang · ${fmtDate(c.checked_in_at)}</span>
+              <p style="margin:.25rem 0 0;font-size:.82rem">${esc(c.guest_key)}</p>
             </div>
-            <p class="wish-row__msg">${esc(c.guest_key)}</p>
+            <div class="p-list-row__controls">
+              <button type="button" class="p-btn p-btn--tiny p-btn--danger" data-del="${i}" aria-label="Hapus check-in ${esc(c.guest_name)}">Hapus</button>
+            </div>
           </article>`
           )
           .join("")}
