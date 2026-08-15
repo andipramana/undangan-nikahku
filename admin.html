@@ -10,231 +10,123 @@
 <meta name="robots" content="noindex">
 <title>Admin — Mita &amp; Andi</title>
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
-<link rel="stylesheet" href="assets/css/admin.css">
+<link rel="stylesheet" href="assets/css/panel.css">
 </head>
 <body>
 
-<!-- Bingkai kolom HP portrait — lihat .app-frame di admin.css. DUA LAPIS:
-     .app-frame = containing block (transform) elemen position:fixed (.editor,
-     .toast) dan TIDAK discroll; .app-frame__scroll = scroller isi halaman,
-     TANPA transform, supaya scroll di dalamnya tidak ikut menyeret .editor/
-     .toast keluar layar (perangkap: transform+overflow-y:auto di elemen yang
-     sama membuat fixed descendant ikut hanyut saat discroll). -->
-<div class="app-frame">
-
-<div class="app-frame__scroll">
 <!-- ============ LAYAR LOGIN ============ -->
-<!-- Field-nya "Nama pengguna" + "Kata sandi" (bukan email) supaya rasanya
-     seperti panel internal. Nama pengguna dipetakan JS ke email tetap;
-     kata sandi TIDAK pernah ada di kode — diverifikasi oleh Supabase Auth. -->
-<div id="login-screen" class="login-screen">
-  <form id="login-form" class="login-card">
-    <h1>Panel Admin</h1>
-    <p class="login-hint">Mita &amp; Andi — The Wedding</p>
+<div id="login-screen" class="p-login-screen">
+  <form id="login-form" class="p-login-card">
+    <p class="p-kicker">Panel Admin</p>
+    <h1>Masuk ke panel.</h1>
+    <p class="p-hint">Mita &amp; Andi — The Wedding</p>
     <label>
       Email admin
-      <input type="email" id="login-username" autocomplete="username" required>
+      <input class="p-input" type="email" id="login-username" autocomplete="username" required>
     </label>
     <label>
       Kata sandi
-      <input type="password" id="login-password" autocomplete="current-password" required>
+      <input class="p-input" type="password" id="login-password" autocomplete="current-password" required>
     </label>
-    <button type="submit" class="btn btn--primary" id="login-submit">Masuk</button>
-    <p id="login-error" class="login-error" role="alert"></p>
+    <button type="submit" class="p-btn p-btn--primary" id="login-submit">Masuk</button>
+    <p id="login-error" class="p-login-error" role="alert"></p>
   </form>
 </div>
 
 <!-- ============ APLIKASI ============ -->
 <div id="app" hidden>
-  <header class="topbar">
-    <h1>Admin — Mita &amp; Andi</h1>
-    <div class="topbar__actions">
-      <a id="preview-invitation" class="btn btn--ghost" href="/" target="_blank" rel="noopener">Pratinjau undangan</a>
-      <button type="button" class="btn btn--ghost" id="btn-logout">Keluar</button>
-    </div>
-  </header>
+  <div class="p-shell">
+    <!-- Sidebar permanen ≥1024px (§5.3) — seluruh 19 tujuan terlihat
+         sekaligus, bukan drawer tersembunyi. Di HP disembunyikan lewat CSS;
+         Beranda (hub) menggantikannya sebagai navigasi utama. -->
+    <aside class="p-sidebar" id="p-sidebar">
+      <p class="p-sidebar__brand">Panel Admin</p>
+      <p class="p-sidebar__slug" id="p-sidebar-slug"></p>
+      <nav id="p-sidebar-nav" aria-label="Navigasi panel"></nav>
+      <button type="button" class="p-btn p-btn--ghost p-sidebar__logout" id="btn-logout">Keluar</button>
+    </aside>
 
-  <div id="publish-banner" class="publish-banner" hidden>
-    <span id="publish-status-text" class="publish-banner__text"></span>
-    <button type="button" class="btn btn--primary" id="btn-publish">Publish</button>
-  </div>
-
-  <nav class="tabs">
-    <button type="button" class="tab tab--active" data-tab="content">Teks</button>
-    <button type="button" class="tab" data-tab="photos">Foto</button>
-    <button type="button" class="tab" data-tab="wishes">Ucapan</button>
-    <a id="wa-workspace-link" class="tab" href="/wa/">Kirim WA</a>
-    <button type="button" class="tab" data-tab="tampilan">Tampilan</button>
-    <button type="button" class="tab" data-tab="fonts">Font</button>
-    <button type="button" class="tab" data-tab="editor-visual">Editor Visual</button>
-    <button type="button" class="tab" data-tab="template">Template</button>
-  </nav>
-
-  <!-- ============ TAB TEKS ============ -->
-  <main id="tab-content" class="panel">
-    <div id="content-form-root"></div>
-  </main>
-
-  <!-- ============ TAB FOTO ============ -->
-  <main id="tab-photos" class="panel" hidden>
-    <div class="photos-toolbar">
-      <label>
-        Folder
-        <select id="photo-folder" class="input"></select>
-      </label>
-      <label class="upload-wrap">
-        <span class="btn btn--primary">Unggah foto…</span>
-        <input type="file" id="photo-upload" accept="image/*" multiple hidden>
-      </label>
-    </div>
-    <p id="photo-warning" class="warning" hidden></p>
-    <div id="photo-grid" class="photo-grid"></div>
-  </main>
-
-  <!-- ============ TAB UCAPAN ============ -->
-  <main id="tab-wishes" class="panel" hidden>
-    <div id="wishes-root"></div>
-  </main>
-
-  <!-- Export seluruh ucapan (bukan hanya halaman pagination). Konten dipisah
-       dari UI supaya hasil PNG bersih dan modal dapat ditutup tanpa menghapus data. -->
-  <div id="wish-export-modal" class="modal" hidden>
-    <div class="modal__panel wish-export-modal__panel">
-      <div class="modal__header"><h3>Export semua ucapan</h3><button type="button" class="modal__close" id="wish-export-close" aria-label="Tutup">&times;</button></div>
-      <p class="muted" id="wish-export-count"></p>
-      <div class="wish-export-actions"><button type="button" class="btn btn--primary" id="wish-export-csv">Unduh CSV</button><button type="button" class="btn btn--ghost" id="wish-export-png">Unduh PNG</button></div>
-      <p class="muted" id="wish-export-status"></p>
-      <div id="wish-export-preview" class="wish-export-preview"></div>
-    </div>
-  </div>
-
-  <!-- ============ TAB KIRIM WA ============ -->
-  <!-- Workspace WhatsApp sekarang punya halaman terang sendiri agar alur
-       pengiriman tidak bercampur dengan editor undangan. -->
-  <main id="tab-wa" class="panel" hidden>
-    <p class="muted">Gunakan menu <strong>Kirim WA</strong> untuk membuka workspace pengiriman.</p>
-  </main>
-
-  <!-- ============ TAB TAMPILAN ============ -->
-  <!-- Warna situs TAMU (style.css) — 7 warna solid + 4 layer overlay,
-       disimpan ke site_content.theme (TANPA migrasi baru). Isi dirender
-       admin/theme.js; simpan memakai pola saveLivestream (shared.js) supaya
-       field lain di site_content tidak ikut tertimpa. -->
-  <main id="tab-tampilan" class="panel" hidden>
-    <div id="theme-root"></div>
-  </main>
-
-  <!-- ============ TAB FONT ============ -->
-  <main id="tab-fonts" class="panel" hidden>
-    <div id="fonts-root"></div>
-  </main>
-
-  <!-- ============ TAB EDITOR VISUAL ============ -->
-  <main id="tab-editor-visual" class="panel visual-editor-panel" hidden>
-    <div id="visual-editor-root"></div>
-  </main>
-
-  <!-- ============ TAB TEMPLATE ============ -->
-  <main id="tab-template" class="panel" hidden>
-    <div id="template-root"></div>
-  </main>
-</div>
-</div><!-- /app-frame__scroll -->
-
-<!-- ============ EDITOR PAN/ZOOM (overlay) ============ -->
-<div id="editor" class="editor" hidden>
-  <div class="editor__panel">
-    <div class="editor__header">
-      <h2>Atur pan &amp; zoom</h2>
-      <button type="button" class="btn btn--ghost" id="editor-close">Tutup</button>
-    </div>
-    <div class="editor__preview-wrap">
-      <div class="editor__preview" id="editor-preview">
-        <img id="editor-img" alt="">
+    <div class="p-main">
+      <header class="p-pageheader" id="p-pageheader"></header>
+      <main class="p-outlet" id="p-outlet"><div class="p-outlet__inner" id="p-outlet-inner"></div></main>
+      <div class="p-savebar" id="p-savebar" hidden>
+        <span class="p-savebar__status">Ada perubahan belum disimpan.</span>
+        <button type="button" class="p-btn p-btn--primary" id="p-savebar-btn">Simpan</button>
       </div>
-      <p class="editor__hint">Seret foto untuk menggeser (pan)</p>
     </div>
-    <label class="editor__zoom">
+  </div>
+</div>
+
+<!-- ============ EDITOR PAN/ZOOM (overlay, dipakai komponen foto) ============ -->
+<div id="p-editor" class="p-editor" hidden>
+  <div class="p-editor__panel">
+    <div class="p-editor__header">
+      <h2>Atur pan &amp; zoom</h2>
+      <button type="button" class="p-btn p-btn--ghost" id="p-editor-close">Tutup</button>
+    </div>
+    <div class="p-editor__preview-wrap">
+      <div class="p-editor__preview" id="p-editor-preview">
+        <img id="p-editor-img" alt="">
+      </div>
+      <p class="p-editor__hint">Seret foto untuk menggeser (pan)</p>
+    </div>
+    <label class="p-editor__zoom">
       Zoom
-      <input type="range" id="editor-zoom" min="1" max="3" step="0.01">
-      <span id="editor-zoom-value"></span>
+      <input type="range" id="p-editor-zoom" min="1" max="3" step="0.01">
+      <span id="p-editor-zoom-value"></span>
     </label>
-    <div class="editor__footer">
-      <button type="button" class="btn btn--ghost" id="editor-reset">Reset</button>
-      <button type="button" class="btn btn--primary" id="editor-save">Simpan</button>
+    <div class="p-editor__footer">
+      <button type="button" class="p-btn p-btn--ghost" id="p-editor-reset">Reset</button>
+      <button type="button" class="p-btn p-btn--primary" id="p-editor-save">Simpan</button>
     </div>
   </div>
 </div>
 
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-<!-- ============ NAVIGASI SECTION (tab Teks) ============ -->
-<!-- FAB + modal menu lompat-section. Sama seperti #editor/#toast: anak
-     langsung .app-frame, DI LUAR .app-frame__scroll — elemen position:fixed
-     yang tertanam di dalam scroller ikut hanyut saat discroll (lihat komentar
-     .app-frame di atas). JANGAN pindahkan ke dalam scroller atau #app. -->
-<button type="button" id="btn-section-nav" class="section-nav-fab" hidden
-        aria-label="Lompat ke bagian form">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-    <line x1="8" y1="18" x2="21" y2="18"/>
-    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
-    <line x1="3" y1="18" x2="3.01" y2="18"/>
-  </svg>
-</button>
-
-<div id="section-nav-modal" class="modal" hidden>
-  <div class="modal__panel">
-    <div class="modal__header">
-      <h3>Bagian form</h3>
-      <button type="button" class="modal__close" aria-label="Tutup">&times;</button>
-    </div>
-    <nav class="nav-menu-list" id="section-nav-list" aria-label="Bagian form"></nav>
-  </div>
-</div>
-
-<!-- Modal tambah kontak kini dimiliki workspace /<slug>/wa/ sendiri. -->
-
-<!-- Tombol "Simpan semua" — dipindah keluar dari form (dulu dirender content.js
-     di dalam scroller) supaya bisa position:fixed tanpa ikut hanyut. Atribut
-     form="content-form" (fitur HTML standar) membuat tombol di LUAR elemen
-     <form> tetap memicu event submit form itu — onSave/listener di content.js
-     tidak berubah. -->
-<button type="submit" form="content-form" class="btn btn--primary btn-save-float"
-        id="btn-save-content" hidden>Simpan semua</button>
-<button type="button" class="btn btn--primary btn-save-float" id="btn-save-fonts" hidden>
-  Simpan font
-</button>
-<button type="button" class="btn btn--primary btn-save-float" id="btn-save-visual-editor" hidden>
-  Simpan editor visual
-</button>
-
-</div><!-- /app-frame -->
+<div id="toast" class="p-toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/tenant.js"></script>
-<!-- Tata letak grid galeri, dipakai bersama halaman undangan: editor pan/zoom
-     memakainya untuk membentuk bingkai pratinjau sesuai kotak asli tiap foto. -->
+<!-- Tata letak grid galeri, dipakai bersama halaman undangan. -->
 <script src="assets/js/gallery-layout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<!-- shared.js WAJIB sebelum admin.js — client Supabase, AdminAPI, dan initAdminAuth
-     diekstrak ke sini, dipakai bersama admin-qr.html (perbaikan bug cukup sekali). -->
-<script src="assets/js/admin/shared.js"></script>
-<script src="assets/js/admin/admin.js"></script>
-<script src="assets/js/admin/content.js"></script>
-<!-- Menu lompat-section tab Teks — dipanggil admin.js setelah ContentPanel.load();
-     dimuat di sini (bersama content.js) supaya sudah tersedia saat dibutuhkan. -->
-<script src="assets/js/admin/section-nav.js"></script>
-<script src="assets/js/admin/photos.js"></script>
-<script src="assets/js/admin/editor.js"></script>
-<script src="assets/js/admin/wishes.js"></script>
+<script src="assets/js/panel/core.js"></script>
+<script src="assets/js/panel/ui.js"></script>
+<script src="assets/js/panel/store.js"></script>
+<script src="assets/js/panel/photos.js"></script>
+<script src="assets/js/panel/router.js"></script>
+
+<!-- Satu file per halaman (kontrak §6.3 rencana v2) — urutan di sini
+     SAMA PERSIS dengan urutan tampil di sidebar/hub (lihat NAV di router.js). -->
+<script src="assets/js/panel/pages/home.js"></script>
+<script src="assets/js/panel/pages/cover.js"></script>
+<script src="assets/js/panel/pages/mempelai.js"></script>
+<script src="assets/js/panel/pages/pembuka.js"></script>
+<script src="assets/js/panel/pages/acara.js"></script>
+<script src="assets/js/panel/pages/cerita.js"></script>
+<script src="assets/js/panel/pages/galeri.js"></script>
+<script src="assets/js/panel/pages/hadiah.js"></script>
+<script src="assets/js/panel/pages/livestream.js"></script>
+<script src="assets/js/panel/pages/penutup.js"></script>
+<script src="assets/js/panel/pages/sapaan.js"></script>
+<script src="assets/js/panel/pages/ucapan.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="assets/js/admin/theme.js"></script>
-<script src="assets/js/admin/fonts.js"></script>
+<script src="assets/js/panel/pages/template.js"></script>
+<script src="assets/js/panel/pages/warna.js"></script>
+<script src="assets/js/panel/pages/font.js"></script>
 <script src="assets/js/visual-editor/registry.js"></script>
-<script src="assets/js/admin/visual-editor.js"></script>
-<script src="assets/js/admin/template.js"></script>
-<script src="assets/js/admin/publish.js"></script>
+<script src="assets/js/panel/pages/editor-visual.js"></script>
+<script src="assets/js/panel/pages/pengaturan.js"></script>
+
+<script>
+(function () {
+  window.AdminShared.initAdminAuth({
+    onSignedIn: async () => {
+      document.getElementById("p-sidebar-slug").textContent = "/" + window.AdminAPI.tenant.slug + "/";
+      await window.PanelStore.load();
+      window.PanelRouter.start();
+    }
+  });
+})();
+</script>
 </body>
 </html>
