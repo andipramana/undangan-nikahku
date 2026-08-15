@@ -7,7 +7,7 @@ window.PanelPages["pengaturan"] = {
   group: "Pengaturan",
   icon: window.PanelUI.icon("settings"),
   async mount(outlet) {
-    const { field, textarea, card, esc, escAttr } = window.PanelUI;
+    const { field, textarea, card, switchRow, esc, escAttr } = window.PanelUI;
     const c = window.PanelStore.getContent();
 
     outlet.innerHTML = `
@@ -15,6 +15,10 @@ window.PanelPages["pengaturan"] = {
         ${field("Judul situs", "st-site-title")}
         ${field("Parameter nama tamu (URL)", "st-guest-param")}
         ${field("Nama tamu default", "st-default-guest")}
+      `)}
+      ${card("Check-in QR", "Tombol melayang yang muncul untuk tamu perorangan (link ber-?to=) berisi QR untuk dipindai petugas saat check-in di venue.", `
+        ${switchRow("Tampilkan tombol QR check-in ke tamu", "st-qr-enabled", { hint: "Matikan kalau acara tidak memakai check-in QR di venue." })}
+        <a class="p-btn p-btn--ghost" href="${escAttr(window.AdminAPI.tenant.path("admin-qr"))}" target="_blank" rel="noopener">Buka Check-in QR (petugas)</a>
       `)}
       ${card("Slideshow & audio", "Jeda pergantian slide hero, dan backsound yang diputar tamu.", `
         ${field("Jeda slideshow hero (ms)", "st-hero-interval", { type: "number" })}
@@ -33,11 +37,12 @@ window.PanelPages["pengaturan"] = {
     set("st-default-guest", c.defaultGuestName);
     set("st-hero-interval", c.heroSlideInterval);
     set("st-audio-title", c.audio.title);
+    outlet.querySelector("#st-qr-enabled").checked = c.qrCheckin.enabled !== false;
 
     function markDirty() {
       window.PanelRouter.setDirty(true, onSave);
     }
-    outlet.querySelectorAll(".p-input").forEach((el) => el.addEventListener("input", markDirty));
+    outlet.querySelectorAll(".p-input, .p-switch input").forEach((el) => el.addEventListener("input", markDirty));
 
     async function onSave() {
       const grab = (id, path, type) => {
@@ -49,6 +54,7 @@ window.PanelPages["pengaturan"] = {
       grab("st-default-guest", "defaultGuestName");
       grab("st-hero-interval", "heroSlideInterval", "number");
       grab("st-audio-title", "audio.title");
+      window.PanelStore.set("qrCheckin.enabled", outlet.querySelector("#st-qr-enabled").checked);
 
       const fileInput = outlet.querySelector("#st-audio-file");
       const audioFile = fileInput.files && fileInput.files[0];
@@ -74,7 +80,7 @@ window.PanelPages["pengaturan"] = {
         window.PanelStore.set("audio.src", "");
       }
 
-      const { error } = await window.PanelStore.save(["siteTitle", "guestParam", "defaultGuestName", "heroSlideInterval", "audio"]);
+      const { error } = await window.PanelStore.save(["siteTitle", "guestParam", "defaultGuestName", "heroSlideInterval", "audio", "qrCheckin"]);
       if (error) { window.AdminAPI.toast("Gagal menyimpan: " + error.message, true); return false; }
       window.AdminAPI.toast(audioFile ? "Backsound dan pengaturan tersimpan ✓" : "Tersimpan ✓");
       const status = outlet.querySelector("#st-audio-status");

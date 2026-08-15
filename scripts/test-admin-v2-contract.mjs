@@ -106,11 +106,25 @@ const FIELD_TOKENS = [
   "theme",
   "typography.elements",
   "visualEditor",
-  "siteTitle", "guestParam", "defaultGuestName", "heroSlideInterval", "audio.title", "audio.path"
+  "siteTitle", "guestParam", "defaultGuestName", "heroSlideInterval", "audio.title", "audio.path",
+  "qrCheckin.enabled"
 ];
 for (const token of FIELD_TOKENS) {
   check(`field "${token}" ada rumahnya di pages/*.js`, allPagesText.includes(token));
 }
+
+// R1 (docs/rencana-admin-v2-revisi.md): qrCheckin.enabled sempat kehilangan
+// UI-nya seluruhnya (Check-in QR jadi link biasa ke admin-qr.html, bukan
+// halaman panel, jadi togglenya tidak punya rumah). Cek generik di atas
+// (substring "qrCheckin.enabled" di gabungan pages/*.js) tidak cukup keras —
+// string itu bisa saja hanya muncul di komentar. Pastikan spesifik: halaman
+// Pengaturan benar-benar merender kontrol .p-switch untuk field ini DAN
+// menyimpannya lewat store.js.
+const pengaturanSrc = await fs.readFile(path.join(pagesDir, "pengaturan.js"), "utf8");
+check("pengaturan.js merender switch untuk qrCheckin.enabled (bukan cuma disebut di komentar)",
+  /switchRow\(\s*"[^"]*"\s*,\s*"[a-z0-9-]+qr[a-z0-9-]*"/i.test(pengaturanSrc));
+check("pengaturan.js menyimpan qrCheckin.enabled lewat PanelStore",
+  /PanelStore\.set\(\s*"qrCheckin\.enabled"/.test(pengaturanSrc) && /PanelStore\.save\(\[[^\]]*"qrCheckin"/.test(pengaturanSrc));
 
 // ---------------------------------------------------------------------
 // 5) panel.css: tidak ada literal hex di luar blok :root.
