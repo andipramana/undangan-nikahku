@@ -119,13 +119,23 @@
 
 <script>
 (function () {
-  window.AdminShared.initAdminAuth({
-    onSignedIn: async () => {
-      document.getElementById("p-sidebar-slug").textContent = "/" + window.AdminAPI.tenant.slug + "/";
+  async function boot() {
+    document.getElementById("p-sidebar-slug").textContent = "/" + window.AdminAPI.tenant.slug + "/";
+    try {
       await window.PanelStore.load();
       window.PanelRouter.start();
+    } catch (err) {
+      // Store.load() gagal (mis. jaringan) sebelum router sempat jalan —
+      // tampilkan jalan keluar yang jelas, bukan layar app kosong tanpa
+      // penjelasan (initAdminAuth memanggil onSignedIn tanpa menunggunya).
+      document.getElementById("p-outlet-inner").innerHTML =
+        '<div class="p-warning p-warning--danger">Gagal memuat data undangan: ' +
+        window.PanelUI.esc(err && err.message ? err.message : err) +
+        '</div><button type="button" class="p-btn p-btn--primary" id="p-boot-retry" style="margin-top:12px">Coba lagi</button>';
+      document.getElementById("p-boot-retry").addEventListener("click", boot);
     }
-  });
+  }
+  window.AdminShared.initAdminAuth({ onSignedIn: boot });
 })();
 </script>
 </body>
