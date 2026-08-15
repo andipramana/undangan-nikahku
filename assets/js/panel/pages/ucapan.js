@@ -25,12 +25,12 @@ window.PanelPages["ucapan"] = {
       `)}
       ${card("Perangkat diblokir", "Pemblokiran memakai token acak browser, bukan alamat IP.", `<div id="wi-blocked"></div>`)}
       <div id="wi-summary"></div>
-      <div class="p-toolbar">
+      <div style="display:grid;gap:.6rem">
         <div style="display:flex;gap:.5rem">
           <button type="button" class="p-btn p-btn--ghost" id="wi-refresh">↻ Refresh</button>
           <button type="button" class="p-btn p-btn--ghost" id="wi-export">Export semua</button>
         </div>
-        <button type="button" class="p-btn p-btn--danger" id="wi-delete-all">Hapus semua ucapan</button>
+        <button type="button" class="p-btn p-btn--danger" id="wi-delete-all" style="width:100%">Hapus semua ucapan</button>
       </div>
       <div id="wi-list"></div>
       <nav class="p-toolbar" id="wi-pagination" aria-label="Halaman ucapan"></nav>

@@ -191,7 +191,7 @@ window.PanelPages["editor-visual"] = {
         (selected.kind !== "image" && selected.kind !== "wish-card" ? `<label>Teks<input class="p-input" id="ve-text" value="${esc(v.text?.value ?? text)}"></label>` : "") +
         (selected.kind === "wish-card" ? `<p class="p-muted">Ini satu kartu dummy. Style berikut otomatis diterapkan ke semua kartu ucapan tanpa mengubah nama atau isi ucapan tamu.</p>` : "") +
         `<details class="p-details" open><summary>Font &amp; teks</summary>
-          <label>Font<select class="p-select" id="ve-family">${FONT_OPTIONS.map((font) => `<option value="${esc(font)}" ${font === typ.fontFamily ? "selected" : ""}>${esc(font)}</option>`).join("")}</select></label>
+          <label>Font<select class="p-select" id="ve-family">${FONT_OPTIONS.map((font) => `<option value="${esc(font)}" style="font-family:'${esc(font)}',sans-serif" ${font === typ.fontFamily ? "selected" : ""}>${esc(font)}</option>`).join("")}</select></label>
           <div class="p-grid-2">
             <label>Ukuran<input class="p-input" id="ve-size" type="number" value="${esc((typ.fontSize || cs?.fontSize || "16px").replace("px", ""))}"></label>
             <label>Weight<select class="p-select" id="ve-weight">${[300, 400, 500, 600, 700].map((x) => `<option ${String(typ.fontWeight || cs?.fontWeight) === String(x) ? "selected" : ""}>${x}</option>`).join("")}</select></label>
