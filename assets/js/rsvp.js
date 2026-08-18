@@ -91,6 +91,7 @@ window.initRsvp = function () {
       .from(window.WEDDING_CONFIG.supabase.wishesTable)
       .select("*")
       .eq("invitation_id", window.TenantContext && window.TenantContext.invitationId)
+      .order("pinned", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(50);
     if (error) {
@@ -157,7 +158,14 @@ window.initRsvp = function () {
     // langsung tampil tanpa reload; setiap request lama menjadi basi dan tidak
     // boleh menimpa daftar ini ketika responsnya baru tiba.
     wishesVersion += 1;
-    if (createdWish) renderWishes([createdWish, ...currentWishes]);
+    // Ucapan baru selalu belum disematkan — taruh SETELAH yang sudah
+    // disematkan (bukan selalu di paling atas), supaya urutan tetap konsisten
+    // dengan query server (pinned desc, created_at desc).
+    if (createdWish) {
+      const pinned = currentWishes.filter((w) => w.pinned);
+      const rest = currentWishes.filter((w) => !w.pinned);
+      renderWishes([...pinned, createdWish, ...rest]);
+    }
     statusEl.textContent = "Terima kasih atas doa dan ucapannya!";
     form.reset();
     if (guestFromUrl) nameInput.value = guestFromUrl;

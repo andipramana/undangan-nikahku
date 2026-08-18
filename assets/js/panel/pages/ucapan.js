@@ -53,7 +53,7 @@ window.PanelPages["ucapan"] = {
       st.page = Math.max(1, nextPage);
       const from = (st.page - 1) * pageSize;
       const [wishRes, modRes, blockRes] = await Promise.all([
-        query(sb.from(wishesTable()).select("*", { count: "exact" }).eq("invitation_id", tenant.invitationId).order("created_at", { ascending: false }).range(from, from + pageSize - 1), "Permintaan ucapan"),
+        query(sb.from(wishesTable()).select("*", { count: "exact" }).eq("invitation_id", tenant.invitationId).order("pinned", { ascending: false }).order("created_at", { ascending: false }).range(from, from + pageSize - 1), "Permintaan ucapan"),
         query(sb.from("wish_moderation").select("*").eq("invitation_id", tenant.invitationId).maybeSingle(), "Permintaan moderasi"),
         query(sb.from("wish_blocks").select("device_token,blocked_at,blocked_wish_id").eq("invitation_id", tenant.invitationId).order("blocked_at", { ascending: false }), "Permintaan perangkat diblokir")
       ]);
@@ -90,16 +90,19 @@ window.PanelPages["ucapan"] = {
               <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
                 <strong>${esc(w.name)}</strong>
                 ${window.PanelUI.badge(LABEL[w.attendance] || w.attendance || "-", chipVariant(w.attendance))}
+                ${w.pinned ? window.PanelUI.badge("📌 Disematkan", "info") : ""}
                 <span class="p-muted" style="font-size:.76rem">${Number(w.guest_count) || 1} orang · ${fmtDate(w.created_at)}</span>
               </div>
               <p style="margin:.3rem 0 0">${esc(w.message)}</p>
             </div>
             <div class="p-list-row__controls">
+              <button type="button" class="p-btn p-btn--tiny ${w.pinned ? "p-btn--ghost" : "p-btn--primary"}" data-pin="${i}">${w.pinned ? "Lepas sematan" : "Sematkan"}</button>
               <button type="button" class="p-btn p-btn--tiny p-btn--danger" data-del="${i}">Hapus</button>
               ${w.device_token ? `<button type="button" class="p-btn p-btn--tiny p-btn--danger" data-block="${i}">Hapus &amp; blokir</button>` : ""}
             </div>
           </div>`).join("")
         : `<p class="p-empty">Belum ada ucapan pada halaman ini.</p>`;
+      list.querySelectorAll("[data-pin]").forEach((b) => b.addEventListener("click", () => togglePin(st.wishes[Number(b.dataset.pin)])));
       list.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => remove(st.wishes[Number(b.dataset.del)], false)));
       list.querySelectorAll("[data-block]").forEach((b) => b.addEventListener("click", () => remove(st.wishes[Number(b.dataset.block)], true)));
 
@@ -123,6 +126,18 @@ window.PanelPages["ucapan"] = {
       if (error) return toast("Gagal unblock perangkat: " + error.message, true);
       if (!count) return toast("Perangkat sudah tidak ada dalam daftar blokir.", true);
       toast("Perangkat berhasil di-unblock.");
+      load(st.page);
+    }
+
+    /** Sematkan ucapan di atas daftar (tamu & panel) — urutan dari server sudah
+     * "pinned desc, created_at desc" (lihat load()), jadi cukup patch lalu
+     * muat ulang halaman saat ini supaya posisinya ikut pindah. */
+    async function togglePin(item) {
+      if (!item) return;
+      const pinned = !item.pinned;
+      const { error } = await sb.from(wishesTable()).update({ pinned }).eq("invitation_id", tenant.invitationId).eq("id", item.id);
+      if (error) return toast("Gagal " + (pinned ? "menyematkan" : "melepas sematan") + ": " + error.message, true);
+      toast(pinned ? "Ucapan disematkan." : "Sematan dilepas.");
       load(st.page);
     }
 
@@ -159,7 +174,7 @@ window.PanelPages["ucapan"] = {
     async function fetchAllWishes() {
       const all = [], chunk = 1000;
       for (let from = 0; ; from += chunk) {
-        const { data, error } = await query(sb.from(wishesTable()).select("name,attendance,guest_count,message,created_at").eq("invitation_id", tenant.invitationId).order("created_at", { ascending: false }).range(from, from + chunk - 1), "Export ucapan");
+        const { data, error } = await query(sb.from(wishesTable()).select("name,attendance,guest_count,message,created_at,pinned").eq("invitation_id", tenant.invitationId).order("pinned", { ascending: false }).order("created_at", { ascending: false }).range(from, from + chunk - 1), "Export ucapan");
         if (error) throw error;
         all.push(...(data || []));
         if (!data || data.length < chunk) return all;

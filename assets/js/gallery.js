@@ -7,10 +7,6 @@ window.initGallery = async function () {
   const photos = (await window.getPhotos("gallery")) || [];
   if (!photos.length) return;
 
-  // Pola baris dipegang gallery-layout.js — dipakai bersama panel admin supaya
-  // bingkai pratinjau pan/zoom di sana memakai bentuk kotak yang sama persis
-  // dengan yang dirender di sini.
-  const PATTERN = window.GalleryLayout.PATTERN;
   /** Gerak masuk per foto, ditentukan posisinya dalam baris grid:
    *  - baris berisi DUA foto -> yang kiri meluncur dari kiri, yang kanan dari
    *    kanan, keduanya bersamaan sehingga terlihat seperti pintu yang menutup.
@@ -18,10 +14,17 @@ window.initGallery = async function () {
    *    (1/3+2/3) — dua-duanya: di kiri slide dari kiri, di kanan dari kanan.
    *  - baris satu foto selebar grid (full) -> mengembang di tempat.
    * Pasangan half dibedakan lewat item sebelumnya, bukan sesudahnya, supaya
-   * penentuannya tetap benar dibaca berurutan dari atas. */
+   * penentuannya tetap benar dibaca berurutan dari atas.
+   * PENTING: posisi HARUS dibaca dari shapeAt() (lebar ASLI tiap foto, sama
+   * seperti `cls` di bawah) — BUKAN dari GalleryLayout.PATTERN (pola lama 20
+   * item, cuma fallback untuk foto tanpa gallery_layout tersimpan). Memakai
+   * PATTERN di sini menyebabkan bug nyata: begitu foto dihapus, indeksnya
+   * bergeser dan pola hardcode itu tidak lagi cocok dengan tata letak yang
+   * SUNGGUHAN dirender, jadi baris half+half bisa dapat arah slide yang
+   * ketukar (foto kanan meluncur dari kiri, atau sebaliknya). */
   function motionFor(i) {
-    const cur = PATTERN[i] || "full";
-    if (cur === "half") return PATTERN[i - 1] === "half" ? "slide-right" : "slide-left";
+    const cur = window.GalleryLayout.shapeAt(i, photos);
+    if (cur === "half") return window.GalleryLayout.shapeAt(i - 1, photos) === "half" ? "slide-right" : "slide-left";
     if (cur === "third") return "slide-left";
     if (cur === "twothirds") return "slide-right";
     return "pop";
