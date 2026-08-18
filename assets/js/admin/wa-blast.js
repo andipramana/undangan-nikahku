@@ -125,13 +125,18 @@
    * tamu. Parameter WAJIB dari WEDDING_CONFIG.guestParam (BUKAN hardcode "to")
    * — konsisten dengan cara situs membaca tamu (main.js/rsvp.js/gift.js pakai
    * params.get(cfg.guestParam)), jadi kalau config diganti link WA ikut
-   * sinkron. Nama tamu di-encode supaya aman sebagai query string. */
+   * sinkron. Nama tamu di-encode supaya aman sebagai query string, tapi spasi
+   * dipakai "+" (bukan "%20") — link ini ikut ditempel MENTAH ke dalam teks
+   * pesan WA (bukan cuma jadi href), jadi "%20" akan tampil literal di chat;
+   * "+" jauh lebih enak dibaca DAN tetap didekode benar sebagai spasi oleh
+   * URLSearchParams di sisi tamu (main.js/rsvp.js/gift.js/admin-qr.js). */
   function buildInviteLink(contact) {
     const base =
       (settings.invitation_link || "").trim() || "https://undangan.andipramana.com/";
     const param = window.WEDDING_CONFIG.guestParam || "to";
     const sep = base.includes("?") ? "&" : "?";
-    return `${base}${sep}${param}=${encodeURIComponent(contact.name)}`;
+    const name = encodeURIComponent(contact.name).replace(/%20/g, "+");
+    return `${base}${sep}${param}=${name}`;
   }
 
   /** Body template untuk kontak: template_id yang masih ada, default dari
