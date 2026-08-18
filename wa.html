@@ -41,6 +41,14 @@
             <a class="wa-button wa-button--secondary" id="wa-manage-contacts" href="#" target="_blank" rel="noopener">Kelola daftar kontak</a>
           </div>
         </div>
+        <div class="wa-list-bar" id="wa-list-bar">
+          <label>Daftar kirim<select id="wa-list-select"></select></label>
+          <div class="wa-list-bar__actions">
+            <button type="button" class="wa-button wa-button--secondary btn--tiny" id="wa-list-new">+ Daftar baru</button>
+            <button type="button" class="wa-button wa-button--secondary btn--tiny" id="wa-list-rename">Ganti nama</button>
+            <button type="button" class="wa-button wa-button--secondary btn--tiny" id="wa-list-delete">Hapus</button>
+          </div>
+        </div>
         <p id="wa-summary" class="wa-summary"></p>
         <div id="wa-contacts" class="wa-contacts" aria-live="polite"></div>
       </section>
@@ -68,6 +76,13 @@
     <label>Nama tamu<input id="wa-add-name" autocomplete="name"></label>
     <label>Nomor WhatsApp<input id="wa-add-phone" inputmode="tel" placeholder="08123456789"></label>
     <button type="button" id="wa-add-save" class="wa-button wa-button--primary">Simpan kontak</button>
+  </div>
+</div>
+<div id="wa-list-modal" class="wa-modal" hidden>
+  <div class="wa-modal__card" role="dialog" aria-modal="true" aria-labelledby="wa-list-modal-title">
+    <div class="wa-modal__head"><h2 id="wa-list-modal-title">Daftar baru</h2><button type="button" id="wa-list-modal-close" class="wa-icon-button" aria-label="Tutup">×</button></div>
+    <label>Nama daftar<input id="wa-list-name" placeholder="mis. Kontak Pengantin Pria"></label>
+    <button type="button" id="wa-list-save" class="wa-button wa-button--primary">Simpan</button>
   </div>
 </div>
 <div id="wa-from-contacts-modal" class="wa-modal" hidden>
