@@ -49,7 +49,7 @@ check("admin.html tidak mengandung data-tab", !/data-tab/.test(adminHtml));
 // ---------------------------------------------------------------------
 const pagesDir = "assets/js/panel/pages";
 const pageFiles = (await fs.readdir(pagesDir)).filter((f) => f.endsWith(".js"));
-check("ada 17 file halaman di assets/js/panel/pages/ (18 tujuan non-Beranda - 1, karena Kirim WA & Check-in QR adalah link, bukan halaman)", pageFiles.length === 17);
+check("ada 18 file halaman di assets/js/panel/pages/ (19 tujuan non-Beranda - 1, karena Kirim WA & Check-in QR adalah link, bukan halaman)", pageFiles.length === 18);
 
 const registeredKeys = new Set();
 // giftRecommendations diedit langsung di kartu foto folder gift_item (lihat
@@ -71,10 +71,10 @@ for (const file of pageFiles) {
 }
 const EXPECTED_KEYS = [
   "home", "cover", "mempelai", "pembuka", "acara", "cerita", "galeri", "hadiah",
-  "livestream", "penutup", "sapaan", "ucapan", "template", "warna", "font", "editor-visual", "pengaturan"
+  "livestream", "penutup", "sapaan", "kontak", "ucapan", "template", "warna", "font", "editor-visual", "pengaturan"
 ];
 for (const key of EXPECTED_KEYS) check(`window.PanelPages["${key}"] terdaftar`, registeredKeys.has(key));
-check("19 tujuan (18 halaman + Beranda) — router.js membawa link Kirim WA & Check-in QR sendiri",
+check("20 tujuan (19 halaman + Beranda) — router.js membawa link Kirim WA & Check-in QR sendiri",
   registeredKeys.size === EXPECTED_KEYS.length);
 
 const routerSrc = await fs.readFile("assets/js/panel/router.js", "utf8");

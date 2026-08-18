@@ -36,7 +36,9 @@
           <div><p class="wa-kicker">DAFTAR TAMU</p><h2>Kirim satu per satu, tetap personal.</h2><p>Setiap tombol hanya membuka satu chat WhatsApp dengan pesan yang sudah disiapkan.</p></div>
           <div class="wa-toolbar wa-toolbar--actions">
             <button type="button" class="wa-button wa-button--primary" id="wa-add">Tambah kontak</button>
+            <button type="button" class="wa-button wa-button--secondary" id="wa-add-from-contacts">Tambah dari kontak</button>
             <label class="wa-button wa-button--secondary"><span>Impor CSV / Excel</span><input type="file" id="wa-import" accept=".csv,.xlsx,.xls" hidden></label>
+            <a class="wa-button wa-button--secondary" id="wa-manage-contacts" href="#" target="_blank" rel="noopener">Kelola daftar kontak</a>
           </div>
         </div>
         <p id="wa-summary" class="wa-summary"></p>
@@ -66,6 +68,14 @@
     <label>Nama tamu<input id="wa-add-name" autocomplete="name"></label>
     <label>Nomor WhatsApp<input id="wa-add-phone" inputmode="tel" placeholder="08123456789"></label>
     <button type="button" id="wa-add-save" class="wa-button wa-button--primary">Simpan kontak</button>
+  </div>
+</div>
+<div id="wa-from-contacts-modal" class="wa-modal" hidden>
+  <div class="wa-modal__card" role="dialog" aria-modal="true" aria-labelledby="wa-from-contacts-title">
+    <div class="wa-modal__head"><h2 id="wa-from-contacts-title">Tambah dari kontak</h2><button type="button" id="wa-from-contacts-close" class="wa-icon-button" aria-label="Tutup">×</button></div>
+    <label>Daftar kontak<select id="wa-from-contacts-list"><option value="">Pilih daftar…</option></select></label>
+    <div id="wa-from-contacts-body"></div>
+    <button type="button" id="wa-from-contacts-save" class="wa-button wa-button--primary" hidden>Tambahkan kontak terpilih</button>
   </div>
 </div>
 <div id="toast" class="wa-toast" role="status" aria-live="polite"></div>

@@ -30,6 +30,7 @@
     document.getElementById("wa-page-title").textContent = `${names.bride} & ${names.groom}`;
     document.title = `WhatsApp — ${names.bride} & ${names.groom}`;
     document.getElementById("wa-back-invitation").href = tenant.path();
+    document.getElementById("wa-manage-contacts").href = tenant.path("admin") + "#/kontak";
   }
 
   window.AdminShared.initAdminAuth({
