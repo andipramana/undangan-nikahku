@@ -713,7 +713,8 @@
     const lists = data || [];
     if (!lists.length) {
       fcListSelect.innerHTML = `<option value="">Belum ada daftar kontak</option>`;
-      fcBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — buat dan isi dulu lewat halaman admin "Kontak".</p>`;
+      const kontakHref = window.AdminAPI.tenant.path("admin") + "#/kontak";
+      fcBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — <a href="${kontakHref}" target="_blank" rel="noopener">buat dan isi dulu lewat halaman Kontak</a>.</p>`;
       return;
     }
     fcListSelect.innerHTML = `<option value="">Pilih daftar…</option>` + lists.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
