@@ -149,6 +149,13 @@
     return settings.default_template || DEFAULT_TEMPLATE_BODY;
   }
 
+  /** Urutkan array kontak lokal berdasarkan nama, case-insensitive (locale
+   * id-ID) — dipanggil setelah load() maupun setelah nama kontak diedit,
+   * supaya daftar tetap urut A-Z walau perubahan terjadi tanpa fetch ulang. */
+  function sortContactsByName() {
+    contacts.sort((a, b) => a.name.localeCompare(b.name, "id", { sensitivity: "base" }));
+  }
+
   /* ---------- Load ---------- */
 
   async function load() {
@@ -158,7 +165,7 @@
         "Permintaan template"
       ),
       window.AdminAPI.query(
-        sb.from("wa_contacts").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("created_at", { ascending: true }),
+        sb.from("wa_contacts").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("name", { ascending: true }),
         "Permintaan kontak"
       ),
       window.AdminAPI.query(
@@ -182,6 +189,10 @@
 
     templates = tplRes.data || [];
     contacts = conRes.data || [];
+    // ORDER BY di query sudah "name" ascending, tapi collation Postgres bisa
+    // beda urutan huruf besar/kecil dibanding locale ID — sortir ulang di
+    // klien (case-insensitive) supaya urutan konsisten apa pun collation DB-nya.
+    sortContactsByName();
     // maybeSingle() mengembalikan null kalau baris belum ada (belum di-seed
     // migrasi) — biarkan fallback awal; kalau ada, pakai isi DB.
     if (setRes.data) settings = setRes.data;
@@ -350,10 +361,10 @@
         </div>
         <div class="wa-contact-list">${empty ? `<p class="wa-contact-empty">Belum ada kontak — impor CSV/Excel atau tambah manual.</p>` : visible.map(({contact:c,index:i}) => `
           <article class="wa-contact-row wa-contact-row--${c.sent ? "sent" : "pending"}" data-i="${i}">
-            <div class="wa-contact-name"><strong>${esc(c.name)}</strong></div>
+            <div class="wa-contact-name"><input type="text" class="wa-contact-name-input" data-i="${i}" value="${esc(c.name)}" aria-label="Nama kontak"></div>
             <button type="button" class="wa-contact-sent wa-contact-status" data-i="${i}" data-sent="${!c.sent}" aria-pressed="${c.sent}" title="${c.sent ? "Tandai belum dikirim" : "Tandai terkirim"}">${c.sent ? "Terkirim" : "Belum"}</button>
             <button type="button" class="wa-contact-send wa-wa-icon" data-i="${i}" aria-label="Kirim WhatsApp ke ${esc(c.name)}" title="Kirim WhatsApp"><img src="assets/img/whatsapp.png" alt="" aria-hidden="true"></button>
-            <div class="wa-contact-phone">${esc(c.phone)}</div>
+            <div class="wa-contact-phone"><input type="text" class="wa-contact-phone-input" data-i="${i}" value="${esc(c.phone)}" aria-label="Nomor WhatsApp"></div>
             <label class="wa-contact-template-wrap"><span>Template</span><select class="wa-contact-template" data-i="${i}" aria-label="Template pesan untuk ${esc(c.name)}"><option value="">Default</option>${templates.map(t => `<option value="${t.id}" ${c.template_id===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label>
             <button type="button" class="wa-contact-del" data-i="${i}" aria-label="Hapus kontak ${esc(c.name)}" title="Hapus kontak">×</button>
           </article>`).join("") || `<p class="wa-contact-empty">Tidak ada kontak untuk pencarian atau filter ini.</p>`}</div>
@@ -402,6 +413,8 @@
     const c = contacts[Number(el.dataset.i)];
     if (!c) return;
     if (el.classList.contains("wa-contact-template")) changeTemplate(c, el);
+    else if (el.classList.contains("wa-contact-name-input")) saveContactName(c, el);
+    else if (el.classList.contains("wa-contact-phone-input")) saveContactPhone(c, el);
   });
 
   async function toggleSent(c, control, nextSent) {
@@ -421,6 +434,55 @@
     // warna badge, jadi render ulang halaman kecil saat ini.
     renderContacts();
     updateSummary();
+  }
+
+  /** Edit nama langsung di baris (blur/change pada input) — simpan ke DB,
+   * lalu urutkan ulang & render ulang karena posisi baris bisa berubah
+   * (daftar selalu urut A-Z, lihat sortContactsByName()). */
+  async function saveContactName(c, input) {
+    const name = input.value.trim();
+    if (!name) {
+      toast("Nama tidak boleh kosong.", true);
+      input.value = c.name;
+      return;
+    }
+    if (name === c.name) return;
+    const { error } = await window.AdminAPI.query(
+      sb.from("wa_contacts").update({ name }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
+      "Penyimpanan nama kontak"
+    );
+    if (error) {
+      toast("Gagal menyimpan nama: " + error.message, true);
+      input.value = c.name;
+      return;
+    }
+    c.name = name;
+    sortContactsByName();
+    renderContacts();
+  }
+
+  /** Edit nomor langsung di baris — dinormalisasi & divalidasi dengan fungsi
+   * yang SAMA dengan jalur import/tambah manual (normalizePhone/isValidPhone),
+   * supaya format tersimpan selalu konsisten (62xxxxxxxxxx). */
+  async function saveContactPhone(c, input) {
+    const phone = normalizePhone(input.value);
+    if (!isValidPhone(phone)) {
+      toast("Nomor tidak valid — contoh: 08123456789, +62 812-3456-789, 628123456789.", true);
+      input.value = c.phone;
+      return;
+    }
+    if (phone === c.phone) { input.value = phone; return; }
+    const { error } = await window.AdminAPI.query(
+      sb.from("wa_contacts").update({ phone }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
+      "Penyimpanan nomor kontak"
+    );
+    if (error) {
+      toast("Gagal menyimpan nomor: " + error.message, true);
+      input.value = c.phone;
+      return;
+    }
+    c.phone = phone;
+    renderContacts();
   }
 
   async function changeTemplate(c, sel) {
