@@ -17,6 +17,7 @@
     ].map((key) => ({ key })) },
     { group: "Tamu", items: [
       { key: "sapaan" },
+      { key: "kontak" },
       { link: "wa", title: "Kirim WhatsApp", iconName: "whatsapp" },
       { key: "ucapan" },
       { link: "admin-qr", title: "Check-in QR", iconName: "qr" }

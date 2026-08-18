@@ -141,7 +141,8 @@
     wand: '<path d="M4 20l10-10M14 4l1.5 1.5M18 8l1.5 1.5M11 4l1 2-2 1M17 10l1 2-2 1"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-1.7-1L15 3h-6l-.3 2.5a7.9 7.9 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.9 7.9 0 0 0 1.7 1L9 21h6l.3-2.5a7.9 7.9 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5z"/>',
     whatsapp: '<path d="M4 20l1.3-4A8 8 0 1 1 9 18l-5 2z"/><path d="M8.5 9.5c0 3 2.5 5.5 5.5 5.5"/>',
-    back: '<path d="M19 12H5M11 18l-6-6 6-6"/>'
+    back: '<path d="M19 12H5M11 18l-6-6 6-6"/>',
+    contacts: '<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/><path d="M4 8h1M4 13h1"/>'
   };
   function icon(name) {
     return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ICONS.home}</svg>`;

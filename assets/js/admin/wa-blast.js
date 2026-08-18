@@ -679,4 +679,107 @@
     toast("Kontak disimpan.");
     await load();
   });
+
+  /* ---------- Tambah dari kontak (buku alamat panel/kontak.js) ---------- */
+  // Sumber terpisah dari wa_contacts: contact_lists/contact_list_entries
+  // (migration 0022) diisi lewat halaman admin "Kontak" (#/kontak). Modal ini
+  // cuma MEMBACA daftar+entrinya untuk dipilih beberapa lalu disalin ke
+  // wa_contacts — tidak pernah menulis balik ke contact_list_entries.
+  const fcModal = document.getElementById("wa-from-contacts-modal");
+  const fcClose = document.getElementById("wa-from-contacts-close");
+  const fcListSelect = document.getElementById("wa-from-contacts-list");
+  const fcBody = document.getElementById("wa-from-contacts-body");
+  const fcSave = document.getElementById("wa-from-contacts-save");
+  let fcEntries = [];
+
+  document.getElementById("wa-add-from-contacts").addEventListener("click", openFromContacts);
+  fcClose.addEventListener("click", () => { fcModal.hidden = true; });
+  fcModal.addEventListener("click", (e) => { if (e.target === fcModal) fcModal.hidden = true; });
+
+  async function openFromContacts() {
+    fcListSelect.innerHTML = `<option value="">Memuat daftar…</option>`;
+    fcBody.innerHTML = "";
+    fcSave.hidden = true;
+    fcModal.hidden = false;
+    const { data, error } = await window.AdminAPI.query(
+      sb.from("contact_lists").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("name", { ascending: true }),
+      "Permintaan daftar kontak"
+    );
+    if (error) {
+      fcListSelect.innerHTML = `<option value="">Gagal memuat daftar</option>`;
+      toast("Gagal memuat daftar kontak: " + error.message, true);
+      return;
+    }
+    const lists = data || [];
+    if (!lists.length) {
+      fcListSelect.innerHTML = `<option value="">Belum ada daftar kontak</option>`;
+      fcBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — buat dan isi dulu lewat halaman admin "Kontak".</p>`;
+      return;
+    }
+    fcListSelect.innerHTML = `<option value="">Pilih daftar…</option>` + lists.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
+  }
+
+  fcListSelect.addEventListener("change", async () => {
+    const listId = fcListSelect.value;
+    fcBody.innerHTML = "";
+    fcSave.hidden = true;
+    if (!listId) return;
+    fcBody.innerHTML = `<p class="wa-fc-empty">Memuat kontak…</p>`;
+    const { data, error } = await window.AdminAPI.query(
+      sb.from("contact_list_entries").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("list_id", Number(listId)).order("name", { ascending: true }),
+      "Permintaan kontak"
+    );
+    if (error) {
+      fcBody.innerHTML = `<p class="wa-fc-empty">Gagal memuat: ${esc(error.message)}</p>`;
+      return;
+    }
+    fcEntries = data || [];
+    renderFcEntries();
+  });
+
+  function renderFcEntries() {
+    fcBody.className = "wa-fc-body";
+    if (!fcEntries.length) {
+      fcBody.innerHTML = `<p class="wa-fc-empty">Daftar ini belum punya kontak.</p>`;
+      fcSave.hidden = true;
+      return;
+    }
+    const existingPhones = new Set(contacts.map((c) => c.phone));
+    fcBody.innerHTML =
+      `<div class="wa-fc-toolbar"><span id="wa-fc-count"></span><button type="button" id="wa-fc-toggle-all">Pilih semua</button></div>` +
+      `<div>${fcEntries.map((e) => {
+        const already = existingPhones.has(e.phone);
+        return `<label class="wa-fc-row"><input type="checkbox" data-fc-id="${e.id}" ${already ? "disabled" : ""}><span>${esc(e.name)}${already ? " (sudah ada)" : ""}</span><span class="wa-fc-phone">${esc(e.phone)}</span></label>`;
+      }).join("")}</div>`;
+    const checkboxes = () => [...fcBody.querySelectorAll("input[data-fc-id]:not(:disabled)")];
+    function updateCount() {
+      const n = checkboxes().filter((c) => c.checked).length;
+      fcBody.querySelector("#wa-fc-count").textContent = n ? `${n} dipilih` : "";
+      fcSave.hidden = n === 0;
+    }
+    checkboxes().forEach((cb) => cb.addEventListener("change", updateCount));
+    fcBody.querySelector("#wa-fc-toggle-all").addEventListener("click", () => {
+      const boxes = checkboxes();
+      const allChecked = boxes.every((c) => c.checked);
+      boxes.forEach((c) => { c.checked = !allChecked; });
+      updateCount();
+    });
+    updateCount();
+  }
+
+  fcSave.addEventListener("click", async () => {
+    const ids = [...fcBody.querySelectorAll("input[data-fc-id]:checked")].map((cb) => Number(cb.dataset.fcId));
+    const rows = fcEntries.filter((e) => ids.includes(e.id)).map((e) => ({ invitation_id: window.AdminAPI.tenant.invitationId, name: e.name, phone: e.phone }));
+    if (!rows.length) return;
+    fcSave.disabled = true;
+    const { error } = await window.AdminAPI.query(sb.from("wa_contacts").insert(rows), "Penyimpanan kontak");
+    fcSave.disabled = false;
+    if (error) {
+      toast("Gagal menambahkan: " + error.message, true);
+      return;
+    }
+    fcModal.hidden = true;
+    toast(`${rows.length} kontak ditambahkan.`);
+    await load();
+  });
 })();
