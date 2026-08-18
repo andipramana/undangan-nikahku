@@ -52,6 +52,30 @@
 
   let contacts = [];
   let templates = [];
+  // Daftar kirim WA bisa dipecah jadi beberapa list (mis. per kelompok tamu) —
+  // migration 0023, tabel wa_lists. TERPISAH dari contact_lists (buku alamat
+  // sumber impor, migration 0022) — jangan disamakan namanya jadi "lists" di
+  // sini, dipakai nama waLists supaya tidak bentrok dengan `lists` lokal di
+  // openFromContacts() (variabel itu punya daftar contact_lists, konsep beda).
+  let waLists = [];
+  let currentWaListId = null;
+  const waListIdKey = `wa-current-list-${window.AdminAPI.tenant.slug}`;
+
+  /** Deep-link ke daftar tertentu lewat query string, mis. /wa?owner=Kontak+Ibu
+   * ("+" didekode jadi spasi oleh URLSearchParams, konvensi sama dengan link
+   * undangan personal di buildInviteLink()). Dicocokkan case-insensitive ke
+   * nama daftar. Cuma dipakai SEKALI di load() pertama — supaya switch manual
+   * lewat dropdown sesudahnya tidak ketimpa balik tiap load() dipanggil ulang
+   * (CRUD/import/switch list semuanya lewat load() yang sama). */
+  let ownerParamApplied = false;
+  function ownerParamListName() {
+    try {
+      const raw = new URLSearchParams(location.search).get("owner");
+      return raw ? raw.trim() : null;
+    } catch {
+      return null;
+    }
+  }
   const CONTACT_PAGE_SIZES = [20, 50, 100];
   let contactFilter = "all";
   let contactSearch = "";
@@ -156,16 +180,90 @@
     contacts.sort((a, b) => a.name.localeCompare(b.name, "id", { sensitivity: "base" }));
   }
 
+  /* ---------- Daftar kirim (wa_lists) ---------- */
+
+  function renderListBar() {
+    const select = document.getElementById("wa-list-select");
+    const renameBtn = document.getElementById("wa-list-rename");
+    const deleteBtn = document.getElementById("wa-list-delete");
+    if (!waLists.length) {
+      select.innerHTML = `<option value="">Belum ada daftar</option>`;
+      renameBtn.disabled = true;
+      deleteBtn.disabled = true;
+      return;
+    }
+    select.innerHTML = waLists.map((l) => `<option value="${l.id}" ${l.id === currentWaListId ? "selected" : ""}>${esc(l.name)}</option>`).join("");
+    renameBtn.disabled = false;
+    deleteBtn.disabled = false;
+  }
+
+  /** Tombol tambah/impor kontak butuh daftar kirim aktif sebagai tujuan —
+   * dimatikan kalau belum ada daftar sama sekali (klik label file yang
+   * inputnya disabled TIDAK membuka dialog pilih file, jadi aman). */
+  function setContactActionsEnabled(enabled) {
+    document.getElementById("wa-add").disabled = !enabled;
+    document.getElementById("wa-add-from-contacts").disabled = !enabled;
+    document.getElementById("wa-import").disabled = !enabled;
+  }
+
+  document.getElementById("wa-list-select").addEventListener("change", (e) => {
+    currentWaListId = Number(e.target.value) || null;
+    if (currentWaListId) localStorage.setItem(waListIdKey, String(currentWaListId));
+    contactPage = 1;
+    load();
+  });
+
   /* ---------- Load ---------- */
 
   async function load() {
+    const listRes = await window.AdminAPI.query(
+      sb.from("wa_lists").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("created_at", { ascending: true }),
+      "Permintaan daftar kirim"
+    );
+    if (listRes.error) {
+      const root = document.getElementById("wa-contacts");
+      root.innerHTML =
+        `<p class="warning">Gagal memuat daftar kirim: ${esc(listRes.error.message)} — pastikan ` +
+        `migration <code>0023_wa_contact_lists.sql</code> sudah dijalankan.</p>` +
+        `<button type="button" class="btn btn--primary" id="wa-retry">Coba lagi</button>`;
+      document.getElementById("wa-retry").addEventListener("click", load);
+      return;
+    }
+    waLists = listRes.data || [];
+    let nextListId = null;
+    if (!ownerParamApplied) {
+      ownerParamApplied = true;
+      const ownerName = ownerParamListName();
+      if (ownerName) {
+        const match = waLists.find((l) => l.name.toLowerCase() === ownerName.toLowerCase());
+        if (match) nextListId = match.id;
+      }
+    }
+    if (!nextListId) {
+      const saved = Number(localStorage.getItem(waListIdKey));
+      nextListId = waLists.some((l) => l.id === saved) ? saved : (waLists[0] ? waLists[0].id : null);
+    }
+    currentWaListId = nextListId;
+    if (currentWaListId) localStorage.setItem(waListIdKey, String(currentWaListId));
+    renderListBar();
+
+    if (!currentWaListId) {
+      contacts = [];
+      templates = [];
+      document.getElementById("wa-contacts").innerHTML = `<p class="wa-contact-empty">Belum ada daftar kirim — klik "+ Daftar baru" untuk membuat yang pertama (mis. per kelompok tamu).</p>`;
+      setContactActionsEnabled(false);
+      updateSummary();
+      return;
+    }
+    setContactActionsEnabled(true);
+
     const [tplRes, conRes, setRes] = await Promise.all([
       window.AdminAPI.query(
         sb.from("wa_templates").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("created_at", { ascending: true }),
         "Permintaan template"
       ),
       window.AdminAPI.query(
-        sb.from("wa_contacts").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("name", { ascending: true }),
+        sb.from("wa_contacts").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("list_id", currentWaListId).order("name", { ascending: true }),
         "Permintaan kontak"
       ),
       window.AdminAPI.query(
@@ -201,6 +299,64 @@
     renderContacts();
     updateSummary();
   }
+
+  /* ---------- CRUD daftar kirim (modal) ---------- */
+
+  const listModal = document.getElementById("wa-list-modal");
+  const listModalTitle = document.getElementById("wa-list-modal-title");
+  const listNameInput = document.getElementById("wa-list-name");
+  let editingListId = null;
+
+  function openListModal(existing) {
+    editingListId = existing ? existing.id : null;
+    listModalTitle.textContent = existing ? "Ganti nama daftar" : "Daftar baru";
+    listNameInput.value = existing ? existing.name : "";
+    listModal.hidden = false;
+    listNameInput.focus();
+  }
+  document.getElementById("wa-list-new").addEventListener("click", () => openListModal());
+  document.getElementById("wa-list-rename").addEventListener("click", () => {
+    const current = waLists.find((l) => l.id === currentWaListId);
+    if (current) openListModal(current);
+  });
+  document.getElementById("wa-list-modal-close").addEventListener("click", () => { listModal.hidden = true; });
+  listModal.addEventListener("click", (e) => { if (e.target === listModal) listModal.hidden = true; });
+  document.getElementById("wa-list-save").addEventListener("click", async () => {
+    const name = listNameInput.value.trim();
+    if (!name) { toast("Nama daftar wajib diisi.", true); return; }
+    if (editingListId) {
+      const { error } = await window.AdminAPI.query(
+        sb.from("wa_lists").update({ name }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", editingListId),
+        "Penyimpanan nama daftar"
+      );
+      if (error) { toast("Gagal menyimpan: " + error.message, true); return; }
+    } else {
+      const { data, error } = await window.AdminAPI.query(
+        sb.from("wa_lists").insert({ invitation_id: window.AdminAPI.tenant.invitationId, name }).select().single(),
+        "Pembuatan daftar"
+      );
+      if (error) { toast("Gagal membuat daftar: " + error.message, true); return; }
+      currentWaListId = data.id;
+      localStorage.setItem(waListIdKey, String(data.id));
+    }
+    listModal.hidden = true;
+    toast("Daftar disimpan.");
+    await load();
+  });
+
+  document.getElementById("wa-list-delete").addEventListener("click", async () => {
+    const current = waLists.find((l) => l.id === currentWaListId);
+    if (!current) return;
+    if (!confirm(`Hapus daftar "${current.name}" beserta ${contacts.length} kontak di dalamnya?\n\nTidak bisa dibatalkan.`)) return;
+    const { error } = await window.AdminAPI.query(
+      sb.from("wa_lists").delete().eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", current.id),
+      "Penghapusan daftar"
+    );
+    if (error) { toast("Gagal menghapus: " + error.message, true); return; }
+    localStorage.removeItem(waListIdKey);
+    toast("Daftar dihapus.");
+    await load();
+  });
 
   /* ---------- Pengaturan (link undangan + template default) ---------- */
 
@@ -537,8 +693,10 @@
 
   function updateSummary() {
     const el = document.getElementById("wa-summary");
+    if (!currentWaListId) { el.textContent = ""; return; }
+    const current = waLists.find((l) => l.id === currentWaListId);
     const done = contacts.reduce((n, c) => n + (c.sent ? 1 : 0), 0);
-    el.textContent = `Total: ${contacts.length} · Sudah dikirim: ${done} · Belum: ${contacts.length - done}`;
+    el.textContent = `Daftar: ${current ? current.name : "-"} · Total: ${contacts.length} · Sudah dikirim: ${done} · Belum: ${contacts.length - done}`;
   }
 
   /* ---------- Import CSV / Excel ---------- */
@@ -624,7 +782,7 @@
     if (!ok) return;
     for (let i = 0; i < rows.length; i += 200) {
       const { error } = await window.AdminAPI.query(
-        sb.from("wa_contacts").insert(rows.slice(i, i + 200).map((row) => ({ ...row, invitation_id: window.AdminAPI.tenant.invitationId }))),
+        sb.from("wa_contacts").insert(rows.slice(i, i + 200).map((row) => ({ ...row, invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId }))),
         "Penyimpanan kontak"
       );
       if (error) {
@@ -668,7 +826,7 @@
       return;
     }
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_contacts").insert({ invitation_id: window.AdminAPI.tenant.invitationId, name, phone }),
+      sb.from("wa_contacts").insert({ invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId, name, phone }),
       "Penyimpanan kontak"
     );
     if (error) {
@@ -770,7 +928,7 @@
 
   fcSave.addEventListener("click", async () => {
     const ids = [...fcBody.querySelectorAll("input[data-fc-id]:checked")].map((cb) => Number(cb.dataset.fcId));
-    const rows = fcEntries.filter((e) => ids.includes(e.id)).map((e) => ({ invitation_id: window.AdminAPI.tenant.invitationId, name: e.name, phone: e.phone }));
+    const rows = fcEntries.filter((e) => ids.includes(e.id)).map((e) => ({ invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId, name: e.name, phone: e.phone }));
     if (!rows.length) return;
     fcSave.disabled = true;
     const { error } = await window.AdminAPI.query(sb.from("wa_contacts").insert(rows), "Penyimpanan kontak");
