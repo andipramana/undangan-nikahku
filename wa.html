@@ -94,6 +94,15 @@
     <button type="button" id="wa-from-contacts-save" class="wa-button wa-button--primary" hidden>Tambahkan kontak terpilih</button>
   </div>
 </div>
+<div id="wa-pick-phone-modal" class="wa-modal" hidden>
+  <div class="wa-modal__card" role="dialog" aria-modal="true" aria-labelledby="wa-pick-phone-title">
+    <div class="wa-modal__head"><h2 id="wa-pick-phone-title">Isi nomor dari kontak</h2><button type="button" id="wa-pick-phone-close" class="wa-icon-button" aria-label="Tutup">×</button></div>
+    <p class="wa-token-help" id="wa-pick-phone-target"></p>
+    <label>Daftar kontak<select id="wa-pick-phone-list"><option value="">Pilih daftar…</option></select></label>
+    <input type="search" id="wa-pick-phone-search" class="wa-fc-search" placeholder="Cari nama atau nomor" aria-label="Cari nama atau nomor" hidden>
+    <div id="wa-pick-phone-body"></div>
+  </div>
+</div>
 <div id="toast" class="wa-toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/config.js"></script>

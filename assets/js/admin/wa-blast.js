@@ -527,6 +527,7 @@
             <div class="wa-contact-row__meta">
               <button type="button" class="wa-contact-sent wa-contact-status" data-i="${i}" data-sent="${!c.sent}" aria-pressed="${c.sent}" title="${c.sent ? "Tandai belum dikirim" : "Tandai terkirim"}">${c.sent ? "Terkirim" : "Belum"}</button>
               <div class="wa-contact-phone"><input type="text" class="wa-contact-phone-input" data-i="${i}" value="${esc(c.phone || "")}" placeholder="Tanpa nomor (opsional)" aria-label="Nomor WhatsApp"></div>
+              ${!hasPhone(c) ? `<button type="button" class="wa-contact-pick-phone" data-i="${i}" aria-label="Isi nomor dari daftar kontak untuk ${esc(c.name)}" title="Isi nomor dari daftar kontak"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 8v6M19 11h6"/></svg></button>` : ""}
               ${hasPhone(c)
                 ? `<button type="button" class="wa-contact-send wa-wa-icon" data-i="${i}" aria-label="Kirim WhatsApp ke ${esc(c.name)}" title="Kirim WhatsApp"><img src="assets/img/whatsapp.png" alt="" aria-hidden="true"></button>`
                 : `<button type="button" class="wa-contact-copy wa-wa-icon" data-i="${i}" aria-label="Salin pesan untuk ${esc(c.name)}" title="Salin pesan (tanpa nomor)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>`}
@@ -572,6 +573,7 @@
     if (!c) return;
     if (el.classList.contains("wa-contact-send")) sendTo(c, el);
     else if (el.classList.contains("wa-contact-copy")) copyMessage(c, el);
+    else if (el.classList.contains("wa-contact-pick-phone")) openPickPhone(c);
     else if (el.classList.contains("wa-contact-del")) removeContact(c, el);
     else if (el.classList.contains("wa-contact-sent")) toggleSent(c, el, el.dataset.sent === "true");
   });
@@ -1010,4 +1012,113 @@
     toast(`${rows.length} kontak ditambahkan.`);
     await load();
   });
+
+  /* ---------- Isi nomor dari kontak (untuk baris yang belum ada nomor) ---------- */
+  // Beda dari "Tambah dari kontak" di atas: modal ini TIDAK membuat baris
+  // baru — cuma menempelkan nomor telepon entri buku alamat yang dipilih ke
+  // SATU baris wa_contacts yang sudah ada. Nama baris itu TIDAK ikut berubah,
+  // cuma phone-nya. Dipicu lewat ikon di baris kontak yang belum punya nomor
+  // (lihat renderContacts()). Klik satu baris langsung menerapkan & menutup
+  // modal — tidak ada tombol "Simpan" terpisah, beda dari fcSave (checkbox
+  // multi-pilih) karena di sini cuma ada SATU target yang diisi.
+  const ppModal = document.getElementById("wa-pick-phone-modal");
+  const ppClose = document.getElementById("wa-pick-phone-close");
+  const ppTargetLabel = document.getElementById("wa-pick-phone-target");
+  const ppListSelect = document.getElementById("wa-pick-phone-list");
+  const ppSearch = document.getElementById("wa-pick-phone-search");
+  const ppBody = document.getElementById("wa-pick-phone-body");
+  let ppEntries = [];
+  let ppTargetContact = null;
+
+  ppClose.addEventListener("click", () => { ppModal.hidden = true; });
+  ppModal.addEventListener("click", (e) => { if (e.target === ppModal) ppModal.hidden = true; });
+
+  async function openPickPhone(c) {
+    ppTargetContact = c;
+    ppTargetLabel.innerHTML = `Nomor akan diisi untuk <strong>${esc(c.name)}</strong> — nama tidak ikut berubah.`;
+    ppListSelect.innerHTML = `<option value="">Memuat daftar…</option>`;
+    ppSearch.hidden = true;
+    ppSearch.value = "";
+    ppBody.innerHTML = "";
+    ppModal.hidden = false;
+    const { data, error } = await window.AdminAPI.query(
+      sb.from("contact_lists").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("name", { ascending: true }),
+      "Permintaan daftar kontak"
+    );
+    if (error) {
+      ppListSelect.innerHTML = `<option value="">Gagal memuat daftar</option>`;
+      toast("Gagal memuat daftar kontak: " + error.message, true);
+      return;
+    }
+    const lists = data || [];
+    if (!lists.length) {
+      ppListSelect.innerHTML = `<option value="">Belum ada daftar kontak</option>`;
+      const kontakHref = window.AdminAPI.tenant.path("admin") + "#/kontak";
+      ppBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — <a href="${kontakHref}" target="_blank" rel="noopener">buat dan isi dulu lewat halaman Kontak</a>.</p>`;
+      return;
+    }
+    ppListSelect.innerHTML = `<option value="">Pilih daftar…</option>` + lists.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
+  }
+
+  ppListSelect.addEventListener("change", async () => {
+    const listId = ppListSelect.value;
+    ppSearch.hidden = true;
+    ppSearch.value = "";
+    ppBody.innerHTML = "";
+    if (!listId) return;
+    ppBody.innerHTML = `<p class="wa-fc-empty">Memuat kontak…</p>`;
+    const { data, error } = await window.AdminAPI.query(
+      sb.from("contact_list_entries").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("list_id", Number(listId)).order("name", { ascending: true }),
+      "Permintaan kontak"
+    );
+    if (error) {
+      ppBody.innerHTML = `<p class="wa-fc-empty">Gagal memuat: ${esc(error.message)}</p>`;
+      return;
+    }
+    ppEntries = (data || []).filter((e) => e.phone); // tanpa nomor tidak berguna di sini
+    ppSearch.hidden = !ppEntries.length;
+    renderPpEntries();
+  });
+
+  ppSearch.addEventListener("input", renderPpEntries);
+
+  function renderPpEntries() {
+    ppBody.className = "wa-fc-body";
+    if (!ppEntries.length) {
+      ppBody.innerHTML = `<p class="wa-fc-empty">Daftar ini belum punya kontak bernomor.</p>`;
+      return;
+    }
+    const keyword = ppSearch.value.trim().toLowerCase();
+    const visible = keyword
+      ? ppEntries.filter((e) => e.name.toLowerCase().includes(keyword) || e.phone.includes(keyword))
+      : ppEntries;
+    if (!visible.length) {
+      ppBody.innerHTML = `<p class="wa-fc-empty">Tidak ada kontak untuk pencarian ini.</p>`;
+      return;
+    }
+    ppBody.innerHTML = visible.map((e) => `<button type="button" class="wa-pp-row" data-pp-id="${e.id}"><span>${esc(e.name)}</span><span class="wa-fc-phone">${esc(e.phone)}</span></button>`).join("");
+    ppBody.querySelectorAll("[data-pp-id]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const entry = ppEntries.find((e) => e.id === Number(btn.dataset.ppId));
+        if (entry) applyPickedPhone(entry);
+      });
+    });
+  }
+
+  async function applyPickedPhone(entry) {
+    const c = ppTargetContact;
+    if (!c) return;
+    const { error } = await window.AdminAPI.query(
+      sb.from("wa_contacts").update({ phone: entry.phone }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
+      "Penyimpanan nomor kontak"
+    );
+    if (error) {
+      toast("Gagal mengisi nomor: " + error.message, true);
+      return;
+    }
+    c.phone = entry.phone;
+    ppModal.hidden = true;
+    toast(`Nomor diisi dari "${entry.name}".`);
+    renderContacts();
+  }
 })();
