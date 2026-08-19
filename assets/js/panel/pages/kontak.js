@@ -89,8 +89,20 @@ window.PanelPages["kontak"] = {
     /** vCard (.vcf) — format export kontak HP standar (Google/iPhone/Android),
      * satu file bisa berisi banyak blok BEGIN:VCARD..END:VCARD. Baris lipatan
      * (continuation, diawali spasi/tab) disatukan dulu sebelum diparse. Nama
-     * diambil dari FN, fallback ke N (Keluarga;Depan;...) kalau FN kosong.
-     * Nomor telepon: baris TEL pertama yang valid per kontak. */
+     * diambil dari FN (nama lengkap format tampilan — paling diandalkan),
+     * fallback ke N (Keluarga;Depan;Tengah;Prefix;Suffix) kalau FN kosong.
+     * Nomor telepon: baris TEL pertama yang valid per kontak.
+     *
+     * DUA bug lama yang sering memotong nama jadi cuma "depan + satu kata
+     * belakang": (1) FN & N dibaca dengan guard `!name` yang SAMA-SAMA
+     * menulis ke variabel `name` sambil jalan — kalau N muncul lebih dulu di
+     * file (urutan umum standar vCard: N sebelum FN), FN yang datang
+     * belakangan TIDAK PERNAH dipakai walau isinya lebih lengkap. (2) fallback
+     * N cuma mengambil parts[1]+parts[0] (Depan+Keluarga), membuang
+     * parts[2] (nama TENGAH/tambahan) sama sekali. Sekarang FN & N dibaca
+     * terpisah dulu, FN selalu menang kalau ada APAPUN urutannya di file, dan
+     * fallback N menggabung SEMUA komponen (prefix, depan, tengah, keluarga,
+     * suffix). */
     function parseVcf(text) {
       const unfolded = String(text ?? "").replace(/\r\n/g, "\n").replace(/\n[ \t]/g, "");
       const blocks = unfolded.split(/BEGIN:VCARD/i).slice(1);
@@ -98,23 +110,24 @@ window.PanelPages["kontak"] = {
       let skipped = 0;
       blocks.forEach((block) => {
         const lines = block.split(/END:VCARD/i)[0].split("\n").map((l) => l.trim()).filter(Boolean);
-        let name = "";
+        let fn = "";
+        let nParts = null;
         let phone = "";
         lines.forEach((line) => {
           const idx = line.indexOf(":");
           if (idx === -1) return;
           const key = line.slice(0, idx).split(";")[0].toUpperCase();
           const value = line.slice(idx + 1).trim();
-          if (key === "FN" && !name) name = value;
-          if (key === "N" && !name) {
-            const parts = value.split(";");
-            name = [parts[1], parts[0]].filter(Boolean).join(" ").trim();
-          }
+          if (key === "FN" && !fn) fn = value;
+          if (key === "N" && !nParts) nParts = value.split(";");
           if (key === "TEL" && !phone) {
             const candidate = normalizePhone(value);
             if (isValidPhone(candidate)) phone = candidate;
           }
         });
+        const name = fn || (nParts
+          ? [nParts[3], nParts[1], nParts[2], nParts[0], nParts[4]].filter(Boolean).join(" ").trim()
+          : "");
         if (!name || !isValidPhone(phone)) { skipped++; return; }
         rows.push({ name, phone });
       });
@@ -196,6 +209,7 @@ window.PanelPages["kontak"] = {
           <label class="p-btn p-btn--ghost"><span>Impor vCard (.vcf)</span><input type="file" id="kt-import-vcf" accept=".vcf" hidden></label>
           <button type="button" class="p-btn p-btn--ghost" id="kt-export-csv" ${rows.length ? "" : "disabled"}>Export CSV</button>
           <button type="button" class="p-btn p-btn--ghost" id="kt-export-excel" ${rows.length ? "" : "disabled"}>Export Excel</button>
+          <button type="button" class="p-btn p-btn--danger" id="kt-delete-all" ${rows.length ? "" : "disabled"}>Hapus semua kontak</button>
         </div>
         <div style="overflow-x:auto">
           <table class="p-table">
@@ -218,6 +232,7 @@ window.PanelPages["kontak"] = {
       if (rows.length) {
         body.querySelector("#kt-export-csv").addEventListener("click", () => exportCsv(list, rows));
         body.querySelector("#kt-export-excel").addEventListener("click", () => exportExcel(list, rows));
+        body.querySelector("#kt-delete-all").addEventListener("click", () => removeAllEntries(list));
       }
       body.querySelectorAll(".kt-entry-name-input").forEach((input) => input.addEventListener("change", () => saveEntryName(Number(input.dataset.id), input)));
       body.querySelectorAll(".kt-entry-phone-input").forEach((input) => input.addEventListener("change", () => saveEntryPhone(Number(input.dataset.id), input)));
@@ -317,6 +332,22 @@ window.PanelPages["kontak"] = {
       const { error } = await query(sb.from("contact_list_entries").delete().eq("invitation_id", tenant.invitationId).eq("id", id), "Penghapusan kontak");
       if (error) { toast("Gagal menghapus: " + error.message, true); return; }
       st.entries = st.entries.filter((x) => x.id !== id);
+      render();
+    }
+
+    /** Hapus semua kontak di daftar yang SEDANG DIBUKA — daftarnya sendiri
+     * (contact_lists) tetap ada, cuma isinya (contact_list_entries) yang
+     * dikosongkan. Konfirmasi dua kali (pola sama dengan "Hapus semua
+     * ucapan" di ucapan.js) karena tidak bisa dibatalkan. */
+    async function removeAllEntries(list) {
+      const rows = entriesFor(list.id);
+      if (!rows.length) return;
+      if (!confirm(`Hapus SEMUA ${rows.length} kontak di daftar "${list.name}"?\n\nTidak bisa dibatalkan.`)) return;
+      if (!confirm("Konfirmasi terakhir: hapus semua kontak di daftar ini sekarang?")) return;
+      const { error } = await query(sb.from("contact_list_entries").delete().eq("invitation_id", tenant.invitationId).eq("list_id", list.id), "Penghapusan semua kontak");
+      if (error) { toast("Gagal menghapus: " + error.message, true); return; }
+      st.entries = st.entries.filter((e) => e.list_id !== list.id);
+      toast("Semua kontak di daftar ini dihapus.");
       render();
     }
 
