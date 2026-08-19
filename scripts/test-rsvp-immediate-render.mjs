@@ -9,6 +9,12 @@ try {
   await page.waitForTimeout(600);
 
   await page.evaluate(() => {
+    // rsvp.js kirim lewat RPC submit_wish (anti-spam device_token) di secure
+    // context — Playwright localhost selalu punya crypto.randomUUID, jadi
+    // jalur .from().insert() di bawah tidak pernah dipakai lagi, cuma
+    // cadangan. Mock TANPA .rpc() bikin submit throw TypeError tak
+    // tertangani dan test macet menunggu kartu yang tidak pernah dirender
+    // (pola sama dengan test-rsvp-stale-load.mjs).
     window.sb = {
       from() {
         return {
@@ -25,6 +31,17 @@ try {
             };
           }
         };
+      },
+      rpc(name, params) {
+        if (name !== "submit_wish") return Promise.resolve({ data: null, error: new Error(`RPC tak dikenal di mock: ${name}`) });
+        return Promise.resolve({
+          data: {
+            id: "test-wish", invitation_id: params.p_invitation_id, name: params.p_name,
+            attendance: params.p_attendance, guest_count: params.p_guest_count, message: params.p_message,
+            created_at: new Date().toISOString()
+          },
+          error: null
+        });
       }
     };
   });

@@ -47,9 +47,16 @@ window.initHeroSlideshows = async function () {
       const fx = slide.focalX ?? 50;
       const fy = slide.focalY ?? 50;
       const zoom = slide.zoom ?? 1;
+      // Cuma foto cover PERTAMA yang boleh eager (itu satu-satunya yang tamu
+      // lihat sebelum sempat berbuat apa-apa — kandidat LCP). Sisanya (foto
+      // cover berikutnya yang baru tampil setelah beberapa detik, DAN seluruh
+      // opening/closing — di bawah lipatan/baru muncul setelah amplop dibuka)
+      // sengaja loading="lazy" supaya tidak rebutan bandwidth dengan foto
+      // cover di jaringan lambat/trafik tinggi — dulu SEMUA foto ini eager.
+      const eager = key === "cover" && i === 0;
       wrap.innerHTML = `
         <source srcset="${src}" type="image/webp">
-        <img class="kenburns" src="${src}" alt=""
+        <img class="kenburns" src="${src}" alt=""${eager ? "" : ' loading="lazy"'}
              style="--fx:${fx}%; --fy:${fy}%; --zoom:${zoom}">
       `;
       container.insertBefore(wrap, overlay);

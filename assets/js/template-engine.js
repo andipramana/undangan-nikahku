@@ -8,6 +8,39 @@
 (function () {
   "use strict";
 
+  // Classic Elegance INLINE (bukan fetch) — satu-satunya template yang benar-benar
+  // dipakai sekarang (lihat panel/pages/template.js: cuma satu opsi di picker).
+  // Isinya harus tetap identik dengan templates/classic-elegance.json (dipertahankan
+  // untuk jalur eksplisit ?template=classic-elegance & preview admin). Sengaja
+  // di-inline: performa — sebelumnya SETIAP load undangan default menunggu satu
+  // request jaringan ekstra ("/templates/classic-elegance.json") di jalur render
+  // paling kritis (sebelum foto cover mulai diunduh), padahal seluruh isinya
+  // (--color-*/--font-* & font Google Fonts) sudah jadi default di :root style.css
+  // dan <link> statis index.html — fetch itu tidak pernah mengubah apa pun untuk
+  // tenant yang belum memilih template kustom (mayoritas kasus).
+  const CLASSIC_ELEGANCE = {
+    id: "classic-elegance",
+    name: "Classic Elegance",
+    version: 2,
+    fonts: [
+      "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&family=Cormorant+Garamond:wght@400&family=Italianno&display=swap"
+    ],
+    theme: {
+      "--color-bg": "#f7f3ea",
+      "--color-dark": "#14120f",
+      "--color-dark-2": "#1c1914",
+      "--color-gold": "#c9a668",
+      "--color-gold-soft": "#e6d7b3",
+      "--color-text": "#2b2620",
+      "--color-text-light": "#f7f3ea",
+      "--font-serif": "\"Poppins\", \"Segoe UI\", sans-serif",
+      "--font-script": "\"EB Garamond\", sans-serif",
+      "--font-sans": "\"Poppins\", \"Segoe UI\", sans-serif",
+      "--font-label": "\"Alegreya Sans\", \"Segoe UI\", sans-serif",
+      "--overlay-closing": "linear-gradient(180deg, rgba(10,9,7,.7) 0%, rgba(10,9,7,.78) 50%, rgba(10,9,7,.88) 100%)"
+    }
+  };
+
   let _definition = null;
   let _cssLink = null;
   let _styleDisabled = false;
@@ -56,11 +89,7 @@
       _definition = source;
     }
 
-    if (!_definition) {
-      try { const res = await fetch("/templates/classic-elegance.json"); _definition = await res.json(); } catch {
-        _definition = { id: "classic-elegance", name: "Classic Elegance" };
-      }
-    }
+    if (!_definition) _definition = CLASSIC_ELEGANCE;
 
     const tpl = _definition;
 

@@ -563,6 +563,19 @@
     if (pre) pre.classList.add("hide");
   }
 
+  // Batas keras preloader — didaftarkan SEKARANG (bukan di dalam handler
+  // DOMContentLoaded di bawah, setelah rantai await fetchInvitation() +
+  // loadTemplate() + populateContent() selesai). BUG yang diperbaiki: sebelum
+  // ini, setTimeout(hidePreloader, 3000) baru MULAI menghitung setelah rantai
+  // itu beres — jadi kalau RPC lambat (trafik tinggi) 8 detik, preloader
+  // sebenarnya baru hilang di detik ke-11 (8 + 3), bukan di detik ke-3. Di
+  // sini timer jalan dari awal skrip, independen dari cepat/lambatnya
+  // jaringan — preloader DIJAMIN hilang di batas ini, konten statis yang
+  // sudah ada di HTML (nama & foto default) tetap terlihat walau data
+  // personalisasi tamu masih menyusul begitu payload-nya datang.
+  window.addEventListener("load", hidePreloader);
+  setTimeout(hidePreloader, 4000);
+
   /** Suntik <link> font sebuah template (kalau belum ada). Dipisah jadi
    * helper karena dulu blok ini terduplikasi persis di dua tempat — sekarang
    * loadTemplate() cuma dipanggil sekali per load, jadi cukup sekali pakai. */
@@ -630,9 +643,6 @@
     if (window.initNavMenu) window.initNavMenu();
     if (window.initQrCheckin) window.initQrCheckin();
     if (window.initReveal) window.initReveal();
-
-    window.addEventListener("load", hidePreloader);
-    setTimeout(hidePreloader, 3000);
 
     const cover = document.getElementById("cover");
     if (cover) {

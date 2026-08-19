@@ -69,7 +69,20 @@
     }
     if (!sb) return null;
     try {
-      const { data, error } = await sb.rpc("get_invitation", { p_slug: tenant.slug });
+      // Batas waktu keras: saat trafik tinggi (banyak tamu buka bersamaan) RPC
+      // bisa antre lama di sisi Supabase — tanpa batas ini, tamu bisa menunggu
+      // 10-20 detik menatap layar loading. Timeout membuatnya JATUH ke cadangan
+      // (localStorage lalu config.js) secepat mungkin alih-alih menunggu tanpa
+      // batas; kalau requestnya sendiri akhirnya selesai belakangan, hasilnya
+      // dibuang begitu saja (Promise.race, bukan dibatalkan di server).
+      const REQUEST_TIMEOUT_MS = 5000;
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Waktu permintaan undangan habis (>5 detik).")), REQUEST_TIMEOUT_MS)
+      );
+      const { data, error } = await Promise.race([
+        sb.rpc("get_invitation", { p_slug: tenant.slug }),
+        timeout
+      ]);
       if (error) throw error;
       if (!data) throw new Error("Undangan tidak ditemukan atau tidak aktif.");
       tenant.setInvitation(data.invitation);
