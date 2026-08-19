@@ -846,9 +846,14 @@
   const fcModal = document.getElementById("wa-from-contacts-modal");
   const fcClose = document.getElementById("wa-from-contacts-close");
   const fcListSelect = document.getElementById("wa-from-contacts-list");
+  const fcSearch = document.getElementById("wa-from-contacts-search");
   const fcBody = document.getElementById("wa-from-contacts-body");
   const fcSave = document.getElementById("wa-from-contacts-save");
   let fcEntries = [];
+  // Set ID (bukan cuma checkbox DOM) supaya pilihan tidak hilang saat hasil
+  // pencarian berganti — checkbox yang tersaring keluar dari daftar tampilan
+  // TETAP terhitung terpilih ketika muncul lagi (atau saat "Tambahkan" ditekan).
+  let fcSelected = new Set();
 
   document.getElementById("wa-add-from-contacts").addEventListener("click", openFromContacts);
   fcClose.addEventListener("click", () => { fcModal.hidden = true; });
@@ -856,8 +861,11 @@
 
   async function openFromContacts() {
     fcListSelect.innerHTML = `<option value="">Memuat daftar…</option>`;
+    fcSearch.hidden = true;
+    fcSearch.value = "";
     fcBody.innerHTML = "";
     fcSave.hidden = true;
+    fcSelected = new Set();
     fcModal.hidden = false;
     const { data, error } = await window.AdminAPI.query(
       sb.from("contact_lists").select("*").eq("invitation_id", window.AdminAPI.tenant.invitationId).order("name", { ascending: true }),
@@ -880,8 +888,11 @@
 
   fcListSelect.addEventListener("change", async () => {
     const listId = fcListSelect.value;
+    fcSearch.hidden = true;
+    fcSearch.value = "";
     fcBody.innerHTML = "";
     fcSave.hidden = true;
+    fcSelected = new Set();
     if (!listId) return;
     fcBody.innerHTML = `<p class="wa-fc-empty">Memuat kontak…</p>`;
     const { data, error } = await window.AdminAPI.query(
@@ -893,8 +904,11 @@
       return;
     }
     fcEntries = data || [];
+    fcSearch.hidden = !fcEntries.length;
     renderFcEntries();
   });
+
+  fcSearch.addEventListener("input", renderFcEntries);
 
   function renderFcEntries() {
     fcBody.className = "wa-fc-body";
@@ -903,32 +917,47 @@
       fcSave.hidden = true;
       return;
     }
+    const keyword = fcSearch.value.trim().toLowerCase();
+    const visible = keyword
+      ? fcEntries.filter((e) => e.name.toLowerCase().includes(keyword) || e.phone.includes(keyword))
+      : fcEntries;
+    if (!visible.length) {
+      fcBody.innerHTML = `<p class="wa-fc-empty">Tidak ada kontak untuk pencarian ini.</p>`;
+      fcSave.hidden = fcSelected.size === 0;
+      return;
+    }
     const existingPhones = new Set(contacts.map((c) => c.phone));
     fcBody.innerHTML =
       `<div class="wa-fc-toolbar"><span id="wa-fc-count"></span><button type="button" id="wa-fc-toggle-all">Pilih semua</button></div>` +
-      `<div>${fcEntries.map((e) => {
+      `<div>${visible.map((e) => {
         const already = existingPhones.has(e.phone);
-        return `<label class="wa-fc-row"><input type="checkbox" data-fc-id="${e.id}" ${already ? "disabled" : ""}><span>${esc(e.name)}${already ? " (sudah ada)" : ""}</span><span class="wa-fc-phone">${esc(e.phone)}</span></label>`;
+        return `<label class="wa-fc-row"><input type="checkbox" data-fc-id="${e.id}" ${already ? "disabled" : ""} ${fcSelected.has(e.id) ? "checked" : ""}><span>${esc(e.name)}${already ? " (sudah ada)" : ""}</span><span class="wa-fc-phone">${esc(e.phone)}</span></label>`;
       }).join("")}</div>`;
     const checkboxes = () => [...fcBody.querySelectorAll("input[data-fc-id]:not(:disabled)")];
     function updateCount() {
-      const n = checkboxes().filter((c) => c.checked).length;
-      fcBody.querySelector("#wa-fc-count").textContent = n ? `${n} dipilih` : "";
-      fcSave.hidden = n === 0;
+      fcBody.querySelector("#wa-fc-count").textContent = fcSelected.size ? `${fcSelected.size} dipilih` : "";
+      fcSave.hidden = fcSelected.size === 0;
     }
-    checkboxes().forEach((cb) => cb.addEventListener("change", updateCount));
+    checkboxes().forEach((cb) => cb.addEventListener("change", () => {
+      const id = Number(cb.dataset.fcId);
+      if (cb.checked) fcSelected.add(id); else fcSelected.delete(id);
+      updateCount();
+    }));
     fcBody.querySelector("#wa-fc-toggle-all").addEventListener("click", () => {
       const boxes = checkboxes();
       const allChecked = boxes.every((c) => c.checked);
-      boxes.forEach((c) => { c.checked = !allChecked; });
+      boxes.forEach((c) => {
+        c.checked = !allChecked;
+        const id = Number(c.dataset.fcId);
+        if (c.checked) fcSelected.add(id); else fcSelected.delete(id);
+      });
       updateCount();
     });
     updateCount();
   }
 
   fcSave.addEventListener("click", async () => {
-    const ids = [...fcBody.querySelectorAll("input[data-fc-id]:checked")].map((cb) => Number(cb.dataset.fcId));
-    const rows = fcEntries.filter((e) => ids.includes(e.id)).map((e) => ({ invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId, name: e.name, phone: e.phone }));
+    const rows = fcEntries.filter((e) => fcSelected.has(e.id)).map((e) => ({ invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId, name: e.name, phone: e.phone }));
     if (!rows.length) return;
     fcSave.disabled = true;
     const { error } = await window.AdminAPI.query(sb.from("wa_contacts").insert(rows), "Penyimpanan kontak");
