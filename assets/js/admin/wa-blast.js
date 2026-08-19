@@ -125,6 +125,12 @@
     return /^62\d{8,13}$/.test(p);
   }
 
+  /** Kontak boleh TANPA nomor sama sekali (mis. nama grup/keluarga yang mau
+   * dikirim manual) — beda dari nomor yang diisi tapi salah format. */
+  function hasPhone(c) {
+    return !!(c && c.phone && String(c.phone).trim());
+  }
+
   /** Bangun pesan akhir dari body template + kontak baris ini. Token dasar
    * sama PERSIS dengan konvensi yang sudah dipakai di gift.js (${tamu}/
    * ${CPP}/${CPW} = nama PANGGILAN) + ${link}. ${namaCPP}/${namaCPW} = nama
@@ -499,7 +505,7 @@
     const filtered = contacts.map((contact, index) => ({ contact, index })).filter(({ contact }) => {
       const matchesStatus = contactFilter === "all" || (contactFilter === "sent" ? !!contact.sent : !contact.sent);
       const keyword = contactSearch.trim().toLowerCase();
-      const matchesSearch = !keyword || contact.name.toLowerCase().includes(keyword) || contact.phone.includes(keyword);
+      const matchesSearch = !keyword || contact.name.toLowerCase().includes(keyword) || (contact.phone || "").includes(keyword);
       return matchesStatus && matchesSearch;
     });
     const pageCount = Math.max(1, Math.ceil(filtered.length / contactPageSize));
@@ -518,11 +524,17 @@
         <div class="wa-contact-list">${empty ? `<p class="wa-contact-empty">Belum ada kontak — impor CSV/Excel atau tambah manual.</p>` : visible.map(({contact:c,index:i}) => `
           <article class="wa-contact-row wa-contact-row--${c.sent ? "sent" : "pending"}" data-i="${i}">
             <div class="wa-contact-name"><input type="text" class="wa-contact-name-input" data-i="${i}" value="${esc(c.name)}" aria-label="Nama kontak"></div>
-            <button type="button" class="wa-contact-sent wa-contact-status" data-i="${i}" data-sent="${!c.sent}" aria-pressed="${c.sent}" title="${c.sent ? "Tandai belum dikirim" : "Tandai terkirim"}">${c.sent ? "Terkirim" : "Belum"}</button>
-            <button type="button" class="wa-contact-send wa-wa-icon" data-i="${i}" aria-label="Kirim WhatsApp ke ${esc(c.name)}" title="Kirim WhatsApp"><img src="assets/img/whatsapp.png" alt="" aria-hidden="true"></button>
-            <div class="wa-contact-phone"><input type="text" class="wa-contact-phone-input" data-i="${i}" value="${esc(c.phone)}" aria-label="Nomor WhatsApp"></div>
-            <label class="wa-contact-template-wrap"><span>Template</span><select class="wa-contact-template" data-i="${i}" aria-label="Template pesan untuk ${esc(c.name)}"><option value="">Default</option>${templates.map(t => `<option value="${t.id}" ${c.template_id===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label>
-            <button type="button" class="wa-contact-del" data-i="${i}" aria-label="Hapus kontak ${esc(c.name)}" title="Hapus kontak">×</button>
+            <div class="wa-contact-row__meta">
+              <button type="button" class="wa-contact-sent wa-contact-status" data-i="${i}" data-sent="${!c.sent}" aria-pressed="${c.sent}" title="${c.sent ? "Tandai belum dikirim" : "Tandai terkirim"}">${c.sent ? "Terkirim" : "Belum"}</button>
+              <div class="wa-contact-phone"><input type="text" class="wa-contact-phone-input" data-i="${i}" value="${esc(c.phone || "")}" placeholder="Tanpa nomor (opsional)" aria-label="Nomor WhatsApp"></div>
+              ${hasPhone(c)
+                ? `<button type="button" class="wa-contact-send wa-wa-icon" data-i="${i}" aria-label="Kirim WhatsApp ke ${esc(c.name)}" title="Kirim WhatsApp"><img src="assets/img/whatsapp.png" alt="" aria-hidden="true"></button>`
+                : `<button type="button" class="wa-contact-copy wa-wa-icon" data-i="${i}" aria-label="Salin pesan untuk ${esc(c.name)}" title="Salin pesan (tanpa nomor)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>`}
+            </div>
+            <div class="wa-contact-row__bottom">
+              <label class="wa-contact-template-wrap"><span>Template</span><select class="wa-contact-template" data-i="${i}" aria-label="Template pesan untuk ${esc(c.name)}"><option value="">Default</option>${templates.map(t => `<option value="${t.id}" ${c.template_id===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label>
+              <button type="button" class="wa-contact-del" data-i="${i}" aria-label="Hapus kontak ${esc(c.name)}" title="Hapus kontak">×</button>
+            </div>
           </article>`).join("") || `<p class="wa-contact-empty">Tidak ada kontak untuk pencarian atau filter ini.</p>`}</div>
         <footer class="wa-pagination"><span class="wa-contact-result">${visible.length ? ((contactPage-1)*contactPageSize+1) : 0}–${Math.min(contactPage*contactPageSize, filtered.length)} / ${filtered.length}</span><label><span>Tampil</span><select class="input" id="wa-contact-page-size">${CONTACT_PAGE_SIZES.map(n=>`<option value="${n}" ${n===contactPageSize?"selected":""}>${n}</option>`).join("")}</select></label><button class="btn btn--tiny" id="wa-prev" ${contactPage===1?"disabled":""}>Prev</button><span>${contactPage}/${pageCount}</span><button class="btn btn--tiny" id="wa-next" ${contactPage===pageCount?"disabled":""}>Next</button></footer>
       </section>`;
@@ -559,6 +571,7 @@
     const c = contacts[Number(el.dataset.i)];
     if (!c) return;
     if (el.classList.contains("wa-contact-send")) sendTo(c, el);
+    else if (el.classList.contains("wa-contact-copy")) copyMessage(c, el);
     else if (el.classList.contains("wa-contact-del")) removeContact(c, el);
     else if (el.classList.contains("wa-contact-sent")) toggleSent(c, el, el.dataset.sent === "true");
   });
@@ -619,25 +632,28 @@
 
   /** Edit nomor langsung di baris — dinormalisasi & divalidasi dengan fungsi
    * yang SAMA dengan jalur import/tambah manual (normalizePhone/isValidPhone),
-   * supaya format tersimpan selalu konsisten (62xxxxxxxxxx). */
+   * supaya format tersimpan selalu konsisten (62xxxxxxxxxx). Boleh dikosongkan
+   * (kontak jadi "tanpa nomor", tombol kirimnya berubah jadi "Salin pesan") —
+   * cuma nomor yang DIISI tapi salah format yang ditolak. */
   async function saveContactPhone(c, input) {
-    const phone = normalizePhone(input.value);
-    if (!isValidPhone(phone)) {
+    const raw = input.value.trim();
+    const phone = raw ? normalizePhone(raw) : "";
+    if (raw && !isValidPhone(phone)) {
       toast("Nomor tidak valid — contoh: 08123456789, +62 812-3456-789, 628123456789.", true);
-      input.value = c.phone;
+      input.value = c.phone || "";
       return;
     }
-    if (phone === c.phone) { input.value = phone; return; }
+    if (phone === (c.phone || "")) { input.value = phone; return; }
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_contacts").update({ phone }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
+      sb.from("wa_contacts").update({ phone: phone || null }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
       "Penyimpanan nomor kontak"
     );
     if (error) {
       toast("Gagal menyimpan nomor: " + error.message, true);
-      input.value = c.phone;
+      input.value = c.phone || "";
       return;
     }
-    c.phone = phone;
+    c.phone = phone || null;
     renderContacts();
   }
 
@@ -668,9 +684,25 @@
     if (!c.sent) toggleSent(c, btn, true);
   }
 
+  /** Kontak tanpa nomor (grup/nama saja) tidak punya wa.me — tombolnya jadi
+   * "Salin pesan" alih-alih ikon WhatsApp: admin tempel manual ke chat/grup
+   * WA pilihannya sendiri. Tetap menandai "sudah dikirim" otomatis, sama
+   * seperti sendTo(), supaya rekap status konsisten untuk kedua jenis kontak. */
+  async function copyMessage(c, btn) {
+    const msg = buildMessage(bodyFor(c), c);
+    try {
+      await navigator.clipboard.writeText(msg);
+    } catch (err) {
+      toast("Gagal menyalin pesan: " + err.message, true);
+      return;
+    }
+    toast("Pesan disalin — tempel manual ke WhatsApp/grup.");
+    if (!c.sent) toggleSent(c, btn, true);
+  }
+
   async function removeContact(c, btn) {
     if (!c) return;
-    if (!confirm(`Hapus kontak "${c.name}" (${c.phone})?\n\nTidak bisa dibatalkan.`)) return;
+    if (!confirm(`Hapus kontak "${c.name}"${hasPhone(c) ? ` (${c.phone})` : " (tanpa nomor)"}?\n\nTidak bisa dibatalkan.`)) return;
     btn.disabled = true;
     const { error, count } = await window.AdminAPI.query(
       sb.from("wa_contacts").delete({ count: "exact" }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", c.id),
@@ -723,7 +755,9 @@
 
   /** CSV sederhana: 2 kolom (nama, nomor), tidak ada koma di dalam kolom nama
    * (skenario umum — tidak perlu parser RFC lengkap). Baris pertama di-skip
-   * kalau kedua kolomnya cocok pola header ("nama,nomor/no.hp/phone"). */
+   * kalau kedua kolomnya cocok pola header ("nama,nomor/no.hp/phone"). Kolom
+   * nomor boleh KOSONG (baris jadi kontak grup/nama saja) — yang dilewati
+   * cuma baris tanpa nama, atau nomor yang DIISI tapi format-nya salah. */
   function parseCsv(text) {
     const lines = String(text ?? "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
     const rows = [];
@@ -731,18 +765,20 @@
     lines.forEach((line, idx) => {
       const parts = line.split(",").map((s) => s.trim());
       if (idx === 0 && isHeaderCell(parts[0]) && isHeaderCell(parts[1])) return; // header
-      const phone = normalizePhone(parts[1]);
-      if (!parts[0] || !isValidPhone(phone)) {
+      const rawPhone = (parts[1] || "").trim();
+      const phone = rawPhone ? normalizePhone(rawPhone) : "";
+      if (!parts[0] || (rawPhone && !isValidPhone(phone))) {
         skipped++;
         return;
       }
-      rows.push({ name: parts[0], phone });
+      rows.push({ name: parts[0], phone: phone || null });
     });
     return { rows, skipped };
   }
 
   /** Excel (.xlsx/.xls) via SheetJS CDN — baca sheet pertama, 2 kolom pertama
-   * tiap baris, header di-skip dengan pola yang sama seperti CSV. */
+   * tiap baris, header di-skip dengan pola yang sama seperti CSV. Kolom nomor
+   * boleh kosong, sama seperti parseCsv() di atas. */
   function parseExcel(buf) {
     if (!window.XLSX) throw new Error("Library XLSX belum termuat — periksa koneksi internet.");
     const wb = window.XLSX.read(buf);
@@ -753,12 +789,13 @@
     grid.forEach((rowArr, idx) => {
       const name = String(rowArr[0] ?? "").trim();
       if (idx === 0 && isHeaderCell(name) && isHeaderCell(rowArr[1])) return; // header
-      const phone = normalizePhone(rowArr[1]);
-      if (!name || !isValidPhone(phone)) {
+      const rawPhone = String(rowArr[1] ?? "").trim();
+      const phone = rawPhone ? normalizePhone(rawPhone) : "";
+      if (!name || (rawPhone && !isValidPhone(phone))) {
         skipped++;
         return;
       }
-      rows.push({ name, phone });
+      rows.push({ name, phone: phone || null });
     });
     return { rows, skipped };
   }
@@ -773,10 +810,10 @@
       );
       return;
     }
-    const preview = rows.slice(0, 3).map((r) => `${r.name} — ${r.phone}`).join("\n");
+    const preview = rows.slice(0, 3).map((r) => `${r.name} — ${r.phone || "(tanpa nomor)"}`).join("\n");
     const ok = confirm(
       `"${fileName}": ${rows.length} kontak terbaca` +
-        (skipped ? ` (${skipped} baris dilewati: kosong / nomor tidak valid)` : "") +
+        (skipped ? ` (${skipped} baris dilewati: nama kosong / nomor tidak valid)` : "") +
         `.\n\nContoh:\n${preview}\n\nSimpan semua?`
     );
     if (!ok) return;
@@ -816,17 +853,20 @@
   });
   addSave.addEventListener("click", async () => {
     const name = addName.value.trim();
-    const phone = normalizePhone(addPhone.value);
+    const rawPhone = addPhone.value.trim();
+    const phone = rawPhone ? normalizePhone(rawPhone) : "";
     if (!name) {
       toast("Nama wajib diisi.", true);
       return;
     }
-    if (!isValidPhone(phone)) {
+    // Nomor OPSIONAL — kosongkan untuk kontak grup/nama saja (tombol kirimnya
+    // jadi "Salin pesan"). Nomor yang DIISI tapi salah format tetap ditolak.
+    if (rawPhone && !isValidPhone(phone)) {
       toast("Nomor tidak valid — contoh: 08123456789, +62 812-3456-789, 628123456789.", true);
       return;
     }
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_contacts").insert({ invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId, name, phone }),
+      sb.from("wa_contacts").insert({ invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId, name, phone: phone || null }),
       "Penyimpanan kontak"
     );
     if (error) {
