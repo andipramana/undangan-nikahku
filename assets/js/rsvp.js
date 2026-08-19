@@ -35,19 +35,13 @@ window.initRsvp = function () {
   // Pilihan kehadiran pakai tombol capsule (bukan dropdown). Belum ada yang
   // terpilih di awal — tamu harus klik dulu, jangan diasumsikan "Hadir".
   const attendanceBox = document.getElementById("rsvp-attendance");
-  const guestsInput = document.getElementById("rsvp-guests");
-  // Kolom "Jumlah Tamu" hanya masuk akal kalau tamunya datang, DAN kalau
-  // kehadirannya sudah dipilih sama sekali — sebelum diklik, sembunyikan.
-  const guestsField = guestsInput && guestsInput.closest("label");
   let attendanceValue = "";
-  if (guestsField) guestsField.hidden = true;
 
   function selectPill(btn) {
     attendanceBox.querySelectorAll(".rsvp-pill").forEach((b) => {
       b.classList.toggle("is-selected", b === btn);
     });
     attendanceValue = btn.dataset.value;
-    if (guestsField) guestsField.hidden = attendanceValue !== "hadir";
   }
   attendanceBox.querySelectorAll(".rsvp-pill").forEach((btn) => {
     btn.addEventListener("click", () => selectPill(btn));
@@ -123,10 +117,10 @@ window.initRsvp = function () {
       invitation_id: window.TenantContext && window.TenantContext.invitationId,
       name: nameInput.value.trim(),
       attendance: attendanceValue,
-      // Yang tidak hadir selalu terkirim 1, bukan angka sisa yang sempat
-      // diketik sebelum berpindah pilihan — kalau tidak, rekap "total orang"
-      // di panel admin ikut menghitung tamu yang justru menyatakan tidak datang.
-      guest_count: attendanceValue === "hadir" ? Number(guestsInput.value) || 1 : 1,
+      // Input "Jumlah Tamu" sengaja dihapus dari form — kesannya membatasi
+      // tamu untuk datang beramai-ramai. guest_count tetap ada di skema (dibaca
+      // rekap "orang hadir" di panel admin), selalu terkirim 1 per konfirmasi.
+      guest_count: 1,
       message: document.getElementById("rsvp-message").value.trim()
     };
 

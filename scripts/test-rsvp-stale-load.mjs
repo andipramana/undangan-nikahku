@@ -17,7 +17,7 @@ const page = await browser.newPage();
 
 try {
   await page.setContent(`
-    <form id="rsvp-form"><input id="rsvp-name"><div id="rsvp-attendance"><button type="button" class="rsvp-pill" data-value="hadir">Hadir</button></div><label><select id="rsvp-guests"><option value="1">1</option></select></label><textarea id="rsvp-message"></textarea><button id="rsvp-submit">Kirim</button></form>
+    <form id="rsvp-form"><input id="rsvp-name"><div id="rsvp-attendance"><button type="button" class="rsvp-pill" data-value="hadir">Hadir</button></div><textarea id="rsvp-message"></textarea><button id="rsvp-submit">Kirim</button></form>
     <p id="rsvp-status"></p><div class="is-revealed" data-reveal-group><div id="wishes-list"></div></div>
   `);
   await page.evaluate((source) => {
