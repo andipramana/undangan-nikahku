@@ -11,12 +11,10 @@ window.initRsvp = function () {
   let wishesVersion = 0;
   if (!form) return;
 
-  const params = new URLSearchParams(location.search);
-  const guestParam = window.WEDDING_CONFIG.guestParam;
-  const rawGuest = params.get(guestParam);
-  const guestFromUrl = rawGuest ? decodeURIComponent(rawGuest.replace(/\+/g, " ")) : "";
-  if (guestFromUrl) nameInput.value = guestFromUrl;
-
+  // Nama SENGAJA tidak diisi otomatis dari parameter link (beda dengan sapaan
+  // di main.js) — satu link undangan sering diteruskan ke satu grup WhatsApp
+  // berisi banyak orang, jadi kolom ini harus selalu kosong supaya tiap orang
+  // mengetik namanya sendiri, bukan ketiban nama penerima link aslinya.
   const statusLabel = { hadir: "Hadir", tidak_hadir: "Tidak Hadir", ragu: "Ragu-ragu" };
   // Token acak per browser, bukan IP/fingerprint. Nilai ini menjadi kunci blokir
   // tenant-scoped di server jika admin memilih "Hapus & blokir perangkat".
@@ -162,7 +160,6 @@ window.initRsvp = function () {
     }
     statusEl.textContent = "Terima kasih atas doa dan ucapannya!";
     form.reset();
-    if (guestFromUrl) nameInput.value = guestFromUrl;
     // Jangan langsung query ulang di sini: respons baca yang terlambat dapat
     // mengembalikan daftar lama dan menimpa kartu yang baru saja dirender.
     // Sinkronisasi normal tetap terjadi saat halaman dibuka kembali.
