@@ -11,23 +11,28 @@ window.initGallery = async function () {
    *  - baris berisi DUA foto -> yang kiri meluncur dari kiri, yang kanan dari
    *    kanan, keduanya bersamaan sehingga terlihat seperti pintu yang menutup.
    *    Ada dua bentuk baris begini: half+half (1/2+1/2), dan third+twothirds
-   *    (1/3+2/3) — dua-duanya: di kiri slide dari kiri, di kanan dari kanan.
+   *    (1/3+2/3) ATAU twothirds+third (2/3+1/3) — admin bebas menaruh mana
+   *    saja di kiri/kanan lewat Tab Foto, urutannya TIDAK selalu third dulu.
    *  - baris satu foto selebar grid (full) -> mengembang di tempat.
-   * Pasangan half dibedakan lewat item sebelumnya, bukan sesudahnya, supaya
-   * penentuannya tetap benar dibaca berurutan dari atas.
+   * Posisi ditentukan dari LEBAR (span kolom), bukan JENIS bentuknya: kalau
+   * lebar foto ini + foto SEBELUMNYA persis mengisi 12 kolom, berarti foto
+   * sebelumnya ada di kiri dan foto ini di kanan (slide dari kanan). Kalau
+   * tidak, foto ini ada di kiri sendiri/awal pasangan baru (slide dari kiri).
    * PENTING: posisi HARUS dibaca dari shapeAt() (lebar ASLI tiap foto, sama
    * seperti `cls` di bawah) — BUKAN dari GalleryLayout.PATTERN (pola lama 20
-   * item, cuma fallback untuk foto tanpa gallery_layout tersimpan). Memakai
-   * PATTERN di sini menyebabkan bug nyata: begitu foto dihapus, indeksnya
-   * bergeser dan pola hardcode itu tidak lagi cocok dengan tata letak yang
-   * SUNGGUHAN dirender, jadi baris half+half bisa dapat arah slide yang
-   * ketukar (foto kanan meluncur dari kiri, atau sebaliknya). */
+   * item, cuma fallback untuk foto tanpa gallery_layout tersimpan).
+   * BUG YANG DIPERBAIKI (dilaporkan dari baris 12 galeri nyata, data live
+   * tenant root: sort_order 16="twothirds" lalu 17="third" — urutan
+   * KEBALIK dari asumsi lama): versi sebelumnya menentukan arah slide dari
+   * JENIS bentuknya langsung ("third" selalu dianggap kiri, "twothirds"
+   * selalu dianggap kanan) — salah kalau admin menaruh twothirds duluan
+   * (di kiri) dan third belakangan (di kanan), arahnya jadi ketukar. */
   function motionFor(i) {
     const cur = window.GalleryLayout.shapeAt(i, photos);
-    if (cur === "half") return window.GalleryLayout.shapeAt(i - 1, photos) === "half" ? "slide-right" : "slide-left";
-    if (cur === "third") return "slide-left";
-    if (cur === "twothirds") return "slide-right";
-    return "pop";
+    if (cur === "full") return "pop";
+    const prev = window.GalleryLayout.shapeAt(i - 1, photos);
+    const SPAN = window.GalleryLayout.SPAN;
+    return SPAN[cur] + SPAN[prev] === 12 ? "slide-right" : "slide-left";
   }
 
   // Video selalu memegang baris visual pertama. Baris yang disimpan admin
