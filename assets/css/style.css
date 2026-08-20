@@ -1497,7 +1497,19 @@ a { color: inherit; }
 .wishes-heading p { margin: 0; color: #85652d; font-size: .66rem; font-weight: 600; letter-spacing: .16em; white-space: nowrap; }
 .wishes-intro { margin: 0 0 1.15rem; text-align: center; color: rgba(60,48,31,.7); font-size: .84rem; line-height: 1.55; }
 .wishes-list {
-  max-height: 360px; overflow-y: auto; overflow-x: hidden;
+  /* Dulu max-height:360px + overflow-y:auto (kotak scroll kecil bersarang di
+     dalam halaman) — dua masalah: (1) cuma ~2-3 kartu kelihatan sebelum harus
+     discroll DI DALAM kotak kecilnya sendiri, (2) gesture scroll di atas
+     kotak itu KETANGKAP olehnya duluan (bukan discroll halaman), jadi terasa
+     "macet" — padahal reveal.js sudah pakai data-reveal-early (early
+     observer, ambang -5% bawah viewport) yang seharusnya trigger secepat
+     kartu menyentuh layar. Kartu yang terkurung di bawah area 360px yang
+     terpotong itu TIDAK PERNAH dianggap "intersecting" sampai kotaknya
+     digulir manual — makanya kelihatan seperti reveal baru muncul kalau
+     sudah scroll jauh/ke tengah. Dihapus jadi mengalir alami mengikuti
+     scroll halaman biasa — reveal-early bekerja normal, dan semua ucapan
+     (maksimal 50, lihat loadWishes() limit di rsvp.js) langsung kelihatan
+     tanpa kotak scroll tersembunyi. */
   display: flex; flex-direction: column; gap: .75rem; padding: .15rem .2rem .15rem 0; text-align: left;
 }
 .wish-card {
