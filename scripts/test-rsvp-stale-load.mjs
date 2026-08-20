@@ -42,7 +42,7 @@ try {
           select() { return this; },
           eq() { return this; },
           order() { return this; },
-          limit() { return new Promise((resolve) => { resolveInitialRead = resolve; }); },
+          range() { return new Promise((resolve) => { resolveInitialRead = resolve; }); },
           insert(payload) {
             return { select() { return { single: async () => ({ data: { ...payload, id: "new" }, error: null }) }; } };
           }
@@ -65,7 +65,7 @@ try {
         });
       }
     };
-    window.__resolveInitialRead = () => resolveInitialRead({ data: [{ id: "old", name: "Tamu Lama", attendance: "hadir", message: "Doa lama" }], error: null });
+    window.__resolveInitialRead = () => resolveInitialRead({ data: [{ id: "old", name: "Tamu Lama", attendance: "hadir", message: "Doa lama" }], error: null, count: 1 });
     // eslint-disable-next-line no-eval
     eval(source);
     window.initRsvp();

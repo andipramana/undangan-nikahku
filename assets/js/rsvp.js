@@ -3,12 +3,20 @@ window.initRsvp = function () {
   const form = document.getElementById("rsvp-form");
   const statusEl = document.getElementById("rsvp-status");
   const listEl = document.getElementById("wishes-list");
+  const paginationEl = document.getElementById("wishes-pagination");
   const nameInput = document.getElementById("rsvp-name");
   // Cache daftar terakhir agar ucapan yang baru berhasil diinsert bisa langsung
   // dirender tanpa menunggu query ulang ke server. Versi ini juga melindungi
   // kartu baru dari respons load awal yang datang terlambat.
   let currentWishes = [];
   let wishesVersion = 0;
+  // Semua ucapan bisa diakses (dulu dibatasi .limit(50), sisanya tidak
+  // pernah kelihatan tamu) — sekarang dipaginasi server-side, 20 per
+  // halaman, supaya jumlah data yang diunduh sekali jalan tetap kecil
+  // walau ucapannya sudah ratusan.
+  const WISHES_PAGE_SIZE = 20;
+  let wishesPage = 1;
+  let wishesTotal = 0;
   if (!form) return;
 
   // Nama SENGAJA tidak diisi otomatis dari parameter link (beda dengan sapaan
@@ -74,24 +82,47 @@ window.initRsvp = function () {
     if (window.revealScan) window.revealScan(listEl);
   }
 
-  async function loadWishes() {
+  function renderPagination() {
+    if (!paginationEl) return;
+    const pageCount = Math.max(1, Math.ceil(wishesTotal / WISHES_PAGE_SIZE));
+    if (pageCount <= 1) { paginationEl.innerHTML = ""; return; }
+    paginationEl.innerHTML = `
+      <button type="button" class="wishes-page-btn" id="wishes-prev" ${wishesPage <= 1 ? "disabled" : ""} aria-label="Halaman ucapan sebelumnya">&larr; Sebelumnya</button>
+      <span class="wishes-page-info">Halaman ${wishesPage} dari ${pageCount}</span>
+      <button type="button" class="wishes-page-btn" id="wishes-next" ${wishesPage >= pageCount ? "disabled" : ""} aria-label="Halaman ucapan berikutnya">Berikutnya &rarr;</button>
+    `;
+    paginationEl.querySelector("#wishes-prev").addEventListener("click", () => goToWishesPage(wishesPage - 1));
+    paginationEl.querySelector("#wishes-next").addEventListener("click", () => goToWishesPage(wishesPage + 1));
+  }
+
+  function goToWishesPage(page) {
+    wishesVersion += 1; // batalkan request halaman lama yang mungkin masih menggantung
+    loadWishes(page);
+    listEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function loadWishes(page = wishesPage) {
     if (!window.sb) return;
-    // Snapshot sebelum request: jika tamu submit sementara request ini masih
-    // berjalan, respons lama tidak boleh menghapus kartu yang sudah tampil.
+    // Snapshot sebelum request: jika tamu submit/ganti halaman sementara
+    // request ini masih berjalan, respons lama tidak boleh menimpa yang baru.
     const requestVersion = wishesVersion;
-    const { data, error } = await window.sb
+    const from = (page - 1) * WISHES_PAGE_SIZE;
+    const { data, error, count } = await window.sb
       .from(window.WEDDING_CONFIG.supabase.wishesTable)
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("invitation_id", window.TenantContext && window.TenantContext.invitationId)
       .order("pinned", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(50);
+      .range(from, from + WISHES_PAGE_SIZE - 1);
     if (error) {
       console.error(error);
       return;
     }
     if (requestVersion !== wishesVersion) return;
+    wishesPage = page;
+    wishesTotal = count || 0;
     renderWishes(data || []);
+    renderPagination();
   }
 
   form.addEventListener("submit", async (e) => {
@@ -150,14 +181,19 @@ window.initRsvp = function () {
     // langsung tampil tanpa reload; setiap request lama menjadi basi dan tidak
     // boleh menimpa daftar ini ketika responsnya baru tiba.
     wishesVersion += 1;
+    wishesTotal += 1;
     // Ucapan baru selalu belum disematkan — taruh SETELAH yang sudah
     // disematkan (bukan selalu di paling atas), supaya urutan tetap konsisten
-    // dengan query server (pinned desc, created_at desc).
-    if (createdWish) {
+    // dengan query server (pinned desc, created_at desc). Cuma disisipkan
+    // kalau tamu sedang di halaman 1 — kalau sedang baca halaman lain,
+    // jangan yank dia balik/ubah daftar yang lagi dilihatnya; batas halaman
+    // itu tetap diperbarui via renderPagination() di bawah.
+    if (createdWish && wishesPage === 1) {
       const pinned = currentWishes.filter((w) => w.pinned);
       const rest = currentWishes.filter((w) => !w.pinned);
-      renderWishes([...pinned, createdWish, ...rest]);
+      renderWishes([...pinned, createdWish, ...rest].slice(0, WISHES_PAGE_SIZE));
     }
+    renderPagination();
     statusEl.textContent = "Terima kasih atas doa dan ucapannya!";
     form.reset();
     // Jangan langsung query ulang di sini: respons baca yang terlambat dapat

@@ -341,6 +341,7 @@
         </div>
         <p class="wishes-intro">Doa baik dan ucapan hangat dari orang-orang terkasih.</p>
         <div id="wishes-list" class="wishes-list" aria-live="polite"></div>
+        <nav id="wishes-pagination" class="wishes-pagination" aria-label="Halaman ucapan"></nav>
       </div>
     </section>
 
@@ -450,6 +451,11 @@
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- Sebelumnya HILANG dari halaman ini — main.js memanggil window.loadTemplate(...)
+     tanpa guard, jadi tanpa file ini seluruh handler DOMContentLoaded (populateContent,
+     initRsvp, initGallery, dst) gagal total sejak awal ("window.loadTemplate is not
+     a function"), bukan cuma template-nya yang tidak jalan. -->
+<script src="assets/js/template-engine.js"></script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/tenant.js"></script>
 <script src="assets/js/photos.js"></script>
