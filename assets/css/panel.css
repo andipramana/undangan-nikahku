@@ -262,7 +262,7 @@ code {
 .p-chapter[aria-current="page"] svg { opacity: 1; }
 .p-chapter[aria-current="page"] .p-chapter__num { color: rgba(255, 255, 255, .68); }
 
-.p-outlet { flex: 1; padding: var(--p-5) var(--p-4) 96px; }
+.p-outlet { flex: 1; min-width: 0; padding: var(--p-5) var(--p-4) 96px; }
 .p-outlet__inner { max-width: var(--p-content-max); margin: 0 auto; display: grid; gap: var(--p-4); }
 
 @media (min-width: 1024px) {
@@ -278,6 +278,92 @@ code {
   font-family: var(--p-font-display);
   font-size: 24px; font-weight: 650; letter-spacing: -.02em;
 }
+
+/* -------------------------------------------------------------------------
+   Sidebar parent-child — jalur navigasi KEDUA (strip bab tetap utama &
+   tampil di semua viewport). ≥1024px: kolom permanen sticky di bawah
+   framehead (--p-framehead-h diisi router.js via ResizeObserver). Di
+   bawah breakpoint itu: drawer dari kiri lewat tombol hamburger topbar.
+   ------------------------------------------------------------------------- */
+.p-menubtn {
+  display: grid; place-items: center; flex: none;
+  width: 34px; height: 34px; border-radius: 999px;
+  border: 1px solid var(--p-hairline); background: var(--p-paper); color: var(--p-ink);
+}
+.p-menubtn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+.p-menubtn:hover { background: var(--p-sunken); }
+
+.p-sidebar {
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 40;
+  width: min(84vw, 300px);
+  display: flex; flex-direction: column;
+  padding: var(--p-4) var(--p-4) calc(var(--p-4) + env(safe-area-inset-bottom));
+  padding-left: calc(var(--p-4) + env(safe-area-inset-left));
+  background: var(--p-paper);
+  border-right: 1px solid var(--p-hairline);
+  box-shadow: var(--p-shadow-lg);
+  transform: translateX(-103%);
+  transition: transform .22s ease;
+}
+.p-sidebar--open { transform: none; }
+#p-sidebar-nav { overflow-y: auto; }
+.p-scrim {
+  position: fixed; inset: 0; z-index: 39;
+  background: var(--p-overlay);
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s ease;
+}
+.p-scrim--show { opacity: 1; pointer-events: auto; }
+
+@media (min-width: 1024px) {
+  .p-menubtn { display: none; }
+  .p-body { display: flex; align-items: flex-start; }
+  .p-sidebar {
+    position: sticky;
+    top: var(--p-framehead-h, 0px);
+    height: calc(100vh - var(--p-framehead-h, 0px));
+    z-index: 10;
+    width: 264px; flex: none;
+    box-shadow: none;
+    transform: none;
+    transition: none;
+    padding-left: var(--p-4); /* safe-area hanya relevan di perangkat mobile */
+  }
+  .p-scrim { display: none; }
+}
+
+/* Parent = label mono yang bisa diciutkan; child = baris tujuan */
+.p-sidegroup + .p-sidegroup { margin-top: var(--p-4); }
+.p-sidegroup__head {
+  display: flex; align-items: center; gap: 7px;
+  width: 100%; text-align: left;
+  border: 0; background: transparent;
+  padding: .35rem var(--p-1);
+  font-family: var(--p-font-mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--p-ink-3);
+}
+.p-sidegroup__head svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.2; transition: transform .15s ease; flex: none; }
+.p-sidegroup__head:hover { color: var(--p-ink); }
+.p-sidegroup__head[aria-expanded="false"] svg { transform: rotate(-90deg); }
+.p-sidegroup__items { display: grid; margin-top: 2px; }
+.p-sideitem {
+  display: flex; align-items: center; gap: 9px;
+  min-height: 36px; padding: .45rem var(--p-2);
+  border-radius: var(--p-r-sm);
+  color: var(--p-ink-2); font-size: 13.5px; font-weight: 550;
+  text-decoration: none; white-space: nowrap;
+}
+.p-sideitem:hover { background: var(--p-sunken); color: var(--p-ink); text-decoration: none; }
+.p-sideitem svg { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.7; opacity: .8; }
+.p-sideitem__num {
+  flex: none; width: 20px;
+  font-family: var(--p-font-mono); font-size: 10.5px; color: var(--p-ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.p-sideitem[aria-current="page"] { background: var(--p-accent-wash); color: var(--p-accent-hover); font-weight: 600; }
+.p-sideitem[aria-current="page"] svg { opacity: 1; }
+.p-sideitem[aria-current="page"] .p-sideitem__num { color: var(--p-accent-hover); }
 
 /* -------------------------------------------------------------------------
    Ringkasan (halaman awal) — checklist peluncuran berupa BARIS LIST, bukan
