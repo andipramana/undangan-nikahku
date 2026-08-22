@@ -32,12 +32,12 @@ const checks = [
   // tidak mengikuti mask; .fab-curve dekoratif WAJIB pointer-events:none
   // supaya tidak menutupi tap ke disc di atasnya.
   ["bottom navbar: 3 panel kiri/fab/kanan menyatu lewat border-radius", css.includes(".wa-bottomnav__side--left") && css.includes(".wa-bottomnav__side--right") && /border-top-right-radius/.test(css) && /border-top-left-radius/.test(css)],
-  // box-shadow (spread) sempat dipakai buat melukis kurva tapi dibuang —
-  // spread melebar ke SEMUA arah (kiri-kanan-atas-bawah, bukan cuma turun),
-  // jadi ukuran tampak = ukuran div ± 2×spread, dua kali salah kira-kira
-  // (lebih lebar dari disc, lalu cekungannya turun sampai nyaris keluar
-  // layar). Sekarang warna solid + width/height langsung, tanpa shadow.
-  ["bottom navbar: kurva tengah warna solid ukuran pasti, dekoratif (pointer-events:none), tanpa box-shadow", css.includes(".wa-bottomnav__fab-curve") && /\.wa-bottomnav__fab-curve\s*\{[^}]*background:\s*var\(--wa-paper\)/.test(css) && /\.wa-bottomnav__fab-curve\s*\{[^}]*pointer-events:\s*none/.test(css) && !/\.wa-bottomnav__fab-curve\s*\{[^}]*box-shadow/.test(css)],
+  // Dua percobaan mempersempit kurva (spread lebih kecil, lalu warna solid
+  // tanpa shadow sama sekali) sama-sama dinilai memperburuk hasilnya oleh
+  // pemilik produk — dikembalikan ke ukuran/pola box-shadow awal atas
+  // permintaan langsung. Assertion ini menegaskan ukuran itu SENGAJA
+  // dipertahankan, bukan lupa dikecilkan lagi.
+  ["bottom navbar: kurva tengah dari box-shadow, dekoratif (pointer-events:none)", css.includes(".wa-bottomnav__fab-curve") && /box-shadow:\s*0\s+22px\s+0\s+20px\s+var\(--wa-paper\)/.test(css) && /\.wa-bottomnav__fab-curve\s*\{[^}]*pointer-events:\s*none/.test(css)],
   ["bottom navbar: tengah primary disc menggantung", css.includes("wa-bottomnav__item--primary") && css.includes(".wa-bottomnav__disc") && /margin-top:\s*-30px/.test(css)],
   // "Link & Template" bukan pasangan tombol toolbar — handler-nya sendiri:
   // buka <details> Pengaturan pesan, scroll halus, flash ring ±1,6s

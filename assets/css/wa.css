@@ -103,28 +103,28 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
   .wa-bottomnav__side--right { border-top-left-radius: 28px; justify-content: space-evenly; }
   /* Slot tengah: lebih lebar dari disc-nya sendiri supaya ada "bahu" kurva
      yang kelihatan di kanan-kirinya (persis referensi), bukan cuma cincin
-     mepet ke disc. pointer-events:none di .fab-curve WAJIB — ini murni
-     dekorasi, jangan sampai menutupi tap ke disc di atasnya (persis bug
-     yang terjadi di percobaan mask sebelumnya). */
+     mepet ke disc. .fab-curve sendiri TRANSPARAN — yang kelihatan adalah
+     box-shadow-nya (spread besar, blur 0): trik ini otomatis menghasilkan
+     kurva mulus mengikuti border-radius div sumbernya, tanpa perlu hitung
+     bezier manual. pointer-events:none WAJIB — ini murni dekorasi, jangan
+     sampai menutupi tap ke disc di atasnya (persis bug yang terjadi di
+     percobaan mask sebelumnya).
+
+     CATATAN: dua percobaan mempersempit lewat spread (966903b) dan lewat
+     ukuran pasti tanpa shadow (f68289c) sama-sama dinilai memperburuk
+     hasilnya oleh pemilik produk — dikembalikan ke ukuran awal ini atas
+     permintaan langsung, JANGAN diubah lagi tanpa arahan baru. */
   .wa-bottomnav__fab-slot {
     flex: none; width: 104px;
     position: relative;
     display: flex; align-items: flex-end; justify-content: center;
   }
-  /* .fab-curve LANGSUNG diberi warna solid & ukuran pasti — TANPA box-shadow.
-     Percobaan sebelumnya melukis bentuknya lewat box-shadow (spread besar,
-     blur 0): praktis tapi spread melebar ke SEMUA arah (kiri-kanan-atas-
-     bawah, bukan cuma turun), jadi lebar & dalam tampak = ukuran div asli
-     ± 2×spread — susah ditebak & dua kali salah kira-kira. Sekarang lebar
-     dan dalamnya persis width/height di bawah, tidak ada faktor pengali
-     tersembunyi. */
   .wa-bottomnav__fab-curve {
-    position: absolute; left: 50%; top: 0;
-    width: 92px; height: 24px;
-    transform: translateX(-50%);
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 30px;
     border-bottom-left-radius: 100px;
     border-bottom-right-radius: 100px;
-    background: var(--wa-paper);
+    box-shadow: 0 22px 0 20px var(--wa-paper);
     pointer-events: none;
   }
   .wa-bottomnav__item {
