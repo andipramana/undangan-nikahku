@@ -3,11 +3,15 @@
 <body>
 <main class="p-outlet"><div class="p-outlet__inner" style="max-width:640px;margin:0 auto">
 <form id="register-form" class="p-card">
+<div class="p-brand">
+<span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
+<span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Provisioning</span></span>
+</div>
 <h1 style="font-family:var(--p-font-display);font-size:clamp(1.5rem,4vw,2rem);letter-spacing:-.035em;margin:0">Daftarkan Undangan</h1>
-<p class="p-hint">Khusus admin root.</p>
+<p class="p-hint">Khusus admin root — membuat tenant baru beserta akun admin-nya.</p>
 <label class="p-field"><span>Email admin root</span><input class="p-input" id="owner-email" type="email" required autocomplete="username"></label>
 <label class="p-field"><span>Password admin root</span><input class="p-input" id="owner-password" type="password" required autocomplete="current-password"></label>
-<hr style="border:0;border-top:1px solid var(--p-line);margin:.25rem 0">
+<hr style="border:0;border-top:1px solid var(--p-hairline);margin:.25rem 0">
 <label class="p-field"><span>Slug path</span><input class="p-input" id="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="siti-dan-ujang"></label>
 <div class="p-grid-2">
 <label class="p-field"><span>Nama mempelai wanita</span><input class="p-input" id="bride-name" required placeholder="Siti"></label>
@@ -40,7 +44,7 @@
 <section id="clients-panel" class="p-card" hidden style="margin-top:1rem">
 <div class="p-toolbar">
 <div><h2 style="font-family:var(--p-font-display);font-size:1.15rem;margin:0 0 .2rem">Daftar client</h2><p class="p-hint" style="margin:0">Kelola undangan, akun Admin, dan Admin QR.</p></div>
-<button type="button" class="p-btn p-btn--ghost" id="clients-refresh">↻ Refresh</button>
+<button type="button" class="p-btn p-btn--ghost" id="clients-refresh">Muat ulang</button>
 </div>
 <div id="clients-list"></div>
 </section>
