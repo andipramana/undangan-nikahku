@@ -76,8 +76,8 @@
   --p-font-display: var(--p-font-ui);
   --p-font-mono: "Geist Mono", ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
 
-  --p-sidebar-w: 264px;
   --p-content-max: 880px;
+  --p-frame-max: 1160px;
 }
 
 /* -------------------------------------------------------------------------
@@ -116,9 +116,9 @@ code {
   background: var(--p-sunken); border-radius: 999px; padding: 3px 10px;
 }
 
-/* Label mikro mono — satu suara untuk kicker, label grup, header tabel */
-.p-kicker, .p-pageheader__kicker, .p-sidebar__group-label, .p-nav-group__label,
-.p-kpi__label, .p-table th {
+/* Label mikro mono — satu suara untuk kicker, label seksi, header tabel */
+.p-kicker, .p-stage__kicker, .p-section-label,
+.p-table th {
   font-family: var(--p-font-mono);
   font-size: 10.5px;
   font-weight: 500;
@@ -175,140 +175,162 @@ code {
 }
 
 /* -------------------------------------------------------------------------
-   Kerangka aplikasi: sidebar permanen (desktop) + outlet
+   Kepala frame: topbar + STRIP BAB — seluruh navigasi dalam satu baris
+   chip horizontal (bab bernomor mengikuti urutan baca tamu, lalu alat flat
+   setelah satu pemisah). Tanpa sidebar/hamburger/grid kartu. Sticky supaya
+   navigasi selalu terjangkau dari kedalaman halaman mana pun.
    ------------------------------------------------------------------------- */
-.p-shell { min-height: 100vh; display: flex; }
-.p-sidebar {
-  display: none;
-  flex: none;
-  position: sticky; top: 0; height: 100vh;
-  width: var(--p-sidebar-w);
-  padding: var(--p-5) var(--p-4) var(--p-4);
-  background: var(--p-paper);
-  border-right: 1px solid var(--p-hairline);
-  flex-direction: column;
-}
-.p-sidebar .p-brand { padding: 0 var(--p-2); }
-.p-sidebar__slug {
-  margin: var(--p-3) var(--p-2) 0;
-  align-self: flex-start;
-  font-family: var(--p-font-mono); font-size: 11px; color: var(--p-ink-2);
-  background: var(--p-sunken); border-radius: 999px; padding: 3px 10px;
-}
-.p-sidebar nav { display: grid; gap: var(--p-5); align-content: start; flex: 1; overflow-y: auto; padding: var(--p-4) 0; }
-.p-sidebar__group-label {
-  display: flex; align-items: center; gap: 10px;
-  margin: 0 0 var(--p-2); padding: 0 var(--p-2);
-  color: var(--p-ink-3);
-}
-.p-sidebar__group-label::after { content: ""; flex: 1; height: 1px; background: var(--p-hairline-weak); }
-.p-sidebar__item {
-  display: flex; align-items: center; gap: 10px;
-  width: 100%; text-align: left; border: 0; background: transparent;
-  border-radius: var(--p-r-sm); padding: .5rem var(--p-2);
-  font-size: 13.5px; font-weight: 550; color: var(--p-ink-2);
-  text-decoration: none; min-height: 36px;
-  transition: background .15s ease, color .15s ease;
-}
-.p-sidebar__item svg { width: 17px; height: 17px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.7; opacity: .85; }
-.p-sidebar__item:hover { background: var(--p-sunken); color: var(--p-ink); text-decoration: none; }
-.p-sidebar__item[aria-current="page"] { background: var(--p-accent-wash); color: var(--p-accent-hover); font-weight: 600; }
-.p-sidebar__item[aria-current="page"] svg { opacity: 1; }
-.p-sidebar__footer { border-top: 1px solid var(--p-hairline-weak); padding-top: var(--p-3); }
-.p-sidebar__logout { width: 100%; }
-
-.p-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
-
-/* Header sticky halaman — kicker mono (nama grup) + judul + status publikasi.
-   Tombol Kembali hanya relevan di HP (sidebar tampil di desktop). */
-.p-pageheader {
-  position: sticky; top: 0; z-index: 20;
-  display: flex; align-items: center; gap: var(--p-3);
-  min-height: 58px;
-  padding: var(--p-2) var(--p-4);
-  background: rgba(245, 246, 248, .86);
-  backdrop-filter: blur(10px) saturate(1.4);
+.p-framehead {
+  position: sticky; top: 0; z-index: 25;
+  background: rgba(245, 246, 248, .88);
+  backdrop-filter: blur(12px) saturate(1.4);
   border-bottom: 1px solid var(--p-hairline);
 }
-.p-pageheader__back {
-  display: none;
-  flex: none; align-items: center; justify-content: center;
-  width: 38px; height: 38px; border-radius: var(--p-r-sm);
+.p-topbar {
+  display: flex; align-items: center; gap: var(--p-3);
+  max-width: var(--p-frame-max);
+  margin: 0 auto; padding: 10px var(--p-4) 6px;
+}
+.p-topbar__side { margin-left: auto; display: flex; align-items: center; gap: var(--p-2); }
+.p-topbar__slug { display: none; }
+@media (min-width: 720px) { .p-topbar__slug { display: inline-flex; } }
+
+/* Pill status publikasi — klik membuka Ringkasan (data-nav-key="home") */
+.p-pubpill {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 30px; padding: .25rem .75rem; border-radius: 999px;
+  border: 0; background: var(--p-warn-wash); color: var(--p-warn);
+  font-family: var(--p-font-mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.p-pubpill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.p-pubpill--live { background: var(--p-ok-wash); color: var(--p-ok); }
+.p-pubpill:hover { box-shadow: inset 0 0 0 1px currentColor; }
+
+/* Menu ⋯ — pratinjau draft & keluar (btn-logout di-bind core.js) */
+.p-topmenu { position: relative; }
+.p-topmenu__btn {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 999px;
   border: 1px solid var(--p-hairline); background: var(--p-paper); color: var(--p-ink);
+  font-size: 15px; line-height: 1; cursor: pointer; list-style: none;
 }
-.p-pageheader__back svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
-.p-pageheader__text { min-width: 0; flex: 1; }
-.p-pageheader__kicker { margin: 0; color: var(--p-ink-3); }
-.p-pageheader__title {
-  margin: 1px 0 0;
-  font-family: var(--p-font-display);
-  font-size: 17px; font-weight: 650; letter-spacing: -.012em;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.p-topmenu__btn::-webkit-details-marker { display: none; }
+.p-topmenu__btn:hover { background: var(--p-sunken); }
+.p-topmenu[open] .p-topmenu__btn { background: var(--p-ink); color: var(--p-paper); border-color: var(--p-ink); }
+.p-topmenu__sheet {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 35;
+  min-width: 200px; padding: 5px; display: grid;
+  background: var(--p-paper); border: 1px solid var(--p-hairline);
+  border-radius: var(--p-r-md); box-shadow: var(--p-shadow-lg);
 }
-.p-pageheader--home .p-pageheader__back { display: none !important; }
+.p-topmenu__sheet button {
+  text-align: left; border: 0; background: transparent;
+  border-radius: calc(var(--p-r-md) - 4px);
+  min-height: 38px; padding: .45rem .7rem;
+  font-size: 13.5px; font-weight: 550; color: var(--p-ink);
+}
+.p-topmenu__sheet button:hover { background: var(--p-sunken); }
+
+/* Strip bab — chip scroll horizontal; chip aktif = pil tinta solid.
+   Nomor bab mono adalah wayfinding utamanya (daftar isi undangan). */
+.p-chapters {
+  display: flex; align-items: center; gap: 4px;
+  max-width: var(--p-frame-max); margin: 0 auto;
+  padding: 2px var(--p-4) 8px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.p-chapters::-webkit-scrollbar { display: none; }
+.p-chapter {
+  flex: none; display: inline-flex; align-items: center; gap: 7px;
+  min-height: 32px; padding: .25rem .85rem; border-radius: 999px;
+  color: var(--p-ink-2); font-size: 13px; font-weight: 550; white-space: nowrap;
+  text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+}
+.p-chapter:hover { background: var(--p-sunken); color: var(--p-ink); text-decoration: none; }
+.p-chapter__num {
+  font-family: var(--p-font-mono); font-size: 10.5px; letter-spacing: .05em;
+  color: var(--p-ink-3); font-variant-numeric: tabular-nums;
+}
+.p-chapter svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.7; opacity: .75; }
+.p-chapter--home { color: var(--p-ink); font-weight: 600; }
+.p-chapters__rule { flex: none; align-self: center; width: 1px; height: 16px; background: var(--p-line); margin: 0 6px; }
+.p-chapter[aria-current="page"] { background: var(--p-ink); color: var(--p-paper); }
+.p-chapter[aria-current="page"]:hover { background: var(--p-ink-hover); }
+.p-chapter[aria-current="page"] svg { opacity: 1; }
+.p-chapter[aria-current="page"] .p-chapter__num { color: rgba(255, 255, 255, .68); }
 
 .p-outlet { flex: 1; padding: var(--p-5) var(--p-4) 96px; }
 .p-outlet__inner { max-width: var(--p-content-max); margin: 0 auto; display: grid; gap: var(--p-4); }
 
 @media (min-width: 1024px) {
-  .p-sidebar { display: flex; }
-  .p-pageheader__back { display: none !important; }
-  .p-pageheader { padding: var(--p-2) var(--p-6); }
   .p-outlet { padding: var(--p-6) var(--p-6) 96px; }
 }
-@media (max-width: 1023.98px) {
-  .p-pageheader:not(.p-pageheader--home) .p-pageheader__back { display: inline-flex; }
+
+/* Stage head — judul halaman DI DALAM aliran konten (scroll ikut halaman,
+   bukan bar sticky): kicker mono /slug/ · bab NN, lalu judul besar. */
+.p-stage { max-width: var(--p-content-max); margin: 0 auto var(--p-4); }
+.p-stage__kicker { margin: 0; color: var(--p-ink-3); }
+.p-stage__title {
+  margin: 5px 0 0;
+  font-family: var(--p-font-display);
+  font-size: 24px; font-weight: 650; letter-spacing: -.02em;
 }
 
 /* -------------------------------------------------------------------------
-   Hub Beranda — status publikasi, KPI, grid navigasi
+   Ringkasan (halaman awal) — checklist peluncuran berupa BARIS LIST, bukan
+   kartu: satu baris status publikasi, lalu daftar bab (titik siap/belum),
+   lalu angka ringkas tamu. Semuanya hairline-separated, nada dokumen.
    ------------------------------------------------------------------------- */
-.p-status-card {
+.p-pubrow {
   display: flex; align-items: center; gap: var(--p-3); flex-wrap: wrap;
-  padding: var(--p-4) var(--p-5);
-  background: var(--p-paper); border: 1px solid var(--p-hairline);
-  border-radius: var(--p-r-lg); box-shadow: var(--p-shadow-sm);
+  padding-bottom: var(--p-4);
+  border-bottom: 1px solid var(--p-hairline);
 }
-.p-status-card__text { flex: 1; min-width: 200px; }
-.p-status-card__text strong { display: block; font-size: 14.5px; font-weight: 650; }
-.p-status-card__text span { font-size: 13px; color: var(--p-ink-2); }
-.p-status-card__actions { display: flex; gap: var(--p-2); flex-wrap: wrap; }
+.p-pubrow__text { flex: 1; min-width: 220px; }
+.p-pubrow__text strong { display: block; font-size: 14.5px; font-weight: 650; }
+.p-pubrow__text span { font-size: 13px; color: var(--p-ink-2); }
+.p-pubrow__actions { display: flex; gap: var(--p-2); flex-wrap: wrap; }
 
-.p-kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--p-3); }
-.p-kpi {
-  padding: var(--p-3) var(--p-4);
-  background: var(--p-paper); border: 1px solid var(--p-hairline);
-  border-radius: var(--p-r-md);
-}
-.p-kpi__value {
-  font-family: var(--p-font-mono); font-size: 26px; font-weight: 600;
-  letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.2;
-}
-.p-kpi__label { margin-top: 2px; color: var(--p-ink-3); }
+.p-section-label { margin: var(--p-5) 0 var(--p-1); color: var(--p-ink-3); }
 
-.p-nav-group { display: grid; gap: var(--p-2); }
-.p-nav-group__label {
-  display: flex; align-items: center; gap: 10px;
-  margin: var(--p-2) 0 0; color: var(--p-ink-3);
+.p-checklist { display: grid; }
+.p-checkrow {
+  display: flex; align-items: center; gap: var(--p-3);
+  margin: 0 calc(var(--p-3) * -1);
+  padding: .85rem var(--p-3);
+  border-radius: var(--p-r-sm);
+  border-bottom: 1px solid var(--p-hairline-weak);
+  color: inherit; text-decoration: none;
 }
-.p-nav-group__label::after { content: ""; flex: 1; height: 1px; background: var(--p-hairline-weak); }
-.p-nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)); gap: var(--p-2); }
-.p-nav-card {
-  display: flex; flex-direction: column; gap: 10px; justify-content: space-between;
-  padding: var(--p-3); min-height: 88px;
-  background: var(--p-paper); border: 1px solid var(--p-hairline); border-radius: var(--p-r-md);
-  text-align: left; text-decoration: none; color: var(--p-ink);
-  transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+.p-checklist .p-checkrow:last-child { border-bottom: 0; }
+.p-checkrow:hover { background: var(--p-sunken); text-decoration: none; }
+.p-checkrow__num {
+  flex: none; width: 22px;
+  font-family: var(--p-font-mono); font-size: 11px; color: var(--p-ink-3);
+  font-variant-numeric: tabular-nums;
 }
-.p-nav-card:hover {
-  border-color: var(--p-line-strong);
-  box-shadow: var(--p-shadow-sm);
-  transform: translateY(-1px);
-  text-decoration: none;
+.p-checkrow__name {
+  flex: 1; min-width: 0;
+  font-size: 14px; font-weight: 600; letter-spacing: -.005em;
 }
-.p-nav-card svg { width: 20px; height: 20px; stroke: var(--p-ink-3); fill: none; stroke-width: 1.6; }
-.p-nav-card:hover svg { stroke: var(--p-accent); }
-.p-nav-card__title { font-weight: 600; font-size: 13.5px; letter-spacing: -.005em; }
+.p-checkrow__state {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--p-font-mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.p-checkrow__state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.p-checkrow__state--done { color: var(--p-ok); }
+.p-checkrow__state--todo { color: var(--p-warn); }
+.p-checkrow__value {
+  flex: none; font-family: var(--p-font-mono); font-size: 15px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.p-checkrow__go { flex: none; color: var(--p-ink-3); transition: color .15s ease; }
+.p-checkrow__go svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; display: block; }
+.p-checkrow:hover .p-checkrow__go { color: var(--p-accent); }
 
 /* -------------------------------------------------------------------------
    Kartu & section
