@@ -194,6 +194,43 @@ try {
   const checklistRows = await page.locator("#home-chapters .p-checkrow").count();
   check("Ringkasan: checklist 9 bab dirender sebagai baris", checklistRows === 9);
 
+  // SIDEBAR parent-child — jalur navigasi KEDUA. Desktop: kolom permanen;
+  // HP: drawer dari hamburger topbar. Strip bab tetap utama & tak diubah.
+  const sidebarOpen = () => page.locator("#p-sidebar").evaluate((el) => el.classList.contains("p-sidebar--open"));
+  check("desktop: sidebar tampil permanen (tanpa drawer)", await page.locator("#p-sidebar").isVisible());
+  await page.locator('#p-sidebar [data-nav-key="hadiah"]').click();
+  await page.waitForTimeout(300);
+  stillOnAdminHtml('sidebar desktop: klik "hadiah"');
+  const kickerHadiah = await page.locator(".p-stage__kicker").textContent().catch(() => "");
+  check("desktop: kicker stage menyebut bab 08 untuk hadiah", /bab\s*08/i.test(kickerHadiah || ""));
+
+  // Grup parent bisa diciutkan/dibuka (berlaku di kedua mode).
+  const firstHead = page.locator(".p-sidegroup__head").first();
+  const groupCount = await page.locator("#p-sidebar-nav .p-sidegroup").count();
+  check("sidebar: 3 grup parent dirender (Bab undangan/Tamu/Tampilan & setelan)", groupCount === 3);
+  await firstHead.click();
+  check("sidebar: klik parent menutup daftar child-nya", (await firstHead.getAttribute("aria-expanded")) === "false");
+  await firstHead.click();
+  check("sidebar: klik parent lagi membuka daftar child-nya", (await firstHead.getAttribute("aria-expanded")) === "true");
+
+  // Jalur drawer HP.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(150);
+  check("HP: drawer awalnya tertutup", !(await sidebarOpen()));
+  await page.locator("#p-menu-btn").click();
+  await page.waitForTimeout(300);
+  check("HP: hamburger membuka drawer", await sidebarOpen());
+  await page.keyboard.press("Escape");
+  check("HP: Escape menutup drawer", !(await sidebarOpen()));
+  await page.locator("#p-menu-btn").click();
+  await page.waitForTimeout(300);
+  await page.locator('#p-sidebar [data-nav-key="kontak"]').click();
+  await page.waitForTimeout(300);
+  stillOnAdminHtml('drawer HP: klik "kontak"');
+  check("HP: setelah memilih tujuan, drawer menutup sendiri", !(await sidebarOpen()));
+  const stageKontak = await page.locator(".p-stage__title").textContent().catch(() => "");
+  check("HP: rute kontak benar-benar termuat dari drawer", /kontak/i.test(stageKontak || ""));
+
   check("tidak ada console error di sepanjang navigasi", consoleErrors.length === 0);
   if (consoleErrors.length) consoleErrors.forEach((e) => console.error("  console error:", e));
   check("tidak ada unhandled exception/rejection di sepanjang navigasi", pageErrors.length === 0);
