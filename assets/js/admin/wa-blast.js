@@ -750,7 +750,9 @@
     const ext = file.name.split(".").pop().toLowerCase();
     let result;
     try {
-      result = ext === "csv" ? parseCsv(await file.text()) : parseExcel(await file.arrayBuffer());
+      result = ext === "csv" ? parseCsv(await file.text())
+        : ext === "vcf" ? parseVcf(await file.text())
+        : parseExcel(await file.arrayBuffer());
     } catch (err) {
       toast("Gagal membaca file: " + err.message, true);
       return;
@@ -781,6 +783,43 @@
         return;
       }
       rows.push({ name: parts[0], phone: phone || null });
+    });
+    return { rows, skipped };
+  }
+
+  /** vCard (.vcf) — format export kontak HP standar; disalin dari
+   * panel/pages/kontak.js agar perilaku impor identik di kedua halaman.
+   * Satu file bisa berisi banyak blok BEGIN:VCARD..END:VCARD; baris lipatan
+   * (continuation, diawali spasi/tab) disatukan dulu. Nama dari FN (paling
+   * andal), fallback ke N dengan SEMUA komponennya; nomor = TEL pertama
+   * yang valid per kontak. Baris tanpa nama/nomor-valid dihitung skipped. */
+  function parseVcf(text) {
+    const unfolded = String(text ?? "").replace(/\r\n/g, "\n").replace(/\n[ \t]/g, "");
+    const blocks = unfolded.split(/BEGIN:VCARD/i).slice(1);
+    const rows = [];
+    let skipped = 0;
+    blocks.forEach((block) => {
+      const lines = block.split(/END:VCARD/i)[0].split("\n").map((l) => l.trim()).filter(Boolean);
+      let fn = "";
+      let nParts = null;
+      let phone = "";
+      lines.forEach((line) => {
+        const idx = line.indexOf(":");
+        if (idx === -1) return;
+        const key = line.slice(0, idx).split(";")[0].toUpperCase();
+        const value = line.slice(idx + 1).trim();
+        if (key === "FN" && !fn) fn = value;
+        if (key === "N" && !nParts) nParts = value.split(";");
+        if (key === "TEL" && !phone) {
+          const candidate = normalizePhone(value);
+          if (isValidPhone(candidate)) phone = candidate;
+        }
+      });
+      const name = fn || (nParts
+        ? [nParts[3], nParts[1], nParts[2], nParts[0], nParts[4]].filter(Boolean).join(" ").trim()
+        : "");
+      if (!name || !isValidPhone(phone)) { skipped++; return; }
+      rows.push({ name, phone });
     });
     return { rows, skipped };
   }
@@ -976,6 +1015,28 @@
     });
   });
 
+  /* "Link & Template" tidak memicu tombol lain — ia membuka section
+   * Pengaturan pesan di atas: buka <details>, scroll halus ke sana, lalu
+   * flash ring hijau sebentar supaya jelas mana yang baru terbuka.
+   * Sengaja bukan modal: form-nya kompleks (link + template + daftar
+   * template tersimpan) dan state simpannya satu — menduplikasinya di
+   * modal berarti dua tempat yang bisa saling tertinggal. */
+  (function bindNavLinks() {
+    const nav = document.getElementById("wa-nav-links");
+    if (!nav) return;
+    nav.addEventListener("click", (e) => {
+      e.preventDefault();
+      const config = document.querySelector(".wa-config");
+      if (!config) return;
+      config.open = true;
+      config.scrollIntoView({ behavior: "smooth", block: "start" });
+      config.classList.remove("wa-config--flash");
+      void config.offsetWidth; // restart animasi bila baris ini di-klik lagi
+      config.classList.add("wa-config--flash");
+      setTimeout(() => config.classList.remove("wa-config--flash"), 1600);
+    });
+  })();
+
   /* ---------- Tooltip long-press item navbar ----------
    * Label pendek ("Impor") belum tentu dimengerti — apalagi format file
    * yang diminta. Tekan-tahan ±450ms → bubble penjelasan. Teks ambil dari
@@ -1006,7 +1067,7 @@
       setTimeout(() => { if (!tip.classList.contains("wa-navtip--show")) tip.hidden = true; }, 220);
     };
 
-    ["wa-nav-add", "wa-nav-from", "wa-nav-import", "wa-nav-manage"].forEach((id) => {
+    ["wa-nav-add", "wa-nav-from", "wa-nav-import", "wa-nav-links", "wa-nav-manage"].forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener("pointerdown", (e) => {

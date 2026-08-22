@@ -37,7 +37,7 @@
           <div class="wa-toolbar wa-toolbar--actions">
             <button type="button" class="wa-button wa-button--primary" id="wa-add">Tambah kontak</button>
             <button type="button" class="wa-button wa-button--secondary" id="wa-add-from-contacts">Tambah dari kontak</button>
-            <label class="wa-button wa-button--secondary"><span>Impor CSV / Excel</span><input type="file" id="wa-import" accept=".csv,.xlsx,.xls" hidden></label>
+            <label class="wa-button wa-button--secondary"><span>Impor CSV / Excel / vCard</span><input type="file" id="wa-import" accept=".csv,.xlsx,.xls,.vcf" hidden></label>
             <a class="wa-button wa-button--secondary" id="wa-manage-contacts" href="#">Kelola daftar kontak</a>
           </div>
         </div>
@@ -102,6 +102,11 @@
   <div class="wa-modal__card" role="dialog" aria-modal="true" aria-labelledby="wa-pick-phone-title">
     <div class="wa-modal__head"><h2 id="wa-pick-phone-title">Isi nomor dari kontak</h2><button type="button" id="wa-pick-phone-close" class="wa-icon-button" aria-label="Tutup">×</button></div>
     <p class="wa-token-help" id="wa-pick-phone-target"></p>
+    <!-- Contact Picker API (Chromium Android saja) — sama seperti di modal
+         Tambah-dari-kontak: hidden default, wa-blast.js menampilkannya hanya
+         bila navigator.contacts tersedia. Satu pilihan langsung diterapkan
+         ke baris target (modal ini tanpa tombol simpan terpisah). -->
+    <button type="button" id="wa-pick-phone-hp" class="wa-button wa-button--secondary" hidden title="Buka kontak di HP ini — nomor kontak yang dipilih langsung mengisi baris ini"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg>Pilih dari kontak HP</button>
     <label>Daftar kontak<select id="wa-pick-phone-list"><option value="">Pilih daftar…</option></select></label>
     <input type="search" id="wa-pick-phone-search" class="wa-fc-search" placeholder="Cari nama atau nomor" aria-label="Cari nama atau nomor" hidden>
     <div id="wa-pick-phone-body"></div>
@@ -111,8 +116,10 @@
      aksi kontak hidup di sini saat dibuka di HP, tombol toolbar atas
      disembunyikan. Item Tambah/Dari kontak/Impor memicu tombol toolbar
      pasangannya (SATU sumber logika & disabled-state — wiring di
-     wa-blast.js); Kelola link keluar ke panel #/kontak (href diset wa.js,
-      sama seperti #wa-manage-contacts). -->
+     wa-blast.js); Link & Template membuka section Pengaturan pesan
+     (buka + scroll + flash); Kelola link keluar ke panel #/kontak
+     (href diset wa.js, sama seperti #wa-manage-contacts). Lima slot dengan
+     "Dari kontak" di TENGAH sebagai aksi utama (disc hijau menggantung). -->
 <nav class="wa-bottomnav" aria-label="Aksi kontak">
   <!-- title = satu sumber teks tooltip: hover di desktop (native),
        long-press di HP (bubble custom, lihat wa-blast.js). -->
@@ -120,13 +127,17 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
     <span>Tambah</span>
   </button>
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-from" title="Pilih banyak tamu sekaligus dari buku alamat di panel admin">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/></svg>
-    <span>Dari kontak</span>
-  </button>
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-import" title="Unggah file Excel (.xlsx/.xls) atau CSV — kolom 1: nama, kolom 2: nomor (boleh kosong)">
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-import" title="Unggah file Excel (.xlsx/.xls), CSV, atau vCard (.vcf) — kolom 1: nama, kolom 2: nomor (boleh kosong)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg>
     <span>Impor</span>
+  </button>
+  <button type="button" class="wa-bottomnav__item wa-bottomnav__item--primary" id="wa-nav-from" title="Pilih banyak tamu sekaligus dari buku alamat di panel admin — atau langsung dari kontak HP">
+    <span class="wa-bottomnav__disc" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/></svg></span>
+    <span>Dari kontak</span>
+  </button>
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-links" title="Atur link undangan & template pesan — membuka Pengaturan pesan di atas">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 1 0-7.07-7.07L11 5.93"/><path d="M14 10a5 5 0 0 0-7.07 0L4.8 12.12a5 5 0 1 0 7.07 7.07L13 18.07"/></svg>
+    <span>Link &amp; Template</span>
   </button>
   <a class="wa-bottomnav__item" id="wa-nav-manage" href="#" title="Buka buku alamat tamu di panel admin">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-1.7-1L15 3h-6l-.3 2.5a7.9 7.9 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.9 7.9 0 0 0 1.7 1L9 21h6l.3-2.5a7.9 7.9 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5z"/></svg>

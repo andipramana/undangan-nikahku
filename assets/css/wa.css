@@ -24,6 +24,14 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
 .wa-list-bar__actions { display:flex; gap:.4rem; flex-wrap:wrap; }
 .wa-summary { margin:0; padding:.85rem 1.4rem; color:var(--wa-muted); background:#fbfcfa; border-bottom:1px solid var(--wa-line); font-size:.86rem; font-weight:600; }
 .wa-config summary { cursor:pointer; list-style:none; padding:1.15rem 1.2rem; display:flex; justify-content:space-between; font-weight:800; }.wa-config summary::-webkit-details-marker { display:none; }.wa-config summary small { color:var(--wa-muted); font-weight:600; }.wa-config[open] summary { border-bottom:1px solid var(--wa-line); }.wa-notice { margin:1rem 1.2rem 0; padding:.75rem; color:#586057; border-left:3px solid #d7aa56; background:#fff9ec; border-radius:0 8px 8px 0; font-size:.78rem; line-height:1.5; }.wa-settings { padding:0 1.2rem 1.2rem; }.wa-token-help { font-size:.75rem; color:var(--wa-muted); line-height:1.7; }.wa-token-help code { color:var(--wa-green-dark); }.wa-templates-title { margin:0; padding:1rem 1.2rem .4rem; font-weight:800; }.wa-template-row { margin:.8rem 1.2rem; padding:.75rem; border:1px solid var(--wa-line); border-radius:12px; }.wa-template-head { display:flex; gap:.45rem; }.wa-template-body { margin-top:.55rem; }.wa-templates-title + .muted { padding:0 1.2rem; }
+/* Ring hijau sekilas saat item navbar "Link & Template" membuka section ini
+   (wa-blast.js toggle kelas .wa-config--flash ±1,6s) — penanda visual mana
+   yang baru terbuka tanpa memindahkan fokus dari daftar kontak. */
+.wa-config--flash { animation: wa-config-flash 1.6s ease-out; }
+@keyframes wa-config-flash {
+  0% { box-shadow: 0 0 0 3px var(--wa-green), 0 10px 30px rgba(23,35,30,.14); }
+  100% { box-shadow: 0 0 0 3px transparent; }
+}
 /* Daftar kontak satu permukaan agar filter, hasil, dan aksi terbaca sebagai satu unit. */
 .wa-contact-shell { margin:1rem 1.2rem 1.2rem; overflow:hidden; border:1px solid var(--wa-line); border-radius:14px; background:#fff; }
 .wa-contact-toolbar { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.7rem; padding:.7rem .8rem; border-bottom:1px solid var(--wa-line); background:#fbfcfa; }
@@ -75,7 +83,7 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
   .wa-toast { bottom: calc(6.4rem + env(safe-area-inset-bottom)); } /* toast di atas bar */
   .wa-bottomnav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: repeat(5, 1fr);
     gap: .2rem;
     padding: .35rem .5rem calc(.35rem + env(safe-area-inset-bottom));
     background: var(--wa-paper);
@@ -91,6 +99,18 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
     font-size: .66rem; font-weight: 800; letter-spacing: .01em;
     text-decoration: none; cursor: pointer;
   }
+  /* Item tengah "Dari kontak" = aksi utama: disc hijau menggantung setengah
+     keluar dari bar (ala material bottom-app-bar), label tetap di bawahnya.
+     Ring paper menyatu dengan latar bar supaya tepi atas bar terlihat utuh. */
+  .wa-bottomnav__item--primary { color: var(--wa-green-dark); }
+  .wa-bottomnav__disc {
+    display: grid; place-items: center;
+    width: 46px; height: 46px; margin-top: -18px;
+    border-radius: 50%;
+    background: var(--wa-green); color: #fff;
+    border: 3px solid var(--wa-paper);
+    box-shadow: 0 6px 16px rgba(31, 138, 85, .38);
+  } /* ukuran svg disc mengikuti rule svg umum item di atas */
   .wa-bottomnav__item:hover { background: var(--wa-soft); }
   .wa-bottomnav__item--disabled { opacity: .4; pointer-events: none; }
   .wa-bottomnav__item svg {

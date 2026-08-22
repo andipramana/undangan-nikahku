@@ -16,13 +16,39 @@ const checks = [
   ["visual terang memakai token sendiri", css.includes("--wa-paper") && css.includes("--wa-green")],
   ["pencarian dan list compact tersedia", page.includes("wa-contacts") && css.includes("wa-contact-shell") && css.includes("wa-status-filters")],
   // Aksi utama "Tambah kontak" punya titik masuk kedua yang mengikuti
-  // viewport (FAB) — terjangkau dari posisi scroll mana pun di daftar,
+  // viewport (dulu FAB) — terjangkau dari posisi scroll mana pun di daftar,
   // membuka modal yang sama dengan #wa-add, dan ikut disabled tanpa list.
   // Bottom navbar gaya aplikasi mobile (≤800px): SEMUA aksi kontak pindah
   // ke bar bawah saat dibuka di HP — toolbar atas disembunyikan, tidak ada
   // FAB mengambang. Item memicu tombol toolbar pasangannya (satu sumber
   // logika & disabled-state), "Kelola" link keluar ke panel #/kontak.
-  ["bottom navbar: empat item aksi di markup", page.includes('id="wa-nav-add"') && page.includes('id="wa-nav-from"') && page.includes('id="wa-nav-import"') && page.includes('id="wa-nav-manage"') && !page.includes("wa-fab")],
+  // Lima slot dengan "Dari kontak" sebagai item TENGAH primary (disc hijau),
+  // dan "Link & Template" membuka section Pengaturan pesan di atas.
+  ["bottom navbar: lima item aksi di markup", page.includes('id="wa-nav-add"') && page.includes('id="wa-nav-from"') && page.includes('id="wa-nav-import"') && page.includes('id="wa-nav-links"') && page.includes('id="wa-nav-manage"') && !page.includes("wa-fab")],
+  ["bottom navbar: tengah primary disc menggantung", /grid-template-columns:\s*repeat\(5,\s*1fr\)/.test(css) && css.includes("wa-bottomnav__item--primary") && css.includes(".wa-bottomnav__disc") && /margin-top:\s*-18px/.test(css)],
+  // "Link & Template" bukan pasangan tombol toolbar — handler-nya sendiri:
+  // buka <details> Pengaturan pesan, scroll halus, flash ring ±1,6s
+  // (restart via void offsetWidth supaya klik ulang tetap terlihat).
+  [
+    "navbar Link & Template membuka Pengaturan pesan dengan flash",
+    /\[\s*"wa-nav-links"/.test(blast) === false &&
+      /getElementById\("wa-nav-links"\)/.test(blast) &&
+      blast.includes('document.querySelector(".wa-config")') &&
+      /config\.open = true;/.test(blast) &&
+      /config\.scrollIntoView\(\{ behavior: "smooth", block: "start" \}\)/.test(blast) &&
+      blast.includes('void config.offsetWidth') &&
+      blast.includes('config.classList.add("wa-config--flash")') &&
+      css.includes(".wa-config--flash") &&
+      /@keyframes wa-config-flash/.test(css)
+  ],
+  // Impor file menerima vCard (.vcf) selain CSV & Excel: accept input file,
+  // parser parseVcf tersedia, dan routing ekstensi mengarahkannya.
+  [
+    "impor menerima vCard (.vcf)",
+    /accept="\.csv,\.xlsx,\.xls,\.vcf"/.test(page) &&
+      blast.includes("function parseVcf(text)") &&
+      blast.includes('ext === "vcf" ? parseVcf(await file.text())')
+  ],
   ["bottom navbar: wiring memicu toolbar + sinkron disabled", /\[\s*"wa-nav-add",\s*"wa-add"/.test(blast) && /classList\.toggle\("wa-bottomnav__item--disabled"/.test(blast)],
   ["bottom navbar: hanya tampil di mobile, toolbar atas disembunyikan", css.includes(".wa-bottomnav { display: none; }") && /\.wa-toolbar--actions\s*\{\s*display:\s*none/.test(css)],
   // Select "Daftar kirim" tidak lagi memakai tampilan native kotak:
@@ -33,7 +59,8 @@ const checks = [
   ["select daftar kirim full width di mobile", /\.wa-list-bar label\s*\{\s*flex:\s*1 1 100%/.test(css)],
   // Tooltip long-press item navbar: teks dari atribut title (desktop hover
   // native), bubble .wa-navtip untuk HP, dan aksi tak jalan setelah hold.
-  ["tooltip long-press item navbar", (page.match(/class="wa-bottomnav__item"[^>]*title=/g) || []).length === 4 && css.includes(".wa-navtip--show") && /pointerType === "mouse"/.test(blast) && /suppressUntil = Date\.now\(\) \+ 700/.test(blast)],
+  // Regex item harus menerima suffix class (--primary pada item tengah).
+  ["tooltip long-press item navbar", (page.match(/class="wa-bottomnav__item[^"]*"[^>]*title=/g) || []).length === 5 && css.includes(".wa-navtip--show") && /pointerType === "mouse"/.test(blast) && /suppressUntil = Date\.now\(\) \+ 700/.test(blast)],
   // "Pilih dari kontak HP" DI DALAM modal Tambah-dari-kontak: tombol default
   // hidden (Contact Picker API cuma ada di Chromium Android — iPhone/desktop
   // tidak pernah melihatnya), wa-blast.js menampilkannya hanya saat
