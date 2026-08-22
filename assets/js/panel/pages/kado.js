@@ -181,6 +181,10 @@ window.PanelPages["kado"] = {
                 <input type="text" class="kd-name-input" data-id="${e.id}" value="${escAttr(e.name)}" placeholder="Nama pemberi" aria-label="Nama pemberi">
                 <button type="button" class="kd-del" data-del-entry="${e.id}" aria-label="Hapus kado dari ${escAttr(e.name)}" title="Hapus">&times;</button>
               </div>
+              <!-- Satu baris meta padat (umpan balik: baris jumlah
+                   sendirian menyisakan space kosong): barang + Rp nominal +
+                   badge qty. flex-wrap: kalau sempit, nominal turun baris
+                   sendiri dengan rapi. -->
               <div class="kd-entry__meta">
                 <span class="kd-itemwrap">
                   <input type="text" class="p-input kd-plain kd-item-input" data-id="${e.id}" value="${escAttr(e.item)}" placeholder="Barang (mis. Amplop Uang)" aria-label="Barang">
@@ -190,8 +194,14 @@ window.PanelPages["kado"] = {
                        atas baris. -->
                   <button type="button" class="kd-clear" data-clear="${e.id}" title="Kosongkan nama barang" aria-label="Kosongkan nama barang">&times;</button>
                 </span>
-                <input type="text" inputmode="numeric" class="p-input kd-plain kd-amount-input" data-id="${e.id}" value="${e.amount !== null && e.amount !== undefined ? escAttr(fmtRibuan(e.amount)) : ""}" placeholder="Jumlah" aria-label="Jumlah (Rp)">
-                <input type="number" min="0" step="1" inputmode="numeric" class="p-input kd-plain kd-quantity-input" data-id="${e.id}" value="${escAttr(e.quantity ?? "")}" placeholder="Qty" aria-label="Kuantiti">
+                <span class="kd-amount">
+                  <span class="kd-amount-cur">Rp</span>
+                  <input type="text" inputmode="numeric" class="p-input kd-plain kd-amount-input" data-id="${e.id}" value="${e.amount !== null && e.amount !== undefined ? escAttr(fmtRibuan(e.amount)) : ""}" placeholder="0" aria-label="Jumlah (Rp)">
+                </span>
+                <!-- Qty = badge pill UNGU satu baris dengan nama barang
+                     (permintaan eksplisit pemilik produk) — tetap input
+                     biasa: tap untuk edit, kosong tinggalkan placeholder. -->
+                <input type="text" inputmode="numeric" class="kd-qty-badge kd-quantity-input" data-id="${e.id}" value="${escAttr(e.quantity ?? "")}" placeholder="Qty" aria-label="Kuantiti (badge)">
               </div>
               <input type="text" class="p-input kd-plain kd-timing-input" data-id="${e.id}" value="${escAttr(e.timing || "")}" placeholder="Keterangan — mis. H-, saat akad (opsional)" aria-label="Keterangan">
             </article>`).join("") : `<p class="p-empty">Belum ada kado di daftar ini — tambah satu-satu lewat tombol di atas.</p>`}

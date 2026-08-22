@@ -96,6 +96,12 @@ check('summary: chip total pemberi + total jumlah (amount null dilewati)', kadoS
 check('entri dirender sebagai article.kd-entry, BUKAN <table>/<td>', /<article class="kd-entry" data-entry-id=/.test(kadoSrc) && !/<table|<tbody|overflow-x:auto">[\s\S]*?<table/.test(kadoSrc.split('renderDetail')[1] || ''));
 check('CSS entri BERKARTU (latar row + border penuh + radius) — bukan garis bawah menyatu', /\.kd-list\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*gap:/.test(panelCss) && /\.kd-entry\s*\{[^}]*background:\s*var\(--p-row\);/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')) && /\.kd-entry\s*\{[^}]*border-radius:/.test(panelCss) && !/\.kd-entry\s*\{[^}]*border-bottom/.test(panelCss));
 check('jumlah: blur TANPA edit memulihkan tampilan terformat (bug klik-lalu-lepas)', kadoSrc.includes('parseAmountInput(input.value).value === e.amount') && /addEventListener\("blur"[\s\S]{0,400}?fmtRibuan\(e\.amount\)/.test(kadoSrc));
+// Layout kreatif permintaan eksplisit pemilik produk: qty = badge pill UNGU
+// satu baris dengan nama barang; nominal inline berprefix Rp (baris jumlah
+// sendirian dinilai boros space).
+check('urutan meta satu baris: barang → Rp nominal → badge qty', kadoSrc.indexOf('class="kd-itemwrap"') > -1 && kadoSrc.indexOf('class="kd-itemwrap"') < kadoSrc.indexOf('kd-amount-cur') && kadoSrc.indexOf('kd-amount-cur') < kadoSrc.indexOf('class="kd-qty-badge kd-quantity-input"'));
+check('badge qty ungu pill mono via token violet (tanpa hex di luar :root), fokus paper', panelCss.includes('--p-violet: #6d28d9;') && panelCss.includes('background: var(--p-violet-wash); color: var(--p-violet);') && /\.kd-qty-badge:focus[^}]*background:\s*var\(--p-paper\)/.test(panelCss));
+check('nominal inline: wrapper .kd-amount flex + angka rata kanan mono', /\.kd-amount\s*\{[^}]*display:\s*flex/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')) && /\.kd-amount \.kd-amount-input\s*\{[^}]*text-align:\s*right/.test(panelCss));
 check('nama borderless transparan (hover/focus berdandan)', /\.kd-name-input\s*\{[^}]*border:\s*1px solid transparent/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')));
 
 // ---------------------------------------------------------------------
