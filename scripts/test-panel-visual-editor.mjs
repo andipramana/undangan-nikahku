@@ -49,8 +49,17 @@ if (!failed) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   try {
     await page.setContent(`<style>${panelCss}</style><div class="p-card" style="width:390px"><div class="p-ve-frame-wrap"><iframe></iframe></div></div>`);
+    // Expected dihitung dari kotak konten kartu yang BENAR-BENAR dirender
+    // (lebar - padding kiri/kanan computed), bukan konstanta padding —
+    // nilai token spasi kartu boleh berubah antar putaran desain, tetapi
+    // kanvas iframe WAJIB selalu mengikuti kotak konten itu (responsif),
+    // bukan mockup lebar tetap.
+    const contentWidth = await page.locator('.p-card').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return el.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    });
     const width = await page.locator('.p-ve-frame-wrap').evaluate((el) => el.getBoundingClientRect().width);
-    check("kanvas iframe Editor Visual mengikuti lebar kartu (bukan mockup lebar tetap)", Math.abs(width - (390 - 32)) < 4); // 390 - 2*var(--p-4) padding kartu
+    check("kanvas iframe Editor Visual mengikuti lebar konten kartu (bukan mockup lebar tetap)", Math.abs(width - contentWidth) < 4);
   } finally {
     await browser.close();
   }
