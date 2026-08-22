@@ -89,6 +89,10 @@
   <div class="wa-modal__card" role="dialog" aria-modal="true" aria-labelledby="wa-from-contacts-title">
     <div class="wa-modal__head"><h2 id="wa-from-contacts-title">Tambah dari kontak</h2><button type="button" id="wa-from-contacts-close" class="wa-icon-button" aria-label="Tutup">×</button></div>
     <label>Daftar kontak<select id="wa-from-contacts-list"><option value="">Pilih daftar…</option></select></label>
+    <!-- Contact Picker API (Android Chrome/Edge dkk.) — tetap hidden di markup;
+         wa-blast.js menampilkannya hanya bila navigator.contacts tersedia,
+         jadi iPhone/desktop tidak pernah melihat tombol mati. -->
+    <button type="button" id="wa-from-contacts-phone" class="wa-button wa-button--secondary" hidden title="Buka kontak di HP ini — pilih satu atau banyak sekaligus, langsung masuk daftar kirim"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M11 18.5h2"/></svg>Pilih dari kontak HP</button>
     <input type="search" id="wa-from-contacts-search" class="wa-fc-search" placeholder="Cari nama atau nomor" aria-label="Cari nama atau nomor" hidden>
     <div id="wa-from-contacts-body"></div>
     <button type="button" id="wa-from-contacts-save" class="wa-button wa-button--primary" hidden>Tambahkan kontak terpilih</button>

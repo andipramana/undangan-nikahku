@@ -33,7 +33,19 @@ const checks = [
   ["select daftar kirim full width di mobile", /\.wa-list-bar label\s*\{\s*flex:\s*1 1 100%/.test(css)],
   // Tooltip long-press item navbar: teks dari atribut title (desktop hover
   // native), bubble .wa-navtip untuk HP, dan aksi tak jalan setelah hold.
-  ["tooltip long-press item navbar", (page.match(/class="wa-bottomnav__item"[^>]*title=/g) || []).length === 4 && css.includes(".wa-navtip--show") && /pointerType === "mouse"/.test(blast) && /suppressUntil = Date\.now\(\) \+ 700/.test(blast)]
+  ["tooltip long-press item navbar", (page.match(/class="wa-bottomnav__item"[^>]*title=/g) || []).length === 4 && css.includes(".wa-navtip--show") && /pointerType === "mouse"/.test(blast) && /suppressUntil = Date\.now\(\) \+ 700/.test(blast)],
+  // "Pilih dari kontak HP" DI DALAM modal Tambah-dari-kontak: tombol default
+  // hidden (Contact Picker API cuma ada di Chromium Android — iPhone/desktop
+  // tidak pernah melihatnya), wa-blast.js menampilkannya hanya saat
+  // navigator.contacts tersedia dan memakai select(["name","tel"], multiple).
+  [
+    "pilih dari kontak HP hanya di browser pendukung",
+    page.includes('id="wa-from-contacts-phone"') &&
+      /id="wa-from-contacts-phone"[^>]*hidden/.test(page) &&
+      blast.includes("navigator.contacts.select") &&
+      blast.includes('select(["name", "tel"], { multiple: true })') &&
+      blast.includes("fcPhoneBtn.hidden = !hasPhoneContacts")
+  ]
 ];
 for (const [label, pass] of checks) {
   if (!pass) throw new Error(`FAIL: ${label}`);

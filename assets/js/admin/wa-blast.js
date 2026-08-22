@@ -898,6 +898,55 @@
   const fcSearch = document.getElementById("wa-from-contacts-search");
   const fcBody = document.getElementById("wa-from-contacts-body");
   const fcSave = document.getElementById("wa-from-contacts-save");
+
+  /* ---------- Pilih dari kontak HP (Contact Picker API) ----------
+   * Jalur ketiga di modal ini selain dropdown daftar: baca langsung buku
+   * kontak HP lewat navigator.contacts.select() — API web resmi yang hanya
+   * ada di browser Chromium Android (Chrome/Edge/Samsung Internet). iPhone
+   * tidak pernah mendukungnya (semua browser iOS wajib WebKit) dan desktop
+   * juga tidak punya API ini, jadi tombolnya tetap hidden di markup dan
+   * hanya ditampilkan saat fitur benar-benar tersedia. Halaman tidak bisa
+   * membaca seluruh buku kontak — user memilih lewat UI sistem, dan hanya
+   * nama+nomor kontak terpilih yang sampai ke halaman. */
+  const hasPhoneContacts = typeof navigator !== "undefined" && navigator.contacts && typeof navigator.contacts.select === "function";
+  const fcPhoneBtn = document.getElementById("wa-from-contacts-phone");
+  if (fcPhoneBtn) {
+    fcPhoneBtn.addEventListener("click", async () => {
+      if (!hasPhoneContacts) return;
+      fcPhoneBtn.disabled = true;
+      try {
+        const picked = await navigator.contacts.select(["name", "tel"], { multiple: true });
+        // Bentuk hasil: [{ name: string[], tel: string[] }, ...]; cancel
+        // mengembalikan array kosong. Nama fallback ke nomor kalau kontak
+        // tidak punya nama; nomor boleh kosong (kontak grup/nama saja).
+        const rows = (picked || [])
+          .map((p) => {
+            const rawPhone = (p.tel && p.tel[0]) || "";
+            const phone = rawPhone ? normalizePhone(rawPhone) : "";
+            return { name: (p.name && p.name[0]) || rawPhone, phone };
+          })
+          .filter((r) => r.name && (!r.phone || isValidPhone(r.phone)))
+          .map((r) => ({ invitation_id: window.AdminAPI.tenant.invitationId, list_id: currentWaListId, name: r.name, phone: r.phone || null }));
+        if (!rows.length) { toast("Tidak ada kontak HP yang bisa ditambahkan.", true); return; }
+        // Nomor yang sudah ada di daftar kirim dilewati (pola "sudah ada"
+        // pada pemilih buku alamat); kontak tanpa nomor tidak bisa dicegah dobel.
+        const existingPhones = new Set(contacts.map((c) => c.phone));
+        const fresh = rows.filter((r) => !r.phone || !existingPhones.has(r.phone));
+        if (!fresh.length) { toast("Semua kontak terpilih sudah ada di daftar kirim."); return; }
+        const { error } = await window.AdminAPI.query(sb.from("wa_contacts").insert(fresh), "Penyimpanan kontak");
+        if (error) { toast("Gagal menambahkan: " + error.message, true); return; }
+        fcModal.hidden = true;
+        toast(`${fresh.length} kontak dari HP ditambahkan.`);
+        await load();
+      } catch (err) {
+        if (err && (err.name === "AbortError" || err.name === "NotAllowedError")) return;
+        toast("Gagal mengambil kontak HP: " + ((err && err.message) || err), true);
+      } finally {
+        fcPhoneBtn.disabled = false;
+      }
+    });
+  }
+
   let fcEntries = [];
   // Set ID (bukan cuma checkbox DOM) supaya pilihan tidak hilang saat hasil
   // pencarian berganti — checkbox yang tersaring keluar dari daftar tampilan
@@ -992,6 +1041,7 @@
 
   async function openFromContacts() {
     fcListSelect.innerHTML = `<option value="">Memuat daftar…</option>`;
+    if (fcPhoneBtn) fcPhoneBtn.hidden = !hasPhoneContacts; // hanya browser pendukung yang melihat tombol
     fcSearch.hidden = true;
     fcSearch.value = "";
     fcBody.innerHTML = "";
