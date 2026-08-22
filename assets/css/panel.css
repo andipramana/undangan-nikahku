@@ -816,3 +816,44 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
   font-family: var(--p-font-mono); font-size: 10.5px; font-weight: 600;
   letter-spacing: .07em; text-transform: uppercase;
 }
+
+/* -------------------------------------------------------------------------
+   Halaman Kado & Amplop (#/kado) — murni internal admin, TIDAK serumpun
+   wa-family: tema kobalt panel standar. Komponen umum .p-* dipakai apa
+   adanya; di bawah hanya util khusus halaman ini.
+   ------------------------------------------------------------------------- */
+/* Aksi daftar kado: grid sel sama lebar — pola yang sama dengan .kt-actions
+   Kontak (flex-wrap berukuran konten membuat barisnya tampak acak di HP). */
+.kd-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--p-2);
+  margin: var(--p-3) 0 var(--p-2);
+}
+.kd-actions .p-btn { width: 100%; justify-content: center; }
+/* Hapus semua = destruktif, satu baris penuh terpisah di bawah grid aksi. */
+.kd-danger-row { display: flex; width: 100%; justify-content: center; margin-top: var(--p-2); }
+/* Chip jumlah catatan ("N CATATAN") di baris daftar — kobalt, bukan hijau wa. */
+.kd-count-chip {
+  display: inline-block; width: max-content;
+  padding: .18rem .6rem;
+  border-radius: 999px;
+  background: var(--p-accent-wash);
+  color: var(--p-accent-hover);
+  font-family: var(--p-font-mono); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase;
+}
+/* Input "Barang" clearable: tombol × kecil DI DALAM field (pola kotak
+   pencarian) untuk mengosongkan default 'Amplop Uang' sekali klik — BEDA
+   dari tombol hapus baris di kolom terakhir tabel. */
+.kd-itemwrap { position: relative; display: block; min-width: 9rem; }
+.kd-itemwrap .p-input { width: 100%; padding-right: 1.9rem; }
+.kd-clear {
+  position: absolute; top: 50%; right: .3rem; transform: translateY(-50%);
+  display: flex; align-items: center; justify-content: center;
+  width: 1.35rem; height: 1.35rem; padding: 0;
+  border: 0; border-radius: 50%; cursor: pointer;
+  background: transparent; color: var(--p-ink-3);
+  font-size: 14px; line-height: 1;
+}
+.kd-clear:hover { background: var(--p-danger-wash); color: var(--p-danger); }

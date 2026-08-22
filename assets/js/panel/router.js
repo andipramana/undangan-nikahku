@@ -35,6 +35,7 @@
     { key: "kontak" },
     { link: "wa", title: "Kirim WhatsApp", iconName: "whatsapp" },
     { key: "ucapan" },
+    { key: "kado" },
     { link: "admin-qr", title: "Check-in QR", iconName: "qr" }
   ];
   const TOOL_LOOK = [
