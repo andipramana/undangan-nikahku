@@ -1011,7 +1011,7 @@
     if (!lists.length) {
       fcListSelect.innerHTML = `<option value="">Belum ada daftar kontak</option>`;
       const kontakHref = window.AdminAPI.tenant.path("admin") + "#/kontak";
-      fcBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — <a href="${kontakHref}" target="_blank" rel="noopener">buat dan isi dulu lewat halaman Kontak</a>.</p>`;
+      fcBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — <a href="${kontakHref}">buat dan isi dulu lewat halaman Kontak</a>.</p>`;
       return;
     }
     fcListSelect.innerHTML = `<option value="">Pilih daftar…</option>` + lists.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
@@ -1143,7 +1143,7 @@
     if (!lists.length) {
       ppListSelect.innerHTML = `<option value="">Belum ada daftar kontak</option>`;
       const kontakHref = window.AdminAPI.tenant.path("admin") + "#/kontak";
-      ppBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — <a href="${kontakHref}" target="_blank" rel="noopener">buat dan isi dulu lewat halaman Kontak</a>.</p>`;
+      ppBody.innerHTML = `<p class="wa-fc-empty">Belum ada daftar kontak — <a href="${kontakHref}">buat dan isi dulu lewat halaman Kontak</a>.</p>`;
       return;
     }
     ppListSelect.innerHTML = `<option value="">Pilih daftar…</option>` + lists.map((l) => `<option value="${l.id}">${esc(l.name)}</option>`).join("");
