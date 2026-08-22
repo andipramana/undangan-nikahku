@@ -101,6 +101,30 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ deleted: true, retainedUserIds: retained }), { headers });
   }
 
+  // Cross-tenant account management (reset password / change login email of a
+  // client's admin or admin_qr). Both operations require service role from the
+  // client side, hence living here behind the root_owner gate above. The target
+  // must be a member of at least one tenant so root's own account can never be
+  // touched by accident; membership rows keep working after an email change
+  // because invitation_members references user_id, not the email.
+  if (action === "update_member_account") {
+    const userId = clean(body.userId);
+    const newPassword = typeof body.newPassword === "string" ? body.newPassword : "";
+    const newEmail = clean(body.newEmail).toLowerCase();
+    if (!userId) return fail("Akun tidak valid");
+    if (!newPassword && !newEmail) return fail("Tidak ada perubahan yang diminta");
+    if (newPassword && newPassword.length < 8) return fail("Kata sandi minimal 8 karakter");
+    if (newEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) return fail("Format email tidak valid");
+    const { data: membership } = await admin.from("invitation_members").select("invitation_id").eq("user_id", userId).limit(1).maybeSingle();
+    if (!membership) return fail("Akun itu bukan anggota client mana pun", 404);
+    const attributes: { email?: string; email_confirm?: boolean; password?: string } = {};
+    if (newEmail) { attributes.email = newEmail; attributes.email_confirm = true; }
+    if (newPassword) attributes.password = newPassword;
+    const { error } = await admin.auth.admin.updateUserById(userId, attributes);
+    if (error) return fail(error.message);
+    return new Response(JSON.stringify({ updated: true }), { headers });
+  }
+
   type TemplatePhoto = { folder: string; storage_path: string; sort_order: number; focal_x: number; focal_y: number; zoom: number; alt: string; width: number | null; height: number | null; gallery_layout: string; gallery_row: number };
   const templateName = "default";
   const blankPerson = (name: string) => ({ name, nickname: name, father: "", mother: "", instagram: "" });
