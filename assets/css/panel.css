@@ -904,7 +904,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
 /* Jumlah = BARIS TERPISAH di bawah barang+qty (umpan balik pemilik produk:
    menempel di baris barang terbaca "barang × Rp jumlah") — prefix Rp statis
    mono + angka rata kanan. min-width:0 wajib agar menyusut di HP sempit. */
-.kd-entry__amount { display: flex; align-items: center; gap: .35rem; }
+/* padding-left .4rem menyamakan padding .kd-plain di atas/bawahnya supaya
+   "Rp" sejajar vertikal dengan teks barang & keterangan (dulu kekiri). */
+.kd-entry__amount { display: flex; align-items: center; gap: .35rem; padding-left: .4rem; }
 .kd-amount-cur {
   flex: none; font-family: var(--p-font-mono);
   font-size: .72rem; font-weight: 650; letter-spacing: .04em;

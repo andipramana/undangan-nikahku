@@ -109,7 +109,7 @@ check('kosongkan qty → kembali jadi "+ qty"; blur kosong juga revert', /value 
 check('"+ qty" diklik → swap jadi input angka lalu fokus', /function wireAddQtyButton/.test(kadoSrc) && /btn\.replaceWith\(input\)/.test(kadoSrc) && /wireQuantityInput\(input\);\s*\n\s*input\.focus\(\)/.test(kadoSrc));
 check('badge qty ungu pill mono via token violet (tanpa hex di luar :root), tanpa .kd-qty-x', panelCss.includes('--p-violet: #6d28d9;') && panelCss.includes('background: var(--p-violet-wash); color: var(--p-violet);') && /\.kd-qty:focus-within[^}]*border-color:\s*var\(--p-violet-line\)/.test(panelCss) && !panelCss.includes('.kd-qty-x'));
 check('tombol "+ qty" samar bergaris putus (bukan badge)', /\.kd-qty-add\s*\{[^}]*border:\s*1px dashed var\(--p-line\)/.test(flatCss));
-check('nominal baris sendiri: .kd-entry__amount flex + angka rata kanan mono', /\.kd-entry__amount\s*\{[^}]*display:\s*flex/.test(flatCss) && /\.kd-entry__amount \.kd-amount-input\s*\{[^}]*text-align:\s*right/.test(flatCss));
+check('nominal baris sendiri: .kd-entry__amount flex + padding kiri .4rem (Rp sejajar teks field) + angka rata kanan mono', /\.kd-entry__amount\s*\{[^}]*display:\s*flex/.test(flatCss) && /\.kd-entry__amount\s*\{[^}]*padding-left:\s*\.4rem/.test(flatCss) && /\.kd-entry__amount \.kd-amount-input\s*\{[^}]*text-align:\s*right/.test(flatCss));
 check('nama borderless transparan (hover/focus berdandan)', /\.kd-name-input\s*\{[^}]*border:\s*1px solid transparent/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')));
 
 // ---------------------------------------------------------------------
