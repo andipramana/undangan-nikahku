@@ -1169,6 +1169,34 @@
   let ppEntries = [];
   let ppTargetContact = null;
 
+  /* Pilih dari kontak HP di modal ini juga (hasPhoneContacts dibahas di atas):
+   * satu pilihan saja — modal ini mengisi SATU baris, polanya klik → langsung
+   * diterapkan tanpa tombol simpan. Kontak tanpa nomor ditolak dengan pesan. */
+  const ppPhoneBtn = document.getElementById("wa-pick-phone-hp");
+  if (ppPhoneBtn) {
+    ppPhoneBtn.addEventListener("click", async () => {
+      if (!hasPhoneContacts || !ppTargetContact) return;
+      ppPhoneBtn.disabled = true;
+      try {
+        const picked = await navigator.contacts.select(["name", "tel"]);
+        const p = (picked || [])[0];
+        const rawPhone = (p && p.tel && p.tel[0]) || "";
+        if (!rawPhone) { toast("Kontak itu tidak punya nomor HP.", true); return; }
+        const phone = normalizePhone(rawPhone);
+        if (!isValidPhone(phone)) {
+          toast("Nomor tidak valid — contoh: 08123456789, +62 812-3456-789, 628123456789.", true);
+          return;
+        }
+        await applyPickedPhone({ name: (p && p.name && p.name[0]) || rawPhone, phone });
+      } catch (err) {
+        if (err && (err.name === "AbortError" || err.name === "NotAllowedError")) return;
+        toast("Gagal mengambil kontak HP: " + ((err && err.message) || err), true);
+      } finally {
+        ppPhoneBtn.disabled = false;
+      }
+    });
+  }
+
   ppClose.addEventListener("click", () => { ppModal.hidden = true; });
   ppModal.addEventListener("click", (e) => { if (e.target === ppModal) ppModal.hidden = true; });
 
@@ -1176,6 +1204,7 @@
     ppTargetContact = c;
     ppTargetLabel.innerHTML = `Nomor akan diisi untuk <strong>${esc(c.name)}</strong> — nama tidak ikut berubah.`;
     ppListSelect.innerHTML = `<option value="">Memuat daftar…</option>`;
+    if (ppPhoneBtn) ppPhoneBtn.hidden = !hasPhoneContacts;
     ppSearch.hidden = true;
     ppSearch.value = "";
     ppBody.innerHTML = "";

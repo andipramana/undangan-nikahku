@@ -792,6 +792,20 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
   letter-spacing: -.03em;
 }
 .p-outlet__inner.wa-family .p-list-row:hover { border-color: var(--p-wa-green); }
+/* Aksi daftar kontak (Tambah manual / Impor CSV / Impor vCard / Export ×2):
+   grid sel sama lebar — flex-wrap berukuran konten membuat tiap tombol
+   beda lebar sehingga barisnya tampak acak di HP. minmax 150px → layar
+   sempit jadi 1–2 kolom penuh, layar lebar beberapa kolom seragam. */
+.kt-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--p-2);
+  margin: var(--p-3) 0 var(--p-2);
+}
+.kt-actions .p-btn { width: 100%; justify-content: center; }
+/* Hapus semua = destruktif, sengaja di luar grid: satu baris penuh di bawah
+   dengan jarak supaya tidak tersapu jari saat mengejar tombol di atasnya. */
+.kt-danger-row { display: flex; width: 100%; justify-content: center; margin-top: var(--p-2); }
 /* Chip jumlah kontak ("N KONTAK") di baris daftar — bahasa chip hijau wa.css. */
 .p-count-chip {
   display: inline-block; width: max-content;

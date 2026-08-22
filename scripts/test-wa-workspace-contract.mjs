@@ -45,7 +45,19 @@ const checks = [
       blast.includes("navigator.contacts.select") &&
       blast.includes('select(["name", "tel"], { multiple: true })') &&
       blast.includes("fcPhoneBtn.hidden = !hasPhoneContacts")
-  ]
+  ],
+  // Modal "Isi nomor dari kontak" (baris tanpa nomor) punya jalur yang sama:
+  // satu pilihan langsung diterapkan via applyPickedPhone (modal ini tanpa
+  // tombol simpan), kontak tanpa nomor ditolak dengan pesan.
+  [
+    "isi nomor baris tanpa nomor juga bisa dari kontak HP",
+    page.includes('id="wa-pick-phone-hp"') && /id="wa-pick-phone-hp"[^>]*hidden/.test(page) &&
+      blast.includes("ppPhoneBtn.hidden = !hasPhoneContacts") &&
+      /ppPhoneBtn[\s\S]{0,900}applyPickedPhone\(\{ name:/.test(blast)
+  ],
+  // Empty state daftar kontak tidak boleh menempel ke tepi container —
+  // .wa-contacts (tanpa CSS sendiri) memuat pesan kosong langsung.
+  ["empty state daftar berjarak dari pinggir", /\.wa-contact-empty\s*\{[^}]*padding:1\.4rem 1rem/.test(css)]
 ];
 for (const [label, pass] of checks) {
   if (!pass) throw new Error(`FAIL: ${label}`);

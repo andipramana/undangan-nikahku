@@ -207,13 +207,18 @@ window.PanelPages["kontak"] = {
       body.innerHTML = card(list.name, `${rows.length} kontak dalam daftar ini.`, `
         <div class="p-toolbar">
           <button type="button" class="p-btn p-btn--ghost" id="kt-back">&larr; Semua daftar</button>
+        </div>
+        <!-- Aksi daftar dalam GRID sel sama lebar (.kt-actions) — flex-wrap
+             berukuran konten membuat barisnya tampak acak di HP (lebar tiap
+             tombol beda-beda). Aksi destruktif dipisah baris sendiri. -->
+        <div class="kt-actions">
           <button type="button" class="p-btn p-btn--primary" id="kt-add-entry">+ Tambah manual</button>
           <label class="p-btn p-btn--ghost"><span>Impor CSV/Excel</span><input type="file" id="kt-import-file" accept=".csv,.xlsx,.xls" hidden></label>
           <label class="p-btn p-btn--ghost"><span>Impor vCard (.vcf)</span><input type="file" id="kt-import-vcf" accept=".vcf" hidden></label>
           <button type="button" class="p-btn p-btn--ghost" id="kt-export-csv" ${rows.length ? "" : "disabled"}>Export CSV</button>
           <button type="button" class="p-btn p-btn--ghost" id="kt-export-excel" ${rows.length ? "" : "disabled"}>Export Excel</button>
-          <button type="button" class="p-btn p-btn--danger" id="kt-delete-all" ${rows.length ? "" : "disabled"}>Hapus semua kontak</button>
         </div>
+        <button type="button" class="p-btn p-btn--danger kt-danger-row" id="kt-delete-all" ${rows.length ? "" : "disabled"}>Hapus semua kontak</button>
         <div style="overflow-x:auto">
           <table class="p-table">
             <thead><tr><th>Nama</th><th>Nomor</th><th></th></tr></thead>

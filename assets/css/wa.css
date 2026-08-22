@@ -31,7 +31,7 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
 .wa-contact-search { display:grid; grid-template-columns:minmax(0,1fr) 34px; min-width:220px; overflow:hidden; border:1px solid var(--wa-line); border-radius:8px; background:#fff; }.wa-contact-search .input { border:0; }.wa-contact-search button { display:grid; place-items:center; border:0; color:var(--wa-muted); background:transparent; cursor:pointer; }.wa-contact-search button:hover,.wa-contact-search button:focus-visible { color:var(--wa-green-dark); background:var(--wa-soft); outline:0; }.wa-contact-search svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; }
 .wa-status-filters { display:flex; align-items:center; gap:.3rem; padding:.2rem; border:1px solid var(--wa-line); border-radius:999px; background:#fff; }
 .wa-status-filter { border:0; border-radius:999px; padding:.32rem .54rem; color:#9aa69e; background:transparent; font-size:.68rem; font-weight:800; white-space:nowrap; }.wa-status-filter.is-active { color:#fff; background:var(--wa-green); }.wa-status-filter:not(.is-active):hover,.wa-status-filter:focus-visible { color:var(--wa-ink); background:var(--wa-warm); outline:0; }
-.wa-contact-list { padding:0 .8rem; }.wa-contact-empty { margin:0; padding:1.4rem .25rem; color:var(--wa-muted); text-align:center; font-size:.82rem; }
+.wa-contact-list { padding:0 .8rem; }.wa-contact-empty { margin:0; padding:1.4rem 1rem; color:var(--wa-muted); text-align:center; font-size:.82rem; }
 /* Nama SELALU baris sendiri, selebar item (permintaan: nama panjang tidak
    boleh terpotong berbagi ruang dengan status/tombol kirim) — baris meta
    (status/nomor/kirim) dan baris bawah (template/hapus) di bawahnya. */
