@@ -22,7 +22,10 @@
 <!-- ============ LAYAR LOGIN ============ -->
 <div id="login-screen" class="p-login-screen">
   <form id="login-form" class="p-login-card">
-    <p class="p-kicker">Panel Admin</p>
+    <div class="p-brand">
+      <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
+      <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Panel Admin</span></span>
+    </div>
     <h1>Masuk ke panel.</h1>
     <p class="p-hint">Mita &amp; Andi — The Wedding</p>
     <label>
@@ -45,10 +48,15 @@
          sekaligus, bukan drawer tersembunyi. Di HP disembunyikan lewat CSS;
          Beranda (hub) menggantikannya sebagai navigasi utama. -->
     <aside class="p-sidebar" id="p-sidebar">
-      <p class="p-sidebar__brand">Panel Admin</p>
+      <div class="p-brand">
+        <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
+        <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Panel Admin</span></span>
+      </div>
       <p class="p-sidebar__slug" id="p-sidebar-slug"></p>
       <nav id="p-sidebar-nav" aria-label="Navigasi panel"></nav>
-      <button type="button" class="p-btn p-btn--ghost p-sidebar__logout" id="btn-logout">Keluar</button>
+      <div class="p-sidebar__footer">
+        <button type="button" class="p-btn p-btn--ghost p-sidebar__logout" id="btn-logout">Keluar</button>
+      </div>
     </aside>
 
     <div class="p-main">
