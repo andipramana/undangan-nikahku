@@ -83,34 +83,47 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
   .wa-toast { bottom: calc(6.4rem + env(safe-area-inset-bottom)); } /* toast di atas bar */
   .wa-bottomnav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
-    display: grid; grid-template-columns: repeat(5, 1fr);
-    gap: .2rem;
-    padding: .35rem .5rem calc(.35rem + env(safe-area-inset-bottom));
+    display: flex; align-items: stretch;
+    height: 64px;
+    padding-bottom: env(safe-area-inset-bottom);
   }
-  /* Lekukan tempat disc "Dari kontak" bersarang, dipotong dari lapisan latar
-     bar lewat mask — DIPISAH ke ::before, BUKAN langsung di .wa-bottomnav,
-     karena mask ikut memotong SELURUH konten elemen termasuk anak-anaknya:
-     kalau dipasang di .wa-bottomnav, disc yang sengaja menyembul -18px ke
-     atas ikut kepotong jadi bentuk senyum, bukan lingkaran utuh (ketahuan
-     dari render lokal). Dengan ::before, yang kena mask cuma lapisan latar
-     ini — tombol & disc di atasnya tetap utuh.
-     .wa-shell pakai gradient diagonal, bukan warna solid, jadi cara "tempel
-     kotak sewarna latar" untuk memalsukan lekukan tidak akan pernah pas;
-     mask membuat lubangnya benar-benar transparan, otomatis cocok dengan
-     apa pun di belakangnya. Item "Dari kontak" kolom ke-3 dari 5 (tengah
-     persis), makanya pusat lekukan di 50%. */
-  .wa-bottomnav::before {
-    content: "";
-    position: absolute; inset: 0;
+  /* Kurva dari 3 panel terpisah, BUKAN satu bar dipotong mask/clip-path —
+     lihat komentar di wa.html tempat markup ini di-render. --left/--right
+     masing-masing menaungi 2 tombol, sudut atas-dalamnya (dekat FAB)
+     dibulatkan besar (border-top-*-radius) supaya nyambung mulus ke kurva
+     tengah. */
+  .wa-bottomnav__side {
+    flex: 1; display: flex;
     background: var(--wa-paper);
     border-top: 1px solid var(--wa-line);
     box-shadow: 0 -8px 24px rgba(23, 35, 30, .08);
-    -webkit-mask-image: radial-gradient(circle 30px at 50% 0, transparent 97%, #000 100%);
-    mask-image: radial-gradient(circle 30px at 50% 0, transparent 97%, #000 100%);
+  }
+  .wa-bottomnav__side--left { border-top-right-radius: 28px; justify-content: space-evenly; }
+  .wa-bottomnav__side--right { border-top-left-radius: 28px; justify-content: space-evenly; }
+  /* Slot tengah: lebih lebar dari disc-nya sendiri supaya ada "bahu" kurva
+     yang kelihatan di kanan-kirinya (persis referensi), bukan cuma cincin
+     mepet ke disc. .fab-curve sendiri TRANSPARAN — yang kelihatan adalah
+     box-shadow-nya (spread besar, blur 0): trik ini otomatis menghasilkan
+     kurva mulus mengikuti border-radius div sumbernya, tanpa perlu hitung
+     bezier manual. pointer-events:none WAJIB — ini murni dekorasi, jangan
+     sampai menutupi tap ke disc di atasnya (persis bug yang terjadi di
+     percobaan mask sebelumnya). */
+  .wa-bottomnav__fab-slot {
+    flex: none; width: 104px;
+    position: relative;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .wa-bottomnav__fab-curve {
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 30px;
+    border-bottom-left-radius: 100px;
+    border-bottom-right-radius: 100px;
+    box-shadow: 0 22px 0 20px var(--wa-paper);
+    pointer-events: none;
   }
   .wa-bottomnav__item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: .28rem; min-height: 56px; padding: .35rem .15rem;
+    gap: .28rem; min-height: 56px; padding: .35rem .6rem;
     border: 0; border-radius: 12px;
     background: transparent;
     color: var(--wa-green-dark);
@@ -118,12 +131,14 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
     text-decoration: none; cursor: pointer;
   }
   /* Item tengah "Dari kontak" = aksi utama: disc hijau menggantung setengah
-     keluar dari bar (ala material bottom-app-bar), label tetap di bawahnya.
-     Ring paper menyatu dengan latar bar supaya tepi atas bar terlihat utuh. */
-  .wa-bottomnav__item--primary { color: var(--wa-green-dark); }
+     keluar dari bar (ala material bottom-app-bar), label tetap di bawahnya. */
+  .wa-bottomnav__item--primary {
+    position: relative; z-index: 1; color: var(--wa-green-dark);
+    min-height: auto; padding: 0 0 .3rem;
+  }
   .wa-bottomnav__disc {
     display: grid; place-items: center;
-    width: 46px; height: 46px; margin-top: -18px;
+    width: 46px; height: 46px; margin-top: -30px;
     border-radius: 50%;
     background: var(--wa-green); color: #fff;
     border: 3px solid var(--wa-paper);

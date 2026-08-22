@@ -67,6 +67,46 @@
         </details>
       </aside>
     </div>
+    <!-- Di dalam #app (bukan sibling setelah </main>) supaya ikut hidden
+         sampai login berhasil — sebelumnya nav ini di luar #app, jadi
+         tampil terus termasuk di layar login. -->
+    <!-- Kurva dibangun dari 3 panel terpisah (kiri/tengah-FAB/kanan) yang
+         menyatu lewat border-radius + trik box-shadow — BUKAN satu bar
+         dipotong mask/clip-path. Percobaan pertama (mask di ::before)
+         ternyata ikut menutupi hit-testing SELURUH lima tombol (mask cuma
+         menyamarkan tampilan, pointer-events tidak ikut mask), jadi tap ke
+         tombol mana pun malah kena elemen nav-nya. Pola 3-panel ini tidak
+         punya lapisan penuh yang menutupi tombol sama sekali, jadi bebas
+         dari kelas bug itu. -->
+    <nav class="wa-bottomnav" aria-label="Aksi kontak">
+      <div class="wa-bottomnav__side wa-bottomnav__side--left">
+        <button type="button" class="wa-bottomnav__item" id="wa-nav-add" title="Tambah manual: isi nama + nomor WA, langsung masuk daftar kirim">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Tambah</span>
+        </button>
+        <button type="button" class="wa-bottomnav__item" id="wa-nav-import" title="Unggah file Excel (.xlsx/.xls), CSV, atau vCard (.vcf) — kolom 1: nama, kolom 2: nomor (boleh kosong)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg>
+          <span>Impor</span>
+        </button>
+      </div>
+      <div class="wa-bottomnav__fab-slot">
+        <div class="wa-bottomnav__fab-curve" aria-hidden="true"></div>
+        <button type="button" class="wa-bottomnav__item wa-bottomnav__item--primary" id="wa-nav-from" title="Pilih banyak tamu sekaligus dari buku alamat di panel admin — atau langsung dari kontak HP">
+          <span class="wa-bottomnav__disc" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/></svg></span>
+          <span>Dari kontak</span>
+        </button>
+      </div>
+      <div class="wa-bottomnav__side wa-bottomnav__side--right">
+        <button type="button" class="wa-bottomnav__item" id="wa-nav-links" title="Atur link undangan & template pesan — membuka Pengaturan pesan di atas">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 1 0-7.07-7.07L11 5.93"/><path d="M14 10a5 5 0 0 0-7.07 0L4.8 12.12a5 5 0 1 0 7.07 7.07L13 18.07"/></svg>
+          <span>Link &amp; Template</span>
+        </button>
+        <a class="wa-bottomnav__item" id="wa-nav-manage" href="#" title="Buka buku alamat tamu di panel admin">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-1.7-1L15 3h-6l-.3 2.5a7.9 7.9 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.9 7.9 0 0 0 1.7 1L9 21h6l.3-2.5a7.9 7.9 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5z"/></svg>
+          <span>Kelola</span>
+        </a>
+      </div>
+    </nav>
   </main>
 </div>
 
@@ -112,39 +152,6 @@
     <div id="wa-pick-phone-body"></div>
   </div>
 </div>
-<!-- BOTTOM NAVBAR gaya aplikasi mobile — hanya tampil ≤800px (CSS): semua
-     aksi kontak hidup di sini saat dibuka di HP, tombol toolbar atas
-     disembunyikan. Item Tambah/Dari kontak/Impor memicu tombol toolbar
-     pasangannya (SATU sumber logika & disabled-state — wiring di
-     wa-blast.js); Link & Template membuka section Pengaturan pesan
-     (buka + scroll + flash); Kelola link keluar ke panel #/kontak
-     (href diset wa.js, sama seperti #wa-manage-contacts). Lima slot dengan
-     "Dari kontak" di TENGAH sebagai aksi utama (disc hijau menggantung). -->
-<nav class="wa-bottomnav" aria-label="Aksi kontak">
-  <!-- title = satu sumber teks tooltip: hover di desktop (native),
-       long-press di HP (bubble custom, lihat wa-blast.js). -->
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-add" title="Tambah manual: isi nama + nomor WA, langsung masuk daftar kirim">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-    <span>Tambah</span>
-  </button>
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-import" title="Unggah file Excel (.xlsx/.xls), CSV, atau vCard (.vcf) — kolom 1: nama, kolom 2: nomor (boleh kosong)">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg>
-    <span>Impor</span>
-  </button>
-  <button type="button" class="wa-bottomnav__item wa-bottomnav__item--primary" id="wa-nav-from" title="Pilih banyak tamu sekaligus dari buku alamat di panel admin — atau langsung dari kontak HP">
-    <span class="wa-bottomnav__disc" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/></svg></span>
-    <span>Dari kontak</span>
-  </button>
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-links" title="Atur link undangan & template pesan — membuka Pengaturan pesan di atas">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 1 0-7.07-7.07L11 5.93"/><path d="M14 10a5 5 0 0 0-7.07 0L4.8 12.12a5 5 0 1 0 7.07 7.07L13 18.07"/></svg>
-    <span>Link &amp; Template</span>
-  </button>
-  <a class="wa-bottomnav__item" id="wa-nav-manage" href="#" title="Buka buku alamat tamu di panel admin">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-1.7-1L15 3h-6l-.3 2.5a7.9 7.9 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.9 7.9 0 0 0 1.7 1L9 21h6l.3-2.5a7.9 7.9 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5z"/></svg>
-    <span>Kelola</span>
-  </a>
-</nav>
-
 <div id="toast" class="wa-toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/config.js"></script>

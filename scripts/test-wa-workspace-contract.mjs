@@ -25,7 +25,15 @@ const checks = [
   // Lima slot dengan "Dari kontak" sebagai item TENGAH primary (disc hijau),
   // dan "Link & Template" membuka section Pengaturan pesan di atas.
   ["bottom navbar: lima item aksi di markup", page.includes('id="wa-nav-add"') && page.includes('id="wa-nav-from"') && page.includes('id="wa-nav-import"') && page.includes('id="wa-nav-links"') && page.includes('id="wa-nav-manage"') && !page.includes("wa-fab")],
-  ["bottom navbar: tengah primary disc menggantung", /grid-template-columns:\s*repeat\(5,\s*1fr\)/.test(css) && css.includes("wa-bottomnav__item--primary") && css.includes(".wa-bottomnav__disc") && /margin-top:\s*-18px/.test(css)],
+  // Kurva dibangun dari 3 panel (kiri/tengah-FAB/kanan) yang menyatu lewat
+  // border-radius + trik box-shadow (spread besar, blur 0) — BUKAN satu bar
+  // dipotong mask/clip-path. Percobaan mask sebelumnya (di git history)
+  // ternyata ikut menutupi hit-testing SELURUH tombol karena pointer-events
+  // tidak mengikuti mask; .fab-curve dekoratif WAJIB pointer-events:none
+  // supaya tidak menutupi tap ke disc di atasnya.
+  ["bottom navbar: 3 panel kiri/fab/kanan menyatu lewat border-radius", css.includes(".wa-bottomnav__side--left") && css.includes(".wa-bottomnav__side--right") && /border-top-right-radius/.test(css) && /border-top-left-radius/.test(css)],
+  ["bottom navbar: kurva tengah dari box-shadow, dekoratif (pointer-events:none)", css.includes(".wa-bottomnav__fab-curve") && /box-shadow:\s*0\s+\d+px\s+0\s+\d+px\s+var\(--wa-paper\)/.test(css) && /\.wa-bottomnav__fab-curve\s*\{[^}]*pointer-events:\s*none/.test(css)],
+  ["bottom navbar: tengah primary disc menggantung", css.includes("wa-bottomnav__item--primary") && css.includes(".wa-bottomnav__disc") && /margin-top:\s*-30px/.test(css)],
   // "Link & Template" bukan pasangan tombol toolbar — handler-nya sendiri:
   // buka <details> Pengaturan pesan, scroll halus, flash ring ±1,6s
   // (restart via void offsetWidth supaya klik ulang tetap terlihat).
