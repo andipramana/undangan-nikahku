@@ -231,6 +231,16 @@ try {
   const stageKontak = await page.locator(".p-stage__title").textContent().catch(() => "");
   check("HP: rute kontak benar-benar termuat dari drawer", /kontak/i.test(stageKontak || ""));
 
+  // Menu ⋯ topbar (laporan user): wajib menutup saat klik bagian layar lain.
+  const topmenuOpen = () => page.locator("#p-topmenu").evaluate((el) => el.open);
+  await page.locator(".p-topmenu__btn").click();
+  check("menu titik-titik terbuka", await topmenuOpen());
+  await page.locator("#p-stage").click(); // area netral tanpa handler nav
+  check("menu titik-titik menutup saat klik area lain", !(await topmenuOpen()));
+  await page.locator(".p-topmenu__btn").click();
+  await page.keyboard.press("Escape");
+  check("menu titik-titik menutup dengan Escape", !(await topmenuOpen()));
+
   check("tidak ada console error di sepanjang navigasi", consoleErrors.length === 0);
   if (consoleErrors.length) consoleErrors.forEach((e) => console.error("  console error:", e));
   check("tidak ada unhandled exception/rejection di sepanjang navigasi", pageErrors.length === 0);

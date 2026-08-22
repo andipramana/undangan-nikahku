@@ -176,7 +176,24 @@
     if (menuBtn) menuBtn.addEventListener("click", () => toggleSidebar());
     const scrim = $("p-scrim");
     if (scrim) scrim.addEventListener("click", () => closeSidebar());
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSidebar(); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const menu = $("p-topmenu"); // menu ⋯ tertutup lebih dulu daripada drawer
+      if (menu && menu.open) { menu.open = false; return; }
+      closeSidebar();
+    });
+  }
+
+  /** Menu ⋯ topbar: elemen <details> native TIDAK menutup sendiri saat klik
+   * terjadi di luarnya — tutup manual kalau titik klik di luar elemennya.
+   * Klik di DALAM menu (summary maupun isinya) tidak dijamak; navigasi lewat
+   * mount() juga sudah menutupnya. */
+  function bindTopMenuOutsideClose() {
+    const menu = $("p-topmenu");
+    if (!menu) return;
+    document.addEventListener("click", (e) => {
+      if (menu.open && !menu.contains(e.target)) menu.open = false;
+    });
   }
 
   /** Sidebar desktop sticky di BAWAH framehead — butuh tinggi framehead
@@ -385,6 +402,7 @@
     renderSidebar();
     bindNavClickSafetyNet();
     bindSidebar();
+    bindTopMenuOutsideClose();
     watchFrameheadHeight();
     const previewBtn = $("p-menu-preview");
     if (previewBtn) previewBtn.addEventListener("click", () => openDraftPreview());
