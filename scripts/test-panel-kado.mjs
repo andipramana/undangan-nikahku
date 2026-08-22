@@ -74,6 +74,9 @@ check('input Barang dibungkus .kd-itemwrap dengan tombol .kd-clear data-clear di
 check('tombol hapus baris terpisah (data-del-entry di td sendiri)', /data-del-entry="\$\{e\.id\}"[^>]*>&times;<\/button><\/td>\s*<\/tr>/.test(kadoSrc));
 check('clearItem menyimpan item="" lalu fokuskan input', /async function clearItem\(id\)/.test(kadoSrc) && /saveEntryField\(id, \{ item: "" \}, input\)/.test(kadoSrc) && /input\.focus\(\)/.test(kadoSrc));
 check('CSS .kd-clear absolut di kanan dalam wrap', /\.kd-itemwrap\s*\{\s*position:\s*relative/.test(panelCss) && /\.kd-clear\s*\{\s*position:\s*absolute/.test(panelCss));
+// Modal kado: panel modal tak punya gap bawaan — Simpan tidak boleh menempel
+// ke field di atasnya (temuan yang sama dengan form register.html).
+check('modal kado beri grid+gap antar field & tombol Simpan', /#kd-list-modal \.p-modal__panel,\s*\n#kd-entry-modal \.p-modal__panel \{ display: grid; gap: var\(--p-3\); \}/.test(panelCss));
 
 // ---------------------------------------------------------------------
 // 5) Export Excel via XLSX (SheetJS sudah CDN di admin.html)

@@ -857,3 +857,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
   font-size: 14px; line-height: 1;
 }
 .kd-clear:hover { background: var(--p-danger-wash); color: var(--p-danger); }
+/* Modal kado: .p-modal__panel tak punya flow-gap antar anaknya (temuan sama
+   dengan form register.html) — tanpa ini tombol Simpan menempel ke field di
+   atasnya. Di-scope ke modal kado saja, modal halaman lain tak disentuh. */
+#kd-list-modal .p-modal__panel,
+#kd-entry-modal .p-modal__panel { display: grid; gap: var(--p-3); }
