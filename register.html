@@ -1,52 +1,139 @@
 <!doctype html>
-<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="/"><meta name="robots" content="noindex"><title>Daftarkan Undangan</title><link rel="icon" type="image/png" href="assets/img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"><link rel="stylesheet" href="assets/css/panel.css"></head>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="/"><meta name="robots" content="noindex"><title>Dashboard Root — Nikahku</title><link rel="icon" type="image/png" href="assets/img/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap"><link rel="stylesheet" href="assets/css/panel.css"><style>
+/* Layout khusus dashboard root — token & komponen tetap dari panel.css. */
+.rd-wrap { max-width: 880px; margin: 0 auto; padding-bottom: 4rem; }
+.rd-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--p-3); }
+.rd-head__actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.rd-toolbar { display: flex; align-items: start; justify-content: space-between; gap: var(--p-3); }
+.rd-advanced { margin-top: var(--p-4); }
+/* Kartu satu client dalam daftar utama. */
+.cl-row { display: grid; gap: var(--p-2); padding: var(--p-3); border: 1px solid var(--p-hairline); border-radius: var(--p-r-md); background: var(--p-row); }
+.cl-top { display: flex; align-items: center; justify-content: space-between; gap: var(--p-2); min-width: 0; }
+.cl-name { font-weight: 650; letter-spacing: -.01em; min-width: 0; overflow-wrap: anywhere; }
+.cl-meta { font-size: 12px; color: var(--p-ink-2); overflow-wrap: anywhere; }
+.cl-links { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .15rem; }
+.cl-links a {
+  display: inline-flex; align-items: center; padding: .28rem .6rem;
+  border: 1px solid var(--p-line); border-radius: 999px;
+  font-family: var(--p-font-mono); font-size: 11.5px; text-decoration: none;
+  color: var(--p-accent-hover); background: var(--p-paper);
+}
+.cl-links a:hover { border-color: var(--p-accent); background: var(--p-accent-wash); }
+.cl-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .3rem; padding-top: var(--p-2); border-top: 1px dashed var(--p-hairline); }
+/* Modal kelola akun — satu blok per anggota (Admin / Admin QR). */
+.ac-member { display: grid; gap: .55rem; padding: var(--p-3) 0; border-top: 1px solid var(--p-hairline-weak); }
+#account-list .ac-member:first-child { border-top: 0; padding-top: 0; }
+.ac-member__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--p-2); flex-wrap: wrap; }
+.ac-mail { font-family: var(--p-font-mono); font-size: 13px; color: var(--p-ink-2); overflow-wrap: anywhere; }
+.ac-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .45rem; }
+</style></head>
 <body>
-<main class="p-outlet"><div class="p-outlet__inner" style="max-width:640px;margin:0 auto">
-<form id="register-form" class="p-card">
-<div class="p-brand">
-<span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
-<span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Provisioning</span></span>
+
+<!-- ============ GERBANG LOGIN ============ -->
+<!-- Root owner wajib masuk dulu; sesi inilah yang dipakai semua aksi
+     berikutnya (create client tidak lagi meminta email/password root). -->
+<div id="login-screen" class="p-login-screen">
+  <form id="login-form" class="p-login-card">
+    <div class="p-brand">
+      <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
+      <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Root Dashboard</span></span>
+    </div>
+    <h1>Masuk ke dashboard root.</h1>
+    <p class="p-hint">Khusus admin root — mengelola semua client undangan.</p>
+    <label>
+      Email admin
+      <input class="p-input" type="email" id="login-username" autocomplete="username" required>
+    </label>
+    <label>
+      Kata sandi
+      <input class="p-input" type="password" id="login-password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="p-btn p-btn--primary" id="login-submit">Masuk</button>
+    <p id="login-error" class="p-login-error" role="alert"></p>
+  </form>
 </div>
-<h1 style="font-family:var(--p-font-display);font-size:clamp(1.5rem,4vw,2rem);letter-spacing:-.035em;margin:0">Daftarkan Undangan</h1>
-<p class="p-hint">Khusus admin root — membuat tenant baru beserta akun admin-nya.</p>
-<label class="p-field"><span>Email admin root</span><input class="p-input" id="owner-email" type="email" required autocomplete="username"></label>
-<label class="p-field"><span>Password admin root</span><input class="p-input" id="owner-password" type="password" required autocomplete="current-password"></label>
-<hr style="border:0;border-top:1px solid var(--p-hairline);margin:.25rem 0">
-<label class="p-field"><span>Slug path</span><input class="p-input" id="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="siti-dan-ujang"></label>
-<div class="p-grid-2">
-<label class="p-field"><span>Nama mempelai wanita</span><input class="p-input" id="bride-name" required placeholder="Siti"></label>
-<label class="p-field"><span>Nama mempelai pria</span><input class="p-input" id="groom-name" required placeholder="Ujang"></label>
-</div>
-<label class="p-field"><span>Nama pasangan / judul</span><input class="p-input" id="display-name" required placeholder="Siti & Ujang"></label>
-<div class="p-grid-2">
-<label class="p-field"><span>Email admin undangan</span><input class="p-input" id="admin-email" type="email" required></label>
-<label class="p-field"><span>Password admin undangan</span><input class="p-input" id="admin-password" type="password" minlength="8" required></label>
-</div>
-<div class="p-grid-2">
-<label class="p-field"><span>Email admin QR</span><input class="p-input" id="qr-email" type="email" required></label>
-<label class="p-field"><span>Password admin QR</span><input class="p-input" id="qr-password" type="password" minlength="8" required></label>
-</div>
-<div class="p-toolbar">
-<button id="submit" class="p-btn p-btn--primary" type="submit">Buat undangan</button>
-<button id="clients-open" class="p-btn p-btn--ghost" type="button">Lihat daftar client</button>
-</div>
-<section class="p-card" aria-label="Default statis dan demo" style="border-style:dashed">
-<div><strong>Default statis</strong><p class="p-hint">Ambil snapshot root sekali ke template mandiri. Root atau demo yang berubah setelahnya tidak mengubah client baru.</p></div>
-<button id="capture-default" class="p-btn p-btn--ghost" type="button">Ambil default dari root</button>
-</section>
-<section class="p-card" aria-label="Demo" style="border-style:dashed">
-<div><strong>Demo</strong><p class="p-hint">Salin default statis ke <code>/demo/</code>. Perubahan demo tidak memengaruhi client baru.</p></div>
-<button id="sync-demo" class="p-btn p-btn--ghost" type="button">Perbarui demo dari default</button>
-</section>
-<p id="message" role="alert" style="color:var(--p-danger);font-size:.84rem;min-height:1.2rem;margin:0"></p>
-<div id="result" hidden></div>
-</form>
-<section id="clients-panel" class="p-card" hidden style="margin-top:1rem">
-<div class="p-toolbar">
-<div><h2 style="font-family:var(--p-font-display);font-size:1.15rem;margin:0 0 .2rem">Daftar client</h2><p class="p-hint" style="margin:0">Kelola undangan, akun Admin, dan Admin QR.</p></div>
-<button type="button" class="p-btn p-btn--ghost" id="clients-refresh">Muat ulang</button>
-</div>
-<div id="clients-list"></div>
-</section>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="app" hidden>
+<main class="p-outlet"><div class="p-outlet__inner rd-wrap">
+  <header class="rd-head">
+    <div class="p-brand">
+      <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
+      <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Root Dashboard</span></span>
+    </div>
+    <div class="rd-head__actions">
+      <button type="button" id="client-new-open" class="p-btn p-btn--primary">+ Client baru</button>
+      <!-- btn-logout wajib statis: dibind core.js initAdminAuth saat load -->
+      <button type="button" id="btn-logout" class="p-btn p-btn--ghost">Keluar</button>
+    </div>
+  </header>
+
+  <!-- DAFTAR CLIENT — tampilan utama dashboard -->
+  <section class="p-card" aria-label="Daftar client">
+    <div class="rd-toolbar">
+      <div>
+        <h2 class="p-card__title">Client undangan</h2>
+        <p class="p-hint">Semua tenant beserta URL dan akunnya. Klik “Kelola akun” untuk ganti email atau reset sandi Admin/Admin QR.</p>
+      </div>
+      <button type="button" id="clients-refresh" class="p-btn p-btn--ghost p-btn--tiny">Muat ulang</button>
+    </div>
+    <div id="clients-list"></div>
+  </section>
+
+  <!-- LANJUTAN — tools snapshot, sengaja bukan hero -->
+  <details class="p-details rd-advanced">
+    <summary>Lanjutan — default statis &amp; demo</summary>
+    <section class="p-card" aria-label="Default statis dan demo" style="border-style:dashed">
+      <div><strong>Default statis</strong><p class="p-hint">Ambil snapshot root sekali ke template mandiri. Root atau demo yang berubah setelahnya tidak mengubah client baru.</p></div>
+      <button id="capture-default" class="p-btn p-btn--ghost" type="button">Ambil default dari root</button>
+    </section>
+    <section class="p-card" aria-label="Demo" style="border-style:dashed">
+      <div><strong>Demo</strong><p class="p-hint">Salin default statis ke <code>/demo/</code>. Perubahan demo tidak memengaruhi client baru.</p></div>
+      <button id="sync-demo" class="p-btn p-btn--ghost" type="button">Perbarui demo dari default</button>
+    </section>
+  </details>
 </div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="assets/js/config.js"></script><script src="assets/js/register.js"></script></body></html>
+</div>
+
+<!-- ============ MODAL CLIENT BARU (alur sekunder) ============ -->
+<!-- Sengaja TIDAK ada field email/password root di sini — provisioning
+     memakai sesi login gerbang di atas. -->
+<div id="client-modal" class="p-modal" hidden>
+<form id="register-form" class="p-modal__panel" role="dialog" aria-modal="true" aria-labelledby="client-modal-title">
+  <div class="p-modal__header"><h3 id="client-modal-title">Buat client baru</h3><button type="button" id="client-modal-close" class="p-modal__close" aria-label="Tutup">×</button></div>
+  <label class="p-field"><span>Slug path</span><input class="p-input" id="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="siti-dan-ujang"></label>
+  <div class="p-grid-2">
+    <label class="p-field"><span>Nama mempelai wanita</span><input class="p-input" id="bride-name" required placeholder="Siti"></label>
+    <label class="p-field"><span>Nama mempelai pria</span><input class="p-input" id="groom-name" required placeholder="Ujang"></label>
+  </div>
+  <label class="p-field"><span>Nama pasangan / judul</span><input class="p-input" id="display-name" required placeholder="Siti &amp; Ujang"></label>
+  <hr style="border:0;border-top:1px solid var(--p-hairline);margin:.25rem 0">
+  <div class="p-grid-2">
+    <label class="p-field"><span>Email admin undangan</span><input class="p-input" id="admin-email" type="email" required></label>
+    <label class="p-field"><span>Password admin undangan</span><input class="p-input" id="admin-password" type="password" minlength="8" required autocomplete="new-password"></label>
+  </div>
+  <div class="p-grid-2">
+    <label class="p-field"><span>Email admin QR</span><input class="p-input" id="qr-email" type="email" required></label>
+    <label class="p-field"><span>Password admin QR</span><input class="p-input" id="qr-password" type="password" minlength="8" required autocomplete="new-password"></label>
+  </div>
+  <button id="submit" class="p-btn p-btn--primary" type="submit">Buat undangan</button>
+</form>
+</div>
+
+<!-- ============ MODAL KELOLA AKUN (lintas client) ============ -->
+<div id="account-modal" class="p-modal" hidden>
+<div class="p-modal__panel" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+  <div class="p-modal__header"><h3 id="account-modal-title">Kelola akun</h3><button type="button" id="account-modal-close" class="p-modal__close" aria-label="Tutup">×</button></div>
+  <p id="account-client-label" class="p-hint" style="margin:-.5rem 0 0"></p>
+  <div id="account-list"></div>
+</div>
+</div>
+
+<div id="toast" class="p-toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/tenant.js"></script>
+<script src="assets/js/panel/core.js"></script>
+<script src="assets/js/register.js"></script>
+</body></html>
