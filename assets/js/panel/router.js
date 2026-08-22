@@ -301,6 +301,10 @@
   window.PanelRouter = {
     start,
     navigate,
+    /** Dipinjam halaman (mis. baris Ringkasan) supaya href path-qualified —
+     * lihat komentar bug <base href="/"> di atas; JANGAN tulis href="#/.."
+     * fragment-saja di mana pun. */
+    hashHref,
     setDirty,
     clearDirty,
     refreshPublishStatus,
