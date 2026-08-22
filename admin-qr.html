@@ -21,7 +21,10 @@
 <!-- Struktur id sama persis dengan admin.html — shared.js/core.js menanganinya. -->
 <div id="login-screen" class="p-login-screen">
   <form id="login-form" class="p-login-card">
-    <p class="p-kicker">Check-in Tamu</p>
+    <div class="p-brand">
+      <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
+      <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Check-in Tamu</span></span>
+    </div>
     <h1>Masuk untuk memindai.</h1>
     <p class="p-hint">Mita &amp; Andi — The Wedding</p>
     <label>
@@ -38,9 +41,12 @@
 </div>
 
 <!-- ============ APLIKASI ============ -->
-<div id="app" hidden style="max-width:640px;margin:0 auto;padding:var(--p-4)">
+<div id="app" hidden style="max-width:640px;margin:0 auto;padding:var(--p-5) var(--p-4)">
   <header class="p-toolbar" style="margin-bottom:var(--p-4)">
-    <h1 style="font-family:var(--p-font-display);font-size:1.4rem;margin:0">Check-in — Mita &amp; Andi</h1>
+    <div class="p-brand">
+      <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
+      <span class="p-brand__text"><span class="p-brand__name">Check-in</span><span class="p-brand__sub">Mita &amp; Andi</span></span>
+    </div>
     <button type="button" class="p-btn p-btn--ghost" id="btn-logout">Keluar</button>
   </header>
 
