@@ -11,6 +11,7 @@ button { cursor:pointer; }
 .wa-login h1 { font-family:Georgia,serif; font-size:clamp(2rem,6vw,3rem); line-height:1.04; margin:.35rem 0 1rem; letter-spacing:-.045em; }.wa-login p { color:var(--wa-muted); line-height:1.6; }
 .wa-kicker { margin:0; color:var(--wa-green); letter-spacing:.13em; font-size:.68rem; font-weight:800; }
 .wa-login label,.wa-settings label,.wa-modal label { display:grid; gap:.45rem; margin-top:1rem; font-size:.84rem; font-weight:700; }
+.wa-login__card > .wa-button { margin-top:1.4rem; width:100%; }
 .wa-login input,.wa-settings input,.wa-settings textarea,.wa-modal input,.wa-modal select,.wa-contact-toolbar select,.wa-contact-template,.wa-template-name,.wa-template-body { width:100%; padding:.75rem .85rem; border:1px solid var(--wa-line); border-radius:11px; color:var(--wa-ink); background:#fff; outline:none; }
 textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings input:focus,.wa-settings textarea:focus,.wa-modal input:focus { border-color:var(--wa-green); box-shadow:0 0 0 3px rgba(31,138,85,.12); }
 .wa-button,.btn { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:40px; border:1px solid transparent; border-radius:11px; padding:.62rem .9rem; font-weight:750; text-decoration:none; transition:transform .15s,background .15s,border-color .15s; }.wa-button:hover,.btn:hover:not(:disabled) { transform:translateY(-1px); }.wa-button--primary,.btn--primary,.wa-contact-send { color:#fff; background:var(--wa-green); }.wa-button--primary:hover,.btn--primary:hover,.wa-contact-send:hover { background:var(--wa-green-dark); }.wa-button--secondary,.wa-button--quiet,.btn--ghost { color:var(--wa-ink); background:#fff; border-color:var(--wa-line); }.wa-button--quiet { font-size:.8rem; }.btn--tiny { min-height:32px; padding:.38rem .6rem; font-size:.76rem; }.btn--danger { color:#a62f2f; border-color:#f0d0d0; background:#fff7f7; }.btn:disabled { opacity:.5; cursor:not-allowed; }
@@ -113,12 +114,17 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
     position: relative;
     display: flex; align-items: flex-end; justify-content: center;
   }
+  /* Lebar div ini SENGAJA lebih sempit dari slot (bukan left:0;right:0 penuh)
+     — box-shadow spread melebar ke SEMUA arah (kiri-kanan, bukan cuma turun),
+     jadi lebar tampak = lebar div + 2×spread. Versi awal div selebar slot
+     (104px) + spread 20px jadi ±144px, jauh lebih lebar dari disc-nya (46px)
+     — sudah dipersempit supaya hasil akhirnya ±2x diameter disc, bukan ±3x. */
   .wa-bottomnav__fab-curve {
-    position: absolute; left: 0; right: 0; top: 0;
-    height: 30px;
+    position: absolute; left: 17px; right: 17px; top: 0;
+    height: 26px;
     border-bottom-left-radius: 100px;
     border-bottom-right-radius: 100px;
-    box-shadow: 0 22px 0 20px var(--wa-paper);
+    box-shadow: 0 18px 0 12px var(--wa-paper);
     pointer-events: none;
   }
   .wa-bottomnav__item {
