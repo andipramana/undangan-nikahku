@@ -2,16 +2,18 @@
  * Smoke test admin.html v2 di browser sungguhan — belum ada satu pun test
  * yang benar-benar mem-boot admin.html sampai sekarang; semua test lain
  * membaca source sebagai teks atau me-mount SATU halaman lewat page.setContent.
- * Ini menutup celah itu: KLIK NYATA elemen navigasi (kartu hub Beranda di
- * viewport HP, lalu sidebar di viewport desktop) — BUKAN location.hash=
- * langsung — supaya bug href fragment-saja yang diresolusi terhadap
- * <base href="/"> (link jadi menunjuk ke root/undangan tamu, bukan tetap di
- * admin.html — dilaporkan dari HP, lihat komentar hashHref() di router.js)
- * benar-benar tertangkap: location.hash= tidak kena bug itu sama sekali,
- * jadi test yang cuma set hash tidak akan pernah mendeteksinya. Pastikan
- * TIDAK ada console error / unhandled rejection, #p-outlet-inner benar-benar
- * terisi di tiap rute, dan dokumen tidak pernah berpindah keluar dari
- * admin.html (page.url() tetap mengandung "/admin.html" setelah tiap klik).
+ * Ini menutup celah itu: KLIK NYATA elemen navigasi (chip STRIP BAB — satu
+ * satunya navigasi sejak rombak v3, tampil di viewport HP maupun desktop)
+ * — BUKAN location.hash= langsung — supaya bug href fragment-saja yang
+ * diresolusi terhadap <base href="/"> (link jadi menunjuk ke root/undangan
+ * tamu, bukan tetap di admin.html — dilaporkan dari HP, lihat komentar
+ * hashHref() di router.js) benar-benar tertangkap: location.hash= tidak kena
+ * bug itu sama sekali, jadi test yang cuma set hash tidak akan pernah
+ * mendeteksinya. Pastikan TIDAK ada console error / unhandled rejection,
+ * #p-outlet-inner benar-benar terisi di tiap rute, judul stage (.p-stage__title,
+ * pengganti pageheader) terisi, dan dokumen tidak pernah berpindah keluar
+ * dari admin.html (page.url() tetap mengandung "/admin.html" setelah tiap
+ * klik).
  *
  * Tidak butuh server maupun Supabase sungguhan: page.route() mencegat SEMUA
  * request ke origin palsu http://panel.test/ dan menyajikannya langsung dari
@@ -130,7 +132,7 @@ try {
   await page.goto("http://panel.test/admin.html");
   await page.locator("#app").waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
   check("layar login tersembunyi, #app tampil setelah boot", await page.locator("#app").isVisible());
-  check("#/ (Beranda, awal): #p-outlet-inner terisi", (await page.locator("#p-outlet-inner").innerHTML()).trim().length > 50);
+  check("#/ (Ringkasan, awal): #p-outlet-inner terisi", (await page.locator("#p-outlet-inner").innerHTML()).trim().length > 50);
 
   // BUG KRITIS (dilaporkan dari HP): admin.html punya <base href="/">, dan
   // href fragment-saja seperti "#/mempelai" diresolusi HTML terhadap base
@@ -146,42 +148,51 @@ try {
     check(`${label}: dokumen TIDAK berpindah keluar dari admin.html (url: ${page.url()})`, page.url().includes("/admin.html"));
   }
 
-  // Jalur mobile (viewport HP): kartu navigasi di hub Beranda
-  // (renderNavGridHtml(), dirender di dalam #p-outlet-inner tiap home.js
-  // mount — sidebar disembunyikan CSS di bawah 1024px, lihat panel.css).
+  // Status publikasi: stub invitations mengembalikan published_at null →
+  // dirty → pill "Draft" di topbar harus muncul (pengganti badge header lama).
+  const pillText = await page.locator("#p-pubpill").textContent().catch(() => "");
+  check("pill status publikasi tampil dengan teks Draft", (pillText || "").trim() === "Draft");
+
+  // Jalur HP (viewport 390px): chip STRIP BAB — navigasi satu-satunya,
+  // tampil di semua viewport sejak v3 (tidak ada lagi sidebar/kartu hub).
   const ROUTES = ["mempelai", "acara", "pengaturan", "warna"];
   for (const key of ROUTES) {
-    await page.locator(`#p-outlet-inner [data-nav-key="${key}"]`).click();
+    await page.locator(`#p-chapters [data-nav-key="${key}"]`).click();
     // router.js mount() sinkron sebagian besar tapi beberapa halaman (mis.
     // warna.js fetch foto preview) async — beri waktu microtask/network mock
     // selesai sebelum membaca outlet.
     await page.waitForTimeout(300);
-    stillOnAdminHtml(`hub Beranda: klik menu "${key}"`);
+    stillOnAdminHtml(`strip bab: klik "${key}"`);
     const outletHtml = await page.locator("#p-outlet-inner").innerHTML();
     check(`#/${key}: #p-outlet-inner benar-benar terisi`, outletHtml.trim().length > 50);
-    const headerTitle = await page.locator(".p-pageheader__title").textContent().catch(() => "");
-    check(`#/${key}: judul halaman di header terisi`, !!(headerTitle && headerTitle.trim().length));
+    const stageTitle = await page.locator(".p-stage__title").textContent().catch(() => "");
+    check(`#/${key}: judul stage (.p-stage__title) terisi`, !!(stageTitle && stageTitle.trim().length));
+    const chipCurrent = await page.locator(`#p-chapters [data-nav-key="${key}"]`).getAttribute("aria-current");
+    check(`#/${key}: chip strip aktif ditandai aria-current="page"`, chipCurrent === "page");
 
-    // Balik ke Beranda lewat tombol "Kembali" (dipicu navigate() langsung,
-    // bukan href) supaya iterasi berikutnya bisa klik kartu hub lagi.
-    await page.locator("#p-back").click();
+    // Balik ke Ringkasan lewat chip-nya (bukan location.hash=) supaya
+    // iterasi berikutnya bisa klik chip bab lagi.
+    await page.locator('#p-chapters [data-nav-key="home"]').click();
     await page.waitForTimeout(300);
-    stillOnAdminHtml(`tombol "Kembali" dari "${key}"`);
+    stillOnAdminHtml(`chip "Ringkasan" dari "${key}"`);
   }
 
-  // Jalur desktop: sidebar permanen (>=1024px) — kode href-nya SAMA
-  // (navItemHref()) tapi elemennya beda dari kartu hub, dan link Beranda di
-  // sidebar punya href hardcoded terpisah (renderSidebar()) — wajib diuji
-  // sendiri, bukan diasumsikan sama dari uji kartu hub di atas.
+  // Jalur desktop: strip yang SAMA, tapi layout beda (slug chip & seluruh
+  // chip bab + alat terlihat tanpa scroll di ≥1024px) — pastikan navigasi
+  // tetap benar di viewport lebar juga.
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.waitForTimeout(150);
-  await page.locator('.p-sidebar__item[data-nav-key="mempelai"]').click();
+  await page.locator('#p-chapters [data-nav-key="cover"]').click();
   await page.waitForTimeout(300);
-  stillOnAdminHtml('sidebar desktop: klik "mempelai"');
-  await page.locator('.p-sidebar__item[data-nav-key="home"]').click();
+  stillOnAdminHtml('strip desktop: klik "cover"');
+  const coverKicker = await page.locator(".p-stage__kicker").textContent().catch(() => "");
+  check("desktop: kicker stage menyebut bab 01 untuk cover", /bab\s*01/i.test(coverKicker || ""));
+  await page.locator('#p-chapters [data-nav-key="home"]').click();
   await page.waitForTimeout(300);
-  stillOnAdminHtml('sidebar desktop: klik "Beranda"');
-  check("sidebar desktop: kembali ke Beranda, #p-outlet-inner terisi", (await page.locator("#p-outlet-inner").innerHTML()).trim().length > 50);
+  stillOnAdminHtml('strip desktop: klik "Ringkasan"');
+  check("desktop: kembali ke Ringkasan, #p-outlet-inner terisi", (await page.locator("#p-outlet-inner").innerHTML()).trim().length > 50);
+  const checklistRows = await page.locator("#home-chapters .p-checkrow").count();
+  check("Ringkasan: checklist 9 bab dirender sebagai baris", checklistRows === 9);
 
   check("tidak ada console error di sepanjang navigasi", consoleErrors.length === 0);
   if (consoleErrors.length) consoleErrors.forEach((e) => console.error("  console error:", e));
@@ -192,4 +203,4 @@ try {
 }
 
 if (failed) { console.error("\nFAIL: smoke test admin.html v2 menemukan masalah."); process.exit(1); }
-console.log("\nPASS: admin.html v2 boot bersih (tanpa error), navigasi klik nyata (hub mobile + sidebar desktop) tetap di admin.html, dan merender konten nyata di tiap rute yang diuji.");
+console.log("\nPASS: admin.html v3 boot bersih (tanpa error), navigasi klik nyata via strip bab (HP + desktop) tetap di admin.html, dan merender konten nyata di tiap rute yang diuji.");

@@ -302,8 +302,8 @@
     start,
     navigate,
     /** Dipinjam halaman (mis. baris Ringkasan) supaya href path-qualified —
-     * lihat komentar bug <base href="/"> di atas; JANGAN tulis href="#/.."
-     * fragment-saja di mana pun. */
+     * lihat komentar bug base-tag di atas; jangan pernah menulis atribut
+     * href yang isinya cuma fragment URL tanpa path. */
     hashHref,
     setDirty,
     clearDirty,
