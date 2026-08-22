@@ -94,7 +94,8 @@ check('summary: chip total pemberi + total jumlah (amount null dilewati)', kadoS
 // 7) Daftar compact ala /wa — tanpa tabel scroll-horizontal
 // ---------------------------------------------------------------------
 check('entri dirender sebagai article.kd-entry, BUKAN <table>/<td>', /<article class="kd-entry" data-entry-id=/.test(kadoSrc) && !/<table|<tbody|overflow-x:auto">[\s\S]*?<table/.test(kadoSrc.split('renderDetail')[1] || ''));
-check('CSS baris compact: flex-column rapat + hairline seperti wa-contact-row', /\.kd-entry\s*\{[^}]*flex-direction:\s*column[^}]*border-bottom:\s*1px solid var\(--p-hairline\)/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')));
+check('CSS entri BERKARTU (latar row + border penuh + radius) — bukan garis bawah menyatu', /\.kd-list\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*gap:/.test(panelCss) && /\.kd-entry\s*\{[^}]*background:\s*var\(--p-row\);/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')) && /\.kd-entry\s*\{[^}]*border-radius:/.test(panelCss) && !/\.kd-entry\s*\{[^}]*border-bottom/.test(panelCss));
+check('jumlah: blur TANPA edit memulihkan tampilan terformat (bug klik-lalu-lepas)', kadoSrc.includes('parseAmountInput(input.value).value === e.amount') && /addEventListener\("blur"[\s\S]{0,400}?fmtRibuan\(e\.amount\)/.test(kadoSrc));
 check('nama borderless transparan (hover/focus berdandan)', /\.kd-name-input\s*\{[^}]*border:\s*1px solid transparent/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')));
 
 // ---------------------------------------------------------------------

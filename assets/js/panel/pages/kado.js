@@ -213,6 +213,21 @@ window.PanelPages["kado"] = {
         });
         input.addEventListener("change", () =>
           saveEntryField(Number(input.dataset.id), { amount: parseAmountInput(input.value) }, input));
+        // BUG klik-lalu-lepas: "change" hanya fire kalau isinya BERUBAH.
+        // Fokus → klik tempat lain tanpa mengetik melewati saveEntryField,
+        // sehingga angka mentah dari handler focus tertinggal di layar.
+        // Blur memulihkan format — identik dengan nilai tersimpan, tidak
+        // menyentuh DB; kalau user mengubah isi, change sudah beres dulu
+        // (change fire sebelum blur) dan sini tinggal idempoten.
+        input.addEventListener("blur", () => {
+          const e = st.entries.find((x) => x.id === Number(input.dataset.id));
+          if (!e) return;
+          const kosong = input.value.trim() === "";
+          const cocok = (e.amount === null || e.amount === undefined)
+            ? kosong
+            : (!kosong && parseAmountInput(input.value).value === e.amount);
+          if (cocok) input.value = kosong ? "" : fmtRibuan(e.amount);
+        });
       });
       body.querySelectorAll(".kd-quantity-input").forEach((input) => input.addEventListener("change", () => {
         const { value, error } = parseNumber(input.value);

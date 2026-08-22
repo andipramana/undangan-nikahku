@@ -857,16 +857,19 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
   font-size: 14px; line-height: 1;
 }
 .kd-clear:hover { background: var(--p-danger-wash); color: var(--p-danger); }
-/* Daftar entri compact — pola daftar kontak wa.html (article per pemberi,
-   flex-column rapat + hairline): SEMUA field terlihat tanpa scroll
-   horizontal, beda dari tabel 6 kolom yang harus digeser di HP. */
-.kd-list { margin-top: var(--p-2); }
+/* Daftar entri compact ala kontak wa.html tapi BERKARTU: satu kotak per
+   pemberi (latar row + border penuh + radius + jarak antar kartu) supaya
+   batas tiap item jelas — versi garis-bawah-tunggal dinilai "menyatu"
+   oleh pemilik produk. Tetap tanpa scroll horizontal di HP. */
+.kd-list { display: flex; flex-direction: column; gap: .55rem; margin-top: var(--p-2); }
 .kd-entry {
-  display: flex; flex-direction: column; gap: .3rem;
-  padding: .6rem 0;
-  border-bottom: 1px solid var(--p-hairline);
+  display: flex; flex-direction: column; gap: .4rem;
+  padding: .65rem .8rem;
+  background: var(--p-row);
+  border: 1px solid var(--p-hairline);
+  border-radius: var(--p-r-md);
 }
-.kd-entry:last-child { border-bottom: 0; }
+.kd-entry:hover { border-color: var(--p-line); }
 .kd-entry__top { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 /* Nama pemberi: input borderless transparan seperti .wa-contact-name-input
    — hover/focus baru berdandan supaya daftar tetap tenang. */
