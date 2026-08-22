@@ -103,6 +103,16 @@
     <div id="wa-pick-phone-body"></div>
   </div>
 </div>
+<!-- Aksi utama yang mengikuti viewport: menambah kontak harus terjangkau
+     dari mana pun user sedang scroll — laporan pemilik produk: refleks mau
+     nambah kontak saat jauh di daftar, jarinya malah kena dropdown
+     "Daftar kirim" yang kebetulan dekat situ. Membuka modal yang sama
+     dengan #wa-add (wiring di wa-blast.js). -->
+<button type="button" class="wa-fab" id="wa-add-fab" aria-label="Tambah kontak">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+  <span>Tambah kontak</span>
+</button>
+
 <div id="toast" class="wa-toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/config.js"></script>

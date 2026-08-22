@@ -210,6 +210,10 @@
     document.getElementById("wa-add").disabled = !enabled;
     document.getElementById("wa-add-from-contacts").disabled = !enabled;
     document.getElementById("wa-import").disabled = !enabled;
+    // FAB tambah-kontak ikut aturan yang sama (guard: elemen hanya ada di
+    // wa.html, tidak wajib di pemakaian runtime lain).
+    const addFab = document.getElementById("wa-add-fab");
+    if (addFab) addFab.disabled = !enabled;
   }
 
   document.getElementById("wa-list-select").addEventListener("change", (e) => {
@@ -849,6 +853,11 @@
     addName.focus();
   }
   addBtn.addEventListener("click", openAdd);
+  // FAB mengikuti viewport (pojok kanan bawah) membuka modal yang SAMA —
+  // satu pintu logika tambah kontak, dua titik masuk (toolbar atas untuk
+  // yang baru masuk halaman, FAB untuk yang sudah jauh di daftar).
+  const addFab = document.getElementById("wa-add-fab");
+  if (addFab) addFab.addEventListener("click", openAdd);
   addClose.addEventListener("click", () => { addModal.hidden = true; });
   addModal.addEventListener("click", (e) => {
     if (e.target === addModal) addModal.hidden = true;

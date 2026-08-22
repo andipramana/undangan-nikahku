@@ -61,3 +61,30 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
 .wa-fc-empty a { color:var(--wa-green-dark); font-weight:700; }
 @media (max-width:800px) { .wa-header { grid-template-columns:1fr auto; }.wa-header__identity { order:3; grid-column:1/-1; text-align:left; }.wa-layout { grid-template-columns:1fr; }.wa-settings-column { order:-1; }.wa-config:not([open]) { background:#fff; }.wa-hero { align-items:start; flex-direction:column; }.wa-toolbar--actions { width:100%; }.wa-list-bar label { grid-template-columns:1fr; }.wa-list-bar select { width:100%; }.wa-contact-toolbar { grid-template-columns:1fr; }.wa-contact-search { min-width:0; }.wa-status-filters { justify-content:space-between; } }
 @media (max-width:440px) { .wa-contact-shell { margin:.8rem; }.wa-contact-toolbar label { grid-template-columns:72px minmax(0,1fr); }.wa-status-filter { flex:1; padding:.32rem .3rem; font-size:.63rem; }.wa-pagination { flex-wrap:wrap; justify-content:center; }.wa-contact-result { flex-basis:100%; margin-right:0; text-align:center; }.wa-toolbar--actions { grid-template-columns:1fr; } }
+/* ---------------------------------------------------------------------
+   FAB tambah-kontak — rule TAMBAHAN, token & rule di atas tidak diubah.
+   Alasan: aksi utama harus terjangkau dari posisi scroll mana pun di
+   daftar kontak (laporan pemilik produk — refleks mau nambah kontak saat
+   jauh di daftar, jarinya malah kena dropdown "Daftar kirim" dekat situ),
+   bukan cuma dari toolbar atas. z-index sengaja di bawah modal (10) dan
+   toast (20) supaya overlay selalu menutupinya; .wa-shell diberi ruang
+   bawah ekstra agar FAB tidak menutupi pagination saat scroll mentok.
+   --------------------------------------------------------------------- */
+.wa-shell { padding-bottom: 4.75rem; }
+.wa-fab {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: calc(1.1rem + env(safe-area-inset-bottom));
+  z-index: 9;
+  display: inline-flex; align-items: center; gap: .5rem;
+  min-height: 52px; padding: .85rem 1.2rem;
+  border: 0; border-radius: 999px;
+  color: #fff; background: var(--wa-green);
+  font-weight: 800; font-size: .9rem;
+  box-shadow: 0 12px 32px rgba(18, 104, 63, .38);
+  transition: transform .15s, background .15s;
+}
+.wa-fab:hover { background: var(--wa-green-dark); transform: translateY(-1px); }
+.wa-fab:disabled { opacity: .5; cursor: not-allowed; }
+.wa-fab svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.wa-fab span { white-space: nowrap; }
