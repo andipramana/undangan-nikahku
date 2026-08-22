@@ -100,6 +100,20 @@ await page.route("**/*", async (route) => {
     if (url.href.includes("html2canvas")) {
       return route.fulfill({ status: 200, contentType: "text/javascript", body: "" });
     }
+    // Font Google (Geist/Geist Mono, dimuat <link> di head admin.html) sah —
+    // stub CSS & berkas font kosong tapi VALID supaya offline test ini tidak
+    // mencatat console error 404 untuk request yang normal di production.
+    if (url.hostname === "fonts.googleapis.com") {
+      return route.fulfill({ status: 200, contentType: "text/css", body: "/* smoke stub: @font-face dinonaktifkan */" });
+    }
+    if (url.hostname === "fonts.gstatic.com") {
+      return route.fulfill({ status: 200, contentType: "font/woff2", body: "" });
+    }
+    // CDN jsdelivr lain (mis. xlsx untuk kontak.js) — script kosong valid;
+    // rute yang diuji smoke tidak menyentuh fitur yang memakainya.
+    if (url.hostname === "cdn.jsdelivr.net") {
+      return route.fulfill({ status: 200, contentType: "text/javascript", body: "" });
+    }
     return route.fulfill({ status: 404, body: "" });
   }
   const filePath = path.join(root, decodeURIComponent(url.pathname));
