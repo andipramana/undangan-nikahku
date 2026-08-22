@@ -232,6 +232,9 @@ try {
   check("HP: setelah memilih tujuan, drawer menutup sendiri", !(await sidebarOpen()));
   const stageKontak = await page.locator(".p-stage__title").textContent().catch(() => "");
   check("HP: rute kontak benar-benar termuat dari drawer", /kontak/i.test(stageKontak || ""));
+  // Halaman Kontak serumpun Kirim WhatsApp: mount memasang class .wa-family
+  // pada outlet (aksen hijau + judul serif, lihat panel.css).
+  check("HP: halaman kontak membawa scope serumpun-WA (.wa-family)", await page.locator("#p-outlet-inner").evaluate((el) => el.classList.contains("wa-family")));
 
   // Menu ⋯ topbar (laporan user): wajib menutup saat klik bagian layar lain.
   const topmenuOpen = () => page.locator("#p-topmenu").evaluate((el) => el.open);

@@ -17,6 +17,9 @@ window.PanelPages["kontak"] = {
   group: "Tamu",
   icon: window.PanelUI.icon("contacts"),
   async mount(outlet) {
+    // Serumpun Kirim WhatsApp (wa.html): satu alur kerja, satu rasa visual.
+    // CSS-nya di panel.css seksi "Halaman Kontak" — halaman lain tak tersentuh.
+    outlet.classList.add("wa-family");
     const { esc, escAttr, card } = window.PanelUI;
     const { sb, toast, tenant, query } = window.AdminAPI;
 
@@ -181,7 +184,7 @@ window.PanelPages["kontak"] = {
             <div class="p-list-row" data-list-id="${l.id}">
               <div class="p-list-row__fields">
                 <strong>${esc(l.name)}</strong>
-                <span class="p-muted">${entriesFor(l.id).length} kontak</span>
+                <span class="p-count-chip">${entriesFor(l.id).length} kontak</span>
               </div>
               <div class="p-list-row__controls">
                 <button type="button" class="p-btn p-btn--tiny p-btn--primary" data-open="${l.id}">Buka</button>
@@ -404,5 +407,9 @@ window.PanelPages["kontak"] = {
 
     await load();
   },
-  destroy() {}
+  destroy() {
+    // Lepas scope serumpun-WA supaya halaman panel berikutnya kembali kobalt.
+    const outlet = document.getElementById("p-outlet-inner");
+    if (outlet) outlet.classList.remove("wa-family");
+  }
 };

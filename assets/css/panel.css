@@ -55,6 +55,13 @@
   --p-info: #1e5fbf;
   --p-info-wash: #e8f0fc;
 
+  /* Keluarga WhatsApp — halaman Kontak (#/kontak) satu alur kerja dengan
+     wa.html (buku alamat → blast), aksennya disamakan dengan wa.css supaya
+     terasa satu kesatuan, bukan dua produk berbeda. */
+  --p-wa-green: #1f8a55;
+  --p-wa-green-dark: #12683f;
+  --p-wa-soft: #ecf7f0;
+
   /* Overlay modal/scrim */
   --p-overlay: rgba(18, 20, 24, .44);
 
@@ -761,4 +768,32 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
    ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* -------------------------------------------------------------------------
+   Halaman Kontak (#/kontak) — serumpun Kirim WhatsApp (wa.html): satu alur
+   kerja (buku alamat → blast), jadi aksen & tipografi judulnya mengikuti
+   wa.css (hijau + serif Georgia), bukan kobalt panel. Di-scope lewat class
+   .wa-family yang dipasang-lepas kontak.js saat mount/destroy — halaman
+   panel lain tidak tersentuh.
+   ------------------------------------------------------------------------- */
+.p-outlet__inner.wa-family .p-btn--primary { background: var(--p-wa-green); }
+.p-outlet__inner.wa-family .p-btn--primary:hover { background: var(--p-wa-green-dark); }
+.p-outlet__inner.wa-family .p-card { border-top: 3px solid var(--p-wa-soft); }
+.p-outlet__inner.wa-family .p-card__title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -.03em;
+}
+.p-outlet__inner.wa-family .p-list-row:hover { border-color: var(--p-wa-green); }
+/* Chip jumlah kontak ("N KONTAK") di baris daftar — bahasa chip hijau wa.css. */
+.p-count-chip {
+  display: inline-block; width: max-content;
+  padding: .18rem .6rem;
+  border-radius: 999px;
+  background: var(--p-wa-soft);
+  color: var(--p-wa-green-dark);
+  font-family: var(--p-font-mono); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase;
 }
