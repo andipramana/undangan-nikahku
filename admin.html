@@ -43,30 +43,40 @@
 
 <!-- ============ APLIKASI ============ -->
 <div id="app" hidden>
-  <div class="p-shell">
-    <!-- Sidebar permanen ≥1024px (§5.3) — seluruh 19 tujuan terlihat
-         sekaligus, bukan drawer tersembunyi. Di HP disembunyikan lewat CSS;
-         Beranda (hub) menggantikannya sebagai navigasi utama. -->
-    <aside class="p-sidebar" id="p-sidebar">
+  <!-- Kepala frame sticky: topbar (merek + slug + status publikasi + ⋯) dan
+       STRIP BAB — seluruh navigasi panel dalam satu chip-row horizontal,
+       tanpa sidebar/hamburger/grid kartu. Dirender router.js (renderStrip).
+       Tombol Keluar hidup di menu ⋯ dan wajib ber-id btn-logout (di-bind
+       core.js initAdminAuth saat load, jadi harus statis di markup ini). -->
+  <div class="p-framehead">
+    <header class="p-topbar">
       <div class="p-brand">
         <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
         <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Panel Admin</span></span>
       </div>
-      <p class="p-sidebar__slug" id="p-sidebar-slug"></p>
-      <nav id="p-sidebar-nav" aria-label="Navigasi panel"></nav>
-      <div class="p-sidebar__footer">
-        <button type="button" class="p-btn p-btn--ghost p-sidebar__logout" id="btn-logout">Keluar</button>
+      <span class="p-chip p-topbar__slug" id="p-topbar-slug"></span>
+      <div class="p-topbar__side">
+        <button type="button" class="p-pubpill" id="p-pubpill" data-nav-key="home" hidden></button>
+        <details class="p-topmenu" id="p-topmenu">
+          <summary class="p-topmenu__btn" aria-label="Menu lainnya">&#8943;</summary>
+          <div class="p-topmenu__sheet">
+            <button type="button" id="p-menu-preview">Pratinjau draft</button>
+            <button type="button" id="btn-logout">Keluar</button>
+          </div>
+        </details>
       </div>
-    </aside>
+    </header>
+    <nav class="p-chapters" id="p-chapters" aria-label="Bab undangan &amp; alat"></nav>
+  </div>
 
-    <div class="p-main">
-      <header class="p-pageheader" id="p-pageheader"></header>
-      <main class="p-outlet" id="p-outlet"><div class="p-outlet__inner" id="p-outlet-inner"></div></main>
-      <div class="p-savebar" id="p-savebar" hidden>
-        <span class="p-savebar__status">Ada perubahan belum disimpan.</span>
-        <button type="button" class="p-btn p-btn--primary" id="p-savebar-btn">Simpan</button>
-      </div>
-    </div>
+  <main class="p-outlet" id="p-outlet">
+    <header class="p-stage" id="p-stage"></header>
+    <div class="p-outlet__inner" id="p-outlet-inner"></div>
+  </main>
+
+  <div class="p-savebar" id="p-savebar" hidden>
+    <span class="p-savebar__status">Ada perubahan belum disimpan.</span>
+    <button type="button" class="p-btn p-btn--primary" id="p-savebar-btn">Simpan</button>
   </div>
 </div>
 
@@ -109,7 +119,8 @@
 <script src="assets/js/panel/router.js"></script>
 
 <!-- Satu file per halaman (kontrak §6.3 rencana v2) — urutan di sini
-     SAMA PERSIS dengan urutan tampil di sidebar/hub (lihat NAV di router.js). -->
+     SAMA PERSIS dengan urutan bab/alat di strip (lihat CHAPTERS & TOOLS di
+     router.js). -->
 <script src="assets/js/panel/pages/home.js"></script>
 <script src="assets/js/panel/pages/cover.js"></script>
 <script src="assets/js/panel/pages/mempelai.js"></script>
@@ -135,7 +146,7 @@
 <script>
 (function () {
   async function boot() {
-    document.getElementById("p-sidebar-slug").textContent = "/" + window.AdminAPI.tenant.slug + "/";
+    document.getElementById("p-topbar-slug").textContent = "/" + window.AdminAPI.tenant.slug + "/";
     try {
       await window.PanelStore.load();
       window.PanelRouter.start();

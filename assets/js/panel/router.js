@@ -5,29 +5,35 @@
  * halaman baru. Hash routing memberi hasil sama bagi pengguna (bookmark,
  * tombol Back, halaman terpisah) tanpa menyentuh routing tenant sama sekali.
  *
- * Struktur navigasi (kelompok + urutan) didefinisikan SEKALI di sini (NAV) —
- * halaman itu sendiri (window.PanelPages[key]) hanya menyumbang title/icon/
- * mount/destroy. home.js memakai renderNavGridHtml() supaya hub tidak
- * mendefinisikan ulang struktur yang sama.
+ * Navigasi v3 — "Strip Bab": TIDAK ada sidebar, hamburger, maupun grid kartu.
+ * Seluruh tujuan hidup sebagai chip di SATU strip horizontal di bawah topbar,
+ * terbagi dua rasa tanpa label grup:
+ *   - BAB (01–09): halaman isi undangan, DINOMORI mengikuti urutan section
+ *     yang benar-benar dibaca tamu di halaman undangan (sampul → penutup) —
+ *     urutan inilah "daftar isi" undangannya, bukan pengelompokan fungsional.
+ *   - ALAT: sisanya (tamu, WA, QR, tampilan, pengaturan), flat setelah satu
+ *     pemisah tipis.
+ * Halaman awal bukan "hub kartu" melainkan Ringkasan: checklist peluncuran
+ * (lihat pages/home.js). Struktur strip didefinisikan SEKALI di sini; halaman
+ * (window.PanelPages[key]) hanya menyumbang title/icon/mount/destroy.
  */
 (function () {
-  const NAV = [
-    { group: "Isi Undangan", items: [
-      "cover", "mempelai", "pembuka", "acara", "cerita", "galeri", "hadiah", "livestream", "penutup"
-    ].map((key) => ({ key })) },
-    { group: "Tamu", items: [
-      { key: "sapaan" },
-      { key: "kontak" },
-      { link: "wa", title: "Kirim WhatsApp", iconName: "whatsapp" },
-      { key: "ucapan" },
-      { link: "admin-qr", title: "Check-in QR", iconName: "qr" }
-    ] },
-    { group: "Tampilan", items: [
-      { key: "template" }, { key: "warna" }, { key: "font" }, { key: "editor-visual" }
-    ] },
-    { group: "Pengaturan", items: [
-      { key: "pengaturan" }
-    ] }
+  // Urutan bab = urutan section di index.html (cover → opening → couple →
+  // event → livestream → love-story → gallery → gift → closing). Nomor bab
+  // pada strip & kicker stage dihitung dari posisi array ini.
+  const CHAPTERS = [
+    "cover", "pembuka", "mempelai", "acara", "livestream", "cerita", "galeri", "hadiah", "penutup"
+  ];
+  // Alat — flat, tanpa label grup. Link wa/admin-qr tetap dibawa router
+  // sendiri (menuju wa.html/admin-qr.html, bukan PanelPages).
+  const TOOLS = [
+    { key: "sapaan" },
+    { key: "kontak" },
+    { link: "wa", title: "Kirim WhatsApp", iconName: "whatsapp" },
+    { key: "ucapan" },
+    { link: "admin-qr", title: "Check-in QR", iconName: "qr" },
+    { key: "template" }, { key: "warna" }, { key: "font" }, { key: "editor-visual" },
+    { key: "pengaturan" }
   ];
 
   let currentKey = null;
@@ -39,6 +45,10 @@
 
   const $ = (id) => document.getElementById(id);
   const pageDef = (key) => window.PanelPages && window.PanelPages[key];
+  const chapterNo = (key) => {
+    const i = CHAPTERS.indexOf(key);
+    return i < 0 ? null : String(i + 1).padStart(2, "0");
+  };
 
   /** BUG KRITIS (dilaporkan dari HP): admin.html punya <base href="/">
    * (perlu untuk semua script/asset relatif). Href fragment-saja seperti
@@ -53,43 +63,34 @@
   function hashHref(key) {
     return location.pathname + (key === "home" ? "#/" : `#/${key}`);
   }
-  function navItemKey(item) { return item.key || item.link; }
-  function navItemHref(item) { return item.link ? window.AdminAPI.tenant.path(item.link) : hashHref(item.key); }
+  function navItemHref(item) {
+    return item.link ? window.AdminAPI.tenant.path(item.link) : hashHref(item.key);
+  }
   function navItemTitle(item) {
     if (item.link) return item.title;
     const p = pageDef(item.key);
     return p ? p.title : item.key;
   }
-  function navItemIcon(item) {
-    if (item.link) return window.PanelUI.icon(item.iconName);
-    const p = pageDef(item.key);
-    return (p && p.icon) || window.PanelUI.icon("home");
-  }
 
-  function renderNavGridHtml() {
-    return NAV.map((group) => {
-      const cards = group.items.map((item) => `
-        <a class="p-nav-card" href="${navItemHref(item)}" data-nav-key="${navItemKey(item)}">
-          ${navItemIcon(item)}
-          <span class="p-nav-card__title">${window.PanelUI.esc(navItemTitle(item))}</span>
-        </a>`).join("");
-      return `<div class="p-nav-group"><p class="p-nav-group__label">${window.PanelUI.esc(group.group)}</p><div class="p-nav-grid">${cards}</div></div>`;
-    }).join("");
-  }
-
-  function renderSidebar() {
-    const nav = $("p-sidebar-nav");
-    if (!nav) return;
-    const home = pageDef("home");
-    let html = `<a class="p-sidebar__item" href="${hashHref("home")}" data-nav-key="home">${(home && home.icon) || window.PanelUI.icon("home")}<span>Beranda</span></a>`;
-    NAV.forEach((group) => {
-      html += `<div><p class="p-sidebar__group-label">${window.PanelUI.esc(group.group)}</p>`;
-      group.items.forEach((item) => {
-        html += `<a class="p-sidebar__item" href="${navItemHref(item)}" data-nav-key="${navItemKey(item)}">${navItemIcon(item)}<span>${window.PanelUI.esc(navItemTitle(item))}</span></a>`;
-      });
-      html += `</div>`;
+  function renderStrip() {
+    const strip = $("p-chapters");
+    if (!strip) return;
+    const esc = window.PanelUI.esc;
+    let html = `<a class="p-chapter p-chapter--home" href="${hashHref("home")}" data-nav-key="home">Ringkasan</a>`;
+    CHAPTERS.forEach((key) => {
+      html += `<a class="p-chapter" href="${hashHref(key)}" data-nav-key="${key}">` +
+        `<span class="p-chapter__num">${chapterNo(key)}</span>` +
+        `<span>${esc(navItemTitle({ key }))}</span></a>`;
     });
-    nav.innerHTML = html;
+    html += `<span class="p-chapters__rule" role="presentation"></span>`;
+    TOOLS.forEach((item) => {
+      const icon = item.link
+        ? window.PanelUI.icon(item.iconName)
+        : ((pageDef(item.key) || {}).icon || "");
+      html += `<a class="p-chapter p-chapter--tool" href="${navItemHref(item)}" data-nav-key="${item.key || item.link}" title="${esc(navItemTitle(item))}">` +
+        `${icon}<span>${esc(navItemTitle(item))}</span></a>`;
+    });
+    strip.innerHTML = html;
   }
 
   function updateActiveNav(key) {
@@ -97,38 +98,45 @@
       if (el.dataset.navKey === key) el.setAttribute("aria-current", "page");
       else el.removeAttribute("aria-current");
     });
+    // Jaga chip aktif selalu terlihat — strip bisa lebih lebar dari layar.
+    const active = document.querySelector('#p-chapters [aria-current="page"]');
+    if (active && active.scrollIntoView) {
+      try { active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }
+      catch { active.scrollIntoView(); }
+    }
   }
 
-  function renderHeader(def, key) {
-    const header = $("p-pageheader");
-    if (!header) return;
-    const isHome = key === "home";
-    header.classList.toggle("p-pageheader--home", isHome);
-    header.innerHTML = `
-      <button type="button" class="p-pageheader__back" id="p-back" aria-label="Kembali ke Beranda">${window.PanelUI.icon("back")}</button>
-      <div class="p-pageheader__text">
-        <p class="p-pageheader__kicker">${window.PanelUI.esc(isHome ? "Panel admin" : (def.group || ""))}</p>
-        <h1 class="p-pageheader__title">${window.PanelUI.esc(def.title)}</h1>
-      </div>
-      <span class="p-badge" id="p-header-publish-badge" hidden></span>
-    `;
-    const back = $("p-back");
-    if (back) back.addEventListener("click", () => navigate("home"));
-    if (lastPublishStatus) applyPublishBadge();
+  /** Stage head — kicker mono (tenant · bab/alat) + judul besar, DI DALAM
+   * aliran konten (tidak sticky, tidak ada tombol back: strip bab di atas
+   * adalah navigasinya). */
+  function renderStage(def, key) {
+    const stage = $("p-stage");
+    if (!stage) return;
+    const slug = window.AdminAPI.tenant.slug;
+    const no = chapterNo(key);
+    const kicker = key === "home"
+      ? `/${slug}/ · ringkasan`
+      : no ? `/${slug}/ · bab ${no}` : `/${slug}/ · alat`;
+    stage.innerHTML = `
+      <p class="p-stage__kicker">${window.PanelUI.esc(kicker)}</p>
+      <h1 class="p-stage__title">${window.PanelUI.esc(def.title)}</h1>`;
   }
 
   function applyPublishBadge() {
-    const badge = $("p-header-publish-badge");
-    if (!badge || !lastPublishStatus) return;
-    badge.hidden = false;
-    badge.className = "p-badge " + (lastPublishStatus.dirty ? "p-badge--warn" : "p-badge--ok");
-    badge.textContent = lastPublishStatus.dirty ? "Belum dipublikasikan" : "Sudah dipublikasikan";
+    const pill = $("p-pubpill");
+    if (!pill || !lastPublishStatus) return;
+    pill.hidden = false;
+    pill.classList.toggle("p-pubpill--live", !lastPublishStatus.dirty);
+    pill.textContent = lastPublishStatus.dirty ? "Draft" : "Live";
+    pill.title = lastPublishStatus.dirty
+      ? "Ada perubahan belum dipublikasikan — klik untuk membuka Ringkasan"
+      : "Semua perubahan sudah dipublikasikan";
   }
 
   // ---------------------------------------------------------------------
   // Status publikasi — satu sumber (invitations.content_updated_at vs
   // published_at, RPC & trigger sudah ada lewat migration 0020). Dipakai
-  // Beranda (kartu penuh) dan header tiap halaman (badge kecil).
+  // pill topbar dan halaman Ringkasan (lewat onPublishStatus).
   // ---------------------------------------------------------------------
   function fmtTime(iso) {
     if (!iso) return "";
@@ -234,7 +242,9 @@
     clearDirty();
     currentKey = key;
     currentPage = def;
-    renderHeader(def, key);
+    const menu = $("p-topmenu"); // tutup dropdown ⋯ kalau kebuka saat pindah
+    if (menu) menu.open = false;
+    renderStage(def, key);
     updateActiveNav(key);
     const outlet = $("p-outlet-inner");
     outlet.innerHTML = "";
@@ -254,9 +264,9 @@
    * redirect 404.html), klik pada [data-nav-key] TETAP dicegat di sini dan
    * dinavigasikan lewat navigate() (location.hash=, bukan href) — jalur yang
    * terbukti kebal terhadap base tag. Dipasang di document supaya menjangkau
-   * sidebar (statis) maupun grid kartu Beranda (dirender ulang tiap home.js
-   * mount, lewat renderNavGridHtml()) tanpa perlu pasang ulang listener tiap
-   * kali. Hanya kunci HALAMAN INTERNAL (punya entri window.PanelPages) yang
+   * strip bab (dirender ulang tiap start()) maupun elemen nav apa pun yang
+   * dirender halaman (mis. baris Ringkasan) tanpa pasang ulang listener.
+   * Hanya kunci HALAMAN INTERNAL (punya entri window.PanelPages) yang
    * dicegat — link eksternal (Kirim WhatsApp/Check-in QR ke wa.html/
    * admin-qr.html, data-nav-key="wa"/"admin-qr") sengaja dibiarkan navigasi
    * normal karena memang menuju halaman lain, bukan bug.
@@ -273,8 +283,10 @@
   }
 
   function start() {
-    renderSidebar();
+    renderStrip();
     bindNavClickSafetyNet();
+    const previewBtn = $("p-menu-preview");
+    if (previewBtn) previewBtn.addEventListener("click", () => openDraftPreview());
     const btn = $("p-savebar-btn");
     if (btn) btn.addEventListener("click", handleSaveBarClick);
     window.addEventListener("hashchange", () => mount(resolveKey()));
@@ -295,7 +307,6 @@
     publishNow,
     openDraftPreview,
     getPublishStatus: () => lastPublishStatus,
-    onPublishStatus: (fn) => { publishListener = fn; },
-    renderNavGridHtml
+    onPublishStatus: (fn) => { publishListener = fn; }
   };
 })();
