@@ -5,17 +5,19 @@
  * halaman baru. Hash routing memberi hasil sama bagi pengguna (bookmark,
  * tombol Back, halaman terpisah) tanpa menyentuh routing tenant sama sekali.
  *
- * Navigasi v3 — "Strip Bab": TIDAK ada sidebar, hamburger, maupun grid kartu.
- * Seluruh tujuan hidup sebagai chip di SATU strip horizontal di bawah topbar,
- * terbagi dua rasa tanpa label grup:
- *   - BAB (01–09): halaman isi undangan, DINOMORI mengikuti urutan section
- *     yang benar-benar dibaca tamu di halaman undangan (sampul → penutup) —
- *     urutan inilah "daftar isi" undangannya, bukan pengelompokan fungsional.
- *   - ALAT: sisanya (tamu, WA, QR, tampilan, pengaturan), flat setelah satu
- *     pemisah tipis.
+ * Navigasi v3 — "Strip Bab" + sidebar pendamping. DUA jalur ke tujuan yang
+ * SAMA, keduanya aktif:
+ *   1. STRIP horizontal di bawah topbar (utama, semua viewport): chip flat
+ *      TANPA label grup — BAB (01–09, dinomori mengikuti urutan section yang
+ *      benar-benar dibaca tamu di halaman undangan: sampul → penutup) lalu
+ *      ALAT flat setelah satu pemisah tipis.
+ *   2. SIDEBAR parent-child (jalur tambahan): permanen ≥1024px, di HP jadi
+ *      drawer dari tombol hamburger topbar. Parent-nya TIGA kelompok besar
+ *      (Bab undangan / Tamu / Tampilan & setelan) yang memecah "alat" strip
+ *      secara logis, bukan kembali ke pengelompokan lama yang dibuang.
  * Halaman awal bukan "hub kartu" melainkan Ringkasan: checklist peluncuran
- * (lihat pages/home.js). Struktur strip didefinisikan SEKALI di sini; halaman
- * (window.PanelPages[key]) hanya menyumbang title/icon/mount/destroy.
+ * (lihat pages/home.js). Struktur kedua jalur didefinisikan SEKALI di sini;
+ * halaman (window.PanelPages[key]) hanya menyumbang title/icon/mount/destroy.
  */
 (function () {
   // Urutan bab = urutan section di index.html (cover → opening → couple →
@@ -24,16 +26,27 @@
   const CHAPTERS = [
     "cover", "pembuka", "mempelai", "acara", "livestream", "cerita", "galeri", "hadiah", "penutup"
   ];
-  // Alat — flat, tanpa label grup. Link wa/admin-qr tetap dibawa router
-  // sendiri (menuju wa.html/admin-qr.html, bukan PanelPages).
-  const TOOLS = [
+  // Alat — dua sub-kelompok: strip merendahkannya jadi SATU runtunan flat
+  // (TOOLS = gabungan keduanya), sidebar memunculkan parent-nya masing-masing.
+  // Link wa/admin-qr tetap dibawa router sendiri (menuju wa.html/
+  // admin-qr.html, bukan PanelPages).
+  const TOOL_GUEST = [
     { key: "sapaan" },
     { key: "kontak" },
     { link: "wa", title: "Kirim WhatsApp", iconName: "whatsapp" },
     { key: "ucapan" },
-    { link: "admin-qr", title: "Check-in QR", iconName: "qr" },
+    { link: "admin-qr", title: "Check-in QR", iconName: "qr" }
+  ];
+  const TOOL_LOOK = [
     { key: "template" }, { key: "warna" }, { key: "font" }, { key: "editor-visual" },
     { key: "pengaturan" }
+  ];
+  const TOOLS = [...TOOL_GUEST, ...TOOL_LOOK];
+  // Parent-child untuk sidebar: kelompok besar → tujuan di bawahnya.
+  const SIDEBAR_GROUPS = [
+    { label: "Bab undangan", items: CHAPTERS.map((key) => ({ key })) },
+    { label: "Tamu", items: TOOL_GUEST },
+    { label: "Tampilan & setelan", items: TOOL_LOOK }
   ];
 
   let currentKey = null;
@@ -91,6 +104,90 @@
         `${icon}<span>${esc(navItemTitle(item))}</span></a>`;
     });
     strip.innerHTML = html;
+  }
+
+  /** SIDEBAR parent-child — jalur navigasi KEDUA di samping strip. Parent =
+   * kelompok besar (label mono, bisa diciutkan), child = tujuan halaman.
+   * ≥1024px: kolom permanen sticky di bawah framehead. Di bawah itu: drawer
+   * dari kiri (openSidebar/closeSidebar di bawah), dibuka tombol hamburger
+   * #p-menu-btn di topbar; strip bab tetap tampil di semua viewport. */
+  const CHEVRON_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+
+  function sideItemHtml(item) {
+    const icon = item.link
+      ? window.PanelUI.icon(item.iconName)
+      : ((pageDef(item.key) || {}).icon || "");
+    const num = chapterNo(item.key);
+    return `<a class="p-sideitem" href="${navItemHref(item)}" data-nav-key="${item.key || item.link}" title="${window.PanelUI.esc(navItemTitle(item))}">` +
+      (num ? `<span class="p-sideitem__num">${num}</span>` : `${icon}`) +
+      `<span>${window.PanelUI.esc(navItemTitle(item))}</span></a>`;
+  }
+
+  function renderSidebar() {
+    const nav = $("p-sidebar-nav");
+    if (!nav) return;
+    nav.innerHTML = SIDEBAR_GROUPS.map((group) => `
+      <section class="p-sidegroup">
+        <button type="button" class="p-sidegroup__head" aria-expanded="true">
+          ${CHEVRON_SVG}<span>${window.PanelUI.esc(group.label)}</span>
+        </button>
+        <div class="p-sidegroup__items">${group.items.map(sideItemHtml).join("")}</div>
+      </section>`).join("");
+  }
+
+  function openSidebar() {
+    const sb = $("p-sidebar");
+    const scrim = $("p-scrim");
+    const btn = $("p-menu-btn");
+    if (sb) sb.classList.add("p-sidebar--open");
+    if (scrim) scrim.classList.add("p-scrim--show");
+    if (btn) btn.setAttribute("aria-expanded", "true");
+  }
+  function closeSidebar() {
+    const sb = $("p-sidebar");
+    const scrim = $("p-scrim");
+    const btn = $("p-menu-btn");
+    if (sb) sb.classList.remove("p-sidebar--open");
+    if (scrim) scrim.classList.remove("p-scrim--show");
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  }
+  function toggleSidebar() {
+    const sb = $("p-sidebar");
+    if (sb && sb.classList.contains("p-sidebar--open")) closeSidebar();
+    else openSidebar();
+  }
+
+  /** Satu listener untuk semua interaksi sidebar: toggle parent (ciut/
+   * buka child-nya), tombol hamburger, klik scrim, dan Escape. */
+  function bindSidebar() {
+    const nav = $("p-sidebar-nav");
+    if (nav) {
+      nav.addEventListener("click", (e) => {
+        const head = e.target.closest(".p-sidegroup__head");
+        if (!head) return;
+        const items = head.nextElementSibling;
+        if (!items) return;
+        const willOpen = head.getAttribute("aria-expanded") !== "true";
+        head.setAttribute("aria-expanded", String(willOpen));
+        items.hidden = !willOpen;
+      });
+    }
+    const menuBtn = $("p-menu-btn");
+    if (menuBtn) menuBtn.addEventListener("click", () => toggleSidebar());
+    const scrim = $("p-scrim");
+    if (scrim) scrim.addEventListener("click", () => closeSidebar());
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSidebar(); });
+  }
+
+  /** Sidebar desktop sticky di BAWAH framehead — butuh tinggi framehead
+   * aktual (topbar + strip bisa berubah antar viewport). Tulis ke CSS var
+   * --p-framehead-h tiap kali ukurannya berubah. */
+  function watchFrameheadHeight() {
+    const head = document.querySelector(".p-framehead");
+    if (!head || !window.ResizeObserver) return;
+    const apply = () => document.documentElement.style.setProperty("--p-framehead-h", head.offsetHeight + "px");
+    apply();
+    new ResizeObserver(apply).observe(head);
   }
 
   function updateActiveNav(key) {
@@ -244,6 +341,7 @@
     currentPage = def;
     const menu = $("p-topmenu"); // tutup dropdown ⋯ kalau kebuka saat pindah
     if (menu) menu.open = false;
+    closeSidebar(); // di HP: tutup drawer setelah memilih tujuan
     renderStage(def, key);
     updateActiveNav(key);
     const outlet = $("p-outlet-inner");
@@ -284,7 +382,10 @@
 
   function start() {
     renderStrip();
+    renderSidebar();
     bindNavClickSafetyNet();
+    bindSidebar();
+    watchFrameheadHeight();
     const previewBtn = $("p-menu-preview");
     if (previewBtn) previewBtn.addEventListener("click", () => openDraftPreview());
     const btn = $("p-savebar-btn");

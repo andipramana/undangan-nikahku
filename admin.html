@@ -43,13 +43,16 @@
 
 <!-- ============ APLIKASI ============ -->
 <div id="app" hidden>
-  <!-- Kepala frame sticky: topbar (merek + slug + status publikasi + ⋯) dan
-       STRIP BAB — seluruh navigasi panel dalam satu chip-row horizontal,
-       tanpa sidebar/hamburger/grid kartu. Dirender router.js (renderStrip).
+  <!-- Kepala frame sticky: topbar (hamburger HP + merek + slug + status
+       publikasi + ⋯) dan STRIP BAB — jalur navigasi utama, satu chip-row
+       horizontal di semua viewport. Dirender router.js (renderStrip).
        Tombol Keluar hidup di menu ⋯ dan wajib ber-id btn-logout (di-bind
        core.js initAdminAuth saat load, jadi harus statis di markup ini). -->
   <div class="p-framehead">
     <header class="p-topbar">
+      <button type="button" class="p-menubtn" id="p-menu-btn" aria-controls="p-sidebar" aria-expanded="false" aria-label="Buka menu navigasi">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
       <div class="p-brand">
         <span class="p-brand__mark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9.5" cy="12" r="5.5"/><circle cx="14.5" cy="12" r="5.5"/></svg></span>
         <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Panel Admin</span></span>
@@ -69,10 +72,22 @@
     <nav class="p-chapters" id="p-chapters" aria-label="Bab undangan &amp; alat"></nav>
   </div>
 
-  <main class="p-outlet" id="p-outlet">
-    <header class="p-stage" id="p-stage"></header>
-    <div class="p-outlet__inner" id="p-outlet-inner"></div>
-  </main>
+  <!-- Jalur navigasi KEDUA: sidebar parent-child (router.js renderSidebar).
+       ≥1024px kolom permanen; di bawahnya drawer dari kiri via hamburger.
+       Isi #p-sidebar-nav dirender JS karena butuh daftar halaman. -->
+  <div class="p-body">
+    <aside class="p-sidebar" id="p-sidebar" aria-label="Navigasi panel">
+      <nav id="p-sidebar-nav"></nav>
+    </aside>
+
+    <main class="p-outlet" id="p-outlet">
+      <header class="p-stage" id="p-stage"></header>
+      <div class="p-outlet__inner" id="p-outlet-inner"></div>
+    </main>
+  </div>
+
+  <!-- Penutup drawer sidebar (HP) — menutupi framehead juga. -->
+  <div class="p-scrim" id="p-scrim"></div>
 
   <div class="p-savebar" id="p-savebar" hidden>
     <span class="p-savebar__status">Ada perubahan belum disimpan.</span>
