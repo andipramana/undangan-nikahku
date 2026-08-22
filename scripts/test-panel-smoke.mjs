@@ -72,6 +72,26 @@ window.supabase = {
         }
         return Promise.resolve({ data: null, error: null });
       },
+      // Halaman Akun Admin (#/admin-akun) memanggil Edge Function
+      // manage-admins lewat functions.invoke — stub dua anggota agar daftar
+      // bisa dirender tanpa jaringan. Role stub di atas "admin" (bukan
+      // root_owner), jadi tombol ganti sandi anggota TIDAK boleh muncul.
+      functions: {
+        invoke(name, opts) {
+          if (name === "manage-admins" && opts && opts.body && opts.body.action === "list") {
+            return Promise.resolve({
+              data: {
+                members: [
+                  { userId: "u-admin", email: "admin@test.dev", role: "admin", createdAt: "2026-01-02T00:00:00Z" },
+                  { userId: "u-qr", email: "qr@test.dev", role: "admin_qr", createdAt: "2026-01-03T00:00:00Z" }
+                ]
+              },
+              error: null
+            });
+          }
+          return Promise.resolve({ data: null, error: null });
+        }
+      },
       from(table) { return chain(() => resultFor(table)); },
       storage: { from() { return { getPublicUrl: (p) => ({ data: { publicUrl: "about:blank#" + p } }) }; } }
     };
@@ -155,7 +175,7 @@ try {
 
   // Jalur HP (viewport 390px): chip STRIP BAB — navigasi satu-satunya,
   // tampil di semua viewport sejak v3 (tidak ada lagi sidebar/kartu hub).
-  const ROUTES = ["mempelai", "acara", "pengaturan", "warna"];
+  const ROUTES = ["mempelai", "acara", "pengaturan", "warna", "admin-akun"];
   for (const key of ROUTES) {
     await page.locator(`#p-chapters [data-nav-key="${key}"]`).click();
     // router.js mount() sinkron sebagian besar tapi beberapa halaman (mis.
@@ -176,6 +196,20 @@ try {
     await page.waitForTimeout(300);
     stillOnAdminHtml(`chip "Ringkasan" dari "${key}"`);
   }
+
+  // Halaman Akun Admin (#/admin-akun) — daftar dirender dari stub Edge
+  // Function manage-admins; role pemanggil di stub adalah "admin" (bukan
+  // root_owner), jadi tombol ganti sandi anggota TIDAK boleh ditawarkan.
+  await page.locator('#p-chapters [data-nav-key="admin-akun"]').click();
+  await page.waitForTimeout(300);
+  stillOnAdminHtml('strip bab: klik "admin-akun"');
+  const aaHtml = await page.locator("#p-outlet-inner").innerHTML();
+  check("admin-akun: daftar email anggota dirender dari manage-admins", aaHtml.includes("admin@test.dev") && aaHtml.includes("qr@test.dev"));
+  check("admin-akun: peran Admin QR tampil sebagai badge", aaHtml.includes("Admin QR"));
+  check("admin-akun: non-root tidak diberi tombol ganti sandi anggota", !aaHtml.includes(">Ganti sandi</button>"));
+  await page.locator('#p-chapters [data-nav-key="home"]').click();
+  await page.waitForTimeout(300);
+  stillOnAdminHtml('chip "Ringkasan" dari "admin-akun"');
 
   // Jalur desktop: strip yang SAMA, tapi layout beda (slug chip & seluruh
   // chip bab + alat terlihat tanpa scroll di ≥1024px) — pastikan navigasi
@@ -219,11 +253,15 @@ try {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(150);
   check("HP: drawer awalnya tertutup", !(await sidebarOpen()));
+  const scrollLocked = () => page.evaluate(() => document.documentElement.classList.contains("p-scroll-lock"));
+  check("HP: scroll-lock awalnya tidak terpasang", !(await scrollLocked()));
   await page.locator("#p-menu-btn").click();
   await page.waitForTimeout(300);
   check("HP: hamburger membuka drawer", await sidebarOpen());
+  check("HP: drawer terbuka mengunci gulir halaman di belakangnya", await scrollLocked());
   await page.keyboard.press("Escape");
   check("HP: Escape menutup drawer", !(await sidebarOpen()));
+  check("HP: menutup drawer melepas scroll-lock", !(await scrollLocked()));
   await page.locator("#p-menu-btn").click();
   await page.waitForTimeout(300);
   await page.locator('#p-sidebar [data-nav-key="kontak"]').click();

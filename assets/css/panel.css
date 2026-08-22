@@ -321,6 +321,10 @@ code {
   transition: opacity .2s ease;
 }
 .p-scrim--show { opacity: 1; pointer-events: auto; }
+/* Drawer sidebar terbuka (di bawah 1024px): halaman di belakangnya tidak
+   boleh ikut menggulir — kunci overflow root sampai drawer ditutup
+   (openSidebar/closeSidebar di router.js memasang-melepas kelas ini). */
+html.p-scroll-lock { overflow: hidden; }
 
 @media (min-width: 1024px) {
   .p-menubtn { display: none; }
@@ -748,6 +752,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
 .panel { padding: var(--p-4) 0; }
 .scan-video {
   width: 100%; max-height: 60vh; display: block;
+  margin-top: var(--p-3); /* jarak dari baris tombol Mulai/Hentikan scan di atasnya */
   border-radius: var(--p-r-md); border: 1px solid var(--p-hairline);
   background: var(--p-ink); object-fit: cover;
 }

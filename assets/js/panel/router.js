@@ -39,7 +39,7 @@
   ];
   const TOOL_LOOK = [
     { key: "template" }, { key: "warna" }, { key: "font" }, { key: "editor-visual" },
-    { key: "pengaturan" }
+    { key: "pengaturan" }, { key: "admin-akun" }
   ];
   const TOOLS = [...TOOL_GUEST, ...TOOL_LOOK];
   // Parent-child untuk sidebar: kelompok besar → tujuan di bawahnya.
@@ -142,6 +142,9 @@
     if (sb) sb.classList.add("p-sidebar--open");
     if (scrim) scrim.classList.add("p-scrim--show");
     if (btn) btn.setAttribute("aria-expanded", "true");
+    // Kunci gulir halaman di belakang drawer — permintaan eksplisit: saat
+    // sidebar dibuka, layar utama tidak boleh bisa discroll.
+    document.documentElement.classList.add("p-scroll-lock");
   }
   function closeSidebar() {
     const sb = $("p-sidebar");
@@ -150,6 +153,7 @@
     if (sb) sb.classList.remove("p-sidebar--open");
     if (scrim) scrim.classList.remove("p-scrim--show");
     if (btn) btn.setAttribute("aria-expanded", "false");
+    document.documentElement.classList.remove("p-scroll-lock");
   }
   function toggleSidebar() {
     const sb = $("p-sidebar");
