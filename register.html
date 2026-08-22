@@ -133,7 +133,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="assets/js/config.js"></script>
-<script src="assets/js/tenant.js"></script>
+<!-- Sengaja TANPA tenant.js: untuk /register (clean URL), tenant.js akan
+     mengira "register" adalah slug tenant sehingga RPC akses dijalankan
+     dengan slug yang salah dan login root ditolak. core.js punya fallback
+     TenantContext { slug: "root" } — persis yang dibutuhkan dashboard ini. -->
 <script src="assets/js/panel/core.js"></script>
 <script src="assets/js/register.js"></script>
 </body></html>

@@ -9,6 +9,11 @@ const checks = [
   // ---- Gerbang login wajib dulu ----
   ['gerbang login terpisah dari app', html.includes('id="login-screen"') && /<div id="app" hidden>/.test(html)],
   ['login reuse core.js, bukan auth sendiri', js.includes('initAdminAuth') && !js.includes('signInWithPassword')],
+  // Regresi 2026-08-22: tenant.js di register.html membuat URL /register
+  // terbaca sebagai slug tenant "register" → RPC akses dijalankan dengan
+  // slug salah → root owner ditolak padahal akunnya benar. Halaman ini
+  // harus memakai fallback slug "root" bawaan core.js.
+  ['tanpa tenant.js (slug root dari fallback core.js)', !html.includes('assets/js/tenant.js')],
   ['hanya role root_owner yang lolos gerbang', /allowedRoles:\s*\[\s*"root_owner"\s*\]/.test(js)],
   ['daftar client dimuat tepat setelah login', /onSignedIn:\s*loadClients/.test(js)],
   ['komponen login terang dari panel.css', css.includes('.p-login-card') && css.includes('.p-login-error')],
