@@ -210,11 +210,12 @@
     document.getElementById("wa-add").disabled = !enabled;
     document.getElementById("wa-add-from-contacts").disabled = !enabled;
     document.getElementById("wa-import").disabled = !enabled;
-    // FAB tambah-kontak & tambah-dari-kontak ikut aturan yang sama (guard:
-    // elemen hanya ada di wa.html, tidak wajib di pemakaian runtime lain).
-    ["wa-add-fab", "wa-add-from-fab"].forEach((id) => {
-      const fab = document.getElementById(id);
-      if (fab) fab.disabled = !enabled;
+    // Bottom navbar (≤800px) meniru state toolbar: item yang tombol
+    // toolbarnya dimatikan tampak redup & tak bisa ditekan. "Kelola"
+    // selalu aktif (link keluar, bukan aksi tulis).
+    ["wa-nav-add", "wa-nav-from", "wa-nav-import"].forEach((id) => {
+      const nav = document.getElementById(id);
+      if (nav) nav.classList.toggle("wa-bottomnav__item--disabled", !enabled);
     });
   }
 
@@ -855,11 +856,6 @@
     addName.focus();
   }
   addBtn.addEventListener("click", openAdd);
-  // FAB mengikuti viewport (pojok kanan bawah) membuka modal yang SAMA —
-  // satu pintu logika tambah kontak, dua titik masuk (toolbar atas untuk
-  // yang baru masuk halaman, FAB untuk yang sudah jauh di daftar).
-  const addFab = document.getElementById("wa-add-fab");
-  if (addFab) addFab.addEventListener("click", openAdd);
   addClose.addEventListener("click", () => { addModal.hidden = true; });
   addModal.addEventListener("click", (e) => {
     if (e.target === addModal) addModal.hidden = true;
@@ -909,10 +905,27 @@
   let fcSelected = new Set();
 
   document.getElementById("wa-add-from-contacts").addEventListener("click", openFromContacts);
-  // FAB "Dari kontak" (pasangan FAB "Tambah kontak") membuka modal yang sama.
-  const addFromFab = document.getElementById("wa-add-from-fab");
-  if (addFromFab) addFromFab.addEventListener("click", openFromContacts);
   fcClose.addEventListener("click", () => { fcModal.hidden = true; });
+
+  /* ---------- Bottom navbar (≤800px, markup di wa.html) ----------
+   * Semua aksi kontak hidup di bar bawah saat dibuka di HP. Tiap item
+   * memicu tombol toolbar pasangannya — SATU sumber logika & disabled:
+   * elemen yang disabled tidak menjalankan handler walau di-klik
+   * programatik. "Kelola" navigasi lewat klik #wa-manage-contacts
+   * (href panel #/kontak diset wa.js). Guard: nav hanya ada di wa.html. */
+  [["wa-nav-add", "wa-add"],
+   ["wa-nav-from", "wa-add-from-contacts"],
+   ["wa-nav-import", "wa-import"],
+   ["wa-nav-manage", "wa-manage-contacts"]].forEach(([navId, srcId]) => {
+    const nav = document.getElementById(navId);
+    const src = document.getElementById(srcId);
+    if (!nav || !src) return;
+    nav.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (src.disabled) return;
+      src.click();
+    });
+  });
   fcModal.addEventListener("click", (e) => { if (e.target === fcModal) fcModal.hidden = true; });
 
   async function openFromContacts() {

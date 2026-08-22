@@ -62,46 +62,43 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
 @media (max-width:800px) { .wa-header { grid-template-columns:1fr auto; }.wa-header__identity { order:3; grid-column:1/-1; text-align:left; }.wa-layout { grid-template-columns:1fr; }.wa-settings-column { order:-1; }.wa-config:not([open]) { background:#fff; }.wa-hero { align-items:start; flex-direction:column; }.wa-toolbar--actions { width:100%; }.wa-list-bar label { grid-template-columns:1fr; }.wa-list-bar select { width:100%; }.wa-contact-toolbar { grid-template-columns:1fr; }.wa-contact-search { min-width:0; }.wa-status-filters { justify-content:space-between; } }
 @media (max-width:440px) { .wa-contact-shell { margin:.8rem; }.wa-contact-toolbar label { grid-template-columns:72px minmax(0,1fr); }.wa-status-filter { flex:1; padding:.32rem .3rem; font-size:.63rem; }.wa-pagination { flex-wrap:wrap; justify-content:center; }.wa-contact-result { flex-basis:100%; margin-right:0; text-align:center; }.wa-toolbar--actions { grid-template-columns:1fr; } }
 /* ---------------------------------------------------------------------
-   FAB tambah-kontak & tambah-dari-kontak — rule TAMBAHAN, token & rule
-   di atas tidak diubah. Alasan: aksi utama harus terjangkau dari posisi
-   scroll mana pun di daftar kontak (laporan pemilik produk — refleks mau
-   nambah kontak saat jauh di daftar, jarinya malah kena dropdown
-   "Daftar kirim" dekat situ), bukan cuma dari toolbar atas. Grup kolom
-   fixed kanan-bawah, primary paling bawah (paling dekat jempol).
-   z-index sengaja di bawah modal (10) dan toast (20) supaya overlay
-   selalu menutupinya; .wa-shell diberi ruang bawah ekstra agar FAB tidak
-   menutupi pagination saat scroll mentok.
+   BOTTOM NAVBAR gaya aplikasi mobile (hanya ≤800px) — menggantikan ide
+   FAB: semua aksi kontak hidup di bar bawah saat dibuka di HP, tombol
+   toolbar atas disembunyikan supaya tidak ada dua tempat untuk hal yang
+   sama. Desktop tak tersentuh. z-index 9 sengaja di bawah modal (10)
+   dan toast (20).
    --------------------------------------------------------------------- */
-.wa-shell { padding-bottom: 7.75rem; }
-.wa-fab-group {
-  position: fixed;
-  right: max(1rem, env(safe-area-inset-right));
-  bottom: calc(1.1rem + env(safe-area-inset-bottom));
-  z-index: 9;
-  display: flex; flex-direction: column; align-items: flex-end;
-  gap: .55rem;
+.wa-bottomnav { display: none; }
+@media (max-width:800px) {
+  .wa-toolbar--actions { display:none; } /* semua menu pindah ke bawah */
+  .wa-shell { padding-bottom: calc(5.75rem + env(safe-area-inset-bottom)); } /* konten tak tertutup bar */
+  .wa-toast { bottom: calc(6.4rem + env(safe-area-inset-bottom)); } /* toast di atas bar */
+  .wa-bottomnav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: .2rem;
+    padding: .35rem .5rem calc(.35rem + env(safe-area-inset-bottom));
+    background: var(--wa-paper);
+    border-top: 1px solid var(--wa-line);
+    box-shadow: 0 -8px 24px rgba(23, 35, 30, .08);
+  }
+  .wa-bottomnav__item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .28rem; min-height: 56px; padding: .35rem .15rem;
+    border: 0; border-radius: 12px;
+    background: transparent;
+    color: var(--wa-green-dark);
+    font-size: .66rem; font-weight: 800; letter-spacing: .01em;
+    text-decoration: none; cursor: pointer;
+  }
+  .wa-bottomnav__item:hover { background: var(--wa-soft); }
+  .wa-bottomnav__item--disabled { opacity: .4; pointer-events: none; }
+  .wa-bottomnav__item svg {
+    width: 22px; height: 22px; flex: none;
+    fill: none; stroke: currentColor; stroke-width: 1.9;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
 }
-.wa-fab {
-  display: inline-flex; align-items: center; gap: .5rem;
-  min-height: 52px; padding: .85rem 1.2rem;
-  border: 0; border-radius: 999px;
-  color: #fff; background: var(--wa-green);
-  font-weight: 800; font-size: .9rem;
-  box-shadow: 0 12px 32px rgba(18, 104, 63, .38);
-  transition: transform .15s, background .15s, border-color .15s;
-}
-.wa-fab:hover { background: var(--wa-green-dark); transform: translateY(-1px); }
-.wa-fab:disabled { opacity: .5; cursor: not-allowed; }
-.wa-fab svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
-.wa-fab span { white-space: nowrap; }
-/* Varian sekunder (buku alamat panel): permukaan kertas ber-border, bukan
-   hijau solid — hierarki tetap jelas mana aksi utama. */
-.wa-fab--secondary {
-  color: var(--wa-ink); background: var(--wa-paper);
-  border: 1px solid var(--wa-line);
-  box-shadow: 0 8px 24px rgba(23, 35, 30, .16);
-}
-.wa-fab--secondary:hover { background: var(--wa-soft); }
 
 /* Select "Daftar kirim" (#wa-list-select) — tampilan native browser (kotak
    abu polos dengan panah bawaan OS) dipoles memakai bahasa visual form yang

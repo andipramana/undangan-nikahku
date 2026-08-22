@@ -103,24 +103,30 @@
     <div id="wa-pick-phone-body"></div>
   </div>
 </div>
-<!-- Aksi utama yang mengikuti viewport: menambah kontak harus terjangkau
-     dari mana pun user sedang scroll — laporan pemilik produk: refleks mau
-     nambah kontak saat jauh di daftar, jarinya malah kena dropdown
-     "Daftar kirim" yang kebetulan dekat situ. DUA titik masuk dalam satu
-     grup: "Tambah kontak" (modal manual) & "Dari kontak" (buku alamat
-     panel) — masing-masing membuka modal yang sama dengan pasangannya di
-     toolbar atas (wiring di wa-blast.js). Primary paling bawah = paling
-     dekat jempol. -->
-<div class="wa-fab-group">
-  <button type="button" class="wa-fab wa-fab--secondary" id="wa-add-from-fab" aria-label="Tambah dari kontak panel">
+<!-- BOTTOM NAVBAR gaya aplikasi mobile — hanya tampil ≤800px (CSS): semua
+     aksi kontak hidup di sini saat dibuka di HP, tombol toolbar atas
+     disembunyikan. Item Tambah/Dari kontak/Impor memicu tombol toolbar
+     pasangannya (SATU sumber logika & disabled-state — wiring di
+     wa-blast.js); Kelola link keluar ke panel #/kontak (href diset wa.js,
+      sama seperti #wa-manage-contacts). -->
+<nav class="wa-bottomnav" aria-label="Aksi kontak">
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-add">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Tambah</span>
+  </button>
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-from">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/></svg>
     <span>Dari kontak</span>
   </button>
-  <button type="button" class="wa-fab" id="wa-add-fab" aria-label="Tambah kontak">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-    <span>Tambah kontak</span>
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-import">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg>
+    <span>Impor</span>
   </button>
-</div>
+  <a class="wa-bottomnav__item" id="wa-nav-manage" href="#">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-1.7-1L15 3h-6l-.3 2.5a7.9 7.9 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.9 7.9 0 0 0 1.7 1L9 21h6l.3-2.5a7.9 7.9 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5z"/></svg>
+    <span>Kelola</span>
+  </a>
+</nav>
 
 <div id="toast" class="wa-toast" role="status" aria-live="polite"></div>
 

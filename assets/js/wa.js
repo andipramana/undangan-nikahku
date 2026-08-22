@@ -30,7 +30,11 @@
     document.getElementById("wa-page-title").textContent = `${names.bride} & ${names.groom}`;
     document.title = `WhatsApp — ${names.bride} & ${names.groom}`;
     document.getElementById("wa-back-invitation").href = tenant.path();
-    document.getElementById("wa-manage-contacts").href = tenant.path("admin") + "#/kontak";
+    const manageHref = tenant.path("admin") + "#/kontak";
+    document.getElementById("wa-manage-contacts").href = manageHref;
+    // Item "Kelola" di bottom navbar (≤800px) menunjuk tujuan yang sama.
+    const navManage = document.getElementById("wa-nav-manage");
+    if (navManage) navManage.href = manageHref;
   }
 
   window.AdminShared.initAdminAuth({
