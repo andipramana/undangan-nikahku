@@ -26,6 +26,9 @@
 .ac-member__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--p-2); flex-wrap: wrap; }
 .ac-mail { font-family: var(--p-font-mono); font-size: 13px; color: var(--p-ink-2); overflow-wrap: anywhere; }
 .ac-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .45rem; }
+/* Form di dalam modal: .p-modal__panel tidak punya flow-gap seperti .p-card,
+   jadi field dan tombol submit saling berdempet — beri grid+gap sendiri. */
+form.p-modal__panel { display: grid; gap: var(--p-3); }
 </style></head>
 <body>
 
