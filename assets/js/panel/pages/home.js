@@ -11,10 +11,23 @@ window.PanelPages["home"] = {
   group: null,
   icon: window.PanelUI ? window.PanelUI.icon("home") : "",
   async mount(outlet) {
+    const esc = window.PanelUI.esc;
     outlet.innerHTML = `
       <div class="p-pubrow" id="home-status">
         <div class="p-pubrow__text"><strong>Memeriksa status publikasi…</strong></div>
       </div>
+      <!-- Shortcut aksi paling sering: blast undangan ke tamu. Link keluar ke
+           wa.html (path tenant, path-qualified) — SENGAJA tanpa data-nav-key:
+           safetyNet router hanya mencegat kunci yang punya PanelPages, tapi
+           elemen ini murni tautan keluar, bukan rute internal. -->
+      <a class="p-cta" href="${esc(window.AdminAPI.tenant.path("wa"))}">
+        <span class="p-cta__icon" aria-hidden="true">${window.PanelUI.icon("whatsapp")}</span>
+        <span class="p-cta__text">
+          <strong>Kirim undangan via WhatsApp</strong>
+          <span>Pilih tamu, atur pesan, dan blast link undangan dari satu tempat.</span>
+        </span>
+        <span class="p-checkrow__go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
+      </a>
       <p class="p-section-label">Bab undangan</p>
       <div class="p-checklist" id="home-chapters"></div>
       <p class="p-section-label">Tamu &amp; alat</p>
@@ -37,7 +50,6 @@ window.PanelPages["home"] = {
       { key: "penutup", ready: (c) => !!c.closing.text }
     ];
 
-    const esc = window.PanelUI.esc;
     const router = window.PanelRouter;
     const content = window.PanelStore.getContent();
     const photoCounts = await loadPhotoCounts();

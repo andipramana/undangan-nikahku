@@ -193,6 +193,8 @@ try {
   check("desktop: kembali ke Ringkasan, #p-outlet-inner terisi", (await page.locator("#p-outlet-inner").innerHTML()).trim().length > 50);
   const checklistRows = await page.locator("#home-chapters .p-checkrow").count();
   check("Ringkasan: checklist 9 bab dirender sebagai baris", checklistRows === 9);
+  const waCta = await page.locator("#p-outlet-inner .p-cta").getAttribute("href");
+  check("Ringkasan: CTA kirim WhatsApp menunjuk ke workspace wa.html tenant", /wa\.html|\/wa\/?/.test(waCta || ""));
 
   // SIDEBAR parent-child — jalur navigasi KEDUA. Desktop: kolom permanen;
   // HP: drawer dari hamburger topbar. Strip bab tetap utama & tak diubah.
