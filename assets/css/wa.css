@@ -110,12 +110,9 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
      sampai menutupi tap ke disc di atasnya (persis bug yang terjadi di
      percobaan mask sebelumnya).
 
-     CATATAN: dua percobaan mempersempit lewat spread (966903b) dan lewat
-     ukuran pasti tanpa shadow (f68289c) sama-sama dinilai memperburuk
-     hasilnya oleh pemilik produk — dikembalikan ke ukuran awal ini atas
-     permintaan langsung, JANGAN diubah lagi tanpa arahan baru. */
+     Lebar slot = lebar disc (46px) + 10px, sesuai arahan langsung. */
   .wa-bottomnav__fab-slot {
-    flex: none; width: 104px;
+    flex: none; width: 56px;
     position: relative;
     display: flex; align-items: flex-end; justify-content: center;
   }
@@ -148,7 +145,6 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
     border-radius: 50%;
     background: var(--wa-green); color: #fff;
     border: 3px solid var(--wa-paper);
-    box-shadow: 0 6px 16px rgba(31, 138, 85, .38);
   } /* ukuran svg disc mengikuti rule svg umum item di atas */
   .wa-bottomnav__item:hover { background: var(--wa-soft); }
   .wa-bottomnav__item--disabled { opacity: .4; pointer-events: none; }
