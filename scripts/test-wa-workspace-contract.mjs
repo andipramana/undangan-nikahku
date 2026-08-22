@@ -18,7 +18,14 @@ const checks = [
   // Aksi utama "Tambah kontak" punya titik masuk kedua yang mengikuti
   // viewport (FAB) — terjangkau dari posisi scroll mana pun di daftar,
   // membuka modal yang sama dengan #wa-add, dan ikut disabled tanpa list.
-  ["FAB tambah-kontak mengikuti viewport", page.includes('id="wa-add-fab"') && css.includes(".wa-fab {") && /addFab\.addEventListener\("click", openAdd\)/.test(blast) && /addFab\.disabled = !enabled/.test(blast)]
+  ["FAB tambah-kontak mengikuti viewport", page.includes('id="wa-add-fab"') && css.includes(".wa-fab {") && /addFab\.addEventListener\("click", openAdd\)/.test(blast)],
+  // Dua FAB dalam satu grup kolom: "Tambah kontak" (primary) & "Dari kontak"
+  // (buku alamat panel) — keduanya membuka modal pasangannya di toolbar,
+  // keduanya ikut disabled tanpa daftar kirim.
+  ["FAB kedua: tambah dari kontak", page.includes('id="wa-add-from-fab"') && css.includes(".wa-fab-group") && css.includes(".wa-fab--secondary") && /addFromFab\.addEventListener\("click", openFromContacts\)/.test(blast) && /"wa-add-from-fab"\]\.forEach/.test(blast)],
+  // Select "Daftar kirim" tidak lagi memakai tampilan native kotak:
+  // appearance none + panah chevron custom.
+  ["select daftar kirim dipolasi (bukan kotak native)", /appearance:\s*none/.test(css) && css.includes("data:image/svg+xml") && /wa-list-bar select:focus/.test(css)]
 ];
 for (const [label, pass] of checks) {
   if (!pass) throw new Error(`FAIL: ${label}`);

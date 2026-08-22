@@ -210,10 +210,12 @@
     document.getElementById("wa-add").disabled = !enabled;
     document.getElementById("wa-add-from-contacts").disabled = !enabled;
     document.getElementById("wa-import").disabled = !enabled;
-    // FAB tambah-kontak ikut aturan yang sama (guard: elemen hanya ada di
-    // wa.html, tidak wajib di pemakaian runtime lain).
-    const addFab = document.getElementById("wa-add-fab");
-    if (addFab) addFab.disabled = !enabled;
+    // FAB tambah-kontak & tambah-dari-kontak ikut aturan yang sama (guard:
+    // elemen hanya ada di wa.html, tidak wajib di pemakaian runtime lain).
+    ["wa-add-fab", "wa-add-from-fab"].forEach((id) => {
+      const fab = document.getElementById(id);
+      if (fab) fab.disabled = !enabled;
+    });
   }
 
   document.getElementById("wa-list-select").addEventListener("change", (e) => {
@@ -907,6 +909,9 @@
   let fcSelected = new Set();
 
   document.getElementById("wa-add-from-contacts").addEventListener("click", openFromContacts);
+  // FAB "Dari kontak" (pasangan FAB "Tambah kontak") membuka modal yang sama.
+  const addFromFab = document.getElementById("wa-add-from-fab");
+  if (addFromFab) addFromFab.addEventListener("click", openFromContacts);
   fcClose.addEventListener("click", () => { fcModal.hidden = true; });
   fcModal.addEventListener("click", (e) => { if (e.target === fcModal) fcModal.hidden = true; });
 

@@ -106,12 +106,21 @@
 <!-- Aksi utama yang mengikuti viewport: menambah kontak harus terjangkau
      dari mana pun user sedang scroll — laporan pemilik produk: refleks mau
      nambah kontak saat jauh di daftar, jarinya malah kena dropdown
-     "Daftar kirim" yang kebetulan dekat situ. Membuka modal yang sama
-     dengan #wa-add (wiring di wa-blast.js). -->
-<button type="button" class="wa-fab" id="wa-add-fab" aria-label="Tambah kontak">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-  <span>Tambah kontak</span>
-</button>
+     "Daftar kirim" yang kebetulan dekat situ. DUA titik masuk dalam satu
+     grup: "Tambah kontak" (modal manual) & "Dari kontak" (buku alamat
+     panel) — masing-masing membuka modal yang sama dengan pasangannya di
+     toolbar atas (wiring di wa-blast.js). Primary paling bawah = paling
+     dekat jempol. -->
+<div class="wa-fab-group">
+  <button type="button" class="wa-fab wa-fab--secondary" id="wa-add-from-fab" aria-label="Tambah dari kontak panel">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/></svg>
+    <span>Dari kontak</span>
+  </button>
+  <button type="button" class="wa-fab" id="wa-add-fab" aria-label="Tambah kontak">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Tambah kontak</span>
+  </button>
+</div>
 
 <div id="toast" class="wa-toast" role="status" aria-live="polite"></div>
 
