@@ -1,11 +1,14 @@
 /**
  * Kado & Amplop — pencatat kado/amplop yang diterima, konsep persis halaman
- * Kontak: tabel `gift_lists` + `gift_list_entries` (migration 0025), beberapa
- * daftar bernama bebas (mis. "Amplop Pengantin Pria"), tiap entri satu
- * pemberi: nama, barang (default 'Amplop Uang' — inputnya clearable: tombol
- * × kecil DI DALAM field untuk mengosongkan default sekali klik), jumlah
- * nominal & kuantiti (boleh kosong), keterangan H-/H/H+. Export Excel via
- * SheetJS XLSX (CDN sudah dimuat admin.html).
+ * Kontak: tabel `gift_lists` + `gift_list_entries` (migration 0025; timing
+ * jadi teks bebas lewat 0026). Beberapa daftar bernama bebas, tiap entri satu
+ * pemberi: nama, barang (default 'Amplop Uang' — input clearable: × kecil DI
+ * DALAM field mengosongkan default sekali klik), jumlah nominal (ditampilkan
+ * dengan pemisah ribuan "1.500.000", boleh kosong), kuantiti (boleh kosong),
+ * dan keterangan TEKS BEBAS (mis. "H-, saat akad"). Detail daftar memakai
+ * baris compact ala daftar kontak di wa.html — semua field terlihat tanpa
+ * scroll horizontal — plus ringkasan total pemberi & total jumlah. Export
+ * Excel via SheetJS XLSX (CDN sudah dimuat admin.html).
  *
  * Murni fitur internal admin — TIDAK serumpun wa-family, tema kobalt panel.
  * Semua perubahan langsung ke DB per aksi — TIDAK lewat store.js/
@@ -23,15 +26,8 @@ window.PanelPages["kado"] = {
 
     const st = { lists: [], entries: [], selectedListId: null };
 
-    // Dropdown keterangan: PERSIS 3 opsi — diterima sebelum (H-), pas (H),
-    // sesudah (H+) hari-H. Null/'' = belum ditandai (opsi kosong).
-    const TIMING_OPTIONS = [
-      { v: "h-", l: "H-" },
-      { v: "h", l: "H" },
-      { v: "h+", l: "H+" }
-    ];
-    const timingLabel = (v) => (TIMING_OPTIONS.find((o) => o.v === v) || { l: "" }).l;
-
+    // Shell halaman + DUA modal (daftar & entri) — wajib statis di sini
+    // sebelum handler-handler di bawah memasang listener ke elemennya.
     outlet.innerHTML = `
       <div id="kd-body"></div>
       <div class="p-modal" id="kd-list-modal" hidden>
@@ -47,10 +43,10 @@ window.PanelPages["kado"] = {
           <label class="p-field"><span>Nama pemberi</span><input class="p-input" id="kd-entry-name" autocomplete="name"></label>
           <label class="p-field"><span>Barang</span><input class="p-input" id="kd-entry-item" value="Amplop Uang"></label>
           <div class="p-grid-2">
-            <label class="p-field"><span>Jumlah</span><input class="p-input" id="kd-entry-amount" type="number" min="0" step="any" inputmode="numeric" placeholder="boleh kosong"></label>
+            <label class="p-field"><span>Jumlah</span><input class="p-input" id="kd-entry-amount" type="text" inputmode="numeric" placeholder="mis. 500.000 (boleh kosong)"></label>
             <label class="p-field"><span>Kuantiti</span><input class="p-input" id="kd-entry-quantity" type="number" min="0" step="1" inputmode="numeric" placeholder="boleh kosong"></label>
           </div>
-          <label class="p-field"><span>Keterangan</span><select class="p-input" id="kd-entry-timing"><option value="">—</option>${TIMING_OPTIONS.map((o) => `<option value="${o.v}">${o.l}</option>`).join("")}</select></label>
+          <label class="p-field"><span>Keterangan</span><input class="p-input" id="kd-entry-timing" type="text" placeholder="mis. H-, saat akad (opsional)"></label>
           <button type="button" class="p-btn p-btn--primary" id="kd-entry-save">Simpan</button>
         </div>
       </div>
@@ -58,15 +54,31 @@ window.PanelPages["kado"] = {
 
     /* ---------- Helper ---------- */
 
-    /** Jumlah/kuantiti boleh kosong (null). Angka divalidasi — NaN ditolak,
-     * kuantiti wajib bilangan bulat (kolom DB integer). Return { value, error }. */
-    function parseNumber(raw, { integer = false } = {}) {
+    /** Kuantiti boleh kosong (null), wajib bilangan bulat (kolom integer). */
+    function parseNumber(raw) {
       const s = String(raw ?? "").trim();
       if (!s) return { value: null };
       const n = Number(s);
       if (!Number.isFinite(n)) return { error: "Angka tidak valid." };
-      if (integer && !Number.isInteger(n)) return { error: "Kuantiti harus bilangan bulat." };
+      if (!Number.isInteger(n)) return { error: "Kuantiti harus bilangan bulat." };
       return { value: n };
+    }
+
+    /** Jumlah nominal diketik manusiawi: pemisah ribuan titik ikut diterima
+     * ("1.500.000") dan koma sebagai desimal ("250,5") — dibersihkan dulu
+     * sebelum divalidasi. Kosong → null (boleh tidak diisi). */
+    function parseAmountInput(raw) {
+      const s = String(raw ?? "").trim().replaceAll(".", "").replaceAll(" ", "").replace(",", ".");
+      if (!s) return { value: null };
+      const n = Number(s);
+      if (!Number.isFinite(n)) return { error: "Angka tidak valid." };
+      if (n < 0) return { error: "Jumlah tidak boleh negatif." };
+      return { value: n };
+    }
+
+    /** Tampilan Indonesia: 1500000 → "1.500.000", 1500.5 → "1.500,5". */
+    function fmtRibuan(n) {
+      return new Intl.NumberFormat("id-ID").format(n);
     }
 
     function download(blob, name) {
@@ -132,14 +144,27 @@ window.PanelPages["kado"] = {
       body.querySelectorAll("[data-del-list]").forEach((btn) => btn.addEventListener("click", () => removeList(Number(btn.dataset.delList))));
     }
 
+    /** Ringkasan atas detail: total pemberi + total jumlah (amount null
+     * dilewati; kalau belum ada satupun amount terisi, tampil "—"). */
+    function summaryHtml(rows) {
+      let sum = 0;
+      let adaAmount = false;
+      rows.forEach((r) => {
+        if (r.amount !== null && r.amount !== undefined) { sum += Number(r.amount); adaAmount = true; }
+      });
+      return `
+        <div class="kd-summary">
+          <div class="kd-summary__item"><strong>${rows.length}</strong><span>pemberi</span></div>
+          <div class="kd-summary__item"><strong>${adaAmount ? esc(fmtRibuan(sum)) : "&mdash;"}</strong><span>total jumlah</span></div>
+        </div>`;
+    }
+
     function renderDetail() {
       const list = st.lists.find((l) => l.id === st.selectedListId);
       const rows = entriesFor(list.id);
       const body = outlet.querySelector("#kd-body");
-      body.innerHTML = card(list.name, `${rows.length} catatan dalam daftar ini.`, `
-        <div class="p-toolbar">
-          <button type="button" class="p-btn p-btn--ghost" id="kd-back">&larr; Semua daftar</button>
-        </div>
+      body.innerHTML = card(list.name, "", `
+        ${summaryHtml(rows)}
         <!-- Grid sel sama lebar (sama dengan .kt-actions Kontak) supaya
              barisnya tidak tampak acak di HP. -->
         <div class="kd-actions">
@@ -147,33 +172,31 @@ window.PanelPages["kado"] = {
           <button type="button" class="p-btn p-btn--ghost" id="kd-export-excel" ${rows.length ? "" : "disabled"}>Export Excel</button>
         </div>
         <button type="button" class="p-btn p-btn--danger kd-danger-row" id="kd-delete-all" ${rows.length ? "" : "disabled"}>Hapus semua kado di daftar ini</button>
-        <div style="overflow-x:auto">
-          <table class="p-table">
-            <thead><tr><th>Nama pemberi</th><th>Barang</th><th>Jumlah</th><th>Kuantiti</th><th>Ket.</th><th></th></tr></thead>
-            <tbody>
-              ${rows.length ? rows.map((e) => `
-                <tr data-entry-id="${e.id}">
-                  <td><input type="text" class="p-input kd-name-input" data-id="${e.id}" value="${escAttr(e.name)}" aria-label="Nama pemberi"></td>
-                  <td><span class="kd-itemwrap">
-                    <input type="text" class="p-input kd-item-input" data-id="${e.id}" value="${escAttr(e.item)}" placeholder="mis. Seserahan" aria-label="Barang">
-                    <!-- × clearable DI DALAM input Barang: mengosongkan default
-                         'Amplop Uang' sekali klik supaya langsung ketik nama
-                         lain — BEDA dari tombol hapus baris di kolom terakhir. -->
-                    <button type="button" class="kd-clear" data-clear="${e.id}" title="Kosongkan nama barang" aria-label="Kosongkan nama barang">&times;</button>
-                  </span></td>
-                  <td><input type="number" min="0" step="any" inputmode="numeric" class="p-input kd-amount-input" data-id="${e.id}" value="${escAttr(e.amount ?? "")}" aria-label="Jumlah"></td>
-                  <td><input type="number" min="0" step="1" inputmode="numeric" class="p-input kd-quantity-input" data-id="${e.id}" value="${escAttr(e.quantity ?? "")}" aria-label="Kuantiti"></td>
-                  <td><select class="p-input kd-timing-select" data-id="${e.id}" aria-label="Keterangan waktu terima">
-                    <option value=""${!e.timing ? " selected" : ""}>—</option>
-                    ${TIMING_OPTIONS.map((o) => `<option value="${o.v}"${e.timing === o.v ? " selected" : ""}>${o.l}</option>`).join("")}
-                  </select></td>
-                  <td><button type="button" class="p-btn p-btn--tiny p-btn--danger" data-del-entry="${e.id}" aria-label="Hapus kado dari ${escAttr(e.name)}">&times;</button></td>
-                </tr>`).join("") : `<tr><td colspan="6" class="p-empty">Belum ada kado di daftar ini — tambah satu-satu lewat tombol di atas.</td></tr>`}
-            </tbody>
-          </table>
+        <!-- Baris compact ala daftar kontak wa.html: satu article per
+             pemberi, SEMUA field terlihat tanpa scroll horizontal. -->
+        <div class="kd-list">
+          ${rows.length ? rows.map((e) => `
+            <article class="kd-entry" data-entry-id="${e.id}">
+              <div class="kd-entry__top">
+                <input type="text" class="kd-name-input" data-id="${e.id}" value="${escAttr(e.name)}" placeholder="Nama pemberi" aria-label="Nama pemberi">
+                <button type="button" class="kd-del" data-del-entry="${e.id}" aria-label="Hapus kado dari ${escAttr(e.name)}" title="Hapus">&times;</button>
+              </div>
+              <div class="kd-entry__meta">
+                <span class="kd-itemwrap">
+                  <input type="text" class="p-input kd-plain kd-item-input" data-id="${e.id}" value="${escAttr(e.item)}" placeholder="Barang (mis. Amplop Uang)" aria-label="Barang">
+                  <!-- × clearable DI DALAM input Barang: mengosongkan default
+                       'Amplop Uang' sekali klik supaya langsung ketik nama
+                       lain — BEDA dari tombol hapus baris (.kd-del) di kanan
+                       atas baris. -->
+                  <button type="button" class="kd-clear" data-clear="${e.id}" title="Kosongkan nama barang" aria-label="Kosongkan nama barang">&times;</button>
+                </span>
+                <input type="text" inputmode="numeric" class="p-input kd-plain kd-amount-input" data-id="${e.id}" value="${e.amount !== null && e.amount !== undefined ? escAttr(fmtRibuan(e.amount)) : ""}" placeholder="Jumlah" aria-label="Jumlah (Rp)">
+                <input type="number" min="0" step="1" inputmode="numeric" class="p-input kd-plain kd-quantity-input" data-id="${e.id}" value="${escAttr(e.quantity ?? "")}" placeholder="Qty" aria-label="Kuantiti">
+              </div>
+              <input type="text" class="p-input kd-plain kd-timing-input" data-id="${e.id}" value="${escAttr(e.timing || "")}" placeholder="Keterangan — mis. H-, saat akad (opsional)" aria-label="Keterangan">
+            </article>`).join("") : `<p class="p-empty">Belum ada kado di daftar ini — tambah satu-satu lewat tombol di atas.</p>`}
         </div>
       `);
-      body.querySelector("#kd-back").addEventListener("click", () => { st.selectedListId = null; render(); });
       body.querySelector("#kd-add-entry").addEventListener("click", () => openEntryModal());
       if (rows.length) {
         body.querySelector("#kd-export-excel").addEventListener("click", () => exportExcel(list, rows));
@@ -181,18 +204,23 @@ window.PanelPages["kado"] = {
       }
       body.querySelectorAll(".kd-name-input").forEach((input) => input.addEventListener("change", () => saveEntryField(Number(input.dataset.id), { name: input.value.trim() }, input)));
       body.querySelectorAll(".kd-item-input").forEach((input) => input.addEventListener("change", () => saveEntryField(Number(input.dataset.id), { item: input.value.trim() }, input)));
-      body.querySelectorAll(".kd-amount-input").forEach((input) => input.addEventListener("change", () => {
-        const { value, error } = parseNumber(input.value);
-        if (error) { toast(error, true); input.value = ""; return; }
-        saveEntryField(Number(input.dataset.id), { amount: value }, input);
-      }));
+      // Jumlah: saat fokus tampil angka mentah (enak diedit), setelah
+      // tersimpan kembali terformat pemisah ribuan.
+      body.querySelectorAll(".kd-amount-input").forEach((input) => {
+        input.addEventListener("focus", () => {
+          const e = st.entries.find((x) => x.id === Number(input.dataset.id));
+          if (e && e.amount !== null && e.amount !== undefined) input.value = String(e.amount);
+        });
+        input.addEventListener("change", () =>
+          saveEntryField(Number(input.dataset.id), { amount: parseAmountInput(input.value) }, input));
+      });
       body.querySelectorAll(".kd-quantity-input").forEach((input) => input.addEventListener("change", () => {
-        const { value, error } = parseNumber(input.value, { integer: true });
+        const { value, error } = parseNumber(input.value);
         if (error) { toast(error, true); input.value = ""; return; }
         saveEntryField(Number(input.dataset.id), { quantity: value }, input);
       }));
-      body.querySelectorAll(".kd-timing-select").forEach((sel) => sel.addEventListener("change", () =>
-        saveEntryField(Number(sel.dataset.id), { timing: sel.value || null }, sel)));
+      body.querySelectorAll(".kd-timing-input").forEach((input) => input.addEventListener("change", () =>
+        saveEntryField(Number(input.dataset.id), { timing: input.value.trim() || null }, input)));
       body.querySelectorAll("[data-clear]").forEach((btn) => btn.addEventListener("click", () => clearItem(Number(btn.dataset.clear))));
       body.querySelectorAll("[data-del-entry]").forEach((btn) => btn.addEventListener("click", () => removeEntry(Number(btn.dataset.delEntry))));
     }
@@ -254,13 +282,20 @@ window.PanelPages["kado"] = {
       window.PanelUI.openModal(entryModal);
       outlet.querySelector("#kd-entry-name").focus();
     }
+    // Preview jumlah di modal juga terformat pemisah ribuan begitu
+    // ditinggal (blur) — nilai mentahnya dibersihkan lagi saat simpan.
+    const modalAmountInput = outlet.querySelector("#kd-entry-amount");
+    modalAmountInput.addEventListener("blur", () => {
+      const { value } = parseAmountInput(modalAmountInput.value);
+      if (value !== null) modalAmountInput.value = fmtRibuan(value);
+    });
     outlet.querySelector("#kd-entry-modal-close").addEventListener("click", () => window.PanelUI.closeModal(entryModal));
     outlet.querySelector("#kd-entry-save").addEventListener("click", async () => {
       const name = outlet.querySelector("#kd-entry-name").value.trim();
       const item = outlet.querySelector("#kd-entry-item").value.trim();
-      const amount = parseNumber(outlet.querySelector("#kd-entry-amount").value);
-      const quantity = parseNumber(outlet.querySelector("#kd-entry-quantity").value, { integer: true });
-      const timing = outlet.querySelector("#kd-entry-timing").value || null;
+      const amount = parseAmountInput(outlet.querySelector("#kd-entry-amount").value);
+      const quantity = parseNumber(outlet.querySelector("#kd-entry-quantity").value);
+      const timing = outlet.querySelector("#kd-entry-timing").value.trim() || null;
       if (!name) { toast("Nama pemberi wajib diisi.", true); return; }
       if (amount.error || quantity.error) { toast(amount.error || quantity.error, true); return; }
       const { data, error } = await query(
@@ -277,34 +312,46 @@ window.PanelPages["kado"] = {
       render();
     });
 
-    /** Simpan satu kolom entri (inline edit di tabel). Kosong = null untuk
+    /** Simpan satu kolom entri (edit inline di daftar). Kosong = null untuk
      * amount/quantity/timing; name wajib terisi; item BOLEH kosong (itu
-     * justru tujuan tombol × clear). */
+     * justru tujuan tombol × clear). Return true kalau tersimpan — pemanggil
+     * amount bergantung ini untuk memutuskan format ulang tampilan. */
     async function saveEntryField(id, patch, input) {
       const e = st.entries.find((x) => x.id === id);
-      if (!e) return;
+      if (!e) return false;
+      if ("amount" in patch && patch.amount && patch.amount.error) {
+        toast(patch.amount.error, true);
+        input.value = e.amount !== null && e.amount !== undefined ? String(e.amount) : "";
+        return false;
+      }
+      if ("amount" in patch) patch = { ...patch, amount: patch.amount.value };
       if ("name" in patch && !patch.name) {
         toast("Nama pemberi tidak boleh kosong.", true);
         input.value = e.name;
-        return;
+        return false;
       }
       const { error } = await query(sb.from("gift_list_entries").update(patch).eq("invitation_id", tenant.invitationId).eq("id", id), "Penyimpanan catatan kado");
       if (error) {
         toast("Gagal menyimpan: " + error.message, true);
         if ("timing" in patch) input.value = e.timing || "";
-        else if (patch.name !== undefined) input.value = e.name;
-        else if (patch.item !== undefined) input.value = e.item;
-        else input.value = e[patch.amount !== undefined ? "amount" : "quantity"] ?? "";
-        return;
+        else if ("item" in patch) input.value = e.item;
+        else if ("amount" in patch) input.value = e.amount ?? "";
+        else if ("quantity" in patch) input.value = e.quantity ?? "";
+        else input.value = e.name;
+        return false;
       }
       Object.assign(e, patch);
-      if (patch.timing !== undefined) input.value = patch.timing || "";
+      // Sinkronkan tampilan field dengan nilai tersimpan.
+      if ("timing" in patch) input.value = patch.timing || "";
+      else if ("amount" in patch) input.value = patch.amount === null ? "" : fmtRibuan(patch.amount);
+      else if ("quantity" in patch) input.value = patch.quantity ?? "";
+      return true;
     }
 
     /** Tombol × DI DALAM input "Barang": kosongkan teks (default 'Amplop
      * Uang') SEKALIGUS simpan item='' — sekali klik, langsung fokus ketik
-     * nama barang lain. Ini bukan hapus baris (tombol itu terpisah di kolom
-     * terakhir tabel). */
+     * nama barang lain. Ini bukan hapus baris (tombol .kd-del terpisah di
+     * kanan atas tiap baris). */
     async function clearItem(id) {
       const input = outlet.querySelector(`.kd-item-input[data-id="${id}"]`);
       await saveEntryField(id, { item: "" }, input);
@@ -340,7 +387,9 @@ window.PanelPages["kado"] = {
       if (!window.XLSX) { toast("Library XLSX belum termuat — periksa koneksi internet.", true); return; }
       const ws = window.XLSX.utils.aoa_to_sheet([
         ["Nama Pemberi", "Barang", "Jumlah", "Kuantiti", "Keterangan"],
-        ...rows.map((r) => [r.name, r.item, r.amount ?? "", r.quantity ?? "", timingLabel(r.timing)])
+        // Angka ditulis MENTAH (tanpa pemisah) supaya Excel membacanya
+        // sebagai angka yang bisa di-sum, bukan teks.
+        ...rows.map((r) => [r.name, r.item, r.amount ?? "", r.quantity ?? "", r.timing || ""])
       ]);
       const wb = window.XLSX.utils.book_new();
       window.XLSX.utils.book_append_sheet(wb, ws, "Kado");
