@@ -13,7 +13,7 @@
    - Kontras: ink/ink-2/ink-3 >= 4.5:1 di atas paper & canvas; teks putih
      >= 4.5:1 di atas accent/ok/warn/danger/info; --p-line >= 3:1 di atas
      paper (border komponen interaktif, WCAG 1.4.11).
-   - Nama kelas lama (.tab/.panel/.scan-*/.p-*) dipertahankan karena jadi
+   - Nama kelas lama (.tab, .panel, .scan-x, .p-x) dipertahankan karena jadi
      hook struktural JS (core.js, admin-qr.js, register.js) — yang berubah
      tampilannya, bukan kontraknya.
    ============================================================================ */

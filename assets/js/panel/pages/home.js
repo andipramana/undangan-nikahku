@@ -63,7 +63,9 @@ window.PanelPages["home"] = {
       const wishesTable = (window.WEDDING_CONFIG.supabase && window.WEDDING_CONFIG.supabase.wishesTable) || "wishes";
       const [wishesRes, checkinsRes, waRes] = await Promise.all([
         api.query(api.sb.from(wishesTable).select("id", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah ucapan"),
-        api.query(api.sb.from("checkins").select("id", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah check-in"),
+        // checkins tidak punya kolom id — primary key-nya guest_key (lihat
+        // migrations/0004_roles_livestream_checkins.sql).
+        api.query(api.sb.from("checkins").select("guest_key", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah check-in"),
         api.query(api.sb.from("wa_contacts").select("id", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah kontak WA")
       ]);
       const cells = outlet.querySelectorAll("#home-kpi .p-kpi__value");
