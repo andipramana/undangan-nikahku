@@ -2,10 +2,12 @@
  * Kado & Amplop — pencatat kado/amplop yang diterima, konsep persis halaman
  * Kontak: tabel `gift_lists` + `gift_list_entries` (migration 0025; timing
  * jadi teks bebas lewat 0026). Beberapa daftar bernama bebas, tiap entri satu
- * pemberi: nama, barang (default 'Amplop Uang' — input clearable: × kecil DI
- * DALAM field mengosongkan default sekali klik), jumlah nominal (ditampilkan
- * dengan pemisah ribuan "1.500.000", boleh kosong), kuantiti (boleh kosong),
- * dan keterangan TEKS BEBAS (mis. "H-, saat akad"). Detail daftar memakai
+ * pemberi: nama, barang (default 'Amplop Uang'; × clear-nya HANYA di modal
+ * tambah — baris daftar polos supaya tak berdempetan badge qty) SEBARIS
+ * badge kuantiti ungu berisi angka polos yang hanya tampil saat qty terisi
+ * (kosong → tombol samar "+ qty"), jumlah
+ * nominal di BARIS TERPISAH (prefix Rp + pemisah ribuan "1.500.000", boleh
+ * kosong), dan keterangan TEKS BEBAS (mis. "H-, saat akad"). Detail daftar memakai
  * baris compact ala daftar kontak di wa.html — semua field terlihat tanpa
  * scroll horizontal — plus ringkasan total pemberi & total jumlah. Export
  * Excel via SheetJS XLSX (CDN sudah dimuat admin.html).
@@ -41,7 +43,7 @@ window.PanelPages["kado"] = {
         <div class="p-modal__panel">
           <div class="p-modal__header"><h3>Tambah kado</h3><button type="button" class="p-modal__close" id="kd-entry-modal-close" aria-label="Tutup">&times;</button></div>
           <label class="p-field"><span>Nama pemberi</span><input class="p-input" id="kd-entry-name" autocomplete="name"></label>
-          <label class="p-field"><span>Barang</span><input class="p-input" id="kd-entry-item" value="Amplop Uang"></label>
+          <label class="p-field"><span>Barang</span><span class="kd-itemwrap"><input class="p-input" id="kd-entry-item" value="Amplop Uang"><button type="button" class="kd-clear" id="kd-entry-item-clear" title="Kosongkan nama barang" aria-label="Kosongkan nama barang">&times;</button></span></label>
           <div class="p-grid-2">
             <label class="p-field"><span>Jumlah</span><input class="p-input" id="kd-entry-amount" type="text" inputmode="numeric" placeholder="mis. 500.000 (boleh kosong)"></label>
             <label class="p-field"><span>Kuantiti</span><input class="p-input" id="kd-entry-quantity" type="number" min="0" step="1" inputmode="numeric" placeholder="boleh kosong"></label>
@@ -159,6 +161,71 @@ window.PanelPages["kado"] = {
         </div>`;
     }
 
+    /** Kontrol kuantiti per entri: badge pill UNGU berisi ANGKA SAJA
+     * (tanpa × — berdempetan dengan tombol × clear barang bikin bingung)
+     * yang tampil HANYA kalau qty terisi; kalau kosong TIDAK ADA badge,
+     * cukup tombol samar "+ qty" untuk memunculkan inputnya. */
+    function qtyControlHtml(e) {
+      const ada = e.quantity !== null && e.quantity !== undefined && e.quantity !== "";
+      return ada
+        ? `<span class="kd-qty"><input type="text" inputmode="numeric" class="kd-qty-num kd-quantity-input" data-id="${e.id}" value="${escAttr(String(e.quantity))}" aria-label="Kuantiti"></span>`
+        : `<button type="button" class="kd-qty-add" data-add-qty="${e.id}" aria-label="Isi kuantiti">+ qty</button>`;
+    }
+
+    /** Pasang perilaku input qty (badge maupun hasil swap dari "+ qty"):
+     * simpan integer; dikosongkan → null DAN kembali jadi tombol "+ qty"
+     * supaya badge tidak menggantung kosong. */
+    function wireQuantityInput(input) {
+      input.addEventListener("change", async () => {
+        const { value, error } = parseNumber(input.value);
+        if (error) {
+          const e = st.entries.find((x) => x.id === Number(input.dataset.id));
+          toast(error, true);
+          input.value = e?.quantity ?? "";
+          return;
+        }
+        const ok = await saveEntryField(Number(input.dataset.id), { quantity: value }, input);
+        if (ok && (value === null || value === undefined) && input.isConnected) {
+          const btn = makeQtyGhost(input.dataset.id);
+          input.replaceWith(btn);
+          wireAddQtyButton(btn);
+        }
+      });
+      // Ditinggal dalam keadaan kosong tanpa berubah (change tak fire) —
+      // kembalikan ke tombol "+ qty", jangan biarkan input telanjang.
+      input.addEventListener("blur", () => {
+        if (input.isConnected && input.value.trim() === "") {
+          const btn = makeQtyGhost(input.dataset.id);
+          input.replaceWith(btn);
+          wireAddQtyButton(btn);
+        }
+      });
+    }
+
+    /** Tombol samar "+ qty": diklik → ganti diri jadi input angka fokus. */
+    function makeQtyGhost(id) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "kd-qty-add";
+      btn.dataset.addQty = String(id);
+      btn.setAttribute("aria-label", "Isi kuantiti");
+      btn.textContent = "+ qty";
+      return btn;
+    }
+    function wireAddQtyButton(btn) {
+      btn.addEventListener("click", () => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.inputMode = "numeric";
+        input.className = "kd-qty-num kd-quantity-input";
+        input.dataset.id = btn.dataset.addQty;
+        input.setAttribute("aria-label", "Kuantiti");
+        btn.replaceWith(input);
+        wireQuantityInput(input);
+        input.focus();
+      });
+    }
+
     function renderDetail() {
       const list = st.lists.find((l) => l.id === st.selectedListId);
       const rows = entriesFor(list.id);
@@ -181,27 +248,20 @@ window.PanelPages["kado"] = {
                 <input type="text" class="kd-name-input" data-id="${e.id}" value="${escAttr(e.name)}" placeholder="Nama pemberi" aria-label="Nama pemberi">
                 <button type="button" class="kd-del" data-del-entry="${e.id}" aria-label="Hapus kado dari ${escAttr(e.name)}" title="Hapus">&times;</button>
               </div>
-              <!-- Satu baris meta padat (umpan balik: baris jumlah
-                   sendirian menyisakan space kosong): barang + Rp nominal +
-                   badge qty. flex-wrap: kalau sempit, nominal turun baris
-                   sendiri dengan rapi. -->
+              <!-- Baris barang + qty: barang polos TANPA × clear (itu cukup
+                   di modal tambah; × dobel dengan badge qty bikin bingung) +
+                   badge pill UNGU angka yang HANYA tampil kalau qty terisi
+                   (kosong → tombol samar "+ qty"). -->
               <div class="kd-entry__meta">
-                <span class="kd-itemwrap">
-                  <input type="text" class="p-input kd-plain kd-item-input" data-id="${e.id}" value="${escAttr(e.item)}" placeholder="Barang (mis. Amplop Uang)" aria-label="Barang">
-                  <!-- × clearable DI DALAM input Barang: mengosongkan default
-                       'Amplop Uang' sekali klik supaya langsung ketik nama
-                       lain — BEDA dari tombol hapus baris (.kd-del) di kanan
-                       atas baris. -->
-                  <button type="button" class="kd-clear" data-clear="${e.id}" title="Kosongkan nama barang" aria-label="Kosongkan nama barang">&times;</button>
-                </span>
-                <span class="kd-amount">
-                  <span class="kd-amount-cur">Rp</span>
-                  <input type="text" inputmode="numeric" class="p-input kd-plain kd-amount-input" data-id="${e.id}" value="${e.amount !== null && e.amount !== undefined ? escAttr(fmtRibuan(e.amount)) : ""}" placeholder="0" aria-label="Jumlah (Rp)">
-                </span>
-                <!-- Qty = badge pill UNGU satu baris dengan nama barang
-                     (permintaan eksplisit pemilik produk) — tetap input
-                     biasa: tap untuk edit, kosong tinggalkan placeholder. -->
-                <input type="text" inputmode="numeric" class="kd-qty-badge kd-quantity-input" data-id="${e.id}" value="${escAttr(e.quantity ?? "")}" placeholder="Qty" aria-label="Kuantiti (badge)">
+                <input type="text" class="p-input kd-plain kd-item-input" data-id="${e.id}" value="${escAttr(e.item)}" placeholder="Barang (mis. Amplop Uang)" aria-label="Barang">
+                ${qtyControlHtml(e)}
+              </div>
+              <!-- Jumlah = BARIS TERPISAH (umpan balik: nempel di baris
+                   barang terbaca "barang × Rp jumlah") — prefix Rp statis +
+                   angka rata kanan mono. -->
+              <div class="kd-entry__amount">
+                <span class="kd-amount-cur">Rp</span>
+                <input type="text" inputmode="numeric" class="p-input kd-plain kd-amount-input" data-id="${e.id}" value="${e.amount !== null && e.amount !== undefined ? escAttr(fmtRibuan(e.amount)) : ""}" placeholder="0" aria-label="Jumlah (Rp)">
               </div>
               <input type="text" class="p-input kd-plain kd-timing-input" data-id="${e.id}" value="${escAttr(e.timing || "")}" placeholder="Keterangan — mis. H-, saat akad (opsional)" aria-label="Keterangan">
             </article>`).join("") : `<p class="p-empty">Belum ada kado di daftar ini — tambah satu-satu lewat tombol di atas.</p>`}
@@ -239,14 +299,10 @@ window.PanelPages["kado"] = {
           if (cocok) input.value = kosong ? "" : fmtRibuan(e.amount);
         });
       });
-      body.querySelectorAll(".kd-quantity-input").forEach((input) => input.addEventListener("change", () => {
-        const { value, error } = parseNumber(input.value);
-        if (error) { toast(error, true); input.value = ""; return; }
-        saveEntryField(Number(input.dataset.id), { quantity: value }, input);
-      }));
+      body.querySelectorAll(".kd-quantity-input").forEach(wireQuantityInput);
+      body.querySelectorAll("[data-add-qty]").forEach(wireAddQtyButton);
       body.querySelectorAll(".kd-timing-input").forEach((input) => input.addEventListener("change", () =>
         saveEntryField(Number(input.dataset.id), { timing: input.value.trim() || null }, input)));
-      body.querySelectorAll("[data-clear]").forEach((btn) => btn.addEventListener("click", () => clearItem(Number(btn.dataset.clear))));
       body.querySelectorAll("[data-del-entry]").forEach((btn) => btn.addEventListener("click", () => removeEntry(Number(btn.dataset.delEntry))));
     }
 
@@ -314,6 +370,15 @@ window.PanelPages["kado"] = {
       const { value } = parseAmountInput(modalAmountInput.value);
       if (value !== null) modalAmountInput.value = fmtRibuan(value);
     });
+    // × clear "Barang" HANYA ada di sini (modal tambah) — baris daftar polos
+    // supaya tidak berdempetan dengan badge qty: sekali klik mengosongkan
+    // default 'Amplop Uang', langsung bisa ketik nama barang lain. Murni UI
+    // — nilai baru tersimpan saat tombol Simpan ditekan.
+    outlet.querySelector("#kd-entry-item-clear").addEventListener("click", () => {
+      const itemInput = outlet.querySelector("#kd-entry-item");
+      itemInput.value = "";
+      itemInput.focus();
+    });
     outlet.querySelector("#kd-entry-modal-close").addEventListener("click", () => window.PanelUI.closeModal(entryModal));
     outlet.querySelector("#kd-entry-save").addEventListener("click", async () => {
       const name = outlet.querySelector("#kd-entry-name").value.trim();
@@ -371,16 +436,6 @@ window.PanelPages["kado"] = {
       else if ("amount" in patch) input.value = patch.amount === null ? "" : fmtRibuan(patch.amount);
       else if ("quantity" in patch) input.value = patch.quantity ?? "";
       return true;
-    }
-
-    /** Tombol × DI DALAM input "Barang": kosongkan teks (default 'Amplop
-     * Uang') SEKALIGUS simpan item='' — sekali klik, langsung fokus ketik
-     * nama barang lain. Ini bukan hapus baris (tombol .kd-del terpisah di
-     * kanan atas tiap baris). */
-    async function clearItem(id) {
-      const input = outlet.querySelector(`.kd-item-input[data-id="${id}"]`);
-      await saveEntryField(id, { item: "" }, input);
-      if (input && document.activeElement !== input) input.focus();
     }
 
     async function removeEntry(id) {

@@ -13,9 +13,12 @@
  * - Detail daftar punya ringkasan total pemberi & total jumlah.
  * - Daftar entri compact ala kontak /wa (article per baris) — TANPA tabel
  *   yang harus scroll horizontal di HP.
- * - DUA tombol × beda tempat & beda fungsi: × clearable DI DALAM input
- *   "Barang" vs tombol hapus baris (.kd-del) — geometrinya diverifikasi
- *   dari markup ASLI halaman.
+ * - Layout baris entri: jumlah nominal di BARIS TERPISAH; badge qty ungu
+ *   (ANGKA SAJA — tanpa ×) sebaris barang dan HANYA saat qty terisi —
+ *   kosong cukup tombol samar "+ qty" (geometri diuji dua varian).
+ * - × clearable "Barang" HANYA di modal tambah kado; baris daftar polos
+ *   (× dobel dekat badge membingungkan) — hapus baris (.kd-del) tetap di
+ *   kanan atas tiap baris.
  */
 import fs from 'node:fs/promises';
 import { chromium } from '@playwright/test';
@@ -96,21 +99,27 @@ check('summary: chip total pemberi + total jumlah (amount null dilewati)', kadoS
 check('entri dirender sebagai article.kd-entry, BUKAN <table>/<td>', /<article class="kd-entry" data-entry-id=/.test(kadoSrc) && !/<table|<tbody|overflow-x:auto">[\s\S]*?<table/.test(kadoSrc.split('renderDetail')[1] || ''));
 check('CSS entri BERKARTU (latar row + border penuh + radius) — bukan garis bawah menyatu', /\.kd-list\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*gap:/.test(panelCss) && /\.kd-entry\s*\{[^}]*background:\s*var\(--p-row\);/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')) && /\.kd-entry\s*\{[^}]*border-radius:/.test(panelCss) && !/\.kd-entry\s*\{[^}]*border-bottom/.test(panelCss));
 check('jumlah: blur TANPA edit memulihkan tampilan terformat (bug klik-lalu-lepas)', kadoSrc.includes('parseAmountInput(input.value).value === e.amount') && /addEventListener\("blur"[\s\S]{0,400}?fmtRibuan\(e\.amount\)/.test(kadoSrc));
-// Layout kreatif permintaan eksplisit pemilik produk: qty = badge pill UNGU
-// satu baris dengan nama barang; nominal inline berprefix Rp (baris jumlah
-// sendirian dinilai boros space).
-check('urutan meta satu baris: barang → Rp nominal → badge qty', kadoSrc.indexOf('class="kd-itemwrap"') > -1 && kadoSrc.indexOf('class="kd-itemwrap"') < kadoSrc.indexOf('kd-amount-cur') && kadoSrc.indexOf('kd-amount-cur') < kadoSrc.indexOf('class="kd-qty-badge kd-quantity-input"'));
-check('badge qty ungu pill mono via token violet (tanpa hex di luar :root), fokus paper', panelCss.includes('--p-violet: #6d28d9;') && panelCss.includes('background: var(--p-violet-wash); color: var(--p-violet);') && /\.kd-qty-badge:focus[^}]*background:\s*var\(--p-paper\)/.test(panelCss));
-check('nominal inline: wrapper .kd-amount flex + angka rata kanan mono', /\.kd-amount\s*\{[^}]*display:\s*flex/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')) && /\.kd-amount \.kd-amount-input\s*\{[^}]*text-align:\s*right/.test(panelCss));
+// Layout permintaan eksplisit pemilik produk: jumlah = BARIS TERPISAH di
+// bawah barang; badge qty "×N" ungu SEBARIS barang dan HANYA saat qty
+// terisi — kosong cukup tombol samar "+ qty" (tanpa × sama sekali).
+const flatCss = panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ');
+check('qty: badge hanya saat terisi, kosong → tombol "+ qty" (tanpa badge)', /function qtyControlHtml/.test(kadoSrc) && /e\.quantity !== null && e\.quantity !== undefined && e\.quantity !== ""/.test(kadoSrc) && kadoSrc.includes('class="kd-qty-add" data-add-qty=') && kadoSrc.includes('+ qty'));
+check('jumlah baris terpisah: div.kd-entry__amount sesudah kontrol qty', kadoSrc.includes('${qtyControlHtml(e)}') && kadoSrc.indexOf('${qtyControlHtml(e)}') < kadoSrc.indexOf('<div class="kd-entry__amount">'));
+check('kosongkan qty → kembali jadi "+ qty"; blur kosong juga revert', /value === null \|\| value === undefined\) && input\.isConnected/.test(kadoSrc) && /input\.addEventListener\("blur", \(\) => \{\s*\n\s*if \(input\.isConnected && input\.value\.trim\(\) === ""\)/.test(kadoSrc));
+check('"+ qty" diklik → swap jadi input angka lalu fokus', /function wireAddQtyButton/.test(kadoSrc) && /btn\.replaceWith\(input\)/.test(kadoSrc) && /wireQuantityInput\(input\);\s*\n\s*input\.focus\(\)/.test(kadoSrc));
+check('badge qty ungu pill mono via token violet (tanpa hex di luar :root), tanpa .kd-qty-x', panelCss.includes('--p-violet: #6d28d9;') && panelCss.includes('background: var(--p-violet-wash); color: var(--p-violet);') && /\.kd-qty:focus-within[^}]*border-color:\s*var\(--p-violet-line\)/.test(panelCss) && !panelCss.includes('.kd-qty-x'));
+check('tombol "+ qty" samar bergaris putus (bukan badge)', /\.kd-qty-add\s*\{[^}]*border:\s*1px dashed var\(--p-line\)/.test(flatCss));
+check('nominal baris sendiri: .kd-entry__amount flex + angka rata kanan mono', /\.kd-entry__amount\s*\{[^}]*display:\s*flex/.test(flatCss) && /\.kd-entry__amount \.kd-amount-input\s*\{[^}]*text-align:\s*right/.test(flatCss));
 check('nama borderless transparan (hover/focus berdandan)', /\.kd-name-input\s*\{[^}]*border:\s*1px solid transparent/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')));
 
 // ---------------------------------------------------------------------
-// 8) DUA tombol ×: clearable-in-field vs hapus baris — markup ASLI
+// 8) × clear "Barang" HANYA di modal tambah; baris daftar polos
 // ---------------------------------------------------------------------
-check('input Barang dibungkus .kd-itemwrap dengan tombol .kd-clear data-clear di DALAMnya', /kd-itemwrap">\s*\n\s*<input[^>]*kd-item-input[\s\S]*?<button type="button" class="kd-clear" data-clear=/.test(kadoSrc));
-check('tombol hapus baris .kd-del data-del-entry terpisah di kd-entry__top', /kd-name-input[\s\S]*?<\/div>\s*\n?\s*(?:<!--[\s\S]*?-->\s*)?<\/div>|data-del-entry="\$\{e\.id\}"[^>]*class="kd-del"|class="kd-del" data-del-entry="\$\{e\.id\}"/.test(kadoSrc) && kadoSrc.includes('class="kd-del" data-del-entry="${e.id}"'));
-check('clearItem menyimpan item="" lalu fokuskan input', /async function clearItem\(id\)/.test(kadoSrc) && /saveEntryField\(id, \{ item: "" \}, input\)/.test(kadoSrc) && /input\.focus\(\)/.test(kadoSrc));
-check('CSS .kd-clear absolut di kanan dalam wrap', /\.kd-itemwrap\s*\{\s*position:\s*relative/.test(panelCss) && /\.kd-clear\s*\{\s*position:\s*absolute/.test(panelCss));
+check('× clear Barang hanya di modal: kd-itemwrap + #kd-entry-item-clear', /<span class="kd-itemwrap"><input class="p-input" id="kd-entry-item"[^>]*><button type="button" class="kd-clear" id="kd-entry-item-clear"/.test(kadoSrc));
+check('baris daftar polos: tak ada data-clear & kd-itemwrap cuma di modal', !kadoSrc.includes('data-clear=') && (kadoSrc.match(/kd-itemwrap/g) || []).length === 1);
+check('clear modal: kosongkan + fokus, murni UI tanpa tulis DB (clearItem DB lama tiada)', kadoSrc.includes('#kd-entry-item-clear")') && /itemInput\.value = "";/.test(kadoSrc) && /itemInput\.focus\(\)/.test(kadoSrc) && !kadoSrc.includes('async function clearItem'));
+check('tombol hapus baris .kd-del data-del-entry tetap di kd-entry__top', /kd-name-input[\s\S]*?<\/div>\s*\n?\s*(?:<!--[\s\S]*?-->\s*)?<\/div>|data-del-entry="\$\{e\.id\}"[^>]*class="kd-del"|class="kd-del" data-del-entry="\$\{e\.id\}"/.test(kadoSrc) && kadoSrc.includes('class="kd-del" data-del-entry="${e.id}"'));
+check('CSS .kd-clear absolut di kanan dalam wrap (dipakai modal)', /\.kd-itemwrap\s*\{\s*position:\s*relative/.test(panelCss) && /\.kd-clear\s*\{\s*position:\s*absolute/.test(panelCss));
 check('modal kado beri grid+gap antar field & tombol Simpan', /#kd-list-modal \.p-modal__panel,\s*\n#kd-entry-modal \.p-modal__panel \{ display: grid; gap: var\(--p-3\); \}/.test(panelCss));
 
 // ---------------------------------------------------------------------
@@ -127,39 +136,59 @@ const rowMatch = kadoSrc.match(/<article class="kd-entry" data-entry-id="\$\{e\.
 check('markup baris entri ditemukan untuk diuji geometrinya', !!rowMatch);
 
 if (!failed && rowMatch) {
+  // ${qtyControlHtml(e)} diekspansi manual jadi DUA varian: qty terisi
+  // (badge angka polos) dan qty kosong (tombol "+ qty" — tanpa badge sama
+  // sekali).
+  const BADGE = '<span class="kd-qty"><input type="text" inputmode="numeric" class="kd-qty-num kd-quantity-input" data-id="1" value="2" aria-label="Kuantiti"></span>';
+  const GHOST = '<button type="button" class="kd-qty-add" data-add-qty="1" aria-label="Isi kuantiti">+ qty</button>';
+  const expand = (ctl) => rowMatch[0].replace('${qtyControlHtml(e)}', ctl);
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 360, height: 800 } });
   try {
-    await page.setContent(`<!doctype html><style>${panelCss}</style><div style="width:360px"><div class="kd-list">${rowMatch[0]}</div></div>`);
-    const geo = await page.evaluate(() => {
-      const r = (el) => el.getBoundingClientRect();
-      const itemInput = r(document.querySelector('.kd-item-input'));
-      const clearBtn = r(document.querySelector('.kd-clear'));
-      const delBtn = r(document.querySelector('[data-del-entry]'));
-      const nameInput = r(document.querySelector('.kd-name-input'));
-      const entry = r(document.querySelector('.kd-entry'));
-      const cx = clearBtn.left + clearBtn.width / 2;
-      const cy = clearBtn.top + clearBtn.height / 2;
-      const inside = (rect, x, y) => x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-      const centerY = (rect) => rect.top + rect.height / 2;
-      const inputs = [...document.querySelectorAll('input')].map(r);
-      return {
-        clearInsideInput: inside(itemInput, cx, cy),
-        delOutsideItemInput: !inside(itemInput, delBtn.left + delBtn.width / 2, delBtn.top + delBtn.height / 2),
-        sameRowAsName: Math.abs(centerY(nameInput) - centerY(delBtn)) < 4,
-        noHorizontalOverflow: document.documentElement.scrollWidth <= 362,
-        allInputsVisible: inputs.every((rect) => rect.left >= -1 && rect.right <= 362)
-      };
-    });
-    check('tombol × clear berada DI DALAM kotak input Barang (clearable in-field)', geo.clearInsideInput);
-    check('tombol hapus baris berada DI LUAR input Barang (beda tempat & fungsi)', geo.delOutsideItemInput);
-    check('tombol hapus satu baris dengan nama pemberi', geo.sameRowAsName);
-    check('di HP 360px: tanpa overflow horizontal', geo.noHorizontalOverflow);
-    check('di HP 360px: SEMUA input terlihat utuh tanpa scroll ke kanan', geo.allInputsVisible);
+    for (const [label, html] of [['qty terisi', expand(BADGE)], ['qty kosong', expand(GHOST)]]) {
+      const page = await browser.newPage({ viewport: { width: 360, height: 800 } });
+      await page.setContent(`<!doctype html><style>${panelCss}</style><div style="width:360px"><div class="kd-list">${html}</div></div>`);
+      const geo = await page.evaluate(() => {
+        const q = (sel) => document.querySelector(sel);
+        const r = (el) => el.getBoundingClientRect();
+        const itemInput = r(q('.kd-item-input'));
+        const delBtn = r(q('[data-del-entry]'));
+        const nameInput = r(q('.kd-name-input'));
+        const meta = q('.kd-entry__meta');
+        const amountInput = q('.kd-amount-input');
+        const qtyNum = q('.kd-qty-num');
+        const qtyAdd = q('.kd-qty-add');
+        const centerY = (rect) => rect.top + rect.height / 2;
+        const inputs = [...document.querySelectorAll('input')].map(r);
+        return {
+          plainItemField: !q('.kd-itemwrap') && !q('[data-clear]'),
+          delRightOfItem: delBtn.left >= itemInput.right - 2,
+          sameRowAsName: Math.abs(centerY(nameInput) - centerY(delBtn)) < 4,
+          amountOutOfMeta: !!amountInput && !!meta && !meta.contains(amountInput),
+          qtyInMeta: !!qtyNum && !!meta && meta.contains(qtyNum),
+          badgePlainNumber: !!qtyNum && qtyNum.value === '2' && !q('.kd-qty-x'),
+          noBadgeWhenEmpty: !qtyNum,
+          ghostVisibleWhenEmpty: !!qtyAdd && r(qtyAdd).width > 0 && r(qtyAdd).height > 0,
+          noHorizontalOverflow: document.documentElement.scrollWidth <= 362,
+          allInputsVisible: inputs.every((rect) => rect.left >= -1 && rect.right <= 362)
+        };
+      });
+      check(`[${label}] field Barang polos — tanpa × clear di baris daftar`, geo.plainItemField);
+      check(`[${label}] hapus baris di kanan & sebaris nama pemberi`, geo.delRightOfItem && geo.sameRowAsName);
+      check(`[${label}] di HP 360px: tanpa overflow horizontal`, geo.noHorizontalOverflow);
+      check(`[${label}] di HP 360px: SEMUA input terlihat utuh`, geo.allInputsVisible);
+      if (label === 'qty terisi') {
+        check('[qty terisi] nominal Rp DI LUAR baris meta (baris terpisah)', geo.amountOutOfMeta);
+        check('[qty terisi] badge ungu sebaris barang — angka polos tanpa ×', geo.qtyInMeta && geo.badgePlainNumber);
+      } else {
+        check('[qty kosong] TIDAK ada badge/input qty sama sekali', geo.noBadgeWhenEmpty);
+        check('[qty kosong] tombol "+ qty" tampil dan bisa disentuh', geo.ghostVisibleWhenEmpty);
+      }
+      await page.close();
+    }
   } finally {
     await browser.close();
   }
 }
 
 if (failed) { console.error('\nFAIL: kontrak kado & amplop panel belum terpenuhi.'); process.exit(1); }
-console.log('\nPASS: kontrak kado & amplop — teks bebas, ribuan, summary, list compact, × clearable vs hapus baris, export Excel.');
+console.log('\nPASS: kontrak kado & amplop — jumlah baris terpisah, badge qty kondisional (×N / + qty), ribuan, summary, list compact, export Excel.');

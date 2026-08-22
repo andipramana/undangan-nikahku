@@ -900,28 +900,43 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
   font-size: 15px;
 }
 .kd-entry .kd-plain:hover:not(:focus) { border-color: var(--p-hairline); background: var(--p-paper); }
-.kd-entry__meta .kd-itemwrap { flex: 1.2 1 8rem; min-width: 0; }
-/* Nominal inline: prefix "Rp" statis mono + angka rata kanan — mengisi
-   baris yang sama dengan barang, tanpa baris kosong menggantung. */
-.kd-amount { flex: 1 1 7.5rem; display: flex; align-items: center; gap: .35rem; min-width: 0; }
+.kd-entry__meta .kd-item-input { flex: 1; min-width: 0; }
+/* Jumlah = BARIS TERPISAH di bawah barang+qty (umpan balik pemilik produk:
+   menempel di baris barang terbaca "barang × Rp jumlah") — prefix Rp statis
+   mono + angka rata kanan. min-width:0 wajib agar menyusut di HP sempit. */
+.kd-entry__amount { display: flex; align-items: center; gap: .35rem; }
 .kd-amount-cur {
   flex: none; font-family: var(--p-font-mono);
   font-size: .72rem; font-weight: 650; letter-spacing: .04em;
   color: var(--p-ink-2);
 }
-.kd-amount .kd-amount-input { flex: 1; width: auto; min-width: 0; text-align: right; font-family: var(--p-font-mono); }
-/* Qty = badge pill UNGU di ujung kanan baris barang (permintaan eksplisit
-   pemilik produk) — tetap input biasa: tap untuk edit, kosong = placeholder
-   samar. Warna violet hardcoded karena panel tidak punya token ungu. */
-.kd-qty-badge {
-  flex: none; width: 3.2rem; padding: .26rem .3rem;
+.kd-entry__amount .kd-amount-input { flex: 1; width: auto; min-width: 0; text-align: right; font-family: var(--p-font-mono); }
+/* Qty = badge pill UNGU berisi ANGKA SAJA sebaris barang, HANYA saat qty
+   terisi — kalau kosong tidak ada badge sama sekali, cukup tombol samar
+   "+ qty" bergaris putus yang diklik untuk memunculkan inputnya. Tanpa ×
+   di dalam badge: berdempetan dengan apa pun di kirinya bikin bingung.
+   field-sizing menyesuaikan lebar input angka di browser baru; fallback
+   width 2ch cukup untuk qty umum. */
+.kd-qty {
+  flex: none; display: flex; align-items: center;
+  padding: .14rem .5rem;
   border: 1px solid transparent; border-radius: 999px;
   background: var(--p-violet-wash); color: var(--p-violet);
-  font-family: var(--p-font-mono); font-size: .82rem; font-weight: 700;
-  text-align: center;
 }
-.kd-qty-badge::placeholder { color: var(--p-violet-placeholder); opacity: 1; }
-.kd-qty-badge:focus { outline: 0; border-color: var(--p-violet-line); background: var(--p-paper); }
+.kd-qty:focus-within { border-color: var(--p-violet-line); background: var(--p-paper); }
+.kd-qty-num {
+  width: 2ch; field-sizing: content; min-width: 1ch; max-width: 6ch;
+  padding: 0; border: 0; background: transparent; outline: 0;
+  font-family: var(--p-font-mono); font-size: .82rem; font-weight: 700;
+  color: var(--p-violet); text-align: center;
+}
+.kd-qty-add {
+  flex: none; padding: .17rem .6rem;
+  border: 1px dashed var(--p-line); border-radius: 999px;
+  background: transparent; color: var(--p-ink-3); cursor: pointer;
+  font-family: var(--p-font-mono); font-size: .72rem; font-weight: 650;
+}
+.kd-qty-add:hover { border-color: var(--p-violet-line); background: var(--p-violet-wash); color: var(--p-violet); }
 .kd-timing-input { width: 100%; }
 .kd-entry .kd-plain:hover:not(:focus) { border-color: var(--p-hairline); background: var(--p-paper); }
 /* Ringkasan total di atas detail — permintaan eksplisit: total pemberi &
