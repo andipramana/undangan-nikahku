@@ -26,9 +26,13 @@ window.PanelPages["template"] = {
           ${KNOWN_TEMPLATES.map((t) => {
             const info = VISUAL_INFO[t.id] || {};
             const active = t.id === activeId;
+            // Pita swatch: warna template sebagai identitas visual kartu,
+            // bukan tiga titik kecil. Hex datang dari data VISUAL_INFO.
+            const stops = (info.colors || []).map((clr, i, arr) =>
+              `${clr} ${(i / arr.length) * 100}% ${((i + 1) / arr.length) * 100}%`).join(", ");
             return `
-            <section class="p-card">
-              <div style="display:flex;gap:.3rem">${(info.colors || []).map((clr) => `<span style="width:28px;height:28px;border-radius:50%;background:${clr};border:1px solid var(--p-line)" title="${clr}"></span>`).join("")}</div>
+            <section class="p-card"${active ? ' style="border-color:var(--p-accent);box-shadow:0 0 0 3px var(--p-accent-wash)"' : ""}>
+              <div aria-hidden="true" style="height:10px;border-radius:999px;background:linear-gradient(90deg, ${stops});margin-bottom:.25rem"></div>
               <h3 class="p-card__title">${esc(t.name)} ${active ? window.PanelUI.badge("Aktif", "ok") : ""}</h3>
               <p class="p-card__desc">${esc(info.desc || "")}</p>
               <div class="p-toolbar">

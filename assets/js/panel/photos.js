@@ -216,13 +216,15 @@
     let destroyed = false;
 
     container.innerHTML = `
-      <div class="p-toolbar">
-        <label class="p-upload-wrap"><span class="p-btn p-btn--ghost">Unggah foto…</span>
-          <input type="file" accept="image/*" multiple hidden class="p-photo-input"></label>
-      </div>
+      <label class="p-upload-wrap p-upload-zone">
+        <span class="p-upload-zone__title">Klik untuk memilih foto, atau seret ke sini</span>
+        <span class="p-upload-zone__hint">JPG/PNG — dikonversi otomatis ke WebP</span>
+        <input type="file" accept="image/*" multiple hidden class="p-photo-input">
+      </label>
       <p class="p-warning" hidden></p>
       <div class="p-photo-grid"></div>
     `;
+    const zoneEl = container.querySelector(".p-upload-zone");
     const warningEl = container.querySelector(".p-warning");
     const gridEl = container.querySelector(".p-photo-grid");
     const inputEl = container.querySelector(".p-photo-input");
@@ -430,6 +432,29 @@
       const files = Array.from(e.target.files);
       e.target.value = "";
       if (files.length) uploadAll(files);
+    });
+
+    // Seret file langsung dari OS ke zona unggah. Berbeda dari drag&drop
+    // reorder kartu di atas: ini file EKSTERNAL (dataTransfer.files), bukan
+    // kartu internal (effectAllowed "move") — keduanya sengaja tidak saling
+    // mengganggu lewat cek dragId / types "Files".
+    container.addEventListener("dragover", (e) => {
+      if (dragId) return;
+      if (!(e.dataTransfer && Array.from(e.dataTransfer.types || []).includes("Files"))) return;
+      e.preventDefault();
+      zoneEl.classList.add("is-dragover");
+    });
+    container.addEventListener("dragleave", (e) => {
+      if (!container.contains(e.relatedTarget)) zoneEl.classList.remove("is-dragover");
+    });
+    container.addEventListener("drop", (e) => {
+      zoneEl.classList.remove("is-dragover");
+      if (dragId) return;
+      const files = Array.from((e.dataTransfer && e.dataTransfer.files) || [])
+        .filter((f) => f.type.startsWith("image/"));
+      if (!files.length) return;
+      e.preventDefault();
+      uploadAll(files);
     });
 
     async function uploadAll(files) {

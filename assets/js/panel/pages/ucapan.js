@@ -193,7 +193,7 @@ window.PanelPages["ucapan"] = {
       const sheet = outlet.querySelector("#wi-export-preview section");
       if (!window.html2canvas) return (status.textContent = "Library export gambar belum termuat. Coba refresh.");
       status.textContent = "Membuat PNG…";
-      const canvas = await window.html2canvas(sheet, { scale: 2, backgroundColor: "#fffdf9" });
+      const canvas = await window.html2canvas(sheet, { scale: 2, backgroundColor: "#ffffff" });
       canvas.toBlob((blob) => { download(blob, "ucapan-pernikahan.png"); status.textContent = "PNG berhasil diunduh."; }, "image/png");
     }
     async function openExport() {
