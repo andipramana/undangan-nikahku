@@ -27,7 +27,13 @@ const checks = [
   ["bottom navbar: hanya tampil di mobile, toolbar atas disembunyikan", css.includes(".wa-bottomnav { display: none; }") && /\.wa-toolbar--actions\s*\{\s*display:\s*none/.test(css)],
   // Select "Daftar kirim" tidak lagi memakai tampilan native kotak:
   // appearance none + panah chevron custom.
-  ["select daftar kirim dipolasi (bukan kotak native)", /appearance:\s*none/.test(css) && css.includes("data:image/svg+xml") && /wa-list-bar select:focus/.test(css)]
+  ["select daftar kirim dipolasi (bukan kotak native)", /appearance:\s*none/.test(css) && css.includes("data:image/svg+xml") && /wa-list-bar select:focus/.test(css)],
+  // Select "Daftar kirim" full width di HP: parent label-nya harus dibentangkan
+  // dulu (flex-item berukuran konten membuat width:100% resolusinya melingkar).
+  ["select daftar kirim full width di mobile", /\.wa-list-bar label\s*\{\s*flex:\s*1 1 100%/.test(css)],
+  // Tooltip long-press item navbar: teks dari atribut title (desktop hover
+  // native), bubble .wa-navtip untuk HP, dan aksi tak jalan setelah hold.
+  ["tooltip long-press item navbar", (page.match(/class="wa-bottomnav__item"[^>]*title=/g) || []).length === 4 && css.includes(".wa-navtip--show") && /pointerType === "mouse"/.test(blast) && /suppressUntil = Date\.now\(\) \+ 700/.test(blast)]
 ];
 for (const [label, pass] of checks) {
   if (!pass) throw new Error(`FAIL: ${label}`);

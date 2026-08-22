@@ -926,6 +926,68 @@
       src.click();
     });
   });
+
+  /* ---------- Tooltip long-press item navbar ----------
+   * Label pendek ("Impor") belum tentu dimengerti — apalagi format file
+   * yang diminta. Tekan-tahan ±450ms → bubble penjelasan. Teks ambil dari
+   * atribut title item (desktop dapat hover native dari title yang sama,
+   * jadi teksnya cuma satu sumber). Setelah tooltip muncul, melepas jari
+   * TIDAK menjalankan aksinya (suppress klik ±700ms). */
+  (function bindNavTips() {
+    const tip = document.createElement("div");
+    tip.className = "wa-navtip";
+    tip.setAttribute("role", "tooltip");
+    tip.hidden = true;
+    document.body.appendChild(tip);
+    let timer = null;
+    let held = false;
+    let suppressTarget = null;
+    let suppressUntil = 0;
+
+    const show = (el) => {
+      const text = el.getAttribute("title") || "";
+      if (!text) return;
+      tip.textContent = text;
+      tip.hidden = false;
+      requestAnimationFrame(() => tip.classList.add("wa-navtip--show"));
+    };
+    const clearTimer = () => { if (timer) { clearTimeout(timer); timer = null; } };
+    const hideSoon = () => {
+      tip.classList.remove("wa-navtip--show");
+      setTimeout(() => { if (!tip.classList.contains("wa-navtip--show")) tip.hidden = true; }, 220);
+    };
+
+    ["wa-nav-add", "wa-nav-from", "wa-nav-import", "wa-nav-manage"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse" || !el.getAttribute("title")) return; // desktop: hover native
+        held = false;
+        clearTimer();
+        timer = setTimeout(() => { held = true; show(el); }, 450);
+      });
+      ["pointerup", "pointercancel", "pointerleave"].forEach((t) =>
+        el.addEventListener(t, () => {
+          clearTimer();
+          if (held) {
+            held = false;
+            hideSoon();
+            suppressTarget = el;
+            suppressUntil = Date.now() + 700;
+          }
+        })
+      );
+      // Geser jari = scroll daftar, bukan hold — batalkan timer tooltip.
+      el.addEventListener("touchmove", clearTimer, { passive: true });
+    });
+
+    document.addEventListener("click", (e) => {
+      if (Date.now() > suppressUntil || !suppressTarget || !suppressTarget.contains(e.target)) return;
+      suppressUntil = 0;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+  })();
   fcModal.addEventListener("click", (e) => { if (e.target === fcModal) fcModal.hidden = true; });
 
   async function openFromContacts() {

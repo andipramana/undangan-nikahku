@@ -110,19 +110,21 @@
      wa-blast.js); Kelola link keluar ke panel #/kontak (href diset wa.js,
       sama seperti #wa-manage-contacts). -->
 <nav class="wa-bottomnav" aria-label="Aksi kontak">
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-add">
+  <!-- title = satu sumber teks tooltip: hover di desktop (native),
+       long-press di HP (bubble custom, lihat wa-blast.js). -->
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-add" title="Tambah manual: isi nama + nomor WA, langsung masuk daftar kirim">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
     <span>Tambah</span>
   </button>
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-from">
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-from" title="Pilih banyak tamu sekaligus dari buku alamat di panel admin">
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="2.5"/><path d="M8 17c.5-2 2-3 4-3s3.5 1 4 3"/></svg>
     <span>Dari kontak</span>
   </button>
-  <button type="button" class="wa-bottomnav__item" id="wa-nav-import">
+  <button type="button" class="wa-bottomnav__item" id="wa-nav-import" title="Unggah file Excel (.xlsx/.xls) atau CSV — kolom 1: nama, kolom 2: nomor (boleh kosong)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5"/><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"/></svg>
     <span>Impor</span>
   </button>
-  <a class="wa-bottomnav__item" id="wa-nav-manage" href="#">
+  <a class="wa-bottomnav__item" id="wa-nav-manage" href="#" title="Buka buku alamat tamu di panel admin">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-1.7-1L15 3h-6l-.3 2.5a7.9 7.9 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.9 7.9 0 0 0 1.7 1L9 21h6l.3-2.5a7.9 7.9 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5z"/></svg>
     <span>Kelola</span>
   </a>
