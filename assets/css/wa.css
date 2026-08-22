@@ -86,9 +86,27 @@ textarea { resize:vertical; line-height:1.5; }.wa-login input:focus,.wa-settings
     display: grid; grid-template-columns: repeat(5, 1fr);
     gap: .2rem;
     padding: .35rem .5rem calc(.35rem + env(safe-area-inset-bottom));
+  }
+  /* Lekukan tempat disc "Dari kontak" bersarang, dipotong dari lapisan latar
+     bar lewat mask — DIPISAH ke ::before, BUKAN langsung di .wa-bottomnav,
+     karena mask ikut memotong SELURUH konten elemen termasuk anak-anaknya:
+     kalau dipasang di .wa-bottomnav, disc yang sengaja menyembul -18px ke
+     atas ikut kepotong jadi bentuk senyum, bukan lingkaran utuh (ketahuan
+     dari render lokal). Dengan ::before, yang kena mask cuma lapisan latar
+     ini — tombol & disc di atasnya tetap utuh.
+     .wa-shell pakai gradient diagonal, bukan warna solid, jadi cara "tempel
+     kotak sewarna latar" untuk memalsukan lekukan tidak akan pernah pas;
+     mask membuat lubangnya benar-benar transparan, otomatis cocok dengan
+     apa pun di belakangnya. Item "Dari kontak" kolom ke-3 dari 5 (tengah
+     persis), makanya pusat lekukan di 50%. */
+  .wa-bottomnav::before {
+    content: "";
+    position: absolute; inset: 0;
     background: var(--wa-paper);
     border-top: 1px solid var(--wa-line);
     box-shadow: 0 -8px 24px rgba(23, 35, 30, .08);
+    -webkit-mask-image: radial-gradient(circle 30px at 50% 0, transparent 97%, #000 100%);
+    mask-image: radial-gradient(circle 30px at 50% 0, transparent 97%, #000 100%);
   }
   .wa-bottomnav__item {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
