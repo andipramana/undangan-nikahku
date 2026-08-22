@@ -64,6 +64,7 @@
           <summary class="p-topmenu__btn" aria-label="Menu lainnya">&#8943;</summary>
           <div class="p-topmenu__sheet">
             <button type="button" id="p-menu-preview">Pratinjau draft</button>
+            <button type="button" id="p-menu-password">Ganti Password</button>
             <button type="button" id="btn-logout">Keluar</button>
           </div>
         </details>
@@ -118,6 +119,34 @@
       <button type="button" class="p-btn p-btn--primary" id="p-editor-save">Simpan</button>
     </div>
   </div>
+</div>
+
+<!-- ============ GANTI PASSWORD (menu ⋯, di-bind router.js) ============
+     Modal statis seperti #p-editor: dibuka PanelUI.openModal (focus trap +
+     Escape sudah ditangani di sana). Submit memanggil
+     AdminAPI.sb.auth.updateUser({ password }) — user sedang login, jadi
+     tidak perlu password lama. -->
+<div id="p-passwd-modal" class="p-modal" hidden>
+  <form class="p-modal__panel" id="p-passwd-form">
+    <div class="p-modal__header">
+      <h3>Ganti Password</h3>
+      <button type="button" class="p-modal__close" id="p-passwd-close" aria-label="Tutup">&times;</button>
+    </div>
+    <label class="p-field">
+      <span>Password baru</span>
+      <input class="p-input" type="password" id="p-passwd-new" autocomplete="new-password" required>
+    </label>
+    <label class="p-field">
+      <span>Konfirmasi password baru</span>
+      <input class="p-input" type="password" id="p-passwd-confirm" autocomplete="new-password" required>
+    </label>
+    <p class="p-hint">Minimal 8 karakter. Kamu tetap masuk dengan perangkat ini setelah password diganti.</p>
+    <p class="p-warning p-warning--danger" id="p-passwd-error" hidden></p>
+    <div style="display:flex; gap:12px; margin-top:16px">
+      <button type="submit" class="p-btn p-btn--primary" id="p-passwd-save">Simpan password</button>
+      <button type="button" class="p-btn p-btn--ghost" id="p-passwd-cancel">Batal</button>
+    </div>
+  </form>
 </div>
 
 <div id="toast" class="p-toast" role="status" aria-live="polite"></div>

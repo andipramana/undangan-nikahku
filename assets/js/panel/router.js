@@ -303,6 +303,58 @@
   }
 
   // ---------------------------------------------------------------------
+  // Ganti Password (menu ⋯ → "Ganti Password") — modal statis di
+  // admin.html (#p-passwd-modal), dibuka lewat helper PanelUI.openModal
+  // (focus trap + Escape urusannya). Submit memanggil
+  // sb.auth.updateUser({ password }): user sedang login, jadi Supabase
+  // tidak minta password lama.
+  // ---------------------------------------------------------------------
+  function bindPasswordModal() {
+    const modal = $("p-passwd-modal");
+    const menuBtn = $("p-menu-password");
+    if (!modal || !menuBtn) return;
+    const form = $("p-passwd-form");
+    const errEl = $("p-passwd-error");
+    const newInput = $("p-passwd-new");
+    const confirmInput = $("p-passwd-confirm");
+    const showErr = (msg) => { errEl.textContent = msg; errEl.hidden = false; };
+
+    menuBtn.addEventListener("click", () => {
+      const menu = $("p-topmenu");
+      if (menu) menu.open = false; // jangan biarkan dropdown menutupi modal
+      form.reset();
+      errEl.hidden = true;
+      window.PanelUI.openModal(modal);
+    });
+    $("p-passwd-close").addEventListener("click", () => window.PanelUI.closeModal(modal));
+    $("p-passwd-cancel").addEventListener("click", () => window.PanelUI.closeModal(modal));
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errEl.hidden = true;
+      const pw = newInput.value;
+      if (pw.length < 8) { showErr("Password minimal 8 karakter."); newInput.focus(); return; }
+      if (pw !== confirmInput.value) { showErr("Konfirmasi tidak sama dengan password baru."); confirmInput.focus(); return; }
+      const saveBtn = $("p-passwd-save");
+      saveBtn.disabled = true;
+      try {
+        const { error } = await window.AdminAPI.sb.auth.updateUser({ password: pw });
+        if (error) {
+          showErr(error.message || "Gagal mengganti password.");
+          window.AdminAPI.toast("Gagal mengganti password: " + (error.message || error), true);
+          return;
+        }
+        window.AdminAPI.toast("Password berhasil diganti.");
+        window.PanelUI.closeModal(modal);
+      } catch (err) {
+        showErr((err && err.message) || "Gagal mengganti password.");
+        window.AdminAPI.toast("Gagal mengganti password.", true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------
   // Dirty tracking + save bar
   // ---------------------------------------------------------------------
   function setDirty(isDirty, onSave) {
@@ -406,6 +458,7 @@
     watchFrameheadHeight();
     const previewBtn = $("p-menu-preview");
     if (previewBtn) previewBtn.addEventListener("click", () => openDraftPreview());
+    bindPasswordModal();
     const btn = $("p-savebar-btn");
     if (btn) btn.addEventListener("click", handleSaveBarClick);
     window.addEventListener("hashchange", () => mount(resolveKey()));

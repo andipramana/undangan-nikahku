@@ -235,11 +235,32 @@ try {
   const topmenuOpen = () => page.locator("#p-topmenu").evaluate((el) => el.open);
   await page.locator(".p-topmenu__btn").click();
   check("menu titik-titik terbuka", await topmenuOpen());
-  await page.locator("#p-stage").click(); // area netral tanpa handler nav
+  // Area netral di LUAR menu — merek di ujung kiri topbar (sheet ⋯ rata
+  // kanan dan kini berisi 3 item sehingga membentang melewati #p-stage
+  // di viewport HP; brand mustahil tertutupnya).
+  await page.locator(".p-topbar .p-brand").click();
   check("menu titik-titik menutup saat klik area lain", !(await topmenuOpen()));
   await page.locator(".p-topmenu__btn").click();
   await page.keyboard.press("Escape");
   check("menu titik-titik menutup dengan Escape", !(await topmenuOpen()));
+
+  // Ganti Password (menu ⋯): item ada, klik membuka modal & menutup menu,
+  // validasi lokal (konfirmasi beda) tampil inline TANPA menyentuh Supabase
+  // (stub auth bahkan tidak punya updateUser — jalur jaringan tak tersentuh),
+  // Escape menutup modal (focus-trap PanelUI.openModal).
+  await page.locator(".p-topmenu__btn").click();
+  check("menu titik-titik berisi item Ganti Password", await page.locator("#p-menu-password").isVisible());
+  await page.locator("#p-menu-password").click();
+  check("klik Ganti Password membuka modal", await page.locator("#p-passwd-modal").isVisible());
+  check("membuka modal menutup menu titik-titik", !(await topmenuOpen()));
+  await page.locator("#p-passwd-new").fill("sandi-panjang-cukup");
+  await page.locator("#p-passwd-confirm").fill("yang-beda");
+  await page.locator("#p-passwd-save").click();
+  check("konfirmasi tidak cocok ditampilkan sebagai error inline", await page.locator("#p-passwd-error").isVisible());
+  const errText = await page.locator("#p-passwd-error").textContent();
+  check("error inline menjelaskan ketidakcocokan konfirmasi", /tidak sama/i.test(errText || ""));
+  await page.keyboard.press("Escape");
+  check("Escape menutup modal ganti password", !(await page.locator("#p-passwd-modal").isVisible()));
 
   check("tidak ada console error di sepanjang navigasi", consoleErrors.length === 0);
   if (consoleErrors.length) consoleErrors.forEach((e) => console.error("  console error:", e));
