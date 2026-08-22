@@ -109,6 +109,12 @@ code {
   font-family: var(--p-font-mono); font-size: .88em;
 }
 .is-disabled { opacity: .5; pointer-events: none; }
+/* Chip mono mikro — identitas tenant / metadata kecil */
+.p-chip {
+  display: inline-flex; align-items: center;
+  font-family: var(--p-font-mono); font-size: 11px; color: var(--p-ink-2);
+  background: var(--p-sunken); border-radius: 999px; padding: 3px 10px;
+}
 
 /* Label mikro mono — satu suara untuk kicker, label grup, header tabel */
 .p-kicker, .p-pageheader__kicker, .p-sidebar__group-label, .p-nav-group__label,

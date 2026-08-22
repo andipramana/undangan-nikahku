@@ -14,7 +14,7 @@ window.PanelPages["home"] = {
   async mount(outlet) {
     outlet.innerHTML = `
       <div class="p-toolbar" style="margin-bottom:-.5rem">
-        <span class="p-muted" style="font-size:.82rem">/${window.PanelUI.escAttr(window.AdminAPI.tenant.slug)}/</span>
+        <span class="p-chip">/${window.PanelUI.escAttr(window.AdminAPI.tenant.slug)}/</span>
         <button type="button" class="p-btn p-btn--ghost p-btn--tiny" id="home-logout">Keluar</button>
       </div>
       <div class="p-status-card" id="home-status">
