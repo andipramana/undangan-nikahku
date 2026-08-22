@@ -123,10 +123,10 @@
    * halaman yang temanya berdekatan (mis. "image" untuk semua section
    * berbasis foto) — bukan berarti setiap halaman butuh bentuk unik. */
   const ICONS = {
-    home: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    home: '<path d="M5 10.5 12 4l7 6.5"/><path d="M6.5 9.2V20h11V9.2"/><path d="M10 20v-5h4v5"/>',
     image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-4 4-2-2-5 5"/>',
     heart: '<path d="M12 20s-7-4.35-9.5-8.8C.7 7.6 2.4 4 6 4c2 0 3.5 1.2 4 2.4C10.5 5.2 12 4 14 4c3.6 0 5.3 3.6 3.5 7.2C19 15.65 12 20 12 20z"/>',
-    quote: '<path d="M7 10c0-2.2 1.8-4 4-4M5 10v4a2 2 0 0 0 2 2M13 10c0-2.2 1.8-4 4-4M11 10v4a2 2 0 0 0 2 2"/>',
+    quote: '<path d="M9.5 7C7 7.9 5.5 9.9 5.5 12.5V17H11v-5.5H8c.1-1.7 1-2.9 2.7-3.5L9.5 7zM19.5 7C17 7.9 15.5 9.9 15.5 12.5V17H21v-5.5h-3c.1-1.7 1-2.9 2.7-3.5L19.5 7z"/>',
     calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
     story: '<path d="M4 6h16M4 12h16M4 18h10"/>',
     gift: '<rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 9h18M12 9v12M12 9c-2-4-6-4-6-1s4 1 6 1c2 0 6 2 6-1s-4-3-6 0z"/>',
