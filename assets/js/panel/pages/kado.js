@@ -37,6 +37,9 @@ window.PanelPages["kado"] = {
         <div class="p-modal__panel">
           <div class="p-modal__header"><h3 id="kd-list-modal-title">Daftar baru</h3><button type="button" class="p-modal__close" id="kd-list-modal-close" aria-label="Tutup">&times;</button></div>
           <label class="p-field"><span>Nama daftar</span><input class="p-input" id="kd-list-name" placeholder="mis. Amplop Pengantin Pria"></label>
+          <!-- PIN opsional per daftar — modul bersama PanelListPin
+               (list-pin.js): kosong = tidak memakai/mengubah PIN. -->
+          ${window.PanelListPin.fieldHtml("kd-list-pin")}
           <button type="button" class="p-btn p-btn--primary" id="kd-list-save">Simpan</button>
         </div>
       </div>
@@ -187,7 +190,14 @@ window.PanelPages["kado"] = {
         </div>
       `);
       body.querySelector("#kd-new-list").addEventListener("click", () => openListModal());
-      body.querySelectorAll("[data-open]").forEach((btn) => btn.addEventListener("click", () => { st.selectedListId = Number(btn.dataset.open); render(); }));
+      // Gerbang PIN per daftar (modul bersama PanelListPin) SEBELUM masuk
+      // detail — batal/salah → tetap di grid, detail tak dirender.
+      body.querySelectorAll("[data-open]").forEach((btn) => btn.addEventListener("click", async () => {
+        const list = st.lists.find((l) => l.id === Number(btn.dataset.open));
+        if (!list || !(await window.PanelListPin.gate({ kind: "kado", list }))) return;
+        st.selectedListId = list.id;
+        render();
+      }));
       body.querySelectorAll("[data-rename]").forEach((btn) => btn.addEventListener("click", () => openListModal(st.lists.find((l) => l.id === Number(btn.dataset.rename)))));
       body.querySelectorAll("[data-del-list]").forEach((btn) => btn.addEventListener("click", () => removeList(Number(btn.dataset.delList))));
     }
@@ -283,6 +293,9 @@ window.PanelPages["kado"] = {
         <div class="kd-actions">
           <button type="button" class="p-btn p-btn--primary" id="kd-add-entry">+ Tambah kado</button>
           <button type="button" class="p-btn p-btn--ghost" id="kd-export-excel" ${rows.length ? "" : "disabled"}>Export Excel</button>
+          <!-- Ganti/Pasang PIN dari dalam daftar (PanelListPin) — selalu
+               tampil supaya daftar tanpa PIN bisa dipasangi dari sini. -->
+          <button type="button" class="p-btn p-btn--ghost" id="kd-change-pin">${list.pin_hash ? "Ganti PIN" : "Pasang PIN"}</button>
         </div>
         <button type="button" class="p-btn p-btn--danger kd-danger-row" id="kd-delete-all" ${rows.length ? "" : "disabled"}>Hapus semua kado di daftar ini</button>
         <!-- Baris compact ala daftar kontak wa.html: satu article per
@@ -314,6 +327,10 @@ window.PanelPages["kado"] = {
         </div>
       `);
       body.querySelector("#kd-add-entry").addEventListener("click", () => openEntryModal());
+      body.querySelector("#kd-change-pin").addEventListener("click", async () => {
+        const berubah = await window.PanelListPin.changeDialog({ kind: "kado", table: "gift_lists", list, api: window.AdminAPI });
+        if (berubah) render();
+      });
       if (rows.length) {
         body.querySelector("#kd-export-excel").addEventListener("click", () => exportExcel(list, rows));
         body.querySelector("#kd-delete-all").addEventListener("click", () => removeAllEntries(list));
@@ -346,6 +363,7 @@ window.PanelPages["kado"] = {
       editingListId = existing ? existing.id : null;
       outlet.querySelector("#kd-list-modal-title").textContent = existing ? "Ganti nama daftar" : "Daftar baru";
       listNameInput.value = existing ? existing.name : "";
+      outlet.querySelector("#kd-list-pin").value = "";
       window.PanelUI.openModal(listModal);
       listNameInput.focus();
     }
@@ -353,12 +371,18 @@ window.PanelPages["kado"] = {
     outlet.querySelector("#kd-list-save").addEventListener("click", async () => {
       const name = listNameInput.value.trim();
       if (!name) { toast("Nama daftar wajib diisi.", true); return; }
+      // PIN opsional (modul PanelListPin): kosong saat edit = JANGAN ubah
+      // pin_hash yang sudah ada; diisi = simpan HASH-nya, bukan teksnya.
+      const pinRes = await window.PanelListPin.readFieldHash("kd-list-pin");
+      if (pinRes.error) { toast(pinRes.error, true); return; }
       if (editingListId) {
-        const { error } = await query(sb.from("gift_lists").update({ name }).eq("invitation_id", tenant.invitationId).eq("id", editingListId), "Penyimpanan nama daftar");
+        const patch = { name };
+        if (pinRes.hash) patch.pin_hash = pinRes.hash;
+        const { error } = await query(sb.from("gift_lists").update(patch).eq("invitation_id", tenant.invitationId).eq("id", editingListId), "Penyimpanan nama daftar");
         if (error) { toast("Gagal menyimpan: " + error.message, true); return; }
         st.lists.find((l) => l.id === editingListId).name = name;
       } else {
-        const { data, error } = await query(sb.from("gift_lists").insert({ invitation_id: tenant.invitationId, name }).select().single(), "Pembuatan daftar");
+        const { data, error } = await query(sb.from("gift_lists").insert({ invitation_id: tenant.invitationId, name, pin_hash: pinRes.hash || null }).select().single(), "Pembuatan daftar");
         if (error) { toast("Gagal membuat daftar: " + error.message, true); return; }
         st.lists.push(data);
       }
