@@ -6,8 +6,9 @@
  * tambah — baris daftar polos supaya tak berdempetan badge qty) SEBARIS
  * badge kuantiti ungu berisi angka polos yang hanya tampil saat qty terisi
  * (kosong → tombol samar "+ qty"), jumlah
- * nominal di BARIS TERPISAH (prefix Rp + pemisah ribuan "1.500.000", boleh
- * kosong), dan keterangan TEKS BEBAS (mis. "H-, saat akad"). Detail daftar memakai
+ * nominal di BARIS TERPISAH (prefix Rp, TERFORMAT pemisah ribuan "1.500.000"
+ * langsung saat diketik, boleh kosong), dan keterangan TEKS BEBAS (mis.
+ * "H-, saat akad"). Detail daftar memakai
  * baris compact ala daftar kontak di wa.html — semua field terlihat tanpa
  * scroll horizontal — plus ringkasan total pemberi & total jumlah. Export
  * Excel via SheetJS XLSX (CDN sudah dimuat admin.html).
@@ -82,6 +83,51 @@ window.PanelPages["kado"] = {
     function fmtRibuan(n) {
       return new Intl.NumberFormat("id-ID").format(n);
     }
+
+    /* ==== Format jumlah: langsung terformat saat diketik ==== */
+
+    /** Normalisasi isi field jumlah SETIAP ketikan: buang semua non-digit,
+     * sisakan satu koma desimal, lalu kelompokkan ribuan bertitik. caretPos
+     * dipetakan ulang ke posisi di teks BARU (dihitung dari banyaknya digit
+     * sebelum caret lama) supaya mengetik di tengah tidak membuat kursor
+     * melompat ke ujung. */
+    function formatAmountTyped(raw, caretPos) {
+      const s = String(raw ?? "");
+      const koma = s.indexOf(",");
+      const intPart = (koma === -1 ? s : s.slice(0, koma)).replace(/\D/g, "");
+      const decPart = koma === -1 ? "" : s.slice(koma + 1).replace(/\D/g, "");
+      const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const text = koma === -1 ? grouped : grouped + "," + decPart;
+      const pos = Math.max(0, Math.min(caretPos ?? 0, s.length));
+      let caret;
+      if (koma !== -1 && pos > koma) {
+        // Caret ada di zona desimal (setelah koma) → biarkan di ujungnya.
+        caret = text.length;
+      } else {
+        // Petakan ulang dari banyaknya digit sebelum caret lama, supaya
+        // titik-titik pemisah yang bertambah/berkurang tidak menggesernya.
+        const target = s.slice(0, pos).replace(/\D/g, "").length;
+        let seen = 0;
+        caret = 0;
+        while (caret < text.length && seen < target) {
+          if (/\d/.test(text[caret])) seen++;
+          caret++;
+        }
+      }
+      return { text, caret };
+    }
+
+    /** Pasang format-langsung ke satu input jumlah (baris daftar & modal). */
+    function wireLiveFormat(input) {
+      input.addEventListener("input", () => {
+        const { text, caret } = formatAmountTyped(input.value, input.selectionStart);
+        if (input.value === text) return;
+        input.value = text;
+        try { input.setSelectionRange(caret, caret); } catch { /* abaikan */ }
+      });
+    }
+
+    /* ==== Akhir format jumlah ==== */
 
     function download(blob, name) {
       const a = document.createElement("a");
@@ -274,30 +320,14 @@ window.PanelPages["kado"] = {
       }
       body.querySelectorAll(".kd-name-input").forEach((input) => input.addEventListener("change", () => saveEntryField(Number(input.dataset.id), { name: input.value.trim() }, input)));
       body.querySelectorAll(".kd-item-input").forEach((input) => input.addEventListener("change", () => saveEntryField(Number(input.dataset.id), { item: input.value.trim() }, input)));
-      // Jumlah: saat fokus tampil angka mentah (enak diedit), setelah
-      // tersimpan kembali terformat pemisah ribuan.
+      // Jumlah TERFORMAT LANGSUNG saat diketik ("1500000" → "1.500.000",
+      // kursor tetap di tempat) — parser saveEntryField sudah toleran titik,
+      // jadi nilai tersimpan tetap bersih tanpa pemisah. Tidak ada lagi
+      // konversi ke angka mentah saat fokus: field SELALU terformat.
       body.querySelectorAll(".kd-amount-input").forEach((input) => {
-        input.addEventListener("focus", () => {
-          const e = st.entries.find((x) => x.id === Number(input.dataset.id));
-          if (e && e.amount !== null && e.amount !== undefined) input.value = String(e.amount);
-        });
+        wireLiveFormat(input);
         input.addEventListener("change", () =>
           saveEntryField(Number(input.dataset.id), { amount: parseAmountInput(input.value) }, input));
-        // BUG klik-lalu-lepas: "change" hanya fire kalau isinya BERUBAH.
-        // Fokus → klik tempat lain tanpa mengetik melewati saveEntryField,
-        // sehingga angka mentah dari handler focus tertinggal di layar.
-        // Blur memulihkan format — identik dengan nilai tersimpan, tidak
-        // menyentuh DB; kalau user mengubah isi, change sudah beres dulu
-        // (change fire sebelum blur) dan sini tinggal idempoten.
-        input.addEventListener("blur", () => {
-          const e = st.entries.find((x) => x.id === Number(input.dataset.id));
-          if (!e) return;
-          const kosong = input.value.trim() === "";
-          const cocok = (e.amount === null || e.amount === undefined)
-            ? kosong
-            : (!kosong && parseAmountInput(input.value).value === e.amount);
-          if (cocok) input.value = kosong ? "" : fmtRibuan(e.amount);
-        });
       });
       body.querySelectorAll(".kd-quantity-input").forEach(wireQuantityInput);
       body.querySelectorAll("[data-add-qty]").forEach(wireAddQtyButton);
@@ -363,13 +393,8 @@ window.PanelPages["kado"] = {
       window.PanelUI.openModal(entryModal);
       outlet.querySelector("#kd-entry-name").focus();
     }
-    // Preview jumlah di modal juga terformat pemisah ribuan begitu
-    // ditinggal (blur) — nilai mentahnya dibersihkan lagi saat simpan.
-    const modalAmountInput = outlet.querySelector("#kd-entry-amount");
-    modalAmountInput.addEventListener("blur", () => {
-      const { value } = parseAmountInput(modalAmountInput.value);
-      if (value !== null) modalAmountInput.value = fmtRibuan(value);
-    });
+    // Jumlah di modal juga terformat langsung saat diketik.
+    wireLiveFormat(outlet.querySelector("#kd-entry-amount"));
     // × clear "Barang" HANYA ada di sini (modal tambah) — baris daftar polos
     // supaya tidak berdempetan dengan badge qty: sekali klik mengosongkan
     // default 'Amplop Uang', langsung bisa ketik nama barang lain. Murni UI
@@ -425,7 +450,7 @@ window.PanelPages["kado"] = {
         toast("Gagal menyimpan: " + error.message, true);
         if ("timing" in patch) input.value = e.timing || "";
         else if ("item" in patch) input.value = e.item;
-        else if ("amount" in patch) input.value = e.amount ?? "";
+        else if ("amount" in patch) input.value = e.amount !== null && e.amount !== undefined ? fmtRibuan(e.amount) : "";
         else if ("quantity" in patch) input.value = e.quantity ?? "";
         else input.value = e.name;
         return false;

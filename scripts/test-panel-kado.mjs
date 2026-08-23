@@ -84,8 +84,9 @@ check('simpan timing: trim, kosong → null', /\{ timing: input\.value\.trim\(\)
 check('parseAmountInput: titik ribuan dibuang, koma = desimal, kosong → null', kadoSrc.includes('replaceAll(".", "")') && kadoSrc.includes('.replace(",", ".")') && /if \(!s\) return \{ value: null \};/.test(kadoSrc));
 check('fmtRibuan pakai Intl.NumberFormat("id-ID")', kadoSrc.includes('Intl.NumberFormat("id-ID")'));
 check('input jumlah type=text inputmode=numeric (bukan number) di daftar & modal', /<input type="text" inputmode="numeric" class="p-input kd-plain kd-amount-input"/.test(kadoSrc) && /<input[^>]*id="kd-entry-amount"[^>]*type="text"|<input type="text" inputmode="numeric"[^>]*id="kd-entry-amount"/.test(kadoSrc));
-check('jumlah tampil terformat dari DB; fokus kembali ke angka mentah', /escAttr\(fmtRibuan\(e\.amount\)\)/.test(kadoSrc) && /input\.value = String\(e\.amount\)/.test(kadoSrc));
-check('modal jumlah terformat on blur', /modalAmountInput\.addEventListener\("blur"/.test(kadoSrc) && /modalAmountInput\.value = fmtRibuan\(value\)/.test(kadoSrc));
+check('jumlah selalu terformat: DB → fmtRibuan, TANPA konversi mentah saat fokus (live format)', /escAttr\(fmtRibuan\(e\.amount\)\)/.test(kadoSrc) && !kadoSrc.includes('input.value = String(e.amount)'));
+check('modal & baris daftar: wireLiveFormat terpasang untuk format langsung', kadoSrc.includes('wireLiveFormat(outlet.querySelector("#kd-entry-amount"))') && /kd-amount-input"\)\.forEach\(\(input\) => \{\s*wireLiveFormat\(input\);/.test(kadoSrc));
+check('helper formatAmountTyped: grouping ribuan + pemetaan ulang caret', kadoSrc.includes("\\B(?=(\\d{3})+(?!\\d))") && /\.replace\(\/\\D\/g, ""\)\.length/.test(kadoSrc));
 check('saveEntryField sukses → tampilan diformat ulang; return bool dipakai', /input\.value = patch\.amount === null \? "" : fmtRibuan\(patch\.amount\)/.test(kadoSrc));
 
 // ---------------------------------------------------------------------
@@ -98,7 +99,7 @@ check('summary: chip total pemberi + total jumlah (amount null dilewati)', kadoS
 // ---------------------------------------------------------------------
 check('entri dirender sebagai article.kd-entry, BUKAN <table>/<td>', /<article class="kd-entry" data-entry-id=/.test(kadoSrc) && !/<table|<tbody|overflow-x:auto">[\s\S]*?<table/.test(kadoSrc.split('renderDetail')[1] || ''));
 check('CSS entri BERKARTU (latar row + border penuh + radius) — bukan garis bawah menyatu', /\.kd-list\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*gap:/.test(panelCss) && /\.kd-entry\s*\{[^}]*background:\s*var\(--p-row\);/.test(panelCss.replace(/\n/g, ' ').replace(/\s+/g, ' ')) && /\.kd-entry\s*\{[^}]*border-radius:/.test(panelCss) && !/\.kd-entry\s*\{[^}]*border-bottom/.test(panelCss));
-check('jumlah: blur TANPA edit memulihkan tampilan terformat (bug klik-lalu-lepas)', kadoSrc.includes('parseAmountInput(input.value).value === e.amount') && /addEventListener\("blur"[\s\S]{0,400}?fmtRibuan\(e\.amount\)/.test(kadoSrc));
+check('error-path simpan amount memulihkan tampilan TERFORMAT (bukan angka mentah)', /else if \("amount" in patch\) input\.value = e\.amount !== null && e\.amount !== undefined \? fmtRibuan\(e\.amount\) : "";/.test(kadoSrc));
 // Layout permintaan eksplisit pemilik produk: jumlah = BARIS TERPISAH di
 // bawah barang; badge qty "×N" ungu SEBARIS barang dan HANYA saat qty
 // terisi — kosong cukup tombol samar "+ qty" (tanpa × sama sekali).
@@ -190,5 +191,54 @@ if (!failed && rowMatch) {
   }
 }
 
+// ---------------------------------------------------------------------
+// 11) Format ribuan LANGSUNG saat diketik — fungsi ASLI diekstrak dari
+//     kado.js lalu diuji: kasus murni formatAmountTyped + ketikan nyata
+//     lewat event "input" pada elemen sungguhan.
+// ---------------------------------------------------------------------
+const fmtBlok = kadoSrc.match(/\/\* ==== Format jumlah: langsung terformat saat diketik ==== \*\/([\s\S]*?)\/\* ==== Akhir format jumlah ==== \*\//);
+check('blok helper format-langsung ditemukan di kado.js', !!fmtBlok);
+
+if (!failed && fmtBlok) {
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<input id="amt">');
+    const hasil = await page.evaluate((src) => {
+      const { formatAmountTyped, wireLiveFormat } = new Function(src + '\nreturn { formatAmountTyped, wireLiveFormat };')();
+      const kasus = [
+        // [isi field, posisi caret, teks diharapkan, caret diharapkan]
+        ['1500000', 7, '1.500.000', 9],
+        ['15000000', 8, '15.000.000', 10],
+        ['1200', 4, '1.200', 5],
+        ['', 0, '', 0],
+        ['abc', 3, '', 0],
+        ['250,5', 5, '250,5', 5],
+        ['1.500.000', 5, '1.500.000', 5],
+        ['12,.', 4, '12,', 3],
+      ].map(([raw, caret, expText, expCaret]) => {
+        const got = formatAmountTyped(raw, caret);
+        return `${got.text === expText && got.caret === expCaret ? 'OK' : `GAGAL(${JSON.stringify(got)})`} ← "${raw}"`;
+      });
+      const input = document.getElementById('amt');
+      wireLiveFormat(input);
+      input.value = '7654321';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      const setelah = input.value;
+      // Hapus satu karakter di tengah: "1.500.000" backspace di ujung →
+      // nilai turun jadi 150000 tetap terformat rapi.
+      input.value = '1.500.000';
+      input.setSelectionRange(9, 9);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      return { kasus, wired: setelah, backspace: input.value };
+    }, fmtBlok[1]);
+    for (const k of hasil.kasus) check(`formatAmountTyped ${k}`, k.startsWith('OK'));
+    check('wireLiveFormat: isi "7654321" langsung jadi "7.654.321"', hasil.wired === '7.654.321');
+    check('wireLiveFormat: nilai sudah terformat tidak berubah-ubah', hasil.backspace === '1.500.000');
+  } finally {
+    await browser.close();
+  }
+}
+
 if (failed) { console.error('\nFAIL: kontrak kado & amplop panel belum terpenuhi.'); process.exit(1); }
-console.log('\nPASS: kontrak kado & amplop — jumlah baris terpisah, badge qty kondisional (×N / + qty), ribuan, summary, list compact, export Excel.');
+console.log('\nPASS: kontrak kado & amplop — jumlah baris terpisah & live-format, badge qty kondisional, × clear hanya di modal, summary, export Excel.');
