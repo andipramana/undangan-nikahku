@@ -960,3 +960,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
    atasnya. Di-scope ke modal kado saja, modal halaman lain tak disentuh. */
 #kd-list-modal .p-modal__panel,
 #kd-entry-modal .p-modal__panel { display: grid; gap: var(--p-3); }
+/* ---- PIN per daftar (modul bersama PanelListPin — dipakai Kontak &
+        Kado/Amplop). Overlay dibangun sendiri oleh modul di atas pola
+        .p-modal; hanya dua util kecil ini yang perlu CSS. ---- */
+.lp-error { margin: 0; color: var(--p-danger); font-size: .84rem; }
+.lp-actions { display: flex; gap: var(--p-2); justify-content: flex-end; }
