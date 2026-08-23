@@ -31,6 +31,9 @@ window.PanelPages["kontak"] = {
         <div class="p-modal__panel">
           <div class="p-modal__header"><h3 id="kt-list-modal-title">Daftar baru</h3><button type="button" class="p-modal__close" id="kt-list-modal-close" aria-label="Tutup">&times;</button></div>
           <label class="p-field"><span>Nama daftar</span><input class="p-input" id="kt-list-name" placeholder="mis. Kontak Mita"></label>
+          <!-- PIN opsional per daftar — modul bersama PanelListPin
+               (list-pin.js): kosong = tidak memakai/mengubah PIN. -->
+          ${window.PanelListPin.fieldHtml("kt-list-pin")}
           <button type="button" class="p-btn p-btn--primary" id="kt-list-save">Simpan</button>
         </div>
       </div>
@@ -195,7 +198,14 @@ window.PanelPages["kontak"] = {
         </div>
       `);
       body.querySelector("#kt-new-list").addEventListener("click", () => openListModal());
-      body.querySelectorAll("[data-open]").forEach((btn) => btn.addEventListener("click", () => { st.selectedListId = Number(btn.dataset.open); render(); }));
+      // Gerbang PIN per daftar (modul bersama PanelListPin) SEBELUM masuk
+      // detail — batal/salah → tetap di grid, detail tak dirender.
+      body.querySelectorAll("[data-open]").forEach((btn) => btn.addEventListener("click", async () => {
+        const list = st.lists.find((l) => l.id === Number(btn.dataset.open));
+        if (!list || !(await window.PanelListPin.gate({ kind: "kontak", list }))) return;
+        st.selectedListId = list.id;
+        render();
+      }));
       body.querySelectorAll("[data-rename]").forEach((btn) => btn.addEventListener("click", () => openListModal(st.lists.find((l) => l.id === Number(btn.dataset.rename)))));
       body.querySelectorAll("[data-del-list]").forEach((btn) => btn.addEventListener("click", () => removeList(Number(btn.dataset.delList))));
     }
@@ -217,6 +227,9 @@ window.PanelPages["kontak"] = {
           <label class="p-btn p-btn--ghost"><span>Impor vCard (.vcf)</span><input type="file" id="kt-import-vcf" accept=".vcf" hidden></label>
           <button type="button" class="p-btn p-btn--ghost" id="kt-export-csv" ${rows.length ? "" : "disabled"}>Export CSV</button>
           <button type="button" class="p-btn p-btn--ghost" id="kt-export-excel" ${rows.length ? "" : "disabled"}>Export Excel</button>
+          <!-- Ganti/Pasang PIN dari dalam daftar (PanelListPin) — selalu
+               tampil supaya daftar tanpa PIN bisa dipasangi dari sini. -->
+          <button type="button" class="p-btn p-btn--ghost" id="kt-change-pin">${list.pin_hash ? "Ganti PIN" : "Pasang PIN"}</button>
         </div>
         <button type="button" class="p-btn p-btn--danger kt-danger-row" id="kt-delete-all" ${rows.length ? "" : "disabled"}>Hapus semua kontak</button>
         <div style="overflow-x:auto">
@@ -235,6 +248,10 @@ window.PanelPages["kontak"] = {
       `);
       body.querySelector("#kt-back").addEventListener("click", () => { st.selectedListId = null; render(); });
       body.querySelector("#kt-add-entry").addEventListener("click", () => openEntryModal());
+      body.querySelector("#kt-change-pin").addEventListener("click", async () => {
+        const berubah = await window.PanelListPin.changeDialog({ kind: "kontak", table: "contact_lists", list, api: window.AdminAPI });
+        if (berubah) render();
+      });
       body.querySelector("#kt-import-file").addEventListener("change", (e) => handleImportFile(e.target, "std"));
       body.querySelector("#kt-import-vcf").addEventListener("change", (e) => handleImportFile(e.target, "vcf"));
       if (rows.length) {
@@ -257,6 +274,7 @@ window.PanelPages["kontak"] = {
       editingListId = existing ? existing.id : null;
       outlet.querySelector("#kt-list-modal-title").textContent = existing ? "Ganti nama daftar" : "Daftar baru";
       listNameInput.value = existing ? existing.name : "";
+      outlet.querySelector("#kt-list-pin").value = "";
       window.PanelUI.openModal(listModal);
       listNameInput.focus();
     }
@@ -264,12 +282,18 @@ window.PanelPages["kontak"] = {
     outlet.querySelector("#kt-list-save").addEventListener("click", async () => {
       const name = listNameInput.value.trim();
       if (!name) { toast("Nama daftar wajib diisi.", true); return; }
+      // PIN opsional (modul PanelListPin): kosong saat edit = JANGAN ubah
+      // pin_hash yang sudah ada; diisi = simpan HASH-nya, bukan teksnya.
+      const pinRes = await window.PanelListPin.readFieldHash("kt-list-pin");
+      if (pinRes.error) { toast(pinRes.error, true); return; }
       if (editingListId) {
-        const { error } = await query(sb.from("contact_lists").update({ name }).eq("invitation_id", tenant.invitationId).eq("id", editingListId), "Penyimpanan nama daftar");
+        const patch = { name };
+        if (pinRes.hash) patch.pin_hash = pinRes.hash;
+        const { error } = await query(sb.from("contact_lists").update(patch).eq("invitation_id", tenant.invitationId).eq("id", editingListId), "Penyimpanan nama daftar");
         if (error) { toast("Gagal menyimpan: " + error.message, true); return; }
         st.lists.find((l) => l.id === editingListId).name = name;
       } else {
-        const { data, error } = await query(sb.from("contact_lists").insert({ invitation_id: tenant.invitationId, name }).select().single(), "Pembuatan daftar");
+        const { data, error } = await query(sb.from("contact_lists").insert({ invitation_id: tenant.invitationId, name, pin_hash: pinRes.hash || null }).select().single(), "Pembuatan daftar");
         if (error) { toast("Gagal membuat daftar: " + error.message, true); return; }
         st.lists.push(data);
       }
