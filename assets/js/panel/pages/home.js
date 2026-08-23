@@ -124,7 +124,10 @@ window.PanelPages["home"] = {
       const rows = [
         { label: "Ucapan & RSVP", value: "—", href: router.hashHref("ucapan"), navKey: "ucapan" },
         { label: "Tamu check-in", value: "—", href: window.AdminAPI.tenant.path("admin-qr"), navKey: "admin-qr" },
-        { label: "Kontak WA", value: "—", href: router.hashHref("kontak"), navKey: "kontak" }
+        { label: "Kontak WA", value: "—", href: router.hashHref("kontak"), navKey: "kontak" },
+        // Shortcut Kado & Amplop (permintaan pemilik produk): angkanya
+        // jumlah entri kado yang sudah dicatat, bukan jumlah daftarnya.
+        { label: "Kado & Amplop", value: "—", href: router.hashHref("kado"), navKey: "kado" }
       ];
       wrap.innerHTML = rows.map((r) => `
         <a class="p-checkrow" href="${esc(r.href)}" data-nav-key="${r.navKey}">
@@ -138,12 +141,13 @@ window.PanelPages["home"] = {
     async function loadCounts(wrap) {
       const api = window.AdminAPI;
       const wishesTable = (window.WEDDING_CONFIG.supabase && window.WEDDING_CONFIG.supabase.wishesTable) || "wishes";
-      const [wishesRes, checkinsRes, waRes] = await Promise.all([
+      const [wishesRes, checkinsRes, waRes, kadoRes] = await Promise.all([
         api.query(api.sb.from(wishesTable).select("id", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah ucapan"),
         // checkins tidak punya kolom id — primary key-nya guest_key (lihat
         // migrations/0004_roles_livestream_checkins.sql).
         api.query(api.sb.from("checkins").select("guest_key", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah check-in"),
-        api.query(api.sb.from("wa_contacts").select("id", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah kontak WA")
+        api.query(api.sb.from("wa_contacts").select("id", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah kontak WA"),
+        api.query(api.sb.from("gift_list_entries").select("id", { count: "exact", head: true }).eq("invitation_id", api.tenant.invitationId), "Jumlah kado")
       ]);
       const set = (label, res) => {
         const cell = wrap.querySelector(`[data-count="${CSS.escape(label)}"]`);
@@ -152,6 +156,7 @@ window.PanelPages["home"] = {
       set("Ucapan & RSVP", wishesRes);
       set("Tamu check-in", checkinsRes);
       set("Kontak WA", waRes);
+      set("Kado & Amplop", kadoRes);
     }
   },
   destroy() {
