@@ -55,10 +55,18 @@
 
       <aside class="wa-settings-column">
         <details class="wa-config">
-          <summary><span>Pengaturan pesan</span><small>Link &amp; template</small></summary>
+          <summary><span>Pengaturan pesan</span><small>Template</small></summary>
           <p id="wa-warning" class="wa-notice">Kirim dengan jeda wajar dan selesaikan satu chat sebelum membuka kontak berikutnya.</p>
           <div class="wa-settings">
-            <label>Link undangan<input type="url" id="wa-link" placeholder="https://undangan.andipramana.com/"></label>
+            <!-- Link undangan BUKAN input: ia ditentukan sistem (provider) dari
+                 path klien — root memakai domain utama, klien ber-slug memakai
+                 /<slug>/ — dan tidak bisa diubah dari sini. wa-blast.js hanya
+                 mengisi teksnya. -->
+            <div class="wa-link-box">
+              <span>Link undangan</span>
+              <code id="wa-link"></code>
+              <p class="wa-token-help">Mengikuti alamat undangan klien ini secara otomatis dan tidak dapat diubah — link tamu (${link}) dibangun dari sini.</p>
+            </div>
             <label>Template default<textarea id="wa-default-template" rows="8" placeholder="Token: ${tamu} ${CPP} ${CPW} ${link}"></textarea></label>
             <p class="wa-token-help">Token tersedia: <code>${tamu}</code> <code>${CPP}</code> <code>${CPW}</code> <code>${link}</code></p>
             <button type="button" class="wa-button wa-button--primary" id="wa-settings-save">Simpan pengaturan</button>
@@ -97,9 +105,9 @@
         </button>
       </div>
       <div class="wa-bottomnav__side wa-bottomnav__side--right">
-        <button type="button" class="wa-bottomnav__item" id="wa-nav-links" title="Atur link undangan & template pesan — membuka Pengaturan pesan di atas">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 1 0-7.07-7.07L11 5.93"/><path d="M14 10a5 5 0 0 0-7.07 0L4.8 12.12a5 5 0 1 0 7.07 7.07L13 18.07"/></svg>
-          <span>Link &amp; Template</span>
+        <button type="button" class="wa-bottomnav__item" id="wa-nav-links" title="Atur template pesan — membuka Pengaturan pesan di atas">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Template</span>
         </button>
         <a class="wa-bottomnav__item" id="wa-nav-manage" href="#" title="Buka buku alamat tamu di panel admin">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-1.7-1L15 3h-6l-.3 2.5a7.9 7.9 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.9 7.9 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7.9 7.9 0 0 0 1.7 1L9 21h6l.3-2.5a7.9 7.9 0 0 0 1.7-1l2.4 1 2-3.5-2-1.5z"/></svg>

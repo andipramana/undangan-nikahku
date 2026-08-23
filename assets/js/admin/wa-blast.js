@@ -10,7 +10,7 @@
  * tab yang dibuka manual satu-satu.
  *
  * Butuh policy dari supabase/migrations/0006_wa_blast.sql (template + kontak)
- * dan 0007_wa_settings.sql (link undangan + template default). Tanpa itu,
+ * dan 0007_wa_settings.sql (pengaturan template default). Tanpa itu,
  * daftar tampil KOSONG tanpa pesan error — RLS menolak diam-diam (pola yang
  * sama dengan tab Ucapan & migration 0003).
  *
@@ -84,14 +84,25 @@
   let contactPageSize = Number(localStorage.getItem(pageSizeKey)) || 50;
   if (!CONTACT_PAGE_SIZES.includes(contactPageSize)) contactPageSize = 50;
 
-  // Pengaturan tab WA (migration 0007, baris tunggal id=1) — link undangan
-  // yang disisipkan ke token ${link} + template default yang bisa diedit
-  // admin. Fallback dipakai kalau baris belum ada (harusnya sudah di-seed
-  // migrasi); di-refresh dari DB tiap load().
+  // Pengaturan tab WA (migration 0007, baris tunggal id=1) — template
+  // default yang bisa diedit admin. Link undangan TIDAK diatur di sini: ia
+  // ditentukan provider dari path klien (publicInviteBase()). Fallback
+  // dipakai kalau baris belum ada (harusnya sudah di-seed migrasi);
+  // di-refresh dari DB tiap load().
   let settings = {
-    invitation_link: "https://undangan.andipramana.com/",
     default_template: ""
   };
+
+  // Base URL publik undangan klien ini — SATU sumber untuk token ${link} dan
+  // tampilan readonly di Pengaturan pesan. Domain produksi (CNAME) + basePath
+  // tenant: root → https://undangan.andipramana.com/, klien ber-slug →
+  // .../<slug>/. Sengaja tidak dibaca dari wa_settings.invitation_link lagi —
+  // link adalah bagian dari provisioning, bukan sesuatu yang boleh berubah
+  // dari panel (kalau beda dengan domain tamu, pesan WA menaut alamat salah).
+  function publicInviteBase() {
+    const base = window.TenantContext ? window.TenantContext.basePath : "/";
+    return "https://undangan.andipramana.com" + base;
+  }
 
   window.WaBlast = { load };
 
@@ -151,8 +162,9 @@
     return Object.keys(values).reduce((s, token) => s.split(token).join(values[token]), body);
   }
 
-  /** Link undangan personal per kontak: base URL dari pengaturan + parameter
-   * tamu. Parameter WAJIB dari WEDDING_CONFIG.guestParam (BUKAN hardcode "to")
+  /** Link undangan personal per kontak: base URL tenant (publicInviteBase —
+   * provider-determined, bukan pengaturan) + parameter tamu. Parameter WAJIB
+   * dari WEDDING_CONFIG.guestParam (BUKAN hardcode "to")
    * — konsisten dengan cara situs membaca tamu (main.js/rsvp.js/gift.js pakai
    * params.get(cfg.guestParam)), jadi kalau config diganti link WA ikut
    * sinkron. Nama tamu di-encode supaya aman sebagai query string, tapi spasi
@@ -161,8 +173,7 @@
    * "+" jauh lebih enak dibaca DAN tetap didekode benar sebagai spasi oleh
    * URLSearchParams di sisi tamu (main.js/rsvp.js/gift.js/admin-qr.js). */
   function buildInviteLink(contact) {
-    const base =
-      (settings.invitation_link || "").trim() || "https://undangan.andipramana.com/";
+    const base = publicInviteBase();
     const param = window.WEDDING_CONFIG.guestParam || "to";
     const sep = base.includes("?") ? "&" : "?";
     const name = encodeURIComponent(contact.name).replace(/%20/g, "+");
@@ -371,10 +382,12 @@
     await load();
   });
 
-  /* ---------- Pengaturan (link undangan + template default) ---------- */
+  /* ---------- Pengaturan (link readonly + template default) ---------- */
 
   function renderSettings() {
-    document.getElementById("wa-link").value = settings.invitation_link || "";
+    // Link undangan tampil saja (elemen code, bukan input) — isinya dari
+    // path tenant, bukan dari DB; admin tidak bisa mengubahnya.
+    document.getElementById("wa-link").textContent = publicInviteBase();
     // Kosong di DB = belum pernah diedit admin → tampilkan teks bawaan yang
     // SOPAN (bukan kotak kosong), admin tinggal edit kalau mau.
     document.getElementById("wa-default-template").value =
@@ -382,17 +395,18 @@
   }
 
   async function saveSettings() {
-    const link = document.getElementById("wa-link").value.trim();
     const tmpl = document.getElementById("wa-default-template").value;
+    // Hanya template yang tersimpan — invitation_link tidak lagi dikirim ke
+    // DB (nilainya diturunkan dari path klien oleh publicInviteBase()).
     const { error } = await window.AdminAPI.query(
-      sb.from("wa_settings").update({ invitation_link: link, default_template: tmpl }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1),
+      sb.from("wa_settings").update({ default_template: tmpl }).eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", 1),
       "Penyimpanan pengaturan"
     );
     if (error) {
       toast("Gagal menyimpan pengaturan: " + error.message, true);
       return;
     }
-    settings = { invitation_link: link, default_template: tmpl };
+    settings = { ...settings, default_template: tmpl };
     toast("Pengaturan disimpan.");
   }
   document.getElementById("wa-settings-save").addEventListener("click", saveSettings);
@@ -1015,10 +1029,10 @@
     });
   });
 
-  /* "Link & Template" tidak memicu tombol lain — ia membuka section
+  /* "Template" tidak memicu tombol lain — ia membuka section
    * Pengaturan pesan di atas: buka <details>, scroll halus ke sana, lalu
    * flash ring hijau sebentar supaya jelas mana yang baru terbuka.
-   * Sengaja bukan modal: form-nya kompleks (link + template + daftar
+   * Sengaja bukan modal: form-nya kompleks (template default + daftar
    * template tersimpan) dan state simpannya satu — menduplikasinya di
    * modal berarti dua tempat yang bisa saling tertinggal. */
   (function bindNavLinks() {
