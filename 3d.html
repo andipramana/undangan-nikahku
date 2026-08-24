@@ -6,45 +6,43 @@
 <base href="/">
 <meta name="robots" content="noindex">
 <!-- =============================================================
-     EKSPERIMEN 3D — undangan pernikahan versi Three.js.
-     BUKAN pengganti index.html: index.html dan seluruh halaman
-     tamu lain tidak disentuh sama sekali. Satu file, tanpa bundler;
-     Three.js dimuat dari CDN (pola sama dengan xlsx/jsQR/html2canvas
-     di file lain). Data & foto diambil dari tenant 'root' lewat
-     assets/js/config.js + assets/js/supabase-client.js yang di-reuse
-     APA ADANYA (RPC get_invitation, localStorage fallback, photoUrl).
+     EKSPERIMEN 3D v2 — "Rumah Mita & Andi".
+     BUKAN pengganti index.html: halaman tamu lain tidak disentuh.
+     Satu file, tanpa bundler; Three.js dari CDN (pola sama dengan
+     xlsx/jsQR/html2canvas di file lain). Data & foto tenant 'root'
+     via assets/js/config.js + supabase-client.js + photos.js
+     (RPC get_invitation → localStorage → config lokal).
 
-     Konsep scene:
-       • Cincin ganda emas prosedural (torus) sebagai pusat, precess
-         pelan + float — envMap gradasi canvas supaya logam "hidup".
-       • Karusel foto melingkar (tekstur foto tenant root) — drag
-         memutar dengan inersia, auto-rotate saat diam, foto depan
-         membesar & belakang memudar.
-       • Kunang-kunang partikel (2 lapis Points additive) naik perlahan.
-       • Nama mempelai sebagai CanvasTexture billboard di atas cincin.
-       • Interaksi: drag putar, wheel/cubit zoom, tap foto = mode fokus
-         (foto terbang ke depan kamera), parallax mengikuti pointer.
+     Konsep: ruang tamu kartun yang bisa dijelajahi — drag untuk
+     melihat sekeliling (orbit), pinch/wheel untuk zoom. Objek
+     interaktif (bingkai foto ×2 di dinding, meja dengan buku
+     cerita & undangan) menyala saat disentuh; tap memunculkan
+     panel info HTML bergaya kartun. Vibe CERAH, ilustratif.
      ============================================================= -->
-<title>Mita &amp; Andi — Undangan 3D</title>
+<title>Mita &amp; Andi — Rumah 3D</title>
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,600&family=Great+Vibes&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap">
 <style>
   :root {
-    --ink: #f3ecdc;
-    --gold: #d8b56a;
-    --gold-dim: #9c854e;
-    --glass: rgba(16, 19, 26, .55);
-    --line: rgba(216, 181, 106, .35);
+    --ink: #4a3728;
+    --cream: #fff6e9;
+    --coral: #ff8a65;
+    --teal: #26b5a2;
+    --sun: #ffc94d;
+    --panel-bg: #fffaf0;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; overflow: hidden; background: #0b0d12; }
+  html, body { height: 100%; overflow: hidden; }
   body {
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: 'Baloo 2', 'Comic Sans MS', cursive, sans-serif;
     color: var(--ink);
-    -webkit-font-smoothing: antialiased;
+    background: linear-gradient(180deg, #bfe7f7 0%, #e8f7d4 100%);
     overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
   #stage { position: fixed; inset: 0; touch-action: none; cursor: grab; }
   #stage.dragging { cursor: grabbing; }
@@ -53,880 +51,733 @@
   #intro {
     position: fixed; inset: 0; z-index: 30;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 24px; gap: 6px;
+    text-align: center; padding: 24px; gap: 14px;
     background:
-      radial-gradient(120% 90% at 50% 110%, rgba(90, 66, 28, .38), transparent 60%),
-      radial-gradient(100% 80% at 50% -20%, rgba(36, 46, 74, .5), transparent 55%),
-      linear-gradient(180deg, #0d1017 0%, #12100d 100%);
-    transition: opacity 1.1s ease, visibility 1.1s;
+      radial-gradient(90% 60% at 50% -10%, rgba(255,201,77,.55), transparent 60%),
+      radial-gradient(120% 80% at 50% 110%, rgba(38,181,162,.35), transparent 55%),
+      linear-gradient(180deg, #fdf3e0 0%, #ffe8cf 100%);
+    transition: opacity .5s ease, visibility .5s ease;
   }
   #intro.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-  #intro .kicker {
-    letter-spacing: .42em; text-transform: uppercase; font-size: 11px;
-    color: var(--gold-dim); margin-bottom: 18px;
+  #intro h1 { font-size: clamp(34px, 9vw, 56px); font-weight: 800; line-height: 1.1; color: var(--coral); }
+  #intro p  { font-size: clamp(15px, 4vw, 18px); font-weight: 600; max-width: 420px; }
+  #enterBtn {
+    margin-top: 10px; border: none; cursor: pointer;
+    font-family: inherit; font-weight: 800; font-size: 18px; color: #fff;
+    padding: 16px 40px; border-radius: 999px;
+    background: linear-gradient(180deg, var(--coral), #f07048);
+    box-shadow: 0 6px 0 #c85a38, 0 12px 24px rgba(200, 90, 56, .35);
+    transition: transform .15s ease, box-shadow .15s ease;
   }
-  #intro .names {
-    font-family: 'Great Vibes', 'Cormorant Garamond', cursive;
-    font-size: clamp(52px, 13vw, 96px); line-height: 1.1;
-    background: linear-gradient(120deg, #f6e7bd, var(--gold) 55%, #b08d43);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(0 2px 18px rgba(216, 181, 106, .22));
-  }
-  #intro .date { font-size: 17px; letter-spacing: .22em; color: var(--ink); opacity: .85; margin-top: 14px; }
-  #intro .guest { margin-top: 34px; font-size: 15px; opacity: .75; }
-  #intro .guest strong { display: block; font-size: 21px; margin-top: 6px; font-weight: 600; }
-  #btn-open {
-    margin-top: 30px; padding: 15px 44px; font: inherit; font-size: 17px; letter-spacing: .18em;
-    color: #171307; background: linear-gradient(120deg, #ecd398, var(--gold) 60%, #b8934a);
-    border: 0; border-radius: 999px; cursor: pointer;
-    box-shadow: 0 8px 32px rgba(216, 181, 106, .35), inset 0 1px 0 rgba(255,255,255,.5);
-    transition: transform .25s ease, box-shadow .25s ease;
-  }
-  #btn-open:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(216,181,106,.45), inset 0 1px 0 rgba(255,255,255,.5); }
-  #load-note { margin-top: 14px; font-size: 13px; color: var(--gold-dim); min-height: 18px; }
+  #enterBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c85a38; }
+  #introHint { font-size: 13px; font-weight: 600; opacity: .65; }
 
-  /* ---------- HUD setelah dibuka ---------- */
-  .hud { position: fixed; z-index: 20; opacity: 0; visibility: hidden; transition: opacity .8s ease .6s, visibility .8s .6s; }
-  body.opened .hud { opacity: 1; visibility: visible; }
-  #hint {
-    left: 50%; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-    font-size: 13px; letter-spacing: .14em; color: var(--ink); opacity: 0 !important;
-    white-space: nowrap; animation: hintfade 1.2s ease 2.8s forwards;
+  /* ---------- HUD ---------- */
+  #hud {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px);
+    left: 12px; right: 12px; z-index: 20;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 10px; pointer-events: none;
   }
-  @keyframes hintfade { to { opacity: .55 !important; } }
-  #btn-info {
-    top: calc(14px + env(safe-area-inset-top)); right: 14px;
-    width: 46px; height: 46px; border-radius: 50%;
-    border: 1px solid var(--line); background: var(--glass);
-    color: var(--gold); font-size: 20px; cursor: pointer; backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px); transition: transform .2s ease;
+  .hud-card {
+    pointer-events: auto;
+    background: rgba(255, 250, 240, .92); border-radius: 18px;
+    padding: 10px 16px; box-shadow: 0 4px 14px rgba(74, 55, 40, .18);
+    font-weight: 700;
   }
-  #btn-info:active { transform: scale(.92); }
+  #hudTitle { font-size: 15px; color: var(--coral); }
+  #hudTitle small { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); opacity: .75; }
 
-  /* Panel info acara */
+  /* ---------- Panel info ---------- */
+  #panelWrap {
+    position: fixed; inset: 0; z-index: 25;
+    display: flex; align-items: center; justify-content: center;
+    padding: 18px; visibility: hidden;
+  }
+  #panelWrap.open { visibility: visible; }
+  #panelBackdrop {
+    position: absolute; inset: 0;
+    background: rgba(74, 55, 40, .45);
+    opacity: 0; transition: opacity .3s ease;
+  }
+  #panelWrap.open #panelBackdrop { opacity: 1; }
   #panel {
-    position: fixed; z-index: 25; inset: 0; display: flex; align-items: center; justify-content: center;
-    padding: 18px; background: rgba(8, 9, 13, .55); backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility .4s;
+    position: relative; width: min(480px, 100%); max-height: 78vh;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    background: var(--panel-bg); border-radius: 24px;
+    padding: 22px 20px 20px;
+    box-shadow: 0 10px 0 rgba(74,55,40,.12), 0 24px 48px rgba(74,55,40,.3);
+    transform: translateY(28px) scale(.96); opacity: 0;
+    transition: transform .32s cubic-bezier(.34,1.4,.64,1), opacity .25s ease;
   }
-  #panel.show { opacity: 1; visibility: visible; }
-  #panel .card {
-    width: min(430px, 100%); max-height: min(78vh, 640px); overflow-y: auto;
-    background: linear-gradient(170deg, rgba(24, 27, 37, .92), rgba(17, 15, 12, .94));
-    border: 1px solid var(--line); border-radius: 20px; padding: 30px 26px 26px;
-    box-shadow: 0 30px 80px rgba(0,0,0,.5); text-align: center;
+  #panelWrap.open #panel { transform: none; opacity: 1; }
+  #panelClose {
+    position: sticky; top: 0; float: right; margin: -6px -6px 0 8px;
+    width: 36px; height: 36px; border: none; border-radius: 50%;
+    background: var(--sun); color: var(--ink); font-weight: 800; font-size: 17px;
+    cursor: pointer; box-shadow: 0 3px 0 #d9a52e;
+    font-family: inherit; z-index: 2;
   }
-  #panel h2 {
-    font-family: 'Great Vibes', cursive; font-weight: 400;
-    font-size: 40px; color: var(--gold); margin-bottom: 2px;
+  #panelKicker {
+    display: inline-block; font-size: 12px; font-weight: 800;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: #fff; background: var(--teal);
+    padding: 4px 12px; border-radius: 999px; margin-bottom: 10px;
   }
-  #panel .sub { font-size: 12px; letter-spacing: .3em; color: var(--gold-dim); text-transform: uppercase; }
-  #countdown { display: flex; justify-content: center; gap: 10px; margin: 20px 0 6px; }
-  #countdown div {
-    min-width: 62px; padding: 10px 6px 8px; border: 1px solid var(--line); border-radius: 12px;
-    background: rgba(216, 181, 106, .07);
+  #panelBody h2 { font-size: 24px; font-weight: 800; color: var(--coral); margin-bottom: 8px; }
+  #panelBody img.panel-photo {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+    border-radius: 16px; margin-bottom: 12px;
+    border: 4px solid #fff; box-shadow: 0 4px 14px rgba(74,55,40,.2);
   }
-  #countdown b { display: block; font-size: 26px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
-  #countdown span { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-dim); }
-  .ev { margin-top: 20px; padding-top: 16px; border-top: 1px dashed rgba(216,181,106,.25); }
-  .ev h3 { font-size: 14px; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
-  .ev .t { font-size: 17px; margin-top: 6px; }
-  .ev .v { font-size: 15px; opacity: .85; margin-top: 4px; }
-  .ev .a { font-size: 13px; opacity: .6; margin-top: 2px; line-height: 1.5; }
-  .ev a {
-    display: inline-block; margin-top: 8px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-    color: var(--gold); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 2px;
+  #panelBody p { font-size: 15.5px; font-weight: 600; line-height: 1.55; margin-bottom: 8px; }
+  #panelBody .row { display: flex; gap: 8px; margin-bottom: 6px; }
+  #panelBody .chip {
+    background: #fff2d6; border-radius: 10px; padding: 6px 10px;
+    font-size: 13px; font-weight: 700;
   }
-  #panel-close { margin-top: 24px; padding: 11px 34px; font: inherit; font-size: 14px; letter-spacing: .16em;
-    color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
-  #panel-close:hover { background: rgba(216,181,106,.12); }
-
-  /* Tombol tutup mode fokus foto */
-  #btn-unfocus {
-    bottom: calc(26px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
-    padding: 11px 30px; font: inherit; font-size: 14px; letter-spacing: .14em;
-    color: var(--ink); border: 1px solid var(--line); border-radius: 999px;
-    background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    cursor: pointer; display: none;
+  #panelBody a.mapsLink {
+    display: inline-block; margin-top: 8px; text-decoration: none;
+    color: #fff; background: var(--teal); font-weight: 800; font-size: 14px;
+    padding: 10px 20px; border-radius: 999px; box-shadow: 0 4px 0 #17897b;
   }
-  body.focused #btn-unfocus { display: block; }
-  body.focused #hint { display: none; }
-
-  #fallback { position: fixed; inset: 0; z-index: 40; display: none; place-items: center; padding: 30px; text-align: center; background: #10131a; }
 </style>
 </head>
 <body>
 
 <div id="stage"></div>
 
-<!-- ===================== HUD ===================== -->
-<button class="hud" id="btn-info" type="button" aria-label="Detail acara">&#9432;</button>
-<p class="hud" id="hint">GESER UNTUK MEMPUTAR &nbsp;&middot;&nbsp; CUBIT UNTUK ZOOM &nbsp;&middot;&nbsp; KETUK FOTO</p>
-<button class="hud" id="btn-unfocus" type="button">Kembali</button>
+<!-- Layar pembuka -->
+<div id="intro">
+  <h1>Mita &amp; Andi</h1>
+  <p>Selamat datang di rumah kami! Geser untuk melihat sekeliling ruangan, lalu sentuh bingkai foto atau benda di atas meja.</p>
+  <button id="enterBtn">Masuk Rumah</button>
+  <span id="introHint">Cocok dibuka di HP — cukup pakai satu jari 👆</span>
+</div>
 
-<!-- ===================== Panel info ===================== -->
-<div id="panel">
-  <div class="card">
-    <p class="sub">Walimatul &#039;Urs</p>
-    <h2 id="p-names">Mita &amp; Andi</h2>
-    <div id="countdown"></div>
-    <p class="sub" id="p-date"></p>
-    <div class="ev" id="ev-akad"></div>
-    <div class="ev" id="ev-resepsi"></div>
-    <button id="panel-close" type="button">Tutup</button>
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-card" id="hudTitle">Rumah Mita &amp; Andi<small>Geser = lihat sekeliling · cubit/zoom = perbesar · sentuh benda bercahaya ✨</small></div>
+</div>
+
+<!-- Panel info -->
+<div id="panelWrap" role="dialog" aria-modal="true">
+  <div id="panelBackdrop"></div>
+  <div id="panel">
+    <button id="panelClose" aria-label="Tutup">✕</button>
+    <span id="panelKicker"></span>
+    <div id="panelBody"></div>
   </div>
 </div>
 
-<!-- ===================== Layar pembuka ===================== -->
-<div id="intro">
-  <p class="kicker">The Wedding of</p>
-  <h1 class="names" id="i-names">Mita &amp; Andi</h1>
-  <p class="date" id="i-date">&mdash;</p>
-  <p class="guest">Kepada Yth.<strong id="i-guest">Bapak/Ibu/Saudara/i</strong></p>
-  <button id="btn-open" type="button">&#10022; Buka Undangan</button>
-  <p id="load-note"></p>
-</div>
-
-<div id="fallback"><p>Maaf, browser ini belum mendukung WebGL sehingga undangan 3D tidak dapat ditampilkan.</p></div>
-
+<script src="https://cdn.jsdelivr.net/npm/supabase@2/dist/umd/supabase.js"></script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/tenant.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<!-- Reuse penuh lapisan data milik undangan: window.sb + photoUrl() +
-     fetchInvitation() (RPC get_invitation p_slug='root' + cadangan
-     localStorage). Tidak ada duplikasi logika Supabase di file ini. -->
 <script src="assets/js/supabase-client.js"></script>
-<!-- Build UMD terakhir Three.js yang masih disediakan (r152) — sejak r161
-     hanya distribusi ESM, jadi versi ini sengaja dipilih agar tetap satu
-     tag <script src> seperti dependensi CDN lain di repo. -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-<script>
-(function () {
-  "use strict";
+<script src="assets/js/photos.js"></script>
+<script type="importmap">
+  { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
 
-  /* =====================================================
-     0) Util kecil
-     ===================================================== */
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const lerp = (a, b, t) => a + (b - a) * t;
-  // damping bebas frame-rate: mendekati target secara eksponensial
-  const damp = (a, b, lambda, dt) => lerp(a, b, 1 - Math.exp(-lambda * dt));
-  const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-  const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/* ================= Data undangan ================= */
 
-  /* =====================================================
-     1) Data undangan — Supabase dulu (fetchInvitation dari
-        supabase-client.js), fallback WEDDING_CONFIG.
-     ===================================================== */
-  const CFG = window.WEDDING_CONFIG;
+const cfg = window.WEDDING_CONFIG;
 
-  function mergeSection(cfgSection, contentKey, content) {
-    return Object.assign({}, cfgSection || {}, (content && content[contentKey]) || {});
+/** Foto folder Supabase → URL publik, dengan cadangan path lokal config. */
+async function photoList(folder, fallbackPaths) {
+  const list = await window.getPhotos(folder);
+  const out = [];
+  if (list && list.length) {
+    for (const p of list) out.push(window.photoUrl(p.path));
+  } else if (fallbackPaths && fallbackPaths.length) {
+    out.push(...fallbackPaths);
   }
+  return out.filter(Boolean);
+}
 
-  async function loadData() {
-    let content = null;
-    let photosByFolder = null;
-    try {
-      const payload = await window.fetchInvitation();
-      if (payload) {
-        content = payload.content || null;
-        photosByFolder = payload.photos || null;
-      }
-    } catch (err) {
-      console.warn("3d: payload Supabase gagal — pakai config lokal.", err);
-    }
-
-    const couple = {
-      bride: mergeSection(CFG.couple && CFG.couple.bride, "bride", content && content.couple),
-      groom: mergeSection(CFG.couple && CFG.couple.groom, "groom", content && content.couple)
-    };
-    const ev = mergeSection(CFG.event, "event", content);
-
-    // Kumpulkan foto: urutan folder paling "galeri" dulu, unik per path,
-    // dibatasi 14 supaya muat tekstur di HP kelas bawah.
-    const folders = ["gallery", "story", "cover", "opening", "closing", "quote"];
-    const seen = new Set();
-    const photos = [];
-    (photosByFolder ? folders : []).forEach((f) => {
-      (Array.isArray(photosByFolder[f]) ? photosByFolder[f] : []).forEach((item) => {
-        const key = item.path || item.webp || item.jpg;
-        if (!key || seen.has(key)) return;
-        seen.add(key);
-        photos.push({
-          src: item.path ? window.photoUrl(item.path) : (item.webp || item.jpg),
-          alt: f
-        });
-      });
-    });
-
-    return {
-      brideName: couple.bride.name || "",
-      groomName: couple.groom.name || "",
-      brideNick: couple.bride.nickname || couple.bride.name || "",
-      groomNick: couple.groom.nickname || couple.groom.name || "",
-      dateLabel: ev.dateLabel || "",
-      dayLabel: ev.dayLabel || "",
-      countdownTarget: ev.countdownTarget || ev.dateISO || "",
-      akad: ev.akad || null,
-      resepsi: ev.resepsi || null,
-      photos
-    };
-  }
-
-  /* =====================================================
-     2) Renderer & scene dasar
-     ===================================================== */
-  let renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-  } catch (err) {
-    console.error("WebGL tidak tersedia:", err);
-    document.getElementById("fallback").style.display = "grid";
-    document.getElementById("intro").style.display = "none";
-    return;
-  }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
-  document.getElementById("stage").appendChild(renderer.domElement);
-
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0b0d12);
-  scene.fog = new THREE.FogExp2(0x0b0d12, 0.048);
-
-  const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 120);
-  const CAM_BASE_Y = 1.35;
-  const DIST_MIN = 4.6, DIST_MAX = 11;
-  camera.position.set(0, CAM_BASE_Y + 1.1, 15.5); // posisi intro — terbang masuk saat dibuka
-
-  // Lampu: key hangat + rim dingin dari belakang + hemisfer lembut.
-  scene.add(new THREE.HemisphereLight(0xfff1d6, 0x151109, 0.65));
-  const keyLight = new THREE.DirectionalLight(0xffdfae, 1.05);
-  keyLight.position.set(4, 6, 6);
-  scene.add(keyLight);
-  const rimLight = new THREE.PointLight(0x6f86ff, 0.9, 40);
-  rimLight.position.set(-5, 3, -6);
-  scene.add(rimLight);
-  const glowLight = new THREE.PointLight(0xffc46b, 1.1, 12);
-  glowLight.position.set(0, 1.6, 2.4);
-  scene.add(glowLight);
-
-  /* ---------- EnvMap gradasi dari canvas (supaya logam memantul) ----------
-     Enam muka cube: langit biru-gelap di atas, cahaya emas di bawah-tengah —
-     cukup untuk highlight lembut di material metal tanpa aset eksternal. */
-  function makeEnvCube() {
-    function face(top, bottom, glow) {
-      const c = document.createElement("canvas");
-      c.width = c.height = 128;
-      const x = c.getContext("2d");
-      const g = x.createLinearGradient(0, 0, 0, 128);
-      g.addColorStop(0, top);
-      g.addColorStop(1, bottom);
-      x.fillStyle = g;
-      x.fillRect(0, 0, 128, 128);
-      if (glow) {
-        const rg = x.createRadialGradient(64, 96, 4, 64, 96, 70);
-        rg.addColorStop(0, "rgba(255,196,107,.85)");
-        rg.addColorStop(1, "rgba(255,196,107,0)");
-        x.fillStyle = rg;
-        x.fillRect(0, 0, 128, 128);
-      }
-      return c;
-    }
-    const side = () => face("#232c42", "#0d0f16", false);
-    const cube = new THREE.CubeTexture([
-      side(), side(),
-      face("#39466b", "#1a2138", false), // atas — langit
-      face("#171310", "#241a0e", true),  // bawah — pantulan lantai emas
-      side(), side()
-    ]);
-    cube.needsUpdate = true;
-    return cube;
-  }
-  const envCube = makeEnvCube();
-  scene.environment = envCube;
-
-  /* =====================================================
-     3) Lantai: disc gradasi radial (glow palsu di bawah cincin)
-     ===================================================== */
-  (function makeFloor() {
-    const c = document.createElement("canvas");
-    c.width = c.height = 256;
-    const x = c.getContext("2d");
-    const g = x.createRadialGradient(128, 128, 8, 128, 128, 126);
-    g.addColorStop(0, "rgba(122, 90, 40, .55)");
-    g.addColorStop(0.5, "rgba(60, 46, 24, .22)");
-    g.addColorStop(1, "rgba(11, 13, 18, 0)");
-    x.fillStyle = g;
-    x.fillRect(0, 0, 256, 256);
-    const tex = new THREE.CanvasTexture(c);
-    const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(14, 48),
-      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
-    );
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.02;
-    scene.add(floor);
-  })();
-
-  /* =====================================================
-     4) Kunang-kunang — dua lapis partikel additive
-     ===================================================== */
-  function makeSprite() {
-    const c = document.createElement("canvas");
-    c.width = c.height = 64;
-    const x = c.getContext("2d");
-    const g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
-    g.addColorStop(0, "rgba(255,236,180,1)");
-    g.addColorStop(0.35, "rgba(255,206,120,.55)");
-    g.addColorStop(1, "rgba(255,206,120,0)");
-    x.fillStyle = g;
-    x.fillRect(0, 0, 64, 64);
-    return new THREE.CanvasTexture(c);
-  }
-  const spriteTex = makeSprite();
-
-  function makeFireflies(count, spread, height, size, tint) {
-    const geo = new THREE.BufferGeometry();
-    const pos = new Float32Array(count * 3);
-    const seed = new Float32Array(count); // fase individual utk gerak sinus
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * spread;
-      pos[i * 3 + 1] = Math.random() * height;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * spread;
-      seed[i] = Math.random() * Math.PI * 2;
-    }
-    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    const mat = new THREE.PointsMaterial({
-      size, map: spriteTex, transparent: true, depthWrite: false,
-      blending: THREE.AdditiveBlending, color: tint, opacity: 0.85
-    });
-    const pts = new THREE.Points(geo, mat);
-    pts.userData = { pos, seed, count, height };
-    scene.add(pts);
-    return pts;
-  }
-  const fliesNear = makeFireflies(220, 16, 7, 0.09, 0xffe3ae);
-  const fliesFar = makeFireflies(420, 34, 9, 0.05, 0xcfd8ff);
-
-  function updateFireflies(pts, time, dt) {
-    const { pos, seed, count, height } = pts.userData;
-    const speed = REDUCED ? 0.08 : 0.22;
-    for (let i = 0; i < count; i++) {
-      const j = i * 3;
-      pos[j + 1] += speed * dt * (0.5 + 0.5 * Math.sin(seed[i]));
-      pos[j] += Math.sin(time * 0.4 + seed[i]) * dt * 0.18;
-      if (pos[j + 1] > height) pos[j + 1] = 0;
-    }
-    pts.geometry.attributes.position.needsUpdate = true;
-  }
-
-  /* =====================================================
-     5) Cincin ganda emas — pusat scene
-     ===================================================== */
-  const GOLD = { color: 0xd9b45b, metalness: 1, roughness: 0.24, envMapIntensity: 1.15 };
-  const goldMat = new THREE.MeshStandardMaterial(Object.assign({ envMap: envCube }, GOLD));
-  goldMat.emissive = new THREE.Color(0x1c1204);
-
-  const ringsGroup = new THREE.Group();
-  scene.add(ringsGroup);
-
-  // Cincin pria (tegak, agak condong) & cincin wanita (rebah menyilang)
-  const ringGeo = new THREE.TorusGeometry(0.72, 0.115, 40, 96);
-  const ringA = new THREE.Mesh(ringGeo, goldMat);
-  ringA.rotation.set(0.35, 0.2, 0);
-  ringA.position.x = -0.34;
-  const ringB = new THREE.Mesh(ringGeo, goldMat);
-  ringB.rotation.set(Math.PI / 2.25, -0.4, 0.3);
-  ringB.position.set(0.5, -0.12, 0.25);
-  ringsGroup.add(ringA, ringB);
-  ringsGroup.position.y = 1.15;
-
-  // Berlian kecil (oktahedron putih) di puncak cincin wanita
-  const diamond = new THREE.Mesh(
-    new THREE.OctahedronGeometry(0.14, 0),
-    new THREE.MeshStandardMaterial({
-      color: 0xffffff, metalness: 0.1, roughness: 0.05,
-      envMap: envCube, envMapIntensity: 2.2, transparent: true, opacity: 0.95
-    })
-  );
-  diamond.position.set(0.5, 0.72, 0.25);
-  scene.add(diamond);
-
-  function animateCenter(t) {
-    const spin = REDUCED ? 0.12 : 1;
-    ringsGroup.position.y = 1.15 + Math.sin(t * 0.8) * 0.06;
-    ringA.rotation.y = 0.2 + Math.sin(t * 0.35 * spin) * 0.45;
-    ringA.rotation.z = Math.cos(t * 0.28 * spin) * 0.3;
-    ringB.rotation.z = 0.3 + Math.sin(t * 0.42 * spin + 1.7) * 0.5;
-    ringB.rotation.y = -0.4 + Math.cos(t * 0.31 * spin) * 0.4;
-    diamond.rotation.y = t * 0.9 * spin;
-    diamond.position.y = 0.72 + Math.sin(t * 1.3) * 0.03;
-    glowLight.intensity = 0.95 + Math.sin(t * 1.6) * 0.25;
-  }
-
-  /* =====================================================
-     6) Nama mempelai — billboard CanvasTexture
-     ===================================================== */
-  let namePlane = null;
-  function makeNameTexture(line1, line2) {
-    const c = document.createElement("canvas");
-    c.width = 2048; c.height = 560;
-    const x = c.getContext("2d");
-    x.textAlign = "center"; x.textBaseline = "middle";
-    x.shadowColor = "rgba(0,0,0,.45)"; x.shadowBlur = 18;
-    x.fillStyle = "#f6ead0";
-    x.font = "italic 600 210px 'Cormorant Garamond', Georgia, serif";
-    x.fillText(line1, 1024, 225);
-    x.strokeStyle = "rgba(216,181,106,.9)"; x.lineWidth = 3;
-    x.beginPath(); x.moveTo(512, 392); x.lineTo(1536, 392); x.stroke();
-    x.fillStyle = "#d8b56a";
-    x.font = "500 74px 'Cormorant Garamond', Georgia, serif";
-    x.fillText(line2.toUpperCase(), 1024, 465);
-    const tex = new THREE.CanvasTexture(c);
-    tex.encoding = THREE.sRGBEncoding;
-    tex.anisotropy = 4;
-    return tex;
-  }
-  function buildNamePlane(data) {
-    const mat = new THREE.MeshBasicMaterial({
-      map: makeNameTexture(data.groomNick + " & " + data.brideNick, data.dateLabel),
-      transparent: true, depthWrite: false, toneMapped: false
-    });
-    namePlane = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.75), mat);
-    namePlane.renderOrder = 5;
-    scene.add(namePlane);
-    // Regambar begitu webfont siap — gambar pertama memakai fallback serif.
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        mat.map.dispose();
-        mat.map = makeNameTexture(data.groomNick + " & " + data.brideNick, data.dateLabel);
-        mat.needsUpdate = true;
-      });
-    }
-  }
-
-  /* =====================================================
-     7) Karusel foto melingkar
-     ===================================================== */
-  const RING_RADIUS = 4.6;
-  const CARD_W = 1.5, CARD_H = 2.0;
-  const photoGroup = new THREE.Group();
-  scene.add(photoGroup);
-  const photoCards = []; // { mesh, frame, angle, texReady }
-
-  const loader = new THREE.TextureLoader();
-  loader.setCrossOrigin("anonymous");
-
-  function placeholderTexture(i) {
-    const c = document.createElement("canvas");
-    c.width = 300; c.height = 400;
-    const x = c.getContext("2d");
-    x.fillStyle = "#1d1811";
-    x.fillRect(0, 0, 300, 400);
-    x.strokeStyle = "rgba(216,181,106,.4)";
-    x.lineWidth = 2;
-    x.strokeRect(14, 14, 272, 372);
-    x.fillStyle = "#8d764a";
-    x.font = "italic 600 44px Georgia, serif";
-    x.textAlign = "center"; x.textBaseline = "middle";
-    x.fillText("✦", 150, 200);
-    return new THREE.CanvasTexture(c);
-  }
-
-  function addPhotoCard(src, index, total) {
-    const angle = (index / total) * Math.PI * 2;
-    const holder = new THREE.Group();
-
-    const frameMat = new THREE.MeshBasicMaterial({ color: 0x2b2115 });
-    const frame = new THREE.Mesh(new THREE.PlaneGeometry(CARD_W + 0.09, CARD_H + 0.09), frameMat);
-    frame.position.z = -0.012;
-    holder.add(frame);
-
-    const mat = new THREE.MeshBasicMaterial({ map: placeholderTexture(index), transparent: true, toneMapped: false });
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(CARD_W, CARD_H), mat);
-    holder.add(mesh);
-
-    holder.position.set(Math.sin(angle) * RING_RADIUS, 1.35, Math.cos(angle) * RING_RADIUS);
-    holder.rotation.y = angle;
-    photoGroup.add(holder);
-
-    const card = { holder, mesh, mat, angle, focused: false, baseScale: 1 };
-    photoCards.push(card);
-
-    loader.load(
-      src,
-      (tex) => {
-        tex.encoding = THREE.sRGBEncoding;
-        tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
-        // Rasio asli dihormati: crop-fit ke kartu (cover) lewat repeat/offset.
-        const img = tex.image;
-        const target = CARD_W / CARD_H;
-        const srcRatio = img.width / img.height;
-        if (srcRatio > target) {
-          tex.repeat.set(target / srcRatio, 1);
-          tex.offset.set((1 - target / srcRatio) / 2, 0);
-        } else if (srcRatio < target) {
-          tex.repeat.set(1, srcRatio / target);
-          tex.offset.set(0, (1 - srcRatio / target) / 2);
-        }
-        mat.map = tex;
-        mat.needsUpdate = true;
-        card.texReady = true;
-        loadedPhotos++;
-        note.textContent = "Memuat foto… " + loadedPhotos + "/" + totalPhotos;
-        if (loadedPhotos >= totalPhotos) note.textContent = "";
-      },
+/** Muat tekstur dari URL; resolve null kalau gagal (jaringan lambat dsb). */
+function loadTexture(url) {
+  return new Promise((resolve) => {
+    new THREE.TextureLoader().load(
+      url,
+      (tex) => { tex.colorSpace = THREE.SRGBColorSpace; resolve(tex); },
       undefined,
-      () => { /* foto gagal (CORS/jaringan) — biarkan placeholder */ }
+      () => resolve(null)
     );
-    return card;
-  }
+  });
+}
 
-  let totalPhotos = 0, loadedPhotos = 0;
-  const note = document.getElementById("load-note");
+/* ================= Scene dasar ================= */
 
-  function buildPhotoRing(data) {
-    const list = data.photos.slice(0, 14);
-    totalPhotos = list.length;
-    list.forEach((p, i) => addPhotoCard(p.src, i, list.length));
-  }
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.appendChild(renderer.domElement);
 
-  /** Skala + opacity tiap kartu mengikuti seberapa "menghadap kamera". */
-  function updateCardAttention() {
-    const camDir = Math.atan2(camera.position.x, camera.position.z);
-    photoCards.forEach((card) => {
-      if (card.focused) return;
-      const eff = card.angle + photoGroup.rotation.y;
-      const facing = Math.cos(eff - camDir); // 1 = tepat di depan kamera
-      const t = clamp((facing + 1) / 2, 0, 1); // 0 belakang → 1 depan
-      const s = lerp(0.82, 1.08, Math.pow(t, 1.6));
-      card.holder.scale.setScalar(s);
-      card.mat.opacity = lerp(0.22, 1, Math.pow(t, 1.4));
-      frameMatSharedOpacity(card, t);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#bfe7f7');
+
+// Kamera orbit manual: yaw/pitch/distance diputar mengelilingi pusat ruangan.
+const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, 0.1, 100);
+
+// Cahaya cerah khas ilustrasi: ambient kuat + matahari hangat.
+scene.add(new THREE.AmbientLight(0xfff2dd, 1.05));
+const sun = new THREE.DirectionalLight(0xffeec2, 1.5);
+sun.position.set(6, 10, 4);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xcdeeff, 0.5);
+fill.position.set(-6, 4, -6);
+scene.add(fill);
+
+/* ================= Ukuran & material ruangan ================= */
+
+const ROOM_W = 10, ROOM_D = 10, ROOM_H = 4.4;
+
+const MAT = {
+  wallBack:   new THREE.MeshLambertMaterial({ color: '#ffe9d6' }),
+  wallSide:   new THREE.MeshLambertMaterial({ color: '#ffdcb8' }),
+  floor:      new THREE.MeshLambertMaterial({ color: '#f7b98a' }),
+  rug:        new THREE.MeshLambertMaterial({ color: '#8fd3c7' }),
+  rugInner:   new THREE.MeshLambertMaterial({ color: '#bfe6dd' }),
+  woodDark:   new THREE.MeshLambertMaterial({ color: '#a86a3d' }),
+  woodLight:  new THREE.MeshLambertMaterial({ color: '#e8b04b' }),
+  frameWood:  new THREE.MeshLambertMaterial({ color: '#c98a4b' }),
+  bookCoverA: new THREE.MeshLambertMaterial({ color: '#ff8a65' }),
+  bookCoverB: new THREE.MeshLambertMaterial({ color: '#5aa9e6' }),
+  paper:      new THREE.MeshBasicMaterial({ color: '#fffdf5' }),
+  sofa:       new THREE.MeshLambertMaterial({ color: '#ffb3c1' }),
+  cushion:    new THREE.MeshLambertMaterial({ color: '#ffd166' }),
+  plantPot:   new THREE.MeshLambertMaterial({ color: '#e07a5f' }),
+  leaf:       new THREE.MeshLambertMaterial({ color: '#57cc99' }),
+  windowFrame:new THREE.MeshLambertMaterial({ color: '#ffffff' })
+};
+
+function box(w, h, d, mat) {
+  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+}
+function cyl(rt, rb, h, seg, mat) {
+  return new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+}
+
+/* ================= Ruangan ================= */
+
+const room = new THREE.Group();
+scene.add(room);
+
+// Lantai + karpet
+{
+  const floor = box(ROOM_W, 0.3, ROOM_D, MAT.floor);
+  floor.position.y = -0.15;
+  room.add(floor);
+  const rug = cyl(2.6, 2.6, 0.06, 40, MAT.rug);
+  rug.position.set(0, 0.03, 0.6);
+  room.add(rug);
+  const rugIn = cyl(1.7, 1.7, 0.08, 40, MAT.rugInner);
+  rugIn.position.set(0, 0.04, 0.6);
+  room.add(rugIn);
+}
+
+// Tiga dinding (belakang, kiri, kanan) — sisi depan terbuka biar kamera bebas
+{
+  const back = box(ROOM_W, ROOM_H, 0.3, MAT.wallBack);
+  back.position.set(0, ROOM_H / 2, -ROOM_D / 2);
+  room.add(back);
+  const left = box(0.3, ROOM_H, ROOM_D, MAT.wallSide);
+  left.position.set(-ROOM_W / 2, ROOM_H / 2, 0);
+  room.add(left);
+  const right = box(0.3, ROOM_H, ROOM_D, MAT.wallSide);
+  right.position.set(ROOM_W / 2, ROOM_H / 2, 0);
+  room.add(right);
+  // Lis plafon warna krem agar tepi atas tidak kosong
+  const cornice = box(ROOM_W + 0.3, 0.25, ROOM_D + 0.3, MAT.windowFrame);
+  cornice.position.y = ROOM_H + 0.02;
+  scene.add(cornice);
+}
+
+// Jendela besar di dinding belakang — "langit" biru + awan, sumber vibe cerah
+let cloudGroup;
+{
+  const win = new THREE.Group();
+  const glass = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.6, 2.2),
+    new THREE.MeshBasicMaterial({ color: '#9adcf5' })
+  );
+  win.add(glass);
+  const barsV = box(0.12, 2.3, 0.1, MAT.windowFrame);
+  win.add(barsV);
+  const barH = box(3.7, 0.12, 0.1, MAT.windowFrame);
+  win.add(barH);
+  // Bingkai luar
+  [[-1.86, 0], [1.86, 0]].forEach(([x]) => {
+    const f = box(0.14, 2.4, 0.14, MAT.windowFrame);
+    f.position.x = x; win.add(f);
+  });
+  [[0, -1.14], [0, 1.14]].forEach(([, y]) => {
+    const f = box(3.9, 0.14, 0.14, MAT.windowFrame);
+    f.position.y = y; win.add(f);
+  });
+  win.position.set(0, 2.5, -ROOM_D / 2 + 0.22);
+  room.add(win);
+
+  // Awan kartun mengapit jendela di dalam dinding? Lebih mudah: dua pot awan
+  // melayang di depan kaca (di dalam ruangan, sebagai dekorasi menggantung).
+  cloudGroup = new THREE.Group();
+  for (let i = 0; i < 3; i++) {
+    const cloud = new THREE.Group();
+    const cm = new THREE.MeshLambertMaterial({ color: '#ffffff' });
+    [[0, 0, 0, 0.42], [0.34, -0.06, 0, 0.3], [-0.34, -0.05, 0, 0.27]].forEach(([x, y, z, r]) => {
+      const puff = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 14), cm);
+      puff.position.set(x, y, z);
+      cloud.add(puff);
     });
+    cloud.position.set(-3.2 + i * 3.2, 3.4 - (i % 2) * 0.4, -1.5);
+    cloud.userData.baseY = cloud.position.y;
+    cloudGroup.add(cloud);
   }
-  // Frame ikut redup — material frame dibagikan per kartu lewat userData.
-  function frameMatSharedOpacity(card, t) {
-    const fm = card.holder.children[0].material;
-    fm.transparent = true;
-    fm.opacity = lerp(0.18, 1, Math.pow(t, 1.4));
-  }
+  scene.add(cloudGroup);
+}
 
-  /* =====================================================
-     8) Interaksi: drag inersia, zoom, pinch, parallax, tap fokus
-     ===================================================== */
-  const stageEl = document.getElementById("stage");
-  let dragging = false, dragMoved = 0, lastX = 0, lastY = 0;
-  let ringVelocity = 0;
-  let targetDist = 7.2, currentDist = 15.5;
-  let parX = 0, parY = 0; // parallax target (-1..1)
-  let autoRotate = !REDUCED;
-  let focusedCard = null;
-  const pointers = new Map();
-  let pinchStartDist = 0, pinchStartZoom = 0;
-  const raycaster = new THREE.Raycaster();
-  const ndc = new THREE.Vector2();
+/* ================= Objek interaktif =================
 
-  const tweens = [];
-  function addTween(duration, onUpdate, onDone, ease) {
-    tweens.push({ t: 0, duration, onUpdate, onDone, ease: ease || easeInOutCubic });
-  }
-  function stepTweens(dt) {
-    for (let i = tweens.length - 1; i >= 0; i--) {
-      const tw = tweens[i];
-      tw.t = Math.min(tw.duration, tw.t + dt);
-      const k = tw.ease(tw.duration ? tw.t / tw.duration : 1);
-      tw.onUpdate(k);
-      if (tw.t >= tw.duration) {
-        tweens.splice(i, 1);
-        if (tw.onDone) tw.onDone();
-      }
-    }
-  }
+  Tiap objek interaktif: group utama + "hitbox" transparan lebih besar
+  supaya gampang ditap di HP, plus outline glow (mesh sedikit lebih besar,
+  additive) yang hanya tampil pada hover/tap target pertama.            */
 
-  function focusCard(card) {
-    if (focusedCard) unfocus();
-    focusedCard = card;
-    card.focused = true;
-    document.body.classList.add("focused");
+const interactives = []; // { hitbox, onClick, glow }
+const raycaster = new THREE.Raycaster();
 
-    // Holder adalah anak photoGroup yang BEROTASI — tween dihitung dalam
-    // ruang DUNIA lalu dikonversi balik ke ruang lokal parent-nya, supaya
-    // foto selalu mendarat tepat di depan kamera apa pun rotasi ring saat itu.
-    const groupInv = photoGroup.quaternion.clone().invert();
-    const fromWorldPos = card.holder.getWorldPosition(new THREE.Vector3());
-    const fromWorldQuat = card.holder.getWorldQuaternion(new THREE.Quaternion());
-    // Target: titik 2.7 unit di depan kamera — ke ruang lokal group (untuk
-    // state akhir) DAN ke ruang dunia (untuk interpolasi).
-    const toLocalPos = photoGroup.worldToLocal(camera.localToWorld(new THREE.Vector3(0, 0.05, -2.7)));
-    const toWorldPos = photoGroup.localToWorld(toLocalPos.clone());
-    const toLocalQuat = groupInv.multiply(camera.quaternion).clone();
+function makeInteractive(group, hitSize, onClick) {
+  const [w, h, d] = hitSize;
+  const hitbox = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+  );
+  hitbox.userData.isHitbox = true;
+  group.add(hitbox);
+  interactives.push({ hitbox, onClick });
+  return hitbox;
+}
 
-    addTween(0.7, (k) => {
-      const p = fromWorldPos.clone().lerp(toWorldPos, k);
-      card.holder.parent.worldToLocal(p);
-      card.holder.position.copy(p);
-      card.holder.quaternion.slerpQuaternions(fromWorldQuat, toLocalQuat, k);
-      card.holder.scale.setScalar(lerp(0.95, 1.25, k));
-      card.mat.opacity = lerp(card.mat.opacity, 1, k);
-    }, null);
-  }
-  function unfocus() {
-    if (!focusedCard) return;
-    const card = focusedCard;
-    focusedCard = null;
-    document.body.classList.remove("focused");
+/** Tekstur foto ke plane berbingkai kayu, digantung di dinding. */
+async function framedPhoto(url, w, h) {
+  const g = new THREE.Group();
+  const frame = box(w + 0.24, h + 0.24, 0.09, MAT.frameWood);
+  g.add(frame);
+  let tex = url ? await loadTexture(url) : null;
+  if (!tex) tex = await loadTexture('assets/img/foto_story/01.jpg');
+  const mat = tex
+    ? new THREE.MeshBasicMaterial({ map: tex })
+    : new THREE.MeshBasicMaterial({ color: '#ffffff' });
+  const photo = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+  photo.position.z = 0.055;
+  g.add(photo);
+  return g;
+}
 
-    const fromPos = card.holder.position.clone();
-    const fromQuat = card.holder.quaternion.clone();
-    const homePos = new THREE.Vector3(
-      Math.sin(card.angle) * RING_RADIUS, 1.35, Math.cos(card.angle) * RING_RADIUS
-    );
-    const homeQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, card.angle, 0));
+/** Meja kayu bulat kaki tunggal. */
+function coffeeTable() {
+  const g = new THREE.Group();
+  const top = cyl(1.15, 1.15, 0.14, 28, MAT.woodLight);
+  top.position.y = 0.72;
+  g.add(top);
+  const leg = cyl(0.12, 0.16, 0.66, 14, MAT.woodDark);
+  leg.position.y = 0.33;
+  g.add(leg);
+  const base = cyl(0.5, 0.56, 0.08, 20, MAT.woodDark);
+  base.position.y = 0.04;
+  g.add(base);
+  return g;
+}
 
-    addTween(0.7, (k) => {
-      card.holder.position.lerpVectors(fromPos, homePos, k);
-      card.holder.quaternion.slerpQuaternions(fromQuat, homeQuat, k);
-    }, () => {
-      card.focused = false; // updateCardAttention ambil alih scale/opacity
-    });
-  }
+/** Buku terbuka sederhana: dua "halaman" miring + sampul. */
+function openBook(coverMat) {
+  const g = new THREE.Group();
+  const cover = box(0.92, 0.05, 0.62, coverMat);
+  g.add(cover);
+  const pgGeo = new THREE.PlaneGeometry(0.84, 0.54);
+  const left = new THREE.Mesh(pgGeo, MAT.paper);
+  left.rotation.x = -Math.PI / 2;
+  left.rotation.z = Math.PI / 2;
+  left.position.set(-0.21, 0.035, 0);
+  left.rotation.y = 0.06;
+  g.add(left);
+  const right = new THREE.Mesh(pgGeo, MAT.paper);
+  right.rotation.x = -Math.PI / 2;
+  right.rotation.z = Math.PI / 2;
+  right.position.set(0.21, 0.035, 0);
+  right.rotation.y = -0.06;
+  g.add(right);
+  return g;
+}
 
-  stageEl.addEventListener("pointerdown", (e) => {
-    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointers.size === 2) {
-      const [a, b] = Array.from(pointers.values());
-      pinchStartDist = Math.hypot(a.x - b.x, a.y - b.y);
-      pinchStartZoom = targetDist;
-      dragging = false;
-      return;
-    }
-    dragging = true; dragMoved = 0; lastX = e.clientX; lastY = e.clientY;
-    stageEl.classList.add("dragging");
-    stageEl.setPointerCapture(e.pointerId);
+/** Amplop undangan putih dengan segel hati. */
+function envelope() {
+  const g = new THREE.Group();
+  const body = box(0.66, 0.03, 0.46, MAT.paper);
+  g.add(body);
+  const flap = new THREE.Mesh(new THREE.ConeGeometry(0.23, 0.2, 3), MAT.paper);
+  flap.scale.z = 0.68;
+  flap.position.set(0, 0.03, -0.115);
+  g.add(flap);
+  const heartCanvas = document.createElement('canvas');
+  heartCanvas.width = heartCanvas.height = 64;
+  const cx = heartCanvas.getContext('2d');
+  cx.fillStyle = '#ff6b81';
+  cx.font = '44px sans-serif';
+  cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.fillText('♥', 32, 34);
+  const sealTex = new THREE.CanvasTexture(heartCanvas);
+  const seal = new THREE.Mesh(
+    new THREE.CircleGeometry(0.06, 20),
+    new THREE.MeshBasicMaterial({ map: sealTex, transparent: true })
+  );
+  seal.rotation.x = -Math.PI / 2;
+  seal.position.set(0, 0.04, -0.1);
+  g.add(seal);
+  return g;
+}
+
+/** Sofa kecil dua kursi (dekorasi, non-interaktif). */
+function sofa() {
+  const g = new THREE.Group();
+  const seat = box(2.4, 0.42, 0.95, MAT.sofa); seat.position.y = 0.32; g.add(seat);
+  const backr = box(2.4, 0.75, 0.25, MAT.sofa); backr.position.set(0, 0.82, -0.36); g.add(backr);
+  [[-1.05], [1.05]].forEach(([x]) => {
+    const arm = box(0.28, 0.6, 0.95, MAT.sofa); arm.position.set(x, 0.5, 0); g.add(arm);
   });
-
-  stageEl.addEventListener("pointermove", (e) => {
-    // Parallax pointer (mouse) — sentuhan jangan ganggu drag
-    if (e.pointerType === "mouse" && !dragging) {
-      parX = (e.clientX / window.innerWidth - 0.5) * 2;
-      parY = (e.clientY / window.innerHeight - 0.5) * 2;
-    }
-    if (!pointers.has(e.pointerId)) return;
-    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-    if (pointers.size === 2) {
-      const [a, b] = Array.from(pointers.values());
-      const d = Math.hypot(a.x - b.x, a.y - b.y);
-      if (pinchStartDist > 0) {
-        targetDist = clamp(pinchStartZoom * (pinchStartDist / d), DIST_MIN, DIST_MAX);
-      }
-      return;
-    }
-    if (!dragging || focusedCard) return;
-
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
-    lastX = e.clientX; lastY = e.clientY;
-    dragMoved += Math.abs(dx) + Math.abs(dy);
-    const boost = 1 / clamp(currentDist / 7, 0.6, 1.8); // zoom dekat = putaran lebih pelan
-    photoGroup.rotation.y += dx * 0.0045 * boost;
-    ringVelocity = dx * 0.0045 * boost * 42; // rad/detik utk inersia
-    // Geser vertikal kecil mengangkat kamera — nuansa "mengintip"
-    parY = clamp(parY + dy * 0.0016, -0.9, 0.9);
+  [[-0.6, 0.1], [0.6, 0.1]].forEach(([x]) => {
+    const c = box(0.5, 0.5, 0.16, MAT.cushion);
+    c.rotation.x = -0.18; c.position.set(x, 0.72, -0.18);
+    g.add(c);
   });
+  [[-1, -0.38], [1, -0.38], [-1, 0.38], [1, 0.38]].forEach(([x, z]) => {
+    const foot = cyl(0.06, 0.06, 0.14, 10, MAT.woodDark);
+    foot.position.set(x, 0.07, z * 0.8); g.add(foot);
+  });
+  return g;
+}
 
-  function endPointer(e) {
-    pointers.delete(e.pointerId);
-    if (pointers.size < 2) pinchStartDist = 0;
-    if (!dragging) return;
-    dragging = false;
-    stageEl.classList.remove("dragging");
-    // Tap (bukan drag): raycast kartu foto
-    if (dragMoved < 7) {
-      ndc.x = (e.clientX / window.innerWidth) * 2 - 1;
-      ndc.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(ndc, camera);
-      const meshes = photoCards.filter((c) => !c.focused).map((c) => c.mesh);
-      const hit = raycaster.intersectObjects(meshes, false)[0];
-      if (hit) {
-        const card = photoCards.find((c) => c.mesh === hit.object);
-        if (card === focusedCard) unfocus();
-        else focusCard(card);
-      } else if (focusedCard) {
-        unfocus();
-      }
-    }
-    dragMoved = 0;
+/** Tanaman pot (dekorasi). */
+function plant() {
+  const g = new THREE.Group();
+  const pot = cyl(0.3, 0.22, 0.5, 16, MAT.plantPot); pot.position.y = 0.25; g.add(pot);
+  for (let i = 0; i < 7; i++) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), MAT.leaf);
+    leaf.scale.set(1, 1.5, 1);
+    const a = (i / 7) * Math.PI * 2;
+    leaf.position.set(Math.cos(a) * 0.16, 0.72 + (i % 3) * 0.16, Math.sin(a) * 0.16);
+    g.add(leaf);
   }
-  stageEl.addEventListener("pointerup", endPointer);
-  stageEl.addEventListener("pointercancel", endPointer);
+  return g;
+}
 
-  window.addEventListener("wheel", (e) => {
-    // Panel info sedang terbuka → biarkan scroll daftar acara bekerja.
-    if (document.getElementById("panel").classList.contains("show")) return;
-    e.preventDefault();
-    targetDist = clamp(targetDist + e.deltaY * 0.004, DIST_MIN, DIST_MAX);
-  }, { passive: false });
+/* ---- Penempatan objek & wiring panel ---- */
 
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+const panelData = {}; // key → builder konten panel (fungsi async → html)
 
-  /* =====================================================
-     9) Overlay: buka undangan, panel info, countdown
-     ===================================================== */
-  const qs = new URLSearchParams(location.search);
-  const guestName = (qs.get(CFG.guestParam || "to") || "").replace(/\+/g, " ").trim();
+function openPanel(key) {
+  const d = panelData[key];
+  if (!d) return;
+  buildPanel(d);
+  document.getElementById('panelWrap').classList.add('open');
+}
+function closePanel() {
+  document.getElementById('panelWrap').classList.remove('open');
+}
+document.getElementById('panelClose').addEventListener('click', closePanel);
+document.getElementById('panelBackdrop').addEventListener('click', closePanel);
 
-  function fillIntro(data) {
-    document.title = data.groomNick + " & " + data.brideNick + " — Undangan 3D";
-    document.getElementById("i-names").textContent = data.brideNick + " & " + data.groomNick;
-    document.getElementById("i-date").textContent =
-      (data.dayLabel ? data.dayLabel + ", " : "") + data.dateLabel;
-    document.getElementById("i-guest").textContent = guestName || CFG.defaultGuestName || "Bapak/Ibu/Saudara/i";
+async function buildPanel(d) {
+  document.getElementById('panelKicker').textContent = d.kicker;
+  const body = document.getElementById('panelBody');
+  body.innerHTML = '';
+  const h2 = document.createElement('h2');
+  h2.textContent = d.title;
+  body.appendChild(h2);
+  if (d.photoUrl) {
+    const img = document.createElement('img');
+    img.className = 'panel-photo';
+    img.src = d.photoUrl;
+    img.alt = d.title;
+    body.appendChild(img);
   }
-  function fillPanel(data) {
-    document.getElementById("p-names").textContent = data.brideNick + " & " + data.groomNick;
-    document.getElementById("p-date").textContent = (data.dayLabel ? data.dayLabel + ", " : "") + data.dateLabel;
-    const cdTarget = data.countdownTarget ? new Date(data.countdownTarget).getTime() : NaN;
-    const cdRoot = document.getElementById("countdown");
-    if (!isNaN(cdTarget)) {
-      cdRoot.innerHTML = Array.from({ length: 4 }, () => "<div><b>&ndash;</b><span></span></div>").join("");
-      const cells = cdRoot.querySelectorAll("div");
-      const labels = ["Hari", "Jam", "Menit", "Detik"];
-      cells.forEach((cell, i) => cell.querySelector("span").textContent = labels[i]);
-      const tick = () => {
-        let diff = Math.max(0, cdTarget - Date.now());
-        const dd = Math.floor(diff / 86400000); diff -= dd * 86400000;
-        const hh = Math.floor(diff / 3600000); diff -= hh * 3600000;
-        const mm = Math.floor(diff / 60000); diff -= mm * 60000;
-        const ss = Math.floor(diff / 1000);
-        const vals = [dd, hh, mm, ss];
-        cells.forEach((cell, i) => cell.querySelector("b").textContent = String(vals[i]).padStart(2, "0"));
-      };
-      tick();
-      setInterval(tick, 1000);
-    } else {
-      cdRoot.style.display = "none";
-    }
-    [["ev-akad", data.akad], ["ev-resepsi", data.resepsi]].forEach(([id, evn]) => {
-      const el = document.getElementById(id);
-      if (!evn) { el.style.display = "none"; return; }
-      const v = evn.venue || {};
-      el.innerHTML =
-        "<h3>" + esc(evn.label || id) + "</h3>" +
-        '<p class="t">' + esc(data.dateLabel) + " &middot; " + esc(evn.start || "") +
-        (evn.end ? " &ndash; " + esc(evn.end) : "") + "</p>" +
-        (v.name ? '<p class="v">' + esc(v.name) + "</p>" : "") +
-        (v.address ? '<p class="a">' + esc(v.address) + "</p>" : "") +
-        (v.mapsUrl ? '<a href="' + esc(v.mapsUrl) + '" target="_blank" rel="noopener">Lihat Lokasi</a>' : "");
-    });
-  }
-  function esc(v) {
-    return String(v == null ? "" : v)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  }
+  const frag = document.createElement('div');
+  frag.innerHTML = d.html || '';
+  body.appendChild(frag);
+}
 
-  document.getElementById("btn-info").addEventListener("click", () => {
-    document.getElementById("panel").classList.add("show");
-  });
-  document.getElementById("panel-close").addEventListener("click", () => {
-    document.getElementById("panel").classList.remove("show");
-  });
-  document.getElementById("panel").addEventListener("click", (e) => {
-    if (e.target.id === "panel") e.target.classList.remove("show");
-  });
-  document.getElementById("btn-unfocus").addEventListener("click", unfocus);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  let opened = false;
-  document.getElementById("btn-open").addEventListener("click", () => {
-    if (opened) return;
-    opened = true;
-    document.getElementById("intro").classList.add("hidden");
-    document.body.classList.add("opened");
-    // Terbang masuk: dist 15.5 → targetDist, sedikit turun dari atas
-    const fromY = CAM_BASE_Y + 1.1;
-    addTween(2.4, (k) => {
-      currentDist = lerp(15.5, targetDist, easeOutCubic(k));
-      camera.position.y = lerp(fromY, CAM_BASE_Y, easeOutCubic(k));
-    }, null, (t) => t); // easing manual di dalam
-  });
+window.__panelsReady = (async function populatePanels() {
+  const ev = cfg.event || {};
+  const akad = ev.akad || {}, rsp = ev.resepsi || {};
+  const story = Array.isArray(cfg.loveStory) ? cfg.loveStory : [];
 
-  /* =====================================================
-     10) Loop utama
-     ===================================================== */
-  const clock = new THREE.Clock();
-  let running = true;
-  document.addEventListener("visibilitychange", () => {
-    running = !document.hidden;
-    if (running) { clock.getDelta(); requestAnimationFrame(loop); }
-  });
-
-  function loop() {
-    if (!running) return;
-    const dt = Math.min(clock.getDelta(), 0.05);
-    const t = clock.elapsedTime;
-
-    stepTweens(dt);
-    updateFireflies(fliesNear, t, dt);
-    updateFireflies(fliesFar, t, dt);
-    animateCenter(t);
-
-    // Inersia + auto-rotate karusel
-    if (!dragging && !focusedCard) {
-      photoGroup.rotation.y += ringVelocity * dt;
-      ringVelocity *= Math.exp(-dt * 2.4);
-      if (autoRotate && Math.abs(ringVelocity) < 0.12) {
-        photoGroup.rotation.y += dt * 0.055;
-      }
-    }
-    updateCardAttention();
-
-    // Billboard nama: selalu menghadap kamera + napas pelan
-    if (namePlane) {
-      namePlane.quaternion.copy(camera.quaternion);
-      namePlane.position.set(0, 3.35 + Math.sin(t * 0.7) * 0.05, 0);
-      namePlane.material.opacity = clamp((currentDist - 4.2) / 2.2, 0, 1);
-    }
-
-    // Kamera: zoom damp (hanya setelah undangan dibuka — sebelum itu kamera
-    // tetap di posisi intro jauh) + parallax halus
-    if (opened) currentDist = damp(currentDist, targetDist, 3.2, dt);
-    if (opened) camera.position.y = damp(camera.position.y, CAM_BASE_Y - parY * 0.5, 3, dt);
-    const px = opened && !focusedCard ? parX : 0;
-    camera.position.x = damp(camera.position.x, px * 0.85, 3, dt);
-    camera.position.z = currentDist;
-    camera.lookAt(0, 1.15 + (opened ? parY * 0.25 : 0.9), 0);
-
-    renderer.render(scene, camera);
-    requestAnimationFrame(loop);
-  }
-
-  /* =====================================================
-     11) Init data lalu mulai
-     ===================================================== */
-  loadData().then((data) => {
-    fillIntro(data);
-    fillPanel(data);
-    buildNamePlane(data);
-    buildPhotoRing(data);
-    if (!totalPhotos) note.textContent = "Foto tidak tersedia — menampilkan cincin & partikel.";
-    requestAnimationFrame(loop);
-  }).catch((err) => {
-    console.error(err);
-    note.textContent = "Gagal memuat data — mencoba data lokal.";
-    requestAnimationFrame(loop);
-  });
+  // 1) BINGKAI FOTO KIRI — cerita cinta (foto babak pertama)
+  const storyPhotos = await photoList('story', story.map((s) => s.photo));
+  panelData.photoStory = {
+    kicker: 'Cerita Kami',
+    title: story[0] ? `${story[0].date} — ${esc(story[0].title)}` : 'Cerita Kami',
+    photoUrl: storyPhotos[0] || '',
+    html: (story[0] ? `<p>${esc(story[0].text)}</p>` : '') +
+      story.slice(1).map((s) =>
+        `<p><strong style="color:var(--teal)">${esc(s.date)} · ${esc(s.title)}</strong><br>${esc(s.text)}</p>`
+      ).join('')
+  };
+  // 2) BINGKAI FOTO KANAN — foto pasangan (folder bride)
+  const couplePhotos = await photoList('bride', [cfg.couple && cfg.couple.bride.photo]);
+  panelData.photoCouple = {
+    kicker: 'Kedua Mempelai',
+    title: `${cfg.couple.bride.nickname} & ${cfg.couple.groom.nickname}`,
+    photoUrl: couplePhotos[0] || '',
+    html: `<p>${esc(cfg.couple.bride.name)}, putri dari pasangan
+             ${esc(cfg.couple.bride.father)} &amp; ${esc(cfg.couple.bride.mother)}.</p>
+           <p>${esc(cfg.couple.groom.name)}, putra dari pasangan
+             ${esc(cfg.couple.groom.father)} &amp; ${esc(cfg.couple.groom.mother)}.</p>
+           <div class="row"><span class="chip">💍 ${esc(ev.dateLabel || '')}</span></div>`
+  };
+  // 3) BUKU DI MEJA — info acara
+  panelData.bookEvent = {
+    kicker: 'Info Acara',
+    title: 'Akad & Resepsi',
+    html: `
+      <div class="row"><span class="chip">📖 Akad Nikah</span><span class="chip">${esc(akad.start || '')}–${esc(akad.end || '')}</span></div>
+      <p>${esc((akad.venue && akad.venue.name) || '')}<br><small>${esc((akad.venue && akad.venue.address) || '')}</small></p>
+      <div class="row"><span class="chip">🎉 Resepsi</span><span class="chip">${esc(rsp.start || '')}–${esc(rsp.end || '')}</span></div>
+      <p>${esc((rsp.venue && rsp.venue.name) || '')}<br><small>${esc((rsp.venue && rsp.venue.address) || '')}</small></p>
+      ${(rsp.venue && rsp.venue.mapsUrl) ? `<a class="mapsLink" href="${esc(rsp.venue.mapsUrl)}" target="_blank" rel="noopener">📍 Buka Google Maps</a>` : ''}`
+  };
+  // 4) AMPLOP DI MEJA — tentang undangan 3D ini
+  panelData.envelopeInfo = {
+    kicker: 'Undangan',
+    title: 'Tentang Undangan Ini',
+    html: `<p>Undangan digital Mita &amp; Andi — ${esc(ev.dayLabel || '')}, ${esc(ev.dateLabel || '')}.</p>
+           <p>Rumah mini ini adalah versi eksperimen Three.js: geser untuk melihat sekeliling,
+              sentuh benda bercahaya untuk membuka cerita. Selamat menjelajah! 🏡</p>`
+  };
+  return panelData;
 })();
+
+/* ---- Build objek dunia (async karena tekstur foto) ---- */
+
+(async function buildWorld() {
+  await window.__panelsReady;
+  // Sofa kiri-decor
+  const sf = sofa();
+  sf.position.set(-2.9, 0, -2.4);
+  sf.rotation.y = Math.PI / 2 - 0.25;
+  room.add(sf);
+
+  // Tanaman pojok
+  const pl = plant();
+  pl.position.set(-3.9, 0, 3.4);
+  room.add(pl);
+  const pl2 = plant();
+  pl2.position.set(3.9, 0, -3.4);
+  pl2.scale.setScalar(1.15);
+  room.add(pl2);
+
+  // Meja tengah
+  const table = coffeeTable();
+  table.position.set(0, 0, 0.6);
+  room.add(table);
+
+  // BUKU CERITA di meja (interaktif)
+  const book = openBook(MAT.bookCoverA);
+  book.position.set(-0.28, 0.83, 0.6);
+  book.rotation.y = 0.3;
+  room.add(book);
+  makeInteractive(book, [1.15, 0.35, 0.9], () => openPanel('bookEvent'));
+
+  // AMPLOP di meja (interaktif)
+  const envl = envelope();
+  envl.position.set(0.42, 0.79, 0.75);
+  envl.rotation.y = -0.4;
+  room.add(envl);
+  makeInteractive(envl, [0.95, 0.35, 0.8], () => openPanel('envelopeInfo'));
+
+  // BINGKAI FOTO di dinding belakang (interaktif)
+  const storyFrame = await framedPhoto(panelData.photoStory.photoUrl, 1.15, 0.85);
+  storyFrame.position.set(-2.2, 2.35, -ROOM_D / 2 + 0.22);
+  room.add(storyFrame);
+  makeInteractive(storyFrame, [1.6, 1.3, 0.4], () => openPanel('photoStory'));
+
+  const coupleFrame = await framedPhoto(panelData.photoCouple.photoUrl, 1.15, 0.85);
+  coupleFrame.position.set(2.2, 2.35, -ROOM_D / 2 + 0.22);
+  room.add(coupleFrame);
+  makeInteractive(coupleFrame, [1.6, 1.3, 0.4], () => openPanel('photoCouple'));
+
+  // Pulsing halo di sekitar tiap objek interaktif — penanda "boleh disentuh"
+  interactives.forEach(({ hitbox }) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(Math.max(hitSizeRadius(hitbox)) , 0.035, 10, 40),
+      new THREE.MeshBasicMaterial({ color: '#ffd166', transparent: true, opacity: 0.85 })
+    );
+    ring.name = 'pulseRing';
+    hitbox.add(ring);
+    // Ring orientasinya menghadap depan-kamera-ish: datarkan saja horizontal
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = -(hitbox.geometry.parameters.height / 2) + 0.05;
+  });
+
+  animate();
+})();
+
+function hitSizeRadius(hitbox) {
+  const p = hitbox.geometry.parameters;
+  return Math.max(p.width, p.depth) / 2 + 0.15;
+}
+
+/* ================= Kontrol sentuh / mouse ================= */
+
+const look = new THREE.Vector3(0, 1.5, 0.6); // titik pandang: tengah ruangan
+let yaw = 0, pitch = 0.32, dist = 9.2;
+const DIST_MIN = 5.5, DIST_MAX = 13;
+let velYaw = 0, velPitch = 0; // inersia
+
+function applyCamera() {
+  pitch = Math.max(-0.15, Math.min(1.1, pitch));
+  camera.position.set(
+    look.x + dist * Math.cos(pitch) * Math.sin(yaw),
+    look.y + dist * Math.sin(pitch),
+    look.z + dist * Math.cos(pitch) * Math.cos(yaw)
+  );
+  camera.lookAt(look);
+}
+applyCamera();
+
+// --- Pointer events (menyatukan mouse & sentuh) ---
+const pointers = new Map(); // pointerId → {x, y}
+let pinchDist = 0;
+let downPos = null, movedFar = false;
+const TAP_SLOP = 12; // px — gerakan di bawah ini dianggap tap
+
+stage.addEventListener('pointerdown', (e) => {
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  stage.classList.add('dragging');
+  if (pointers.size === 1) { downPos = { x: e.clientX, y: e.clientY }; movedFar = false; }
+  if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
+  }
+});
+
+stage.addEventListener('pointermove', (e) => {
+  const prev = pointers.get(e.pointerId);
+  if (!prev) return;
+  const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (downPos && Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > TAP_SLOP) movedFar = true;
+
+  if (pointers.size === 1) {
+    // Drag = putar pandangan (dengan inersia ringan)
+    velYaw = dx * 0.0042;
+    velPitch = dy * 0.0028;
+    yaw += velYaw;
+    pitch += velPitch;
+    applyCamera();
+  } else if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (pinchDist > 0) {
+      dist = Math.max(DIST_MIN, Math.min(DIST_MAX, dist * (pinchDist / d)));
+      applyCamera();
+    }
+    pinchDist = d;
+  }
+});
+
+function endPointer(e) {
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinchDist = 0;
+  if (pointers.size === 0) {
+    stage.classList.remove('dragging');
+    // Tap = buka objek yang kena
+    if (!movedFar && downPos) tryPick(downPos.x, downPos.y);
+    downPos = null;
+  }
+}
+stage.addEventListener('pointerup', endPointer);
+stage.addEventListener('pointercancel', endPointer);
+stage.addEventListener('pointerleave', (e) => {
+  if (pointers.has(e.pointerId)) endPointer(e);
+});
+
+// Wheel zoom (desktop)
+stage.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  dist = Math.max(DIST_MIN, Math.min(DIST_MAX, dist * (1 + Math.sign(e.deltaY) * 0.08)));
+  applyCamera();
+}, { passive: false });
+
+/* ---- Raycast pick ---- */
+
+const ndc = new THREE.Vector2();
+function tryPick(x, y) {
+  ndc.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  const hits = raycaster.intersectObjects(interactives.map((i) => i.hitbox), false);
+  if (hits.length) {
+    const entry = interactives.find((i) => i.hitbox === hits[0].object);
+    if (entry) entry.onClick();
+  }
+}
+
+/* ================= Loop animasi ================= */
+
+const clock = new THREE.Clock();
+const pulseMats = [];
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  const t = clock.elapsedTime;
+
+  // Inersia drag
+  if (pointers.size === 0) {
+    velYaw *= 0.93; velPitch *= 0.93;
+    if (Math.abs(velYaw) > 1e-4 || Math.abs(velPitch) > 1e-4) {
+      yaw += velYaw; pitch += velPitch;
+      applyCamera();
+    }
+  }
+
+  // Awan mengapung pelan
+  cloudGroup.children.forEach((cloud, i) => {
+    cloud.position.y = cloud.userData.baseY + Math.sin(t * 0.7 + i * 2.1) * 0.12;
+    cloud.rotation.y = Math.sin(t * 0.3 + i) * 0.15;
+  });
+
+  // Halo pulsing di objek interaktif
+  scene.traverse((o) => {
+    if (o.name === 'pulseRing') {
+      const s = 1 + Math.sin(t * 3 + o.parent.id) * 0.12;
+      o.scale.set(s, s, s);
+    }
+  });
+
+  renderer.render(scene, camera);
+}
+
+/* ================= Resize ================= */
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ================= Enter ================= */
+
+document.getElementById('enterBtn').addEventListener('click', () => {
+  document.getElementById('intro').classList.add('hidden');
+});
 </script>
 </body>
 </html>
