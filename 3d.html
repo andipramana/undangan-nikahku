@@ -6,20 +6,23 @@
 <base href="/">
 <meta name="robots" content="noindex">
 <!-- =============================================================
-     EKSPERIMEN 3D v2 — "Rumah Mita & Andi".
+     EKSPERIMEN 3D v3 — "Jalan Menuju Hari Bahagia".
      BUKAN pengganti index.html: halaman tamu lain tidak disentuh.
-     Satu file, tanpa bundler; Three.js dari CDN (pola sama dengan
-     xlsx/jsQR/html2canvas di file lain). Data & foto tenant 'root'
+     Satu file, tanpa bundler; Three.js dari CDN. Data tenant 'root'
      via assets/js/config.js + supabase-client.js + photos.js
      (RPC get_invitation → localStorage → config lokal).
 
-     Konsep: ruang tamu kartun yang bisa dijelajahi — drag untuk
-     melihat sekeliling (orbit), pinch/wheel untuk zoom. Objek
-     interaktif (bingkai foto ×2 di dinding, meja dengan buku
-     cerita & undangan) menyala saat disentuh; tap memunculkan
-     panel info HTML bergaya kartun. Vibe CERAH, ilustratif.
+     Konsep: perjalanan first-person POV LINEAR — navigasi HANYA
+     scroll/swipe vertikal (maju/mundur sepanjang jalur), tanpa
+     drag-lihat-sekeliling. Urutan checkpoint SAMA PERSIS dengan
+     section index.html: Cover (tombol buka undangan) → opening
+     (ayat + foto) → mempelai ×2 → save-the-date → acara →
+     livestream → quote → cerita cinta → quotes → galeri → gift →
+     rsvp → closing. Begitu kamera tiba di sebuah checkpoint,
+     panel info-nya OTOMATIS terbuka; ditutup → lanjut scroll.
+     Vibe cerah kartun-ilustratif, lanjutan versi rumah sebelumnya.
      ============================================================= -->
-<title>Mita &amp; Andi — Rumah 3D</title>
+<title>Mita &amp; Andi — Perjalanan 3D</title>
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +30,6 @@
 <style>
   :root {
     --ink: #4a3728;
-    --cream: #fff6e9;
     --coral: #ff8a65;
     --teal: #26b5a2;
     --sun: #ffc94d;
@@ -44,14 +46,54 @@
     -webkit-tap-highlight-color: transparent;
     user-select: none;
   }
-  #stage { position: fixed; inset: 0; touch-action: none; cursor: grab; }
-  #stage.dragging { cursor: grabbing; }
+
+  /* Scroll terjadi pada wrapper tinggi-penuh ini — halaman 3D sendiri fixed. */
+  #scroller {
+    position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; z-index: 5;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+  }
+  #scroller::-webkit-scrollbar { display: none; }
+  #scroll-space { width: 1px; }
+  .snap-seg {
+    height: 100vh; height: 100dvh;
+    scroll-snap-align: start; scroll-snap-stop: always;
+    pointer-events: none;
+  }
+
+  #stage { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+  /* ---------- Progress rail ---------- */
+  #rail {
+    position: fixed; right: calc(env(safe-area-inset-right, 0px) + 10px); top: 50%;
+    transform: translateY(-50%); z-index: 20;
+    display: flex; flex-direction: column; gap: 9px; align-items: center;
+  }
+  .rail-dot {
+    width: 10px; height: 10px; border-radius: 999px;
+    background: rgba(255,255,255,.75);
+    box-shadow: 0 0 0 2px rgba(74,55,40,.25);
+    transition: background .3s ease, transform .3s ease;
+  }
+  .rail-dot.active { background: var(--coral); transform: scale(1.45); }
+
+  /* ---------- Hint bawah ---------- */
+  #hint {
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    transform: translateX(-50%); z-index: 20;
+    background: rgba(255,250,240,.92); color: var(--ink);
+    font-weight: 700; font-size: 13px; padding: 8px 18px; border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(74,55,40,.22);
+    transition: opacity .5s ease;
+    white-space: nowrap;
+  }
+  #hint.hidden { opacity: 0; }
 
   /* ---------- Layar pembuka ---------- */
   #intro {
     position: fixed; inset: 0; z-index: 30;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 24px; gap: 14px;
+    text-align: center; padding: 24px; gap: 12px;
     background:
       radial-gradient(90% 60% at 50% -10%, rgba(255,201,77,.55), transparent 60%),
       radial-gradient(120% 80% at 50% 110%, rgba(38,181,162,.35), transparent 55%),
@@ -59,50 +101,37 @@
     transition: opacity .5s ease, visibility .5s ease;
   }
   #intro.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-  #intro h1 { font-size: clamp(34px, 9vw, 56px); font-weight: 800; line-height: 1.1; color: var(--coral); }
-  #intro p  { font-size: clamp(15px, 4vw, 18px); font-weight: 600; max-width: 420px; }
+  #intro h1 { font-size: clamp(32px, 9vw, 54px); font-weight: 800; line-height: 1.1; color: var(--coral); }
+  #intro p { font-size: clamp(15px, 4vw, 18px); font-weight: 600; max-width: 430px; }
   #enterBtn {
-    margin-top: 10px; border: none; cursor: pointer;
+    margin-top: 8px; border: none; cursor: pointer;
     font-family: inherit; font-weight: 800; font-size: 18px; color: #fff;
     padding: 16px 40px; border-radius: 999px;
     background: linear-gradient(180deg, var(--coral), #f07048);
-    box-shadow: 0 6px 0 #c85a38, 0 12px 24px rgba(200, 90, 56, .35);
+    box-shadow: 0 6px 0 #c85a38, 0 12px 24px rgba(200,90,56,.35);
     transition: transform .15s ease, box-shadow .15s ease;
   }
   #enterBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c85a38; }
   #introHint { font-size: 13px; font-weight: 600; opacity: .65; }
 
-  /* ---------- HUD ---------- */
-  #hud {
-    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px);
-    left: 12px; right: 12px; z-index: 20;
-    display: flex; justify-content: space-between; align-items: flex-start;
-    gap: 10px; pointer-events: none;
-  }
-  .hud-card {
-    pointer-events: auto;
-    background: rgba(255, 250, 240, .92); border-radius: 18px;
-    padding: 10px 16px; box-shadow: 0 4px 14px rgba(74, 55, 40, .18);
-    font-weight: 700;
-  }
-  #hudTitle { font-size: 15px; color: var(--coral); }
-  #hudTitle small { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); opacity: .75; }
-
-  /* ---------- Panel info ---------- */
+  /* ---------- Panel info otomatis ---------- */
   #panelWrap {
     position: fixed; inset: 0; z-index: 25;
     display: flex; align-items: center; justify-content: center;
     padding: 18px; visibility: hidden;
   }
   #panelWrap.open { visibility: visible; }
+  /* Panel menutupi scroll: backdrop menerima wheel/touch agar konten
+     tidak melompat saat panel terbuka. */
   #panelBackdrop {
     position: absolute; inset: 0;
-    background: rgba(74, 55, 40, .45);
+    background: rgba(74,55,40,.45);
     opacity: 0; transition: opacity .3s ease;
+    touch-action: none;
   }
   #panelWrap.open #panelBackdrop { opacity: 1; }
   #panel {
-    position: relative; width: min(480px, 100%); max-height: 78vh;
+    position: relative; width: min(480px, 100%); max-height: 74vh;
     overflow-y: auto; -webkit-overflow-scrolling: touch;
     background: var(--panel-bg); border-radius: 24px;
     padding: 22px 20px 20px;
@@ -124,14 +153,23 @@
     color: #fff; background: var(--teal);
     padding: 4px 12px; border-radius: 999px; margin-bottom: 10px;
   }
-  #panelBody h2 { font-size: 24px; font-weight: 800; color: var(--coral); margin-bottom: 8px; }
+  #panelBody h2 { font-size: 23px; font-weight: 800; color: var(--coral); margin-bottom: 8px; line-height: 1.2; }
   #panelBody img.panel-photo {
     width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
     border-radius: 16px; margin-bottom: 12px;
     border: 4px solid #fff; box-shadow: 0 4px 14px rgba(74,55,40,.2);
   }
+  #panelBody img.gallery-thumb {
+    width: 31%; aspect-ratio: 1 / 1; object-fit: cover;
+    border-radius: 12px; margin: 0 2% 8px 0;
+    border: 3px solid #fff; box-shadow: 0 3px 10px rgba(74,55,40,.18);
+  }
   #panelBody p { font-size: 15.5px; font-weight: 600; line-height: 1.55; margin-bottom: 8px; }
-  #panelBody .row { display: flex; gap: 8px; margin-bottom: 6px; }
+  #panelBody blockquote {
+    font-style: italic; font-weight: 700; font-size: 17px; line-height: 1.5;
+    color: var(--teal); text-align: center; padding: 6px 8px;
+  }
+  #panelBody .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
   #panelBody .chip {
     background: #fff2d6; border-radius: 10px; padding: 6px 10px;
     font-size: 13px; font-weight: 700;
@@ -141,23 +179,32 @@
     color: #fff; background: var(--teal); font-weight: 800; font-size: 14px;
     padding: 10px 20px; border-radius: 999px; box-shadow: 0 4px 0 #17897b;
   }
+  #panelBody .arabic {
+    font-size: 26px; text-align: center; direction: rtl; line-height: 1.9;
+    margin-bottom: 8px;
+  }
+  #panelBody .story-item { margin-bottom: 12px; }
+  #panelBody .story-date { color: var(--teal); font-weight: 800; font-size: 13px; letter-spacing: .04em; }
 </style>
 </head>
 <body>
 
 <div id="stage"></div>
 
+<!-- Wrapper scroll: memberi ruang vertikal untuk swipe -->
+<div id="scroller"><div id="scroll-space"></div></div>
+
+<!-- Rail progres checkpoint -->
+<div id="rail"></div>
+
+<div id="hint">Geser ke atas untuk berjalan 👆</div>
+
 <!-- Layar pembuka -->
 <div id="intro">
   <h1>Mita &amp; Andi</h1>
-  <p>Selamat datang di rumah kami! Geser untuk melihat sekeliling ruangan, lalu sentuh bingkai foto atau benda di atas meja.</p>
-  <button id="enterBtn">Masuk Rumah</button>
-  <span id="introHint">Cocok dibuka di HP — cukup pakai satu jari 👆</span>
-</div>
-
-<!-- HUD -->
-<div id="hud">
-  <div class="hud-card" id="hudTitle">Rumah Mita &amp; Andi<small>Geser = lihat sekeliling · cubit/zoom = perbesar · sentuh benda bercahaya ✨</small></div>
+  <p>Ikuti jalan kami menuju hari bahagia. Geser layar ke atas untuk melangkah maju — setiap posisi akan membuka ceritanya sendiri.</p>
+  <button id="enterBtn">Mulai Perjalanan</button>
+  <span id="introHint">Cukup satu jari — geser atas/bawah 📱</span>
 </div>
 
 <!-- Panel info -->
@@ -184,28 +231,25 @@ import * as THREE from 'three';
 /* ================= Data undangan ================= */
 
 const cfg = window.WEDDING_CONFIG;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-/** Foto folder Supabase → URL publik, dengan cadangan path lokal config. */
 async function photoList(folder, fallbackPaths) {
   const list = await window.getPhotos(folder);
   const out = [];
   if (list && list.length) {
     for (const p of list) out.push(window.photoUrl(p.path));
   } else if (fallbackPaths && fallbackPaths.length) {
-    out.push(...fallbackPaths);
+    out.push(...fallbackPaths.filter(Boolean));
   }
-  return out.filter(Boolean);
+  return out;
 }
 
-/** Muat tekstur dari URL; resolve null kalau gagal (jaringan lambat dsb). */
 function loadTexture(url) {
   return new Promise((resolve) => {
-    new THREE.TextureLoader().load(
-      url,
-      (tex) => { tex.colorSpace = THREE.SRGBColorSpace; resolve(tex); },
-      undefined,
-      () => resolve(null)
-    );
+    new THREE.TextureLoader().load(url, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace; resolve(tex);
+    }, undefined, () => resolve(null));
   });
 }
 
@@ -219,547 +263,501 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 stage.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#bfe7f7');
+scene.background = new THREE.Color('#cfeef9'); // langit siang cerah
+scene.fog = new THREE.Fog('#cfeef9', 26, 58);
 
-// Kamera orbit manual: yaw/pitch/distance diputar mengelilingi pusat ruangan.
-const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, 0.1, 100);
+// Kamera POV: selalu menghadap -Z sepanjang jalur, sedikit bobbing saat jalan.
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.1, 120);
 
-// Cahaya cerah khas ilustrasi: ambient kuat + matahari hangat.
 scene.add(new THREE.AmbientLight(0xfff2dd, 1.05));
-const sun = new THREE.DirectionalLight(0xffeec2, 1.5);
-sun.position.set(6, 10, 4);
+const sun = new THREE.DirectionalLight(0xffeec2, 1.4);
+sun.position.set(8, 14, 6);
 scene.add(sun);
-const fill = new THREE.DirectionalLight(0xcdeeff, 0.5);
-fill.position.set(-6, 4, -6);
-scene.add(fill);
-
-/* ================= Ukuran & material ruangan ================= */
-
-const ROOM_W = 10, ROOM_D = 10, ROOM_H = 4.4;
 
 const MAT = {
-  wallBack:   new THREE.MeshLambertMaterial({ color: '#ffe9d6' }),
-  wallSide:   new THREE.MeshLambertMaterial({ color: '#ffdcb8' }),
-  floor:      new THREE.MeshLambertMaterial({ color: '#f7b98a' }),
-  rug:        new THREE.MeshLambertMaterial({ color: '#8fd3c7' }),
-  rugInner:   new THREE.MeshLambertMaterial({ color: '#bfe6dd' }),
-  woodDark:   new THREE.MeshLambertMaterial({ color: '#a86a3d' }),
-  woodLight:  new THREE.MeshLambertMaterial({ color: '#e8b04b' }),
-  frameWood:  new THREE.MeshLambertMaterial({ color: '#c98a4b' }),
-  bookCoverA: new THREE.MeshLambertMaterial({ color: '#ff8a65' }),
-  bookCoverB: new THREE.MeshLambertMaterial({ color: '#5aa9e6' }),
-  paper:      new THREE.MeshBasicMaterial({ color: '#fffdf5' }),
-  sofa:       new THREE.MeshLambertMaterial({ color: '#ffb3c1' }),
-  cushion:    new THREE.MeshLambertMaterial({ color: '#ffd166' }),
-  plantPot:   new THREE.MeshLambertMaterial({ color: '#e07a5f' }),
-  leaf:       new THREE.MeshLambertMaterial({ color: '#57cc99' }),
-  windowFrame:new THREE.MeshLambertMaterial({ color: '#ffffff' })
+  path:   new THREE.MeshLambertMaterial({ color: '#f2cf9a' }),   // jalan setapak pasir
+  grassA: new THREE.MeshLambertMaterial({ color: '#a5dc86' }),
+  grassB: new THREE.MeshLambertMaterial({ color: '#93cf72' }),
+  trunk:  new THREE.MeshLambertMaterial({ color: '#a86a3d' }),
+  leaf:   new THREE.MeshLambertMaterial({ color: '#57cc99' }),
+  arch:   new THREE.MeshLambertMaterial({ color: '#ff8a65' }),
+  archAlt:new THREE.MeshLambertMaterial({ color: '#26b5a2' }),
+  post:   new THREE.MeshLambertMaterial({ color: '#ffffff' }),
+  flowerA:new THREE.MeshBasicMaterial({ color: '#ff6b81' }),
+  flowerB:new THREE.MeshBasicMaterial({ color: '#ffd166' }),
+  flowerC:new THREE.MeshBasicMaterial({ color: '#ba68c8' }),
+  cloud:  new THREE.MeshLambertMaterial({ color: '#ffffff' }),
+  gateWood:new THREE.MeshLambertMaterial({ color: '#c98a4b' })
 };
 
-function box(w, h, d, mat) {
-  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-}
-function cyl(rt, rb, h, seg, mat) {
-  return new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
-}
+const rand = (seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647)(42);
 
-/* ================= Ruangan ================= */
+function box(w, h, d, mat) { return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); }
+function cyl(rt, rb, h, seg, mat) { return new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat); }
+function sphere(r, mat, w = 14, hh = 10) { return new THREE.Mesh(new THREE.SphereGeometry(r, w, hh), mat); }
 
-const room = new THREE.Group();
-scene.add(room);
+/* ================= Dunia: jalur lurus sepanjang Z negatif =================
 
-// Lantai + karpet
+   Jalur dari z=0 (Cover) ke z=-CHECK_SPACING*(N-1). Tiap checkpoint punya
+   gapura lengkung + papan nama + dekorasi unik. Rumput dua sisi bergantian
+   warna (strip ala kartun). Pohon & bunga tersebar acak deterministik.   */
+
+const CHECKPOINTS = []; // diisi buildCheckpoints(): { z, key, label }
+const CHECK_SPACING = 16;
+
+// Ground panjang: strip rumput + jalan tengah
 {
-  const floor = box(ROOM_W, 0.3, ROOM_D, MAT.floor);
-  floor.position.y = -0.15;
-  room.add(floor);
-  const rug = cyl(2.6, 2.6, 0.06, 40, MAT.rug);
-  rug.position.set(0, 0.03, 0.6);
-  room.add(rug);
-  const rugIn = cyl(1.7, 1.7, 0.08, 40, MAT.rugInner);
-  rugIn.position.set(0, 0.04, 0.6);
-  room.add(rugIn);
+  const LEN = 320;
+  // rumput kiri/kanan berselang-seling warna per strip 8m — vibe kartun
+  for (let i = 0; i < LEN / 8; i++) {
+    const side = i % 2 ? MAT.grassA : MAT.grassB;
+    const g = new THREE.Mesh(new THREE.PlaneGeometry(60, 8), side);
+    g.rotation.x = -Math.PI / 2;
+    g.position.set(0, 0, -(i * 8) - 4);
+    scene.add(g);
+  }
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(4.4, LEN), MAT.path);
+  road.rotation.x = -Math.PI / 2;
+  road.position.set(0, 0.02, -LEN / 2 + 40);
+  scene.add(road);
 }
 
-// Tiga dinding (belakang, kiri, kanan) — sisi depan terbuka biar kamera bebas
-{
-  const back = box(ROOM_W, ROOM_H, 0.3, MAT.wallBack);
-  back.position.set(0, ROOM_H / 2, -ROOM_D / 2);
-  room.add(back);
-  const left = box(0.3, ROOM_H, ROOM_D, MAT.wallSide);
-  left.position.set(-ROOM_W / 2, ROOM_H / 2, 0);
-  room.add(left);
-  const right = box(0.3, ROOM_H, ROOM_D, MAT.wallSide);
-  right.position.set(ROOM_W / 2, ROOM_H / 2, 0);
-  room.add(right);
-  // Lis plafon warna krem agar tepi atas tidak kosong
-  const cornice = box(ROOM_W + 0.3, 0.25, ROOM_D + 0.3, MAT.windowFrame);
-  cornice.position.y = ROOM_H + 0.02;
-  scene.add(cornice);
+// Pohon & bunga pinggir jalan
+function tree(x, z, s = 1) {
+  const g = new THREE.Group();
+  const trunk = cyl(0.18 * s, 0.26 * s, 1.6 * s, 8, MAT.trunk);
+  trunk.position.y = 0.8 * s;
+  g.add(trunk);
+  [[0, 2.1 * s, 0, 1.05], [0.55 * s, 1.65 * s, 0.2, 0.62], [-0.5 * s, 1.75 * s, -0.15, 0.66]].forEach(([x2, y2, z2, r]) => {
+    const puff = sphere(r * s, MAT.leaf);
+    puff.position.set(x2, y2, z2);
+    puff.scale.y = 0.92;
+    g.add(puff);
+  });
+  g.position.set(x, 0, z);
+  return g;
+}
+function flower(x, z) {
+  const stem = cyl(0.02, 0.02, 0.34, 5, MAT.leaf);
+  stem.position.set(x, 0.17, z);
+  scene.add(stem);
+  const head = sphere(0.11, [MAT.flowerA, MAT.flowerB, MAT.flowerC][Math.floor(rand() * 3)], 8, 6);
+  head.position.set(x, 0.42, z);
+  scene.add(head);
+}
+for (let z = 4; z > -290; z -= 3.2) {
+  [-1, 1].forEach((side) => {
+    if (rand() < 0.5) flower(side * (2.8 + rand() * 1.4), z - rand() * 2);
+    if (rand() < 0.42) scene.add(tree(side * (5 + rand() * 3), z - rand() * 2.5, 0.85 + rand() * 0.5));
+  });
 }
 
-// Jendela besar di dinding belakang — "langit" biru + awan, sumber vibe cerah
-let cloudGroup;
-{
-  const win = new THREE.Group();
-  const glass = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.6, 2.2),
-    new THREE.MeshBasicMaterial({ color: '#9adcf5' })
+// Awan mengapung
+const clouds = [];
+for (let i = 0; i < 12; i++) {
+  const cl = new THREE.Group();
+  const cm = MAT.cloud;
+  [[0, 0, 0, 0.9], [1.1, -0.15, 0.2, 0.6], [-1.05, -0.1, -0.15, 0.55], [0.4, 0.5, 0, 0.55]].forEach(([x, y, z, r]) => {
+    const puff = sphere(r, cm);
+    puff.position.set(x, y, z);
+    cl.add(puff);
+  });
+  cl.position.set(-24 + rand() * 48, 10 + rand() * 6, 10 - rand() * 300);
+  cl.userData.baseY = cl.position.y;
+  cl.userData.speed = 0.15 + rand() * 0.2;
+  scene.add(cl);
+  clouds.push(cl);
+}
+
+/* ---- Gapura checkpoint: dua tiang + lengkung + papan label ---- */
+
+const labelCanvasTex = (() => {
+  const cache = {};
+  return (text) => {
+    if (cache[text]) return cache[text];
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 128;
+    const x = c.getContext('2d');
+    x.fillStyle = '#fffaf0';
+    x.beginPath();
+    x.roundRect(6, 14, 500, 100, 28);
+    x.fill();
+    x.strokeStyle = '#ff8a65'; x.lineWidth = 8;
+    x.stroke();
+    x.fillStyle = '#4a3728';
+    x.font = '800 44px "Baloo 2", sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(text, 256, 68, 450);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    cache[text] = tex;
+    return tex;
+  };
+})();
+
+function makeGate(label, idx) {
+  const g = new THREE.Group();
+  const mat = idx % 2 ? MAT.archAlt : MAT.arch;
+  [-1.7, 1.7].forEach((x) => {
+    const post = cyl(0.14, 0.18, 3.1, 10, MAT.post);
+    post.position.set(x, 1.55, 0);
+    g.add(post);
+    const ball = sphere(0.22, mat);
+    ball.position.set(x, 3.2, 0);
+    g.add(ball);
+  });
+  const arc = new THREE.Mesh(new THREE.TorusGeometry(1.7, 0.12, 10, 40, Math.PI), mat);
+  arc.position.y = 3.1;
+  g.add(arc);
+  // Papan label di atas lengkung
+  const sign = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.4, 0.85),
+    new THREE.MeshBasicMaterial({ map: labelCanvasTex(label), transparent: false })
   );
-  win.add(glass);
-  const barsV = box(0.12, 2.3, 0.1, MAT.windowFrame);
-  win.add(barsV);
-  const barH = box(3.7, 0.12, 0.1, MAT.windowFrame);
-  win.add(barH);
-  // Bingkai luar
-  [[-1.86, 0], [1.86, 0]].forEach(([x]) => {
-    const f = box(0.14, 2.4, 0.14, MAT.windowFrame);
-    f.position.x = x; win.add(f);
-  });
-  [[0, -1.14], [0, 1.14]].forEach(([, y]) => {
-    const f = box(3.9, 0.14, 0.14, MAT.windowFrame);
-    f.position.y = y; win.add(f);
-  });
-  win.position.set(0, 2.5, -ROOM_D / 2 + 0.22);
-  room.add(win);
+  sign.position.set(0, 4.15, 0);
+  g.add(sign);
+  const signBack = box(3.5, 0.95, 0.08, MAT.gateWood);
+  signBack.position.set(0, 4.15, -0.05);
+  g.add(signBack);
+  return g;
+}
 
-  // Awan kartun mengapit jendela di dalam dinding? Lebih mudah: dua pot awan
-  // melayang di depan kaca (di dalam ruangan, sebagai dekorasi menggantung).
-  cloudGroup = new THREE.Group();
-  for (let i = 0; i < 3; i++) {
-    const cloud = new THREE.Group();
-    const cm = new THREE.MeshLambertMaterial({ color: '#ffffff' });
-    [[0, 0, 0, 0.42], [0.34, -0.06, 0, 0.3], [-0.34, -0.05, 0, 0.27]].forEach(([x, y, z, r]) => {
-      const puff = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 14), cm);
-      puff.position.set(x, y, z);
-      cloud.add(puff);
+/** Bunga rangkaian di kedua sisi gapura (dekorasi tiang tambahan). */
+function garland(gate, y) {
+  [MAT.flowerA, MAT.flowerB, MAT.flowerC].forEach((m, i) => {
+    [-1.7, 1.7].forEach((x) => {
+      const f = sphere(0.09, m, 8, 6);
+      f.position.set(x + (i - 1) * 0.12, y - i * 0.16, 0.14);
+      gate.add(f);
     });
-    cloud.position.set(-3.2 + i * 3.2, 3.4 - (i % 2) * 0.4, -1.5);
-    cloud.userData.baseY = cloud.position.y;
-    cloudGroup.add(cloud);
+  });
+}
+
+/* ================= Konten panel per checkpoint ================= */
+
+const panels = {}; // key → { kicker, title, html?, photoUrl?, photoUrls? }
+
+function chipRow(pairs) {
+  return `<div class="row">${pairs.map(([t]) => `<span class="chip">${esc(t)}</span>`).join('')}</div>`;
+}
+
+window.__panelsReady = (async function buildPanels() {
+  const ev = cfg.event || {};
+  const akad = ev.akad || {}, rsp = ev.resepsi || {};
+  const story = Array.isArray(cfg.loveStory) ? cfg.loveStory : [];
+  const op = cfg.opening || {};
+
+  // 01 cover — dibuka via tombol (bukan isi panel; checkpoint tetap ada utk rail)
+  panels.cover = {
+    kicker: 'Cover',
+    title: `${cfg.couple.bride.nickname} & ${cfg.couple.groom.nickname}`,
+    html: `<p style="text-align:center">Undangan pernikahan ${esc(cfg.couple.bride.name)} &amp; ${esc(cfg.couple.groom.name)}.</p>
+           ${chipRow([[ev.dayLabel || '', ev.dateLabel || '']])}
+           <p style="font-size:13px;opacity:.7;text-align:center">Geser ke atas untuk memulai perjalanan ⤴</p>`
+  };
+
+  // 02 opening — ayat + foto
+  const openPhotos = await photoList('opening');
+  panels.opening = {
+    kicker: 'Save The Date',
+    title: 'Bismillah',
+    photoUrl: openPhotos[0] || '',
+    html: `${op.arabicQuote ? `<p class="arabic">${esc(op.arabicQuote)}</p>` : ''}
+           ${op.quote ? `<blockquote>${esc(op.quote)}<br><span style="font-size:13px">${esc(op.source || '')}</span></blockquote>` : ''}
+           ${chipRow([`${ev.dayLabel || ''}, ${ev.dateLabel || ''}`])}`
+  };
+
+  // 03 couple-bride
+  const bridePhotos = await photoList('bride', [cfg.couple.bride.photo]);
+  panels['couple-bride'] = {
+    kicker: 'Mempelai',
+    title: cfg.couple.bride.nickname,
+    photoUrl: bridePhotos[0] || '',
+    html: `<p><strong>${esc(cfg.couple.bride.name)}</strong></p>
+           <p>Putri dari pasangan ${esc(cfg.couple.bride.father)} &amp; ${esc(cfg.couple.bride.mother)}.</p>`
+  };
+
+  // 04 couple-groom
+  const groomPhotos = await photoList('groom', [cfg.couple.groom.photo]);
+  panels['couple-groom'] = {
+    kicker: 'Mempelai',
+    title: cfg.couple.groom.nickname,
+    photoUrl: groomPhotos[0] || '',
+    html: `<p><strong>${esc(cfg.couple.groom.name)}</strong></p>
+           <p>Putra dari pasangan ${esc(cfg.couple.groom.father)} &amp; ${esc(cfg.couple.groom.mother)}.</p>`
+  };
+
+  // 05 save-the-date-2 — hitung mundur singkat (hari saja)
+  panels['save-the-date-2'] = {
+    kicker: 'Save The Date',
+    title: 'Menuju Hari Bahagia',
+    html: (() => {
+      let daysLeft = '';
+      try {
+        const target = new Date(ev.countdownTarget || ev.dateISO);
+        const diff = Math.ceil((target - Date.now()) / 86400000);
+        if (!isNaN(diff)) daysLeft = diff > 0 ? `⏳ ${diff} hari lagi` : '🎉 Hari telah tiba!';
+      } catch (_) {}
+      return `<p>Dengan memohon doa restu, kami menantikan hari bahagia:</p>
+        ${chipRow([[ev.dayLabel || '', ev.dateLabel || '', daysLeft]])}`;
+    })()
+  };
+
+  // 06 event — akad & resepsi + Maps
+  panels.event = {
+    kicker: 'Info Acara',
+    title: 'Akad & Resepsi',
+    html: `
+      ${chipRow([`📖 Akad Nikah`, `${akad.start || ''}–${akad.end || ''}`])}
+      <p>${esc((akad.venue && akad.venue.name) || '')}<br><small>${esc((akad.venue && akad.venue.address) || '')}</small></p>
+      ${chipRow([`🎉 Resepsi`, `${rsp.start || ''}–${rsp.end || ''}`])}
+      <p>${esc((rsp.venue && rsp.venue.name) || '')}<br><small>${esc((rsp.venue && rsp.venue.address) || '')}</small></p>
+      ${(rsp.venue && rsp.venue.mapsUrl) ? `<a class="mapsLink" href="${esc(rsp.venue.mapsUrl)}" target="_blank" rel="noopener">📍 Buka Google Maps</a>` : ''}`
+  };
+
+  // 07 livestream
+  const ls = cfg.livestream || {};
+  const lsLinks = [
+    ls.youtube && ['▶️ YouTube', ls.youtube],
+    ls.instagram && ['📸 Instagram', ls.instagram],
+    ls.tiktok && ['🎵 TikTok', ls.tiktok]
+  ].filter(Boolean);
+  panels.livestream = {
+    kicker: 'Live Streaming',
+    title: 'Saksikan Jarak Jauh',
+    html: lsLinks.length
+      ? `<p>Tidak bisa hadir langsung? Ikuti siaran langsung di:</p>` +
+        lsLinks.map(([t, u]) => `<p><a class="mapsLink" href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a></p>`).join('')
+      : `<p>Saat ini tidak ada jadwal siaran langsung. Namun doa Anda tetap bisa menyertai dari mana saja. 🤲</p>`
+  };
+
+  // 08 quote
+  panels.quote = {
+    kicker: 'Quote',
+    title: '',
+    html: `<blockquote>${esc(cfg.quotePhoto.quote)}</blockquote>`
+  };
+
+  // 09 love-story
+  const storyPhotos = await photoList('story', story.map((s) => s.photo));
+  panels['love-story'] = {
+    kicker: 'Our Story',
+    title: 'Perjalanan Kami',
+    html: story.map((s, i) =>
+      `<div class="story-item">
+         <span class="story-date">${esc(s.date)}</span>
+         <h2 style="font-size:19px">${esc(s.title)}</h2>
+         ${storyPhotos[i] ? `<img class="gallery-thumb" src="${esc(storyPhotos[i])}" alt="${esc(s.title)}">` : ''}
+         <p>${esc(s.text)}</p>
+       </div>`
+    ).join('')
+  };
+
+  // 10 quotes
+  panels.quotes = {
+    kicker: 'Quotes',
+    title: '',
+    html: `<blockquote>“Finding home not in a place, but in a person.”</blockquote>`
+  };
+
+  // 11 gallery
+  const galPhotos = await photoList('gallery');
+  panels.gallery = {
+    kicker: 'Moments',
+    title: 'Galeri Foto',
+    html: galPhotos.length
+      ? galPhotos.slice(0, 12).map((u) => `<img class="gallery-thumb" src="${esc(u)}" alt="Galeri">`).join('')
+      : '<p>Galeri akan segera hadir.</p>'
+  };
+
+  // 12 gift
+  const accs = (cfg.gift && cfg.gift.accounts) || [];
+  panels.gift = {
+    kicker: 'Wedding Gift',
+    title: 'Tanda Kasih',
+    html: `<p>Doa restu Anda adalah karunia yang berarti bagi kami. Namun jika ingin memberi tanda kasih:</p>` +
+      accs.map((a) => chipRow([[`${a.bank} a.n. ${a.holder}`, a.number]])).join('') +
+      ((cfg.gift && cfg.gift.address && cfg.gift.address.recipient)
+        ? `<p><strong>Kirim kado ke:</strong><br>${esc(cfg.gift.address.recipient)} — ${esc(cfg.gift.address.phone || '')}</p>`
+        : '')
+  };
+
+  // 13 rsvp
+  panels.rsvp = {
+    kicker: 'RSVP',
+    title: 'Doa & Ucapan',
+    html: `<p>Doa baik dan ucapan hangat dari orang-oranng terkasih adalah bekal terindah bagi kami.</p>
+           <p style="opacity:.7;font-size:13px">Formulir RSVP lengkap tersedia di halaman undangan utama.</p>`
+  };
+
+  // 14 closing
+  const closePhotos = await photoList('closing');
+  panels.closing = {
+    kicker: 'Penutup',
+    title: 'Sampai Jumpa',
+    photoUrl: closePhotos[0] || '',
+    html: `<p>${esc(cfg.closing.text)}</p>
+           <p style="text-align:center;font-size:22px;color:var(--coral);font-weight:800">
+             ${esc(cfg.couple.bride.nickname)} &amp; ${esc(cfg.couple.groom.nickname)} 💛</p>`
+  };
+})();
+
+/* ---- Susun urutan checkpoint = urutan section index.html ---- */
+
+const ORDER = [
+  ['cover', 'Cover'],
+  ['opening', 'Ayat & Foto'],
+  ['couple-bride', 'Mempelai — Mita'],
+  ['couple-groom', 'Mempelai — Andi'],
+  ['save-the-date-2', 'Save The Date'],
+  ['event', 'Acara'],
+  ['livestream', 'Live'],
+  ['quote', 'Quote'],
+  ['love-story', 'Cerita Kami'],
+  ['quotes', 'Quotes'],
+  ['gallery', 'Galeri'],
+  ['gift', 'Hadiah'],
+  ['rsvp', 'RSVP'],
+  ['closing', 'Penutup']
+];
+ORDER.forEach(([key, label], i) => {
+  CHECKPOINTS.push({ key, label, z: -i * CHECK_SPACING });
+});
+
+/* ---- Bangun gapura tiap checkpoint ---- */
+
+(async function buildGates() {
+  await window.__panelsReady;
+  CHECKPOINTS.forEach(({ z, label }, i) => {
+    const gate = makeGate(label, i);
+    gate.position.set(0, 0, z);
+    garland(gate, 2.9);
+    scene.add(gate);
+  });
+})();
+
+/* ================= Kontrol scroll (wheel + sentuh) ================= */
+
+const scroller = document.getElementById('scroller');
+const scrollSpace = document.getElementById('scroll-space');
+
+const MAX_STEP = CHECKPOINTS.length - 1;
+
+// Satu anak setinggi layar per checkpoint + CSS scroll-snap mandatory:
+// swipe di HP otomatis "menempel" ke checkpoint terdekat (native, halus).
+scrollSpace.innerHTML = CHECKPOINTS.map((c) =>
+  `<div class="snap-seg" data-step="${CHECKPOINTS.indexOf(c)}"></div>`
+).join('');
+
+let currentStep = 0;        // checkpoint aktif (integer)
+let currentTravel = 0;      // posisi kontinu 0..MAX_STEP untuk kamera
+const camBaseY = 1.55;
+const camCurrent = { z: 0 };
+let autoOpenedFor = -1;     // step yang panelnya sudah pernah terbuka otomatis
+let suppressScroll = false; // saat panel terbuka, abaikan input scroll
+
+// --- Wheel tetap didukung (desktop): default scroll pada #scroller sudah jalan;
+//     tak perlu handler tambahan. ---
+
+// --- Scroll → deteksi checkpoint ---
+scroller.addEventListener('scroll', () => {
+  if (suppressScroll) {
+    const lockPos = currentStep * innerHeight;
+    if (Math.abs(scroller.scrollTop - lockPos) > 2) scroller.scrollTop = lockPos;
+    return;
   }
-  scene.add(cloudGroup);
-}
-
-/* ================= Objek interaktif =================
-
-  Tiap objek interaktif: group utama + "hitbox" transparan lebih besar
-  supaya gampang ditap di HP, plus outline glow (mesh sedikit lebih besar,
-  additive) yang hanya tampil pada hover/tap target pertama.            */
-
-const interactives = []; // { hitbox, onClick, glow }
-const raycaster = new THREE.Raycaster();
-
-function makeInteractive(group, hitSize, onClick) {
-  const [w, h, d] = hitSize;
-  const hitbox = new THREE.Mesh(
-    new THREE.BoxGeometry(w, h, d),
-    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
-  );
-  hitbox.userData.isHitbox = true;
-  group.add(hitbox);
-  interactives.push({ hitbox, onClick });
-  return hitbox;
-}
-
-/** Tekstur foto ke plane berbingkai kayu, digantung di dinding. */
-async function framedPhoto(url, w, h) {
-  const g = new THREE.Group();
-  const frame = box(w + 0.24, h + 0.24, 0.09, MAT.frameWood);
-  g.add(frame);
-  let tex = url ? await loadTexture(url) : null;
-  if (!tex) tex = await loadTexture('assets/img/foto_story/01.jpg');
-  const mat = tex
-    ? new THREE.MeshBasicMaterial({ map: tex })
-    : new THREE.MeshBasicMaterial({ color: '#ffffff' });
-  const photo = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
-  photo.position.z = 0.055;
-  g.add(photo);
-  return g;
-}
-
-/** Meja kayu bulat kaki tunggal. */
-function coffeeTable() {
-  const g = new THREE.Group();
-  const top = cyl(1.15, 1.15, 0.14, 28, MAT.woodLight);
-  top.position.y = 0.72;
-  g.add(top);
-  const leg = cyl(0.12, 0.16, 0.66, 14, MAT.woodDark);
-  leg.position.y = 0.33;
-  g.add(leg);
-  const base = cyl(0.5, 0.56, 0.08, 20, MAT.woodDark);
-  base.position.y = 0.04;
-  g.add(base);
-  return g;
-}
-
-/** Buku terbuka sederhana: dua "halaman" miring + sampul. */
-function openBook(coverMat) {
-  const g = new THREE.Group();
-  const cover = box(0.92, 0.05, 0.62, coverMat);
-  g.add(cover);
-  const pgGeo = new THREE.PlaneGeometry(0.84, 0.54);
-  const left = new THREE.Mesh(pgGeo, MAT.paper);
-  left.rotation.x = -Math.PI / 2;
-  left.rotation.z = Math.PI / 2;
-  left.position.set(-0.21, 0.035, 0);
-  left.rotation.y = 0.06;
-  g.add(left);
-  const right = new THREE.Mesh(pgGeo, MAT.paper);
-  right.rotation.x = -Math.PI / 2;
-  right.rotation.z = Math.PI / 2;
-  right.position.set(0.21, 0.035, 0);
-  right.rotation.y = -0.06;
-  g.add(right);
-  return g;
-}
-
-/** Amplop undangan putih dengan segel hati. */
-function envelope() {
-  const g = new THREE.Group();
-  const body = box(0.66, 0.03, 0.46, MAT.paper);
-  g.add(body);
-  const flap = new THREE.Mesh(new THREE.ConeGeometry(0.23, 0.2, 3), MAT.paper);
-  flap.scale.z = 0.68;
-  flap.position.set(0, 0.03, -0.115);
-  g.add(flap);
-  const heartCanvas = document.createElement('canvas');
-  heartCanvas.width = heartCanvas.height = 64;
-  const cx = heartCanvas.getContext('2d');
-  cx.fillStyle = '#ff6b81';
-  cx.font = '44px sans-serif';
-  cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  cx.fillText('♥', 32, 34);
-  const sealTex = new THREE.CanvasTexture(heartCanvas);
-  const seal = new THREE.Mesh(
-    new THREE.CircleGeometry(0.06, 20),
-    new THREE.MeshBasicMaterial({ map: sealTex, transparent: true })
-  );
-  seal.rotation.x = -Math.PI / 2;
-  seal.position.set(0, 0.04, -0.1);
-  g.add(seal);
-  return g;
-}
-
-/** Sofa kecil dua kursi (dekorasi, non-interaktif). */
-function sofa() {
-  const g = new THREE.Group();
-  const seat = box(2.4, 0.42, 0.95, MAT.sofa); seat.position.y = 0.32; g.add(seat);
-  const backr = box(2.4, 0.75, 0.25, MAT.sofa); backr.position.set(0, 0.82, -0.36); g.add(backr);
-  [[-1.05], [1.05]].forEach(([x]) => {
-    const arm = box(0.28, 0.6, 0.95, MAT.sofa); arm.position.set(x, 0.5, 0); g.add(arm);
-  });
-  [[-0.6, 0.1], [0.6, 0.1]].forEach(([x]) => {
-    const c = box(0.5, 0.5, 0.16, MAT.cushion);
-    c.rotation.x = -0.18; c.position.set(x, 0.72, -0.18);
-    g.add(c);
-  });
-  [[-1, -0.38], [1, -0.38], [-1, 0.38], [1, 0.38]].forEach(([x, z]) => {
-    const foot = cyl(0.06, 0.06, 0.14, 10, MAT.woodDark);
-    foot.position.set(x, 0.07, z * 0.8); g.add(foot);
-  });
-  return g;
-}
-
-/** Tanaman pot (dekorasi). */
-function plant() {
-  const g = new THREE.Group();
-  const pot = cyl(0.3, 0.22, 0.5, 16, MAT.plantPot); pot.position.y = 0.25; g.add(pot);
-  for (let i = 0; i < 7; i++) {
-    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 10), MAT.leaf);
-    leaf.scale.set(1, 1.5, 1);
-    const a = (i / 7) * Math.PI * 2;
-    leaf.position.set(Math.cos(a) * 0.16, 0.72 + (i % 3) * 0.16, Math.sin(a) * 0.16);
-    g.add(leaf);
+  currentTravel = scroller.scrollTop / innerHeight;
+  const step = Math.round(currentTravel);
+  const clamped = Math.max(0, Math.min(MAX_STEP, step));
+  if (clamped !== autoOpenedFor) {
+    // Snap-sedang-berjalan: hanya buka kalau sudah dekat posisi final
+    if (Math.abs(scroller.scrollTop - clamped * innerHeight) < innerHeight * 0.25) {
+      arriveAt(clamped);
+    }
   }
-  return g;
+});
+
+function arriveAt(step) {
+  currentStep = step;
+  autoOpenedFor = step;
+  updateRail();
+  openPanel(CHECKPOINTS[step].key);
 }
 
-/* ---- Penempatan objek & wiring panel ---- */
+/* ================= Panel ================= */
 
-const panelData = {}; // key → builder konten panel (fungsi async → html)
+const panelWrap = document.getElementById('panelWrap');
+const panelBody = document.getElementById('panelBody');
+const panelKicker = document.getElementById('panelKicker');
 
-function openPanel(key) {
-  const d = panelData[key];
+async function openPanel(key) {
+  await window.__panelsReady;
+  const d = panels[key];
   if (!d) return;
-  buildPanel(d);
-  document.getElementById('panelWrap').classList.add('open');
-}
-function closePanel() {
-  document.getElementById('panelWrap').classList.remove('open');
-}
-document.getElementById('panelClose').addEventListener('click', closePanel);
-document.getElementById('panelBackdrop').addEventListener('click', closePanel);
-
-async function buildPanel(d) {
-  document.getElementById('panelKicker').textContent = d.kicker;
-  const body = document.getElementById('panelBody');
-  body.innerHTML = '';
-  const h2 = document.createElement('h2');
-  h2.textContent = d.title;
-  body.appendChild(h2);
+  panelKicker.textContent = d.kicker;
+  panelBody.innerHTML = '';
+  if (d.title) {
+    const h2 = document.createElement('h2');
+    h2.textContent = d.title;
+    panelBody.appendChild(h2);
+  }
   if (d.photoUrl) {
     const img = document.createElement('img');
     img.className = 'panel-photo';
     img.src = d.photoUrl;
-    img.alt = d.title;
-    body.appendChild(img);
+    img.alt = d.title || d.kicker;
+    panelBody.appendChild(img);
   }
   const frag = document.createElement('div');
   frag.innerHTML = d.html || '';
-  body.appendChild(frag);
+  panelBody.appendChild(frag);
+  suppressScroll = true;
+  panelWrap.classList.add('open');
+  document.getElementById('hint').classList.add('hidden');
 }
 
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
-  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-window.__panelsReady = (async function populatePanels() {
-  const ev = cfg.event || {};
-  const akad = ev.akad || {}, rsp = ev.resepsi || {};
-  const story = Array.isArray(cfg.loveStory) ? cfg.loveStory : [];
-
-  // 1) BINGKAI FOTO KIRI — cerita cinta (foto babak pertama)
-  const storyPhotos = await photoList('story', story.map((s) => s.photo));
-  panelData.photoStory = {
-    kicker: 'Cerita Kami',
-    title: story[0] ? `${story[0].date} — ${esc(story[0].title)}` : 'Cerita Kami',
-    photoUrl: storyPhotos[0] || '',
-    html: (story[0] ? `<p>${esc(story[0].text)}</p>` : '') +
-      story.slice(1).map((s) =>
-        `<p><strong style="color:var(--teal)">${esc(s.date)} · ${esc(s.title)}</strong><br>${esc(s.text)}</p>`
-      ).join('')
-  };
-  // 2) BINGKAI FOTO KANAN — foto pasangan (folder bride)
-  const couplePhotos = await photoList('bride', [cfg.couple && cfg.couple.bride.photo]);
-  panelData.photoCouple = {
-    kicker: 'Kedua Mempelai',
-    title: `${cfg.couple.bride.nickname} & ${cfg.couple.groom.nickname}`,
-    photoUrl: couplePhotos[0] || '',
-    html: `<p>${esc(cfg.couple.bride.name)}, putri dari pasangan
-             ${esc(cfg.couple.bride.father)} &amp; ${esc(cfg.couple.bride.mother)}.</p>
-           <p>${esc(cfg.couple.groom.name)}, putra dari pasangan
-             ${esc(cfg.couple.groom.father)} &amp; ${esc(cfg.couple.groom.mother)}.</p>
-           <div class="row"><span class="chip">💍 ${esc(ev.dateLabel || '')}</span></div>`
-  };
-  // 3) BUKU DI MEJA — info acara
-  panelData.bookEvent = {
-    kicker: 'Info Acara',
-    title: 'Akad & Resepsi',
-    html: `
-      <div class="row"><span class="chip">📖 Akad Nikah</span><span class="chip">${esc(akad.start || '')}–${esc(akad.end || '')}</span></div>
-      <p>${esc((akad.venue && akad.venue.name) || '')}<br><small>${esc((akad.venue && akad.venue.address) || '')}</small></p>
-      <div class="row"><span class="chip">🎉 Resepsi</span><span class="chip">${esc(rsp.start || '')}–${esc(rsp.end || '')}</span></div>
-      <p>${esc((rsp.venue && rsp.venue.name) || '')}<br><small>${esc((rsp.venue && rsp.venue.address) || '')}</small></p>
-      ${(rsp.venue && rsp.venue.mapsUrl) ? `<a class="mapsLink" href="${esc(rsp.venue.mapsUrl)}" target="_blank" rel="noopener">📍 Buka Google Maps</a>` : ''}`
-  };
-  // 4) AMPLOP DI MEJA — tentang undangan 3D ini
-  panelData.envelopeInfo = {
-    kicker: 'Undangan',
-    title: 'Tentang Undangan Ini',
-    html: `<p>Undangan digital Mita &amp; Andi — ${esc(ev.dayLabel || '')}, ${esc(ev.dateLabel || '')}.</p>
-           <p>Rumah mini ini adalah versi eksperimen Three.js: geser untuk melihat sekeliling,
-              sentuh benda bercahaya untuk membuka cerita. Selamat menjelajah! 🏡</p>`
-  };
-  return panelData;
-})();
-
-/* ---- Build objek dunia (async karena tekstur foto) ---- */
-
-(async function buildWorld() {
-  await window.__panelsReady;
-  // Sofa kiri-decor
-  const sf = sofa();
-  sf.position.set(-2.9, 0, -2.4);
-  sf.rotation.y = Math.PI / 2 - 0.25;
-  room.add(sf);
-
-  // Tanaman pojok
-  const pl = plant();
-  pl.position.set(-3.9, 0, 3.4);
-  room.add(pl);
-  const pl2 = plant();
-  pl2.position.set(3.9, 0, -3.4);
-  pl2.scale.setScalar(1.15);
-  room.add(pl2);
-
-  // Meja tengah
-  const table = coffeeTable();
-  table.position.set(0, 0, 0.6);
-  room.add(table);
-
-  // BUKU CERITA di meja (interaktif)
-  const book = openBook(MAT.bookCoverA);
-  book.position.set(-0.28, 0.83, 0.6);
-  book.rotation.y = 0.3;
-  room.add(book);
-  makeInteractive(book, [1.15, 0.35, 0.9], () => openPanel('bookEvent'));
-
-  // AMPLOP di meja (interaktif)
-  const envl = envelope();
-  envl.position.set(0.42, 0.79, 0.75);
-  envl.rotation.y = -0.4;
-  room.add(envl);
-  makeInteractive(envl, [0.95, 0.35, 0.8], () => openPanel('envelopeInfo'));
-
-  // BINGKAI FOTO di dinding belakang (interaktif)
-  const storyFrame = await framedPhoto(panelData.photoStory.photoUrl, 1.15, 0.85);
-  storyFrame.position.set(-2.2, 2.35, -ROOM_D / 2 + 0.22);
-  room.add(storyFrame);
-  makeInteractive(storyFrame, [1.6, 1.3, 0.4], () => openPanel('photoStory'));
-
-  const coupleFrame = await framedPhoto(panelData.photoCouple.photoUrl, 1.15, 0.85);
-  coupleFrame.position.set(2.2, 2.35, -ROOM_D / 2 + 0.22);
-  room.add(coupleFrame);
-  makeInteractive(coupleFrame, [1.6, 1.3, 0.4], () => openPanel('photoCouple'));
-
-  // Pulsing halo di sekitar tiap objek interaktif — penanda "boleh disentuh"
-  interactives.forEach(({ hitbox }) => {
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(Math.max(hitSizeRadius(hitbox)) , 0.035, 10, 40),
-      new THREE.MeshBasicMaterial({ color: '#ffd166', transparent: true, opacity: 0.85 })
-    );
-    ring.name = 'pulseRing';
-    hitbox.add(ring);
-    // Ring orientasinya menghadap depan-kamera-ish: datarkan saja horizontal
-    ring.rotation.x = Math.PI / 2;
-    ring.position.y = -(hitbox.geometry.parameters.height / 2) + 0.05;
-  });
-
-  animate();
-})();
-
-function hitSizeRadius(hitbox) {
-  const p = hitbox.geometry.parameters;
-  return Math.max(p.width, p.depth) / 2 + 0.15;
+function closePanel() {
+  panelWrap.classList.remove('open');
+  suppressScroll = false;
+  document.getElementById('hint').classList.remove('hidden');
 }
+document.getElementById('panelClose').addEventListener('click', closePanel);
+document.getElementById('panelBackdrop').addEventListener('click', closePanel);
 
-/* ================= Kontrol sentuh / mouse ================= */
+/* ================= Rail progres ================= */
 
-const look = new THREE.Vector3(0, 1.5, 0.6); // titik pandang: tengah ruangan
-let yaw = 0, pitch = 0.32, dist = 9.2;
-const DIST_MIN = 5.5, DIST_MAX = 13;
-let velYaw = 0, velPitch = 0; // inersia
-
-function applyCamera() {
-  pitch = Math.max(-0.15, Math.min(1.1, pitch));
-  camera.position.set(
-    look.x + dist * Math.cos(pitch) * Math.sin(yaw),
-    look.y + dist * Math.sin(pitch),
-    look.z + dist * Math.cos(pitch) * Math.cos(yaw)
-  );
-  camera.lookAt(look);
-}
-applyCamera();
-
-// --- Pointer events (menyatukan mouse & sentuh) ---
-const pointers = new Map(); // pointerId → {x, y}
-let pinchDist = 0;
-let downPos = null, movedFar = false;
-const TAP_SLOP = 12; // px — gerakan di bawah ini dianggap tap
-
-stage.addEventListener('pointerdown', (e) => {
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  stage.classList.add('dragging');
-  if (pointers.size === 1) { downPos = { x: e.clientX, y: e.clientY }; movedFar = false; }
-  if (pointers.size === 2) {
-    const [a, b] = [...pointers.values()];
-    pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
-  }
+const railEl = document.getElementById('rail');
+ORDER.forEach(() => {
+  const dot = document.createElement('span');
+  dot.className = 'rail-dot';
+  railEl.appendChild(dot);
 });
-
-stage.addEventListener('pointermove', (e) => {
-  const prev = pointers.get(e.pointerId);
-  if (!prev) return;
-  const dx = e.clientX - prev.x, dy = e.clientY - prev.y;
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-  if (downPos && Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > TAP_SLOP) movedFar = true;
-
-  if (pointers.size === 1) {
-    // Drag = putar pandangan (dengan inersia ringan)
-    velYaw = dx * 0.0042;
-    velPitch = dy * 0.0028;
-    yaw += velYaw;
-    pitch += velPitch;
-    applyCamera();
-  } else if (pointers.size === 2) {
-    const [a, b] = [...pointers.values()];
-    const d = Math.hypot(a.x - b.x, a.y - b.y);
-    if (pinchDist > 0) {
-      dist = Math.max(DIST_MIN, Math.min(DIST_MAX, dist * (pinchDist / d)));
-      applyCamera();
-    }
-    pinchDist = d;
-  }
-});
-
-function endPointer(e) {
-  pointers.delete(e.pointerId);
-  if (pointers.size < 2) pinchDist = 0;
-  if (pointers.size === 0) {
-    stage.classList.remove('dragging');
-    // Tap = buka objek yang kena
-    if (!movedFar && downPos) tryPick(downPos.x, downPos.y);
-    downPos = null;
-  }
+function updateRail() {
+  [...railEl.children].forEach((dot, i) => dot.classList.toggle('active', i === currentStep));
 }
-stage.addEventListener('pointerup', endPointer);
-stage.addEventListener('pointercancel', endPointer);
-stage.addEventListener('pointerleave', (e) => {
-  if (pointers.has(e.pointerId)) endPointer(e);
-});
-
-// Wheel zoom (desktop)
-stage.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  dist = Math.max(DIST_MIN, Math.min(DIST_MAX, dist * (1 + Math.sign(e.deltaY) * 0.08)));
-  applyCamera();
-}, { passive: false });
-
-/* ---- Raycast pick ---- */
-
-const ndc = new THREE.Vector2();
-function tryPick(x, y) {
-  ndc.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1);
-  raycaster.setFromCamera(ndc, camera);
-  const hits = raycaster.intersectObjects(interactives.map((i) => i.hitbox), false);
-  if (hits.length) {
-    const entry = interactives.find((i) => i.hitbox === hits[0].object);
-    if (entry) entry.onClick();
-  }
-}
+updateRail();
 
 /* ================= Loop animasi ================= */
 
 const clock = new THREE.Clock();
-const pulseMats = [];
 
 function animate() {
   requestAnimationFrame(animate);
-  const dt = clock.getDelta();
+  const dt = Math.min(clock.getDelta(), 0.1);
   const t = clock.elapsedTime;
 
-  // Inersia drag
-  if (pointers.size === 0) {
-    velYaw *= 0.93; velPitch *= 0.93;
-    if (Math.abs(velYaw) > 1e-4 || Math.abs(velPitch) > 1e-4) {
-      yaw += velYaw; pitch += velPitch;
-      applyCamera();
-    }
-  }
+  // Kamera mengikuti scroll dengan lerp halus — perjalanan terasa "berjalan",
+  // bukan lompat, walau snap native-nya instan.
+  const targetZ = -currentTravel * CHECK_SPACING;
+  camCurrent.z += (targetZ - camCurrent.z) * (1 - Math.pow(0.002, dt));
+  camera.position.set(0, camBaseY + Math.sin(t * 2.1) * 0.035, camCurrent.z);
+  camera.lookAt(0, camBaseY, camCurrent.z - 10);
 
-  // Awan mengapung pelan
-  cloudGroup.children.forEach((cloud, i) => {
-    cloud.position.y = cloud.userData.baseY + Math.sin(t * 0.7 + i * 2.1) * 0.12;
-    cloud.rotation.y = Math.sin(t * 0.3 + i) * 0.15;
-  });
-
-  // Halo pulsing di objek interaktif
-  scene.traverse((o) => {
-    if (o.name === 'pulseRing') {
-      const s = 1 + Math.sin(t * 3 + o.parent.id) * 0.12;
-      o.scale.set(s, s, s);
-    }
+  // Awan drift
+  clouds.forEach((cl) => {
+    cl.position.x += cl.userData.speed * dt * 0.6;
+    if (cl.position.x > 30) cl.position.x = -30;
+    cl.position.y = cl.userData.baseY + Math.sin(t * 0.5 + cl.id) * 0.25;
   });
 
   renderer.render(scene, camera);
@@ -771,9 +769,12 @@ addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  // snap-seg pakai 100dvh — resize ditangani CSS
 });
 
 /* ================= Enter ================= */
+
+animate();
 
 document.getElementById('enterBtn').addEventListener('click', () => {
   document.getElementById('intro').classList.add('hidden');
