@@ -23,9 +23,10 @@
   // Urutan bab = urutan section di index.html (cover → opening → couple →
   // event → livestream → love-story → gallery → gift → closing). Nomor bab
   // pada strip & kicker stage dihitung dari posisi array ini.
-  const CHAPTERS = [
-    "cover", "pembuka", "mempelai", "acara", "livestream", "cerita", "galeri", "hadiah", "penutup"
-  ];
+  // Diisi saat start() dari skema editor template aktif — bab yang tampil
+  // (dan nomornya) mengikuti template, bukan daftar tetap. Template tanpa
+  // section quote/subcover tidak lagi menampilkan babnya di admin.
+  let CHAPTERS = [];
   // Alat — dua sub-kelompok: strip merendahkannya jadi SATU runtunan flat
   // (TOOLS = gabungan keduanya), sidebar memunculkan parent-nya masing-masing.
   // Link wa/admin-qr tetap dibawa router sendiri (menuju wa.html/
@@ -44,7 +45,9 @@
   ];
   const TOOLS = [...TOOL_GUEST, ...TOOL_LOOK];
   // Parent-child untuk sidebar: kelompok besar → tujuan di bawahnya.
-  const SIDEBAR_GROUPS = [
+  // Fungsi, bukan konstanta: daftar bab baru diketahui setelah manifest
+  // template dimuat di start().
+  const sidebarGroups = () => [
     { label: "Bab undangan", items: CHAPTERS.map((key) => ({ key })) },
     { label: "Tamu", items: TOOL_GUEST },
     { label: "Tampilan & setelan", items: TOOL_LOOK }
@@ -127,7 +130,7 @@
   function renderSidebar() {
     const nav = $("p-sidebar-nav");
     if (!nav) return;
-    nav.innerHTML = SIDEBAR_GROUPS.map((group) => `
+    nav.innerHTML = sidebarGroups().map((group) => `
       <section class="p-sidegroup">
         <button type="button" class="p-sidegroup__head" aria-expanded="true">
           ${CHEVRON_SVG}<span>${window.PanelUI.esc(group.label)}</span>
@@ -454,7 +457,21 @@
     });
   }
 
-  function start() {
+  /** Daftarkan satu halaman editor per section yang dideklarasikan template
+   * aktif. Halaman lain (Sapaan, Kontak, Ucapan, Template, Warna, …) tidak
+   * tergantung template dan tetap didaftarkan lewat file masing-masing. */
+  async function registerChapters() {
+    const manifest = await window.PanelStore.activeManifest();
+    const sections = (manifest.editor && manifest.editor.sections) || [];
+    window.PanelPages = window.PanelPages || {};
+    CHAPTERS = sections.map((section) => {
+      window.PanelPages[section.key] = window.PanelSectionPage(section);
+      return section.key;
+    });
+  }
+
+  async function start() {
+    await registerChapters();
     renderStrip();
     renderSidebar();
     bindNavClickSafetyNet();

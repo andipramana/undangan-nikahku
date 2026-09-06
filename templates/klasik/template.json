@@ -48,27 +48,41 @@
         "key": "cover",
         "label": "Cover & Sampul",
         "icon": "image",
+        "cards": [
+          {
+            "name": "Cover",
+            "desc": "Foto layar penuh pertama yang dilihat tamu."
+          },
+          {
+            "name": "Subcover",
+            "desc": "Quotes layar penuh antara Cover dan Save The Date. Kosongkan baris mana pun untuk menyembunyikannya."
+          }
+        ],
         "fields": [
           {
             "path": "subcover.enabled",
             "type": "switch",
-            "label": "Tampilkan Subcover (quotes setelah cover)"
+            "label": "Tampilkan section Subcover",
+            "card": "Subcover"
           },
           {
             "path": "subcover.quoteLine1",
             "type": "text",
-            "label": "Quote baris 1"
+            "label": "Quote baris 1",
+            "card": "Subcover"
           },
           {
             "path": "subcover.quoteLine2",
             "type": "text",
-            "label": "Quote baris 2"
+            "label": "Quote baris 2",
+            "card": "Subcover"
           }
         ],
         "photos": [
           {
             "slot": "cover",
             "label": "Foto cover",
+            "card": "Cover",
             "ratio": "9/16",
             "min": 1,
             "max": 8
@@ -76,6 +90,7 @@
           {
             "slot": "subcover",
             "label": "Foto subcover",
+            "card": "Subcover",
             "ratio": "9/16",
             "max": 5
           }
@@ -84,36 +99,42 @@
       {
         "key": "pembuka",
         "label": "Pembuka & Ayat",
-        "icon": "book",
+        "icon": "quote",
         "fields": [
           {
             "path": "opening.arabicQuote",
             "type": "textarea",
             "label": "Bismillah (arab)",
+            "card": "Ayat pembuka",
             "rows": 2
           },
           {
             "path": "opening.quote",
             "type": "textarea",
             "label": "Terjemahan",
+            "card": "Ayat pembuka",
             "rows": 4
           },
           {
             "path": "opening.source",
             "type": "text",
-            "label": "Sumber (QS ...)"
+            "label": "Sumber (QS ...)",
+            "card": "Ayat pembuka"
           }
         ],
         "photos": [
           {
             "slot": "opening",
-            "label": "Foto pembuka",
+            "label": "Foto opening",
+            "card": "Foto Save the Date",
+            "cardDesc": "Folder opening (hero) dan std2 (foto statis Save the Date 2).",
             "ratio": "9/16",
             "max": 8
           },
           {
             "slot": "std2",
-            "label": "Foto Save The Date 2",
+            "label": "Foto Save the Date 2",
+            "card": "Foto Save the Date",
             "ratio": "9/16",
             "max": 5
           }
@@ -127,64 +148,78 @@
           {
             "path": "couple.bride.name",
             "type": "text",
-            "label": "Nama pengantin wanita"
+            "label": "Nama lengkap",
+            "card": "Mempelai wanita",
+            "required": true
           },
           {
             "path": "couple.bride.nickname",
             "type": "text",
-            "label": "Panggilan wanita"
+            "label": "Panggilan",
+            "card": "Mempelai wanita"
           },
           {
             "path": "couple.bride.instagram",
             "type": "text",
-            "label": "Instagram wanita (opsional)"
+            "label": "Instagram (opsional)",
+            "card": "Mempelai wanita"
           },
           {
             "path": "couple.bride.father",
             "type": "text",
-            "label": "Ayah wanita"
+            "label": "Nama ayah",
+            "card": "Mempelai wanita"
           },
           {
             "path": "couple.bride.mother",
             "type": "text",
-            "label": "Ibu wanita"
+            "label": "Nama ibu",
+            "card": "Mempelai wanita"
           },
           {
             "path": "couple.groom.name",
             "type": "text",
-            "label": "Nama pengantin pria"
+            "label": "Nama lengkap",
+            "card": "Mempelai pria",
+            "required": true
           },
           {
             "path": "couple.groom.nickname",
             "type": "text",
-            "label": "Panggilan pria"
+            "label": "Panggilan",
+            "card": "Mempelai pria"
           },
           {
             "path": "couple.groom.instagram",
             "type": "text",
-            "label": "Instagram pria (opsional)"
+            "label": "Instagram (opsional)",
+            "card": "Mempelai pria"
           },
           {
             "path": "couple.groom.father",
             "type": "text",
-            "label": "Ayah pria"
+            "label": "Nama ayah",
+            "card": "Mempelai pria"
           },
           {
             "path": "couple.groom.mother",
             "type": "text",
-            "label": "Ibu pria"
+            "label": "Nama ibu",
+            "card": "Mempelai pria"
           }
         ],
         "photos": [
           {
             "slot": "bride",
             "label": "Foto mempelai wanita",
+            "card": "Mempelai wanita",
             "ratio": "3/4",
             "max": 8
           },
           {
             "slot": "groom",
             "label": "Foto mempelai pria",
+            "card": "Mempelai pria",
             "ratio": "3/4",
             "max": 8
           }
@@ -197,103 +232,124 @@
         "fields": [
           {
             "path": "event.dateISO",
-            "type": "date",
-            "label": "Tanggal (ISO)"
+            "type": "text",
+            "label": "Tanggal (ISO, yyyy-mm-dd)",
+            "card": "Tanggal & countdown"
           },
           {
             "path": "event.dateLabel",
             "type": "text",
-            "label": "Tanggal tampil"
+            "label": "Tanggal tampil",
+            "card": "Tanggal & countdown",
+            "required": true
           },
           {
             "path": "event.dayLabel",
             "type": "text",
-            "label": "Nama hari"
+            "label": "Nama hari",
+            "card": "Tanggal & countdown"
           },
           {
             "path": "event.countdownTarget",
             "type": "text",
-            "label": "Target countdown (ISO + offset)"
+            "label": "Target countdown (ISO + offset)",
+            "card": "Tanggal & countdown",
+            "required": true
           },
           {
             "path": "event.akad.label",
             "type": "text",
-            "label": "Akad - label"
+            "label": "Label",
+            "card": "Akad"
           },
           {
             "path": "event.akad.start",
-            "type": "time",
-            "label": "Akad - mulai"
+            "type": "text",
+            "label": "Mulai",
+            "card": "Akad"
           },
           {
             "path": "event.akad.end",
-            "type": "time",
-            "label": "Akad - selesai"
+            "type": "text",
+            "label": "Selesai",
+            "card": "Akad"
           },
           {
             "path": "event.akad.venue.name",
             "type": "text",
-            "label": "Venue akad - nama"
+            "label": "Venue - nama",
+            "card": "Akad"
           },
           {
             "path": "event.akad.venue.address",
             "type": "textarea",
-            "label": "Venue akad - alamat",
+            "label": "Venue - alamat",
+            "card": "Akad",
             "rows": 2
           },
           {
             "path": "event.akad.venue.mapsUrl",
-            "type": "url",
-            "label": "Venue akad - URL Maps"
+            "type": "text",
+            "label": "Venue - URL Maps",
+            "card": "Akad"
           },
           {
             "path": "event.resepsi.label",
             "type": "text",
-            "label": "Resepsi - label"
+            "label": "Label",
+            "card": "Resepsi"
           },
           {
             "path": "event.resepsi.start",
-            "type": "time",
-            "label": "Resepsi - mulai"
+            "type": "text",
+            "label": "Mulai",
+            "card": "Resepsi"
           },
           {
             "path": "event.resepsi.end",
-            "type": "time",
-            "label": "Resepsi - selesai"
+            "type": "text",
+            "label": "Selesai",
+            "card": "Resepsi"
           },
           {
             "path": "event.resepsi.venue.name",
             "type": "text",
-            "label": "Venue resepsi - nama"
+            "label": "Venue - nama",
+            "card": "Resepsi"
           },
           {
             "path": "event.resepsi.venue.address",
             "type": "textarea",
-            "label": "Venue resepsi - alamat",
+            "label": "Venue - alamat",
+            "card": "Resepsi",
             "rows": 2
           },
           {
             "path": "event.resepsi.venue.mapsUrl",
-            "type": "url",
-            "label": "Venue resepsi - URL Maps"
+            "type": "text",
+            "label": "Venue - URL Maps",
+            "card": "Resepsi"
           },
           {
             "path": "dresscode.text",
             "type": "textarea",
-            "label": "Dresscode - teks",
+            "label": "Teks",
+            "card": "Dresscode",
             "rows": 3
           },
           {
             "path": "dresscode.colors",
             "type": "colorlist",
-            "label": "Dresscode - warna"
+            "label": "Warna pilihan",
+            "card": "Dresscode",
+            "newItem": "#c9a668"
           }
         ],
         "photos": [
           {
             "slot": "event",
-            "label": "Foto kartu acara",
-            "ratio": "4/5",
+            "label": "Foto slider event",
+            "ratio": "16/9",
             "max": 8
           }
         ]
@@ -305,55 +361,62 @@
         "fields": [
           {
             "path": "livestream.youtube",
-            "type": "url",
-            "label": "YouTube"
+            "type": "text",
+            "label": "YouTube",
+            "card": "Link siaran langsung",
+            "cardDesc": "URL kosong = platform itu tidak ditampilkan; kosongkan semuanya untuk menyembunyikan section Live Streaming di undangan."
           },
           {
             "path": "livestream.instagram",
-            "type": "url",
-            "label": "Instagram"
+            "type": "text",
+            "label": "Instagram",
+            "card": "Link siaran langsung"
           },
           {
             "path": "livestream.tiktok",
-            "type": "url",
-            "label": "TikTok"
+            "type": "text",
+            "label": "TikTok",
+            "card": "Link siaran langsung"
           }
         ]
       },
       {
         "key": "cerita",
         "label": "Cerita Kami",
-        "icon": "clock",
+        "icon": "story",
         "fields": [
           {
             "path": "loveStory",
             "type": "list",
-            "label": "Babak cerita",
+            "label": "Love Story",
+            "card": "Love Story",
+            "cardDesc": "Tiap babak tampil berurutan sebagai garis waktu.",
             "item": [
               {
-                "path": "date",
-                "type": "text",
-                "label": "Tanggal/tahun"
+                "key": "date",
+                "label": "Tahun",
+                "type": "text"
               },
               {
-                "path": "title",
-                "type": "text",
-                "label": "Judul"
+                "key": "title",
+                "label": "Judul babak",
+                "type": "text"
               },
               {
-                "path": "text",
-                "type": "textarea",
+                "key": "text",
                 "label": "Cerita",
-                "rows": 3
+                "type": "textarea",
+                "rows": 4
               }
-            ]
+            ],
+            "addLabel": "+ tambah babak"
           }
         ],
         "photos": [
           {
             "slot": "story",
-            "label": "Foto tiap babak",
-            "ratio": "16/10",
+            "label": "Foto Our Story",
+            "ratio": "4/5",
             "max": 12
           }
         ]
@@ -361,17 +424,33 @@
       {
         "key": "galeri",
         "label": "Galeri",
-        "icon": "grid",
+        "icon": "image",
+        "cards": [
+          {
+            "name": "Video galeri",
+            "desc": "Kosongkan untuk menyembunyikan thumbnail video di atas foto galeri."
+          },
+          {
+            "name": "Foto galeri",
+            "desc": ""
+          },
+          {
+            "name": "Quote foto",
+            "desc": "Foto 1:1 dengan kutipan di atasnya."
+          }
+        ],
         "fields": [
           {
             "path": "galleryVideo.youtube",
-            "type": "url",
-            "label": "Video galeri (YouTube)"
+            "type": "text",
+            "label": "Video galeri (YouTube URL)",
+            "card": "Video galeri"
           },
           {
             "path": "quotePhoto.quote",
             "type": "textarea",
-            "label": "Teks quote foto",
+            "label": "Teks quote",
+            "card": "Quote foto",
             "rows": 3
           }
         ],
@@ -379,15 +458,16 @@
           {
             "slot": "gallery",
             "label": "Foto galeri",
-            "ratio": "free",
-            "max": 40,
-            "layout": true
+            "card": "Foto galeri",
+            "ratio": "1/1",
+            "max": 40
           },
           {
             "slot": "quote",
             "label": "Foto quote",
+            "card": "Quote foto",
             "ratio": "1/1",
-            "max": 1
+            "max": 3
           }
         ]
       },
@@ -400,76 +480,102 @@
             "path": "gift.accounts",
             "type": "list",
             "label": "Rekening",
+            "card": "Rekening",
             "item": [
               {
-                "path": "bank",
-                "type": "text",
-                "label": "Bank"
+                "key": "bank",
+                "label": "Bank",
+                "type": "text"
               },
               {
-                "path": "number",
-                "type": "text",
-                "label": "Nomor rekening"
+                "key": "number",
+                "label": "Nomor rekening",
+                "type": "text"
               },
               {
-                "path": "name",
-                "type": "text",
-                "label": "Atas nama"
+                "key": "holder",
+                "label": "Atas nama",
+                "type": "text"
               },
               {
-                "path": "owner",
+                "key": "owner",
+                "label": "Pemilik rekening",
                 "type": "select",
-                "label": "Milik",
                 "options": [
-                  "cpw",
-                  "cpp"
+                  {
+                    "value": "",
+                    "label": "Tidak ikut"
+                  },
+                  {
+                    "value": "cpw",
+                    "label": "CPW (wanita)"
+                  },
+                  {
+                    "value": "cpp",
+                    "label": "CPP (pria)"
+                  }
                 ]
               },
               {
-                "path": "template",
+                "key": "placeholder",
+                "label": "Sembunyikan nomor (placeholder)",
+                "type": "switch"
+              },
+              {
+                "key": "template",
+                "label": "Pesan WA kustom",
                 "type": "textarea",
-                "label": "Template pesan (opsional)",
-                "rows": 3
+                "rows": 3,
+                "placeholder": "Pesan WA kustom (kosongkan = default). Token: ${tamu} ${CPP} ${CPW} ${LABEL}"
               }
-            ]
+            ],
+            "addLabel": "+ tambah rekening"
           },
           {
             "path": "gift.contactCPW",
             "type": "text",
-            "label": "CPW - nomor WA (62...)"
+            "label": "CPW - nomor WA (62...)",
+            "card": "Kontak WhatsApp konfirmasi",
+            "cardDesc": "Dituju tombol Konfirmasi Pengiriman, dipilih otomatis dari field pemilik tiap rekening."
           },
           {
             "path": "gift.contactCPP",
             "type": "text",
-            "label": "CPP - nomor WA (62...)"
+            "label": "CPP - nomor WA (62...)",
+            "card": "Kontak WhatsApp konfirmasi"
           },
           {
             "path": "gift.address.recipient",
             "type": "text",
-            "label": "Kado - penerima"
+            "label": "Penerima",
+            "card": "Alamat kado"
           },
           {
             "path": "gift.address.phone",
             "type": "text",
-            "label": "Kado - telepon"
+            "label": "Telepon",
+            "card": "Alamat kado"
           },
           {
             "path": "gift.address.detail",
-            "type": "textarea",
-            "label": "Kado - alamat",
-            "rows": 3
+            "type": "text",
+            "label": "Detail alamat",
+            "card": "Alamat kado"
           },
           {
             "path": "gift.address.template",
             "type": "textarea",
-            "label": "Template pesan kado",
-            "rows": 3
+            "label": "Template pesan konfirmasi kado",
+            "card": "Alamat kado",
+            "rows": 3,
+            "placeholder": "Token: ${tamu} ${CPP} ${CPW} ${LABEL}. Kosongkan = pesan default."
           }
         ],
         "photos": [
           {
             "slot": "gift_item",
             "label": "Rekomendasi kado",
+            "cardDesc": "Nama, harga, dan link tiap rekomendasi diedit langsung pada kartu fotonya di bawah - foto ke-1 berpasangan dengan rekomendasi ke-1, dst.",
             "ratio": "1/1",
             "max": 12
           }
@@ -483,7 +589,9 @@
           {
             "path": "closing.text",
             "type": "textarea",
-            "label": "Closing statement default",
+            "label": "Teks penutup",
+            "card": "Closing statement default",
+            "cardDesc": "Dipakai untuk tamu yang tidak cocok dengan kelompok sapaan mana pun. Token: ${tamu} ${CPP} ${CPW}.",
             "rows": 4
           }
         ],

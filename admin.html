@@ -167,15 +167,9 @@
      SAMA PERSIS dengan urutan bab/alat di strip (lihat CHAPTERS & TOOLS di
      router.js). -->
 <script src="assets/js/panel/pages/home.js"></script>
-<script src="assets/js/panel/pages/cover.js"></script>
-<script src="assets/js/panel/pages/mempelai.js"></script>
-<script src="assets/js/panel/pages/pembuka.js"></script>
-<script src="assets/js/panel/pages/acara.js"></script>
-<script src="assets/js/panel/pages/cerita.js"></script>
-<script src="assets/js/panel/pages/galeri.js"></script>
-<script src="assets/js/panel/pages/hadiah.js"></script>
-<script src="assets/js/panel/pages/livestream.js"></script>
-<script src="assets/js/panel/pages/penutup.js"></script>
+<!-- Sembilan halaman bab dulu ditulis satu per satu; sekarang satu renderer
+     generik yang dibangun dari skema editor template aktif. -->
+<script src="assets/js/panel/pages/section.js"></script>
 <script src="assets/js/panel/pages/sapaan.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="assets/js/panel/pages/kontak.js"></script>
@@ -196,7 +190,7 @@
     document.getElementById("p-topbar-slug").textContent = "/" + window.AdminAPI.tenant.slug + "/";
     try {
       await window.PanelStore.load();
-      window.PanelRouter.start();
+      await window.PanelRouter.start();
     } catch (err) {
       // Store.load() gagal (mis. jaringan) sebelum router sempat jalan —
       // tampilkan jalan keluar yang jelas, bukan layar app kosong tanpa

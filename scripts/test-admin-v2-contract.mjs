@@ -49,7 +49,15 @@ check("admin.html tidak mengandung data-tab", !/data-tab/.test(adminHtml));
 // ---------------------------------------------------------------------
 const pagesDir = "assets/js/panel/pages";
 const pageFiles = (await fs.readdir(pagesDir)).filter((f) => f.endsWith(".js"));
-check("ada 20 file halaman di assets/js/panel/pages/ (21 tujuan non-Beranda - 1, karena Kirim WA & Check-in QR adalah link, bukan halaman)", pageFiles.length === 20);
+// Sembilan halaman bab (cover...penutup) TIDAK lagi berupa file: sejak mesin
+// template v4, bab dibangun runtime oleh pages/section.js dari skema editor
+// template aktif, jadi bab yang muncul mengikuti template. Yang tersisa di
+// sini hanyalah halaman yang memang tidak tergantung template.
+check("ada 12 file halaman di assets/js/panel/pages/ (11 tujuan tetap + renderer bab generik)", pageFiles.length === 12);
+
+const sectionSrc = await fs.readFile(path.join(pagesDir, "section.js"), "utf8");
+check("section.js mengekspor renderer bab generik (window.PanelSectionPage)",
+  /window\.PanelSectionPage\s*=/.test(sectionSrc));
 
 const registeredKeys = new Set();
 // giftRecommendations diedit langsung di kartu foto folder gift_item (lihat
@@ -59,6 +67,9 @@ let allPagesText = await fs.readFile("assets/js/panel/photos.js", "utf8");
 for (const file of pageFiles) {
   const source = await fs.readFile(path.join(pagesDir, file), "utf8");
   allPagesText += `\n// --- ${file} ---\n` + source;
+  // Renderer generik mendaftarkan halaman lewat router (satu per section
+  // template), bukan lewat window.PanelPages["<key>"] statis.
+  if (file === "section.js") continue;
   const m = source.match(/window\.PanelPages\["([a-z0-9-]+)"\]\s*=\s*\{/);
   if (!m) { check(`${file} mendaftarkan window.PanelPages[...]`, false); continue; }
   const key = m[1];
@@ -70,13 +81,19 @@ for (const file of pageFiles) {
   check(`${key}: punya title/group/mount/destroy`, hasTitle && hasGroup && hasMount && hasDestroy);
 }
 const EXPECTED_KEYS = [
-  "home", "cover", "mempelai", "pembuka", "acara", "cerita", "galeri", "hadiah",
-  "livestream", "penutup", "sapaan", "kontak", "ucapan", "kado", "template", "warna", "font", "editor-visual", "pengaturan",
-  "admin-akun"
+  "home", "sapaan", "kontak", "ucapan", "kado", "template", "warna", "font",
+  "editor-visual", "pengaturan", "admin-akun"
 ];
 for (const key of EXPECTED_KEYS) check(`window.PanelPages["${key}"] terdaftar`, registeredKeys.has(key));
-check("22 tujuan (21 halaman + Beranda) — router.js membawa link Kirim WA & Check-in QR sendiri",
+check("12 tujuan tetap (11 halaman + Beranda) — bab datang dari template, link Kirim WA & Check-in QR dibawa router",
   registeredKeys.size === EXPECTED_KEYS.length);
+
+// Bab-nya sendiri harus tetap ada, cuma pindah rumah: dideklarasikan template.
+const klasikManifest = JSON.parse(await fs.readFile("templates/klasik/template.json", "utf8"));
+const chapterKeys = ((klasikManifest.editor || {}).sections || []).map((sec) => sec.key);
+for (const key of ["cover", "mempelai", "pembuka", "acara", "cerita", "galeri", "hadiah", "livestream", "penutup"]) {
+  check(`bab "${key}" dideklarasikan skema editor template klasik`, chapterKeys.includes(key));
+}
 
 const routerSrc = await fs.readFile("assets/js/panel/router.js", "utf8");
 check('router.js memuat link "Kirim WhatsApp" (wa.html, bukan PanelPages)', /link:\s*"wa"/.test(routerSrc));
@@ -108,6 +125,8 @@ const safetyNetBody = routerSrc.match(/function bindNavClickSafetyNet\(\)\s*\{([
 check("router.js: fungsi bindNavClickSafetyNet() ditemukan", !!safetyNetBody);
 check("router.js: bindNavClickSafetyNet() benar-benar memasang click handler yang membaca [data-nav-key] dan memanggil navigate()",
   !!safetyNetBody && /addEventListener\(\s*"click"/.test(safetyNetBody[1]) && /data-nav-key/.test(safetyNetBody[1]) && /navigate\(/.test(safetyNetBody[1]));
+check("router.js: daftar bab dibaca dari skema template aktif, bukan array hardcoded",
+  /activeManifest\(\)/.test(routerSrc) && /PanelSectionPage\(/.test(routerSrc));
 check('router.js: bindNavClickSafetyNet() dipanggil dari start() (bukan cuma didefinisikan)',
   /function start\(\)\s*\{[\s\S]*?bindNavClickSafetyNet\(\)/.test(routerSrc));
 for (const pageFile of pageFiles) {
@@ -144,8 +163,14 @@ const FIELD_TOKENS = [
   "siteTitle", "guestParam", "defaultGuestName", "heroSlideInterval", "audio.title", "audio.path",
   "qrCheckin.enabled"
 ];
+// "Rumah" sebuah field kini bisa dua tempat: halaman yang ditulis tangan
+// (pages/*.js) ATAU skema editor template — bab dibangun dari skema itu.
+// Klasik dipakai sebagai acuan karena ia template terlengkap (superset);
+// template lain boleh memuat lebih sedikit field, itu memang tujuannya.
+const fieldHomes = allPagesText +
+  "\n// --- templates/klasik/template.json ---\n" + JSON.stringify(klasikManifest.editor || {});
 for (const token of FIELD_TOKENS) {
-  check(`field "${token}" ada rumahnya di pages/*.js`, allPagesText.includes(token));
+  check(`field "${token}" ada rumahnya (halaman tetap atau skema template)`, fieldHomes.includes(token));
 }
 
 // R1 (docs/rencana-admin-v2-revisi.md): qrCheckin.enabled sempat kehilangan
