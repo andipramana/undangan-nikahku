@@ -6,9 +6,9 @@
  * netral markup dan memakai ID semantik — rsvp.js, gift.js, qr-checkin.js —
  * plus guest-overrides.js untuk override editor visual.
  *
- * Countdown dan tombol musik ditulis pendek di sini (masing-masing ~20 baris)
- * karena versi bersama menuntut elemen khas klasik (#save-the-date-2,
- * #audio-toggle-icon) yang tidak ada di template ini.
+ * Hitung mundur, tombol musik, dan toast memakai WeddingBehaviors
+ * (assets/js/core/behaviors.js): elemennya diserahkan dari sini, jadi
+ * penamaan & tata letaknya tetap milik template ini.
  */
 (function () {
   "use strict";
@@ -17,16 +17,6 @@
 
   const $ = (id) => document.getElementById(id);
   const cleanups = [];
-
-  /* ── Toast: dipanggil rsvp.js & gift.js lewat window.showToast ─────────── */
-  window.showToast = function (message) {
-    const el = $("toast");
-    if (!el) return;
-    el.textContent = message;
-    el.classList.add("show");
-    clearTimeout(window.__ncToast);
-    window.__ncToast = setTimeout(() => el.classList.remove("show"), 2400);
-  };
 
   function setBg(el, photo) {
     if (!el || !photo) return;
@@ -52,43 +42,6 @@
     el.innerHTML = `<a href="https://instagram.com/${encodeURIComponent(ig)}" target="_blank" rel="noopener">${IG_ICON}<span>@${esc(ig)}</span></a>`;
   }
 
-  /* ── Countdown sendiri (versi bersama terikat markup klasik) ───────────── */
-  function startCountdown(targetISO) {
-    const days = $("cd-days"), hours = $("cd-hours"), mins = $("cd-minutes"), secs = $("cd-seconds");
-    if (!days) return;
-    const target = new Date(targetISO).getTime();
-    if (isNaN(target)) return;
-    const pad = (n) => String(n).padStart(2, "0");
-    const tick = () => {
-      const diff = Math.max(0, target - Date.now());
-      const s = Math.floor(diff / 1000);
-      days.textContent = String(Math.floor(s / 86400));
-      hours.textContent = pad(Math.floor(s / 3600) % 24);
-      mins.textContent = pad(Math.floor(s / 60) % 60);
-      secs.textContent = pad(s % 60);
-    };
-    tick();
-    const timer = setInterval(tick, 1000);
-    cleanups.push(() => clearInterval(timer));
-  }
-
-  /* ── Tombol musik sendiri (bar equalizer, bukan ikon Font Awesome) ─────── */
-  function setupAudio(cfg) {
-    const audio = $("bg-audio"), btn = $("audio-toggle");
-    if (!audio || !btn) return;
-    const src = (cfg.audio && (cfg.audio.path ? window.audioUrl(cfg.audio.path) : cfg.audio.src)) || "";
-    if (!src) return;
-    audio.src = src;
-    btn.hidden = false;
-    const sync = () => btn.classList.toggle("is-playing", !audio.paused);
-    btn.addEventListener("click", () => { audio.paused ? audio.play().catch(() => {}) : audio.pause(); });
-    audio.addEventListener("play", sync);
-    audio.addEventListener("pause", sync);
-    // Autoplay hanya boleh setelah gestur tamu (kebijakan browser) — dipicu
-    // tombol "Buka Undangan", bukan saat halaman dimuat.
-    window.__ncPlayAudio = () => audio.play().catch(() => {});
-  }
-
   /* ── Adegan hidup + titik navigasi ─────────────────────────────────────── */
   function setupScenes(root) {
     const scenes = [...root.querySelectorAll(".nc-scene")];
@@ -109,22 +62,17 @@
       });
     }
 
-    if (!("IntersectionObserver" in window)) {
-      scenes.forEach((sc) => sc.classList.add("is-live"));
-      return;
-    }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("is-live");
-        if (dots) {
-          dots.querySelectorAll("button").forEach((b) =>
-            b.classList.toggle("is-active", b.dataset.go === entry.target.id));
-        }
-      });
-    }, { threshold: 0.45 });
-    scenes.forEach((sc) => io.observe(sc));
-    cleanups.push(() => io.disconnect());
+    // once:false — titik navigasi harus ikut berpindah tiap kali adegan
+    // dilewati lagi, bukan sekali saat pertama muncul.
+    cleanups.push(window.WeddingBehaviors.revealOnView(scenes, {
+      threshold: 0.45,
+      once: false,
+      onEnter(scene) {
+        if (!dots) return;
+        dots.querySelectorAll("button").forEach((b) =>
+          b.classList.toggle("is-active", b.dataset.go === scene.id));
+      }
+    }));
   }
 
   function setupModals(root) {
@@ -209,7 +157,10 @@
           (dress.colors || []).map((c) => `<span style="background:${esc(c)}" title="${esc(c)}"></span>`).join("");
       }
 
-      startCountdown(cfg.event.countdownTarget);
+      cleanups.push(window.WeddingBehaviors.countdown({
+        days: $("cd-days"), hours: $("cd-hours"),
+        minutes: $("cd-minutes"), seconds: $("cd-seconds")
+      }, cfg.event.countdownTarget));
 
       /* Live streaming — sectionnya dibuang kalau tidak ada satu pun URL,
          supaya tidak menyisakan adegan kosong yang tetap kena snap. */
@@ -259,7 +210,9 @@
       setBg($("closing-media"), photos("closing")[0]);
 
       /* Perilaku */
-      setupAudio(cfg);
+      cleanups.push(window.WeddingBehaviors.toast($("toast")));
+      const audio = window.WeddingBehaviors.audio($("bg-audio"), $("audio-toggle"), cfg);
+      cleanups.push(audio.stop);
       setupModals(root);
       setupScenes(root);
 
@@ -271,7 +224,7 @@
         window.__invitationOpen = true;
         (window.__openCallbacks || []).forEach((fn) => fn());
         window.__openCallbacks = [];
-        if (window.__ncPlayAudio) window.__ncPlayAudio();
+        audio.play();
         $("cover").classList.add("is-live");
       }, { once: true });
 

@@ -20,6 +20,16 @@
         "#b3925f",
         "#f1ece3"
       ]
+    },
+    {
+      "id": "kertas",
+      "name": "Kertas",
+      "desc": "Editorial. Kertas gading, tipografi besar, grid asimetris, daftar isi bernomor di tepi.",
+      "colors": [
+        "#f3efe6",
+        "#8c3b2a",
+        "#201d18"
+      ]
     }
   ]
 }

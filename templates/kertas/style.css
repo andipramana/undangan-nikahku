@@ -1,0 +1,386 @@
+/* ============================================================================
+   KERTAS — undangan yang dibaca seperti buku acara cetak.
+
+   CSS MANDIRI: satu-satunya stylesheet tampilan saat template ini aktif
+   (docs/kontrak-template.md). Reset dan seluruh komponennya ditulis di sini,
+   tidak mewarisi apa pun dari template lain.
+
+   Bahasa desain — sengaja berlawanan dengan Nocturne:
+   - Terang dan berpori: kertas gading #f3efe6 dengan tekstur bintik halus
+     (gradient, bukan file gambar), tinta cokelat-hitam #201d18.
+   - Tidak ada kartu, tidak ada bayangan, tidak ada sudut membulat. Yang
+     memisahkan bagian adalah GARIS dan RUANG KOSONG, seperti halaman cetak.
+   - Grid asimetris: kolom teks tidak pernah di tengah — digeser ke kanan dan
+     diimbangi nomor bab (folio) di margin kiri.
+   - Tipografi yang memimpin: Fraunces (serif optical) ukuran sangat besar
+     untuk nama, Archivo untuk teks; angka & label pakai huruf kecil-kapital.
+   - Gerak sangat pelan dan sedikit: naik 12px + fade. Tidak ada scroll-snap —
+     halaman mengalir bebas, karena ini "dibaca", bukan "dijelajahi".
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --kt-paper: #f3efe6;
+  --kt-paper-2: #ece7db;
+  --kt-ink: #201d18;
+  --kt-ink-2: #57514a;
+  --kt-ink-3: #8b8378;
+  --kt-accent: #8c3b2a;              /* merah bata tinta cetak */
+  --kt-line: rgba(32, 29, 24, .18);
+  --kt-line-2: rgba(32, 29, 24, .08);
+
+  --kt-serif: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --kt-sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+
+  --kt-measure: 34rem;               /* lebar baca nyaman */
+  --kt-gutter: clamp(1.25rem, 5vw, 4rem);
+}
+
+html { -webkit-text-size-adjust: 100%; }
+html.no-scroll, body.no-scroll { overflow: hidden; }
+
+body {
+  margin: 0;
+  background: var(--kt-paper);
+  color: var(--kt-ink);
+  font-family: var(--kt-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  /* Bintik kertas: dua radial-gradient sangat halus, diulang kecil. Tidak
+     memakai file gambar supaya template tetap satu berkas CSS. */
+  background-image:
+    radial-gradient(rgba(32, 29, 24, .028) 1px, transparent 1px),
+    radial-gradient(rgba(32, 29, 24, .022) 1px, transparent 1px);
+  background-size: 22px 22px, 37px 37px;
+  background-position: 0 0, 11px 18px;
+}
+
+img { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+/* ---------- Masthead ---------- */
+.kt-masthead {
+  position: sticky; top: 0; z-index: 40;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem;
+  padding: .7rem var(--kt-gutter);
+  background: color-mix(in srgb, var(--kt-paper) 88%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--kt-line-2);
+  font-size: .62rem; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--kt-ink-3);
+}
+.kt-masthead__names { justify-self: center; color: var(--kt-ink); letter-spacing: .18em; }
+.kt-masthead__tools { justify-self: end; display: flex; gap: .5rem; }
+
+.kt-tool {
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border: 1px solid var(--kt-line); color: var(--kt-ink);
+}
+.kt-tool svg { width: 16px; height: 16px; }
+.kt-tool__bar { width: 2px; height: 7px; margin: 0 1px; background: currentColor; display: inline-block; }
+.kt-tool.is-playing .kt-tool__bar { animation: kt-eq .9s ease-in-out infinite; }
+.kt-tool.is-playing .kt-tool__bar:nth-child(2) { animation-delay: .15s; }
+.kt-tool.is-playing .kt-tool__bar:nth-child(3) { animation-delay: .3s; }
+@keyframes kt-eq { 0%, 100% { height: 5px; } 50% { height: 13px; } }
+
+/* ---------- Daftar isi ---------- */
+.kt-index-btn {
+  position: fixed; z-index: 41; left: var(--kt-gutter); bottom: 1.2rem;
+  padding: .55rem 1rem; background: var(--kt-ink); color: var(--kt-paper);
+  font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
+}
+.kt-index {
+  position: fixed; z-index: 42; inset: auto auto 4.2rem var(--kt-gutter);
+  display: none; padding: 1rem 1.4rem 1.1rem;
+  background: var(--kt-paper); border: 1px solid var(--kt-line);
+  max-height: 60vh; overflow-y: auto;
+}
+.kt-index.is-open { display: block; }
+.kt-index a {
+  display: flex; gap: .9rem; align-items: baseline;
+  padding: .3rem 0; font-size: .82rem; color: var(--kt-ink-2);
+}
+.kt-index a b { font-family: var(--kt-serif); font-weight: 400; font-size: .72rem; color: var(--kt-ink-3); min-width: 1.6rem; }
+.kt-index a.is-active { color: var(--kt-accent); }
+.kt-index a.is-active b { color: var(--kt-accent); }
+
+/* Layar lebar: daftar isi jadi kolom tetap di margin kiri — inilah bentuk
+   aslinya, tombol laci hanya jalan darurat untuk layar sempit. */
+@media (min-width: 1100px) {
+  .kt-index-btn { display: none; }
+  .kt-index {
+    display: block; position: fixed; top: 40%; left: 2.2rem; bottom: auto;
+    background: none; border: 0; padding: 0; max-height: none;
+  }
+  .kt-index a { border: 0; }
+}
+
+/* ---------- Kerangka halaman ---------- */
+.kt-paper { padding-bottom: 5rem; }
+
+.kt-sheet {
+  position: relative;
+  max-width: var(--kt-measure);
+  /* Asimetris: dorong kolom ke kanan dari tengah, sisakan margin kiri lebar
+     untuk folio — komposisi halaman kanan buku. */
+  margin: 0 auto;
+  padding: clamp(3.5rem, 12vw, 7rem) var(--kt-gutter);
+}
+@media (min-width: 1100px) {
+  .kt-sheet { margin-left: max(22rem, 26vw); margin-right: auto; padding-left: 0; padding-right: 2rem; }
+}
+
+/* Gerak masuk: pelan, sedikit, sekali. */
+.kt-sheet > * { opacity: 0; transform: translateY(12px); transition: opacity .7s ease, transform .7s ease; }
+.kt-sheet > *:nth-child(2) { transition-delay: .06s; }
+.kt-sheet > *:nth-child(3) { transition-delay: .12s; }
+.kt-sheet > *:nth-child(4) { transition-delay: .18s; }
+.kt-sheet > *:nth-child(n+5) { transition-delay: .24s; }
+.kt-sheet.is-live > * { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .kt-sheet > * { opacity: 1; transform: none; transition: none; }
+}
+
+.kt-folio {
+  margin: 0 0 1.6rem;
+  font-family: var(--kt-serif); font-size: .95rem; letter-spacing: .3em;
+  color: var(--kt-ink-3);
+}
+@media (min-width: 1100px) {
+  .kt-folio { position: absolute; left: -5rem; top: clamp(3.5rem, 12vw, 7rem); margin: 0; }
+}
+
+.kt-rule { height: 1px; margin: 0 0 2rem; background: var(--kt-ink); }
+.kt-eyebrow {
+  margin: 0 0 .6rem; font-size: .6rem; letter-spacing: .28em;
+  text-transform: uppercase; color: var(--kt-ink-3);
+}
+.kt-label { margin: 0 0 .3rem; font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-h2 {
+  margin: 0 0 2rem; font-family: var(--kt-serif); font-weight: 400;
+  font-size: clamp(1.9rem, 6vw, 2.9rem); line-height: 1.06; letter-spacing: -.01em;
+}
+.kt-h3 { margin: 0 0 1rem; font-family: var(--kt-serif); font-weight: 400; font-size: 1.35rem; }
+
+.kt-display {
+  margin: 0; font-family: var(--kt-serif); font-weight: 400;
+  font-size: clamp(3rem, 15vw, 6.5rem); line-height: .92; letter-spacing: -.03em;
+}
+.kt-display .amp {
+  display: block; font-size: .38em; font-style: italic;
+  color: var(--kt-accent); margin: .12em 0;
+}
+.kt-display--sm { font-size: clamp(2rem, 9vw, 3.4rem); }
+
+.kt-btn {
+  display: inline-block; padding: .8rem 1.5rem;
+  border: 1px solid var(--kt-ink); color: var(--kt-ink);
+  font-size: .66rem; letter-spacing: .2em; text-transform: uppercase;
+  transition: background .2s, color .2s;
+}
+.kt-btn:hover { background: var(--kt-ink); color: var(--kt-paper); }
+.kt-btn--solid { background: var(--kt-ink); color: var(--kt-paper); }
+.kt-btn--solid:hover { background: var(--kt-accent); border-color: var(--kt-accent); }
+.kt-link {
+  display: inline-block; color: var(--kt-accent);
+  font-size: .74rem; letter-spacing: .06em;
+  border-bottom: 1px solid currentColor; padding-bottom: 1px;
+}
+
+/* ---------- Sampul ---------- */
+.kt-cover { padding-top: clamp(2.5rem, 9vw, 5rem); }
+.kt-cover__meta { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; margin: 1.6rem 0 2.2rem; }
+.kt-cover__date { margin: 0; font-family: var(--kt-serif); font-size: 1.15rem; }
+.kt-cover__venue { margin: 0; font-size: .82rem; color: var(--kt-ink-2); }
+.kt-cover__figure { margin: 0 0 2.2rem; }
+.kt-cover__figure img { width: 100%; aspect-ratio: 4/5; object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%); }
+.kt-cover__to { border-top: 1px solid var(--kt-line); padding-top: 1.4rem; }
+.kt-guest { margin: 0 0 1.4rem; font-family: var(--kt-serif); font-size: clamp(1.4rem, 5vw, 2rem); }
+
+/* ---------- Ayat ---------- */
+.kt-arabic {
+  margin: 0 0 1.6rem; font-family: var(--kt-serif); font-size: clamp(1.2rem, 5vw, 1.7rem);
+  line-height: 2.1; direction: rtl; color: var(--kt-ink);
+}
+.kt-quote {
+  margin: 0; padding-left: 1.4rem; border-left: 2px solid var(--kt-accent);
+  font-family: var(--kt-serif); font-size: clamp(1.1rem, 3.6vw, 1.45rem);
+  line-height: 1.65; font-style: italic;
+}
+.kt-source { margin: 1rem 0 0 1.4rem; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--kt-ink-3); }
+
+/* ---------- Mempelai ---------- */
+.kt-person { display: grid; gap: 1.2rem; margin-bottom: 3.2rem; }
+.kt-person__figure { margin: 0; }
+.kt-person__figure img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%); }
+.kt-person__name { margin: 0 0 .5rem; font-family: var(--kt-serif); font-weight: 400; font-size: clamp(1.7rem, 6vw, 2.4rem); line-height: 1.05; }
+.kt-person__parents { margin: 0; font-size: .9rem; line-height: 1.75; color: var(--kt-ink-2); }
+.kt-person__ig { margin: .7rem 0 0; }
+.kt-person__ig a { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--kt-accent); }
+.kt-person__ig svg { width: 15px; height: 15px; }
+
+@media (min-width: 620px) {
+  /* Kolom foto sempit + teks lebar; entri kedua dibalik supaya halaman tidak
+     terbaca berulang seperti daftar. */
+  .kt-person { grid-template-columns: 8.5rem 1fr; align-items: start; gap: 1.6rem; }
+  .kt-person--flip { grid-template-columns: 1fr 8.5rem; }
+  .kt-person--flip .kt-person__figure { order: 2; }
+}
+
+/* ---------- Foto full-bleed pemisah ---------- */
+.kt-bleed { margin: 0 0 0; padding: 0; }
+.kt-bleed img { width: 100%; aspect-ratio: 21/9; object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%); }
+@media (min-width: 1100px) { .kt-bleed img { aspect-ratio: 21/8; } }
+
+/* ---------- Acara ---------- */
+.kt-event__date { margin: -1rem 0 2rem; font-family: var(--kt-serif); font-size: 1.2rem; color: var(--kt-ink-2); }
+.kt-schedule { margin: 0 0 2.4rem; }
+.kt-schedule__row {
+  display: grid; gap: .5rem; padding: 1.3rem 0;
+  border-top: 1px solid var(--kt-line);
+}
+.kt-schedule__row:last-child { border-bottom: 1px solid var(--kt-line); }
+.kt-schedule dt {
+  font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; color: var(--kt-ink-3);
+}
+.kt-schedule dd { margin: 0; }
+.kt-schedule__time { margin: 0 0 .35rem; font-family: var(--kt-serif); font-size: 1.5rem; line-height: 1; }
+.kt-schedule__venue { margin: 0; font-size: .95rem; }
+.kt-schedule__addr { margin: .2rem 0 .6rem; font-size: .84rem; color: var(--kt-ink-2); }
+@media (min-width: 620px) {
+  .kt-schedule__row { grid-template-columns: 7rem 1fr; gap: 1.5rem; align-items: baseline; }
+}
+
+.kt-countdown { display: flex; flex-wrap: wrap; gap: 1.4rem; margin: 0 0 2rem; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-countdown b { font-family: var(--kt-serif); font-weight: 400; font-size: 1.6rem; letter-spacing: 0; color: var(--kt-ink); margin-right: .3rem; }
+.kt-event__actions { margin-bottom: 2rem; }
+.kt-dress { border-top: 1px solid var(--kt-line); padding-top: 1.3rem; }
+.kt-dress p { margin: 0 0 .7rem; font-size: .92rem; color: var(--kt-ink-2); }
+.kt-swatches { display: flex; gap: .5rem; }
+.kt-swatches span { width: 30px; height: 30px; border: 1px solid var(--kt-line); }
+
+/* ---------- Live ---------- */
+.kt-live__links { display: flex; flex-wrap: wrap; gap: .7rem; }
+
+/* ---------- Cerita ---------- */
+.kt-story__item { padding: 1.6rem 0; border-top: 1px solid var(--kt-line); }
+.kt-story__item:last-child { border-bottom: 1px solid var(--kt-line); }
+.kt-story__no { font-family: var(--kt-serif); font-size: .8rem; color: var(--kt-accent); letter-spacing: .1em; }
+.kt-story__date { display: block; margin: .3rem 0 .5rem; font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-story__item h4 { margin: 0 0 .5rem; font-family: var(--kt-serif); font-weight: 400; font-size: 1.4rem; line-height: 1.15; }
+.kt-story__item p { margin: 0; font-size: .95rem; line-height: 1.8; color: var(--kt-ink-2); }
+
+/* ---------- Galeri ---------- */
+.kt-gallery__grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: .5rem; }
+.kt-gallery__grid button { padding: 0; border: 0; }
+.kt-gallery__grid img { width: 100%; height: 100%; object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%); }
+/* Irama majalah: lebar & tinggi bergantian mengikuti posisi, bukan seragam. */
+.kt-gallery__grid button { grid-column: span 3; aspect-ratio: 3/4; }
+.kt-gallery__grid button:nth-child(3n+1) { grid-column: span 6; aspect-ratio: 16/10; }
+.kt-gallery__grid button:nth-child(5n+4) { grid-column: span 2; aspect-ratio: 1; }
+.kt-gallery__grid button:nth-child(5n+5) { grid-column: span 4; aspect-ratio: 4/3; }
+
+/* ---------- Kartu balasan ---------- */
+.kt-form { display: grid; gap: 1.2rem; margin-bottom: 2.6rem; }
+.kt-field { display: grid; gap: .45rem; }
+.kt-field > span { font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-form input, .kt-form textarea {
+  width: 100%; padding: .6rem 0;
+  background: none; border: 0; border-bottom: 1px solid var(--kt-line);
+  color: var(--kt-ink); font-family: var(--kt-sans); font-size: 1rem;
+}
+.kt-form input:focus, .kt-form textarea:focus { outline: none; border-bottom-color: var(--kt-accent); }
+.kt-form .kt-btn--solid { justify-self: start; }
+.kt-status { margin: 0; font-size: .8rem; color: var(--kt-ink-2); min-height: 1.2em; }
+
+.kt-pills { display: flex; flex-wrap: wrap; gap: .5rem; }
+/* .rsvp-pill & .is-selected = kontrak assets/js/rsvp.js */
+.rsvp-pill {
+  padding: .5rem 1rem; border: 1px solid var(--kt-line); color: var(--kt-ink-2);
+  font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  transition: color .2s, border-color .2s, background .2s;
+}
+.rsvp-pill:hover { border-color: var(--kt-ink); color: var(--kt-ink); }
+.rsvp-pill.is-selected { background: var(--kt-ink); border-color: var(--kt-ink); color: var(--kt-paper); }
+
+/* Kelas berikut DIHASILKAN assets/js/rsvp.js — ditulis ulang dengan bahasa
+   visual Kertas, bukan diimpor dari stylesheet template lain. */
+.kt-wishes { display: grid; gap: 0; margin-bottom: 2.6rem; }
+.kt-wishes .wish-card { padding: 1.2rem 0; border-top: 1px solid var(--kt-line-2); }
+.kt-wishes .wish-card__name { font-family: var(--kt-serif); font-size: 1.1rem; }
+.kt-wishes .wish-card__status { display: block; margin: .15rem 0 .4rem; font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-wishes .wish-card__status--hadir { color: var(--kt-accent); }
+.kt-wishes .wish-card__message { margin: 0; font-size: .92rem; line-height: 1.75; color: var(--kt-ink-2); }
+.kt-wishes .wishes-empty { margin: 0; padding: 1.2rem 0; font-size: .88rem; color: var(--kt-ink-3); }
+.kt-wishes__nav { display: flex; gap: 1.2rem; align-items: center; margin-bottom: 2.6rem; }
+.kt-wishes__nav .wishes-page-btn { color: var(--kt-accent); font-size: .7rem; letter-spacing: .14em; border-bottom: 1px solid currentColor; }
+.kt-wishes__nav .wishes-page-btn:disabled { color: var(--kt-ink-3); border-bottom-color: transparent; cursor: default; }
+.kt-wishes__nav .wishes-page-info { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--kt-ink-3); }
+
+/* ---------- Hadiah (markup dari assets/js/gift.js) ---------- */
+.kt-gift { border-top: 1px solid var(--kt-ink); padding-top: 1.8rem; }
+#gift-panel { display: grid; gap: 1.2rem; margin-top: 1.2rem; }
+.gift-account { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--kt-line-2); }
+.gift-account__bank { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: var(--kt-ink-3); }
+.gift-account__number { margin-top: .25rem; font-family: var(--kt-serif); font-size: 1.3rem; }
+.gift-account__holder { margin-top: .15rem; font-size: .82rem; color: var(--kt-ink-2); }
+.gift-copy-btn { flex: none; padding: .45rem .8rem; border: 1px solid var(--kt-line); color: var(--kt-ink); font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; }
+.gift-copy-btn:hover { background: var(--kt-ink); color: var(--kt-paper); }
+#gift-address { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--kt-line-2); }
+.gift-address__text { font-size: .88rem; line-height: 1.7; color: var(--kt-ink-2); }
+.gift-address__text strong { color: var(--kt-ink); font-weight: 500; }
+.gift-note { margin: 0; font-size: .84rem; line-height: 1.8; color: var(--kt-ink-3); }
+.kt-gift__actions { display: flex; flex-wrap: wrap; gap: 1.2rem; }
+
+.gift-rec-card { border: 1px solid var(--kt-line); display: grid; }
+.gift-rec-card__img img, .gift-rec-card__placeholder { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.gift-rec-card__placeholder { display: grid; place-items: center; font-size: 2rem; background: var(--kt-paper-2); }
+.gift-rec-card__body { padding: .75rem; display: grid; gap: .2rem; }
+.gift-rec-card__name { font-size: .88rem; }
+.gift-rec-card__price { font-size: .78rem; color: var(--kt-accent); }
+.gift-rec-card__nobuy { font-size: .7rem; color: var(--kt-ink-3); }
+.gift-rec-card .btn-outline { justify-self: start; margin-top: .3rem; padding: .4rem .75rem; border: 1px solid var(--kt-line); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+
+/* ---------- Penutup ---------- */
+.kt-closing { text-align: left; }
+.kt-closing__text { margin: 0 0 1.8rem; font-size: 1rem; line-height: 1.9; color: var(--kt-ink-2); }
+.kt-colophon { margin: 3rem 0 0; font-size: .58rem; letter-spacing: .26em; text-transform: uppercase; color: var(--kt-ink-3); }
+
+/* ---------- Modal & lightbox ---------- */
+.kt-modal, .kt-lightbox {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center; padding: 1.2rem;
+  background: rgba(32, 29, 24, .6);
+}
+.kt-modal__panel {
+  width: min(30rem, 100%); max-height: 86dvh; overflow-y: auto;
+  padding: 1.5rem; background: var(--kt-paper); border: 1px solid var(--kt-ink);
+  display: grid; gap: .9rem;
+}
+.kt-modal__panel--qr { width: min(20rem, 100%); }
+.kt-modal__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.kt-modal__head h3 { margin: 0; font-family: var(--kt-serif); font-weight: 400; font-size: 1.25rem; }
+.kt-modal__x { font-size: 1.5rem; line-height: 1; color: var(--kt-ink-3); }
+.kt-modal select, .kt-modal textarea {
+  width: 100%; padding: .7rem; background: var(--kt-paper-2);
+  border: 1px solid var(--kt-line); color: var(--kt-ink); font: inherit; font-size: .9rem;
+}
+.qr-container canvas { width: 100% !important; height: auto !important; image-rendering: pixelated; background: #fff; padding: 12px; }
+.kt-recs { display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem; }
+.kt-lightbox img { max-width: min(100%, 62rem); max-height: 86dvh; object-fit: contain; }
+.kt-lightbox .kt-modal__x { position: absolute; top: 1rem; right: 1.2rem; font-size: 2rem; color: var(--kt-paper); }
+
+/* ---------- Toast ---------- */
+.kt-toast {
+  position: fixed; z-index: 70; left: 50%; bottom: 1.4rem; transform: translate(-50%, 12px);
+  padding: .7rem 1.1rem; background: var(--kt-ink); color: var(--kt-paper);
+  font-size: .8rem; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+}
+.kt-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Sebelum "Buka Undangan" ditekan: hanya sampul yang ada di halaman. */
+.kt-paper.is-locked { overflow: hidden; }
+.kt-paper.is-locked .kt-sheet:not(.kt-cover),
+.kt-paper.is-locked .kt-bleed { display: none; }

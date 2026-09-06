@@ -1,0 +1,236 @@
+<!-- Kertas — undangan yang dibaca seperti buku acara cetak.
+     Berbeda dari template lain: tidak ada adegan layar penuh dan tidak ada
+     scroll-snap. Halaman mengalir panjang seperti majalah — kolom teks
+     bermargin lebar berselang-seling dengan foto full-bleed — dan navigasinya
+     berupa daftar isi bernomor yang menempel di tepi. -->
+<div class="kt" id="kt-root">
+
+  <audio id="bg-audio" loop preload="none"></audio>
+
+  <!-- Kepala tetap: nomor edisi + kendali. Meniru masthead majalah. -->
+  <header class="kt-masthead" id="kt-masthead">
+    <span class="kt-masthead__issue" id="kt-issue"></span>
+    <span class="kt-masthead__names" id="kt-masthead-names"></span>
+    <span class="kt-masthead__tools">
+      <button id="audio-toggle" class="kt-tool" type="button" aria-label="Putar musik" hidden>
+        <span class="kt-tool__bar"></span><span class="kt-tool__bar"></span><span class="kt-tool__bar"></span>
+      </button>
+      <button id="btn-qr-checkin" class="kt-tool" type="button" aria-label="Tunjukkan QR check-in" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M14 14h3v3h-3zM20 14h1M14 20h1M18 18h3v3h-3z"/></svg>
+      </button>
+    </span>
+  </header>
+
+  <!-- Daftar isi: kolom lengket di kiri pada layar lebar, laci di HP. -->
+  <button class="kt-index-btn" id="kt-index-btn" type="button" aria-expanded="false">Daftar isi</button>
+  <nav class="kt-index" id="kt-index" aria-label="Daftar isi"></nav>
+
+  <main class="kt-paper" id="kt-paper">
+
+    <!-- Sampul: tipografi besar, foto mengapit asimetris -->
+    <section class="kt-sheet kt-cover" id="cover" data-chapter="Sampul">
+      <p class="kt-rule" aria-hidden="true"></p>
+      <p class="kt-eyebrow">Undangan Pernikahan</p>
+      <h1 class="kt-display" id="couple-names-cover"></h1>
+      <div class="kt-cover__meta">
+        <p class="kt-cover__date" id="cover-date"></p>
+        <p class="kt-cover__venue" id="cover-venue"></p>
+      </div>
+      <figure class="kt-cover__figure">
+        <img id="cover-photo" alt="" loading="eager">
+      </figure>
+      <div class="kt-cover__to">
+        <p class="kt-label" id="guest-label"></p>
+        <p class="kt-guest" id="guest-name"></p>
+        <button class="kt-btn kt-btn--solid" id="btn-open" type="button">Buka Undangan</button>
+      </div>
+    </section>
+
+    <!-- Ayat: satu kolom sempit, dikutip besar -->
+    <section class="kt-sheet kt-verse" id="opening" data-chapter="Doa">
+      <p class="kt-folio">I</p>
+      <p class="kt-arabic" id="opening-arabic"></p>
+      <blockquote class="kt-quote" id="wfl-quote"></blockquote>
+      <p class="kt-source" id="wfl-source"></p>
+    </section>
+
+    <!-- Mempelai: dua entri, foto kecil di kolom sempit, teks di kolom lebar -->
+    <section class="kt-sheet kt-couple" id="couple" data-chapter="Mempelai">
+      <p class="kt-folio">II</p>
+      <h2 class="kt-h2">Kedua Mempelai</h2>
+
+      <article class="kt-person">
+        <figure class="kt-person__figure"><img id="bride-photo" alt="" loading="lazy"></figure>
+        <div class="kt-person__text">
+          <p class="kt-eyebrow">Mempelai Wanita</p>
+          <h3 class="kt-person__name" id="bride-name"></h3>
+          <p class="kt-person__parents" id="bride-parents"></p>
+          <p class="kt-person__ig" id="bride-instagram"></p>
+        </div>
+      </article>
+
+      <article class="kt-person kt-person--flip">
+        <figure class="kt-person__figure"><img id="groom-photo" alt="" loading="lazy"></figure>
+        <div class="kt-person__text">
+          <p class="kt-eyebrow">Mempelai Pria</p>
+          <h3 class="kt-person__name" id="groom-name"></h3>
+          <p class="kt-person__parents" id="groom-parents"></p>
+          <p class="kt-person__ig" id="groom-instagram"></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Foto full-bleed pemisah, khas majalah -->
+    <figure class="kt-bleed" id="kt-bleed-1" hidden>
+      <img alt="" loading="lazy">
+    </figure>
+
+    <!-- Acara: disusun seperti tabel jadwal cetak, bukan kartu -->
+    <section class="kt-sheet kt-event" id="event" data-chapter="Acara">
+      <p class="kt-folio">III</p>
+      <h2 class="kt-h2">Rangkaian Acara</h2>
+      <p class="kt-event__date" id="event-date-line"></p>
+
+      <dl class="kt-schedule">
+        <div class="kt-schedule__row">
+          <dt id="akad-label">Akad</dt>
+          <dd>
+            <p class="kt-schedule__time"><span id="akad-time"></span></p>
+            <p class="kt-schedule__venue" id="venue-name-akad"></p>
+            <p class="kt-schedule__addr" id="venue-address-akad"></p>
+            <a class="kt-link" id="akad-maps" target="_blank" rel="noopener">Lihat peta</a>
+          </dd>
+        </div>
+        <div class="kt-schedule__row">
+          <dt id="resepsi-label">Resepsi</dt>
+          <dd>
+            <p class="kt-schedule__time"><span id="resepsi-time"></span></p>
+            <p class="kt-schedule__venue" id="venue-name-resepsi"></p>
+            <p class="kt-schedule__addr" id="venue-address-resepsi"></p>
+            <a class="kt-link" id="resepsi-maps" target="_blank" rel="noopener">Lihat peta</a>
+          </dd>
+        </div>
+      </dl>
+
+      <div class="kt-countdown" aria-label="Hitung mundur">
+        <span><b id="cd-days">0</b> hari</span>
+        <span><b id="cd-hours">00</b> jam</span>
+        <span><b id="cd-minutes">00</b> menit</span>
+        <span><b id="cd-seconds">00</b> detik</span>
+      </div>
+
+      <div class="kt-event__actions">
+        <a class="kt-btn" id="btn-add-calendar" target="_blank" rel="noopener">Simpan ke kalender</a>
+      </div>
+
+      <div class="kt-dress" id="kt-dress" hidden>
+        <p class="kt-eyebrow">Dresscode</p>
+        <p id="dresscode-text"></p>
+        <div class="kt-swatches" id="dresscode-swatches"></div>
+      </div>
+    </section>
+
+    <section class="kt-sheet kt-live" id="livestream" data-chapter="Live">
+      <p class="kt-folio">IV</p>
+      <h2 class="kt-h2">Siaran Langsung</h2>
+      <div class="kt-live__links" id="livestream-links"></div>
+    </section>
+
+    <!-- Cerita: entri bernomor bergaya editorial -->
+    <section class="kt-sheet kt-story" id="love-story" data-chapter="Cerita">
+      <p class="kt-folio">V</p>
+      <h2 class="kt-h2">Perjalanan Kami</h2>
+      <div class="kt-story__list" id="love-story-list"></div>
+    </section>
+
+    <!-- Galeri: grid majalah asimetris (besar-kecil bergantian) -->
+    <section class="kt-sheet kt-gallery" id="gallery" data-chapter="Galeri">
+      <p class="kt-folio">VI</p>
+      <h2 class="kt-h2">Album</h2>
+      <div class="kt-gallery__grid" id="kt-gallery-grid"></div>
+    </section>
+
+    <!-- RSVP & hadiah: blok formulir bergaya kartu balasan cetak -->
+    <section class="kt-sheet kt-rsvp" id="gift" data-chapter="Balasan">
+      <p class="kt-folio">VII</p>
+      <h2 class="kt-h2">Kartu Balasan</h2>
+
+      <form class="kt-form" id="rsvp-form">
+        <label class="kt-field"><span>Nama</span>
+          <input id="rsvp-name" type="text" autocomplete="name" required>
+        </label>
+        <div class="kt-field">
+          <span>Kehadiran</span>
+          <!-- .rsvp-pill + data-value adalah kait assets/js/rsvp.js -->
+          <div class="kt-pills" id="rsvp-attendance" role="radiogroup" aria-label="Kehadiran">
+            <button type="button" class="rsvp-pill" data-value="hadir">Hadir</button>
+            <button type="button" class="rsvp-pill" data-value="tidak_hadir">Tidak hadir</button>
+            <button type="button" class="rsvp-pill" data-value="ragu">Masih ragu</button>
+          </div>
+        </div>
+        <label class="kt-field"><span>Ucapan &amp; doa</span>
+          <textarea id="rsvp-message" rows="4" required></textarea>
+        </label>
+        <button id="rsvp-submit" type="submit" class="kt-btn kt-btn--solid">Kirim balasan</button>
+        <p id="rsvp-status" class="kt-status" role="status"></p>
+      </form>
+
+      <div class="kt-wishes" id="wishes-list"></div>
+      <div class="kt-wishes__nav" id="wishes-pagination" hidden></div>
+
+      <div class="kt-gift">
+        <h3 class="kt-h3">Tanda Kasih</h3>
+        <button type="button" class="kt-btn" id="btn-gift-toggle">Lihat rekening &amp; alamat</button>
+        <div id="gift-panel" hidden>
+          <div id="gift-accounts"></div>
+          <div id="gift-address"></div>
+          <div class="kt-gift__actions">
+            <button type="button" class="kt-link" id="btn-gift-recs">Rekomendasi kado</button>
+            <button type="button" class="kt-link" id="btn-gift-confirm">Konfirmasi pengiriman</button>
+            <button type="button" class="kt-link" id="btn-gift-hide">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Penutup: colophon -->
+    <section class="kt-sheet kt-closing" id="closing" data-chapter="Penutup">
+      <p class="kt-rule" aria-hidden="true"></p>
+      <p class="kt-closing__text" id="closing-text"></p>
+      <h2 class="kt-display kt-display--sm" id="couple-names-closing"></h2>
+      <p class="kt-colophon" id="kt-colophon">Undangan Nikahku</p>
+    </section>
+
+  </main>
+
+  <div class="kt-modal" id="gift-confirm-modal" hidden>
+    <div class="kt-modal__panel">
+      <div class="kt-modal__head"><h3>Konfirmasi pengiriman</h3><button type="button" class="kt-modal__x modal__close" data-close aria-label="Tutup">&times;</button></div>
+      <select id="gift-confirm-method"></select>
+      <textarea id="gift-confirm-message" rows="10"></textarea>
+      <button type="button" class="kt-btn kt-btn--solid" id="gift-confirm-send">Kirim via WhatsApp</button>
+    </div>
+  </div>
+
+  <div class="kt-modal" id="gift-recs-modal" hidden>
+    <div class="kt-modal__panel">
+      <div class="kt-modal__head"><h3>Rekomendasi kado</h3><button type="button" class="kt-modal__x modal__close" data-close aria-label="Tutup">&times;</button></div>
+      <div id="gift-recs-grid" class="kt-recs"></div>
+    </div>
+  </div>
+
+  <div class="kt-modal" id="qr-checkin-modal" hidden>
+    <div class="kt-modal__panel kt-modal__panel--qr">
+      <div class="kt-modal__head"><h3>QR Check-in</h3><button type="button" class="kt-modal__x modal__close" data-close aria-label="Tutup">&times;</button></div>
+      <div class="qr-container"><canvas id="qr-checkin-canvas"></canvas></div>
+      <p class="kt-status">Tunjukkan kode ini ke petugas saat tiba.</p>
+    </div>
+  </div>
+
+  <div class="kt-lightbox" id="kt-lightbox" hidden>
+    <button type="button" class="kt-modal__x" data-close aria-label="Tutup">&times;</button>
+    <img id="kt-lightbox-img" alt="">
+  </div>
+
+  <div id="toast" class="kt-toast" role="status" aria-live="polite"></div>
+</div>
