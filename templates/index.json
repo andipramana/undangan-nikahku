@@ -5,7 +5,21 @@
       "id": "klasik",
       "name": "Classic Elegance",
       "desc": "Hangat, emas, timeless. Cover layar penuh, kartu akad & resepsi, linimasa cerita.",
-      "colors": ["#14120f", "#c9a668", "#f7f3ea"]
+      "colors": [
+        "#14120f",
+        "#c9a668",
+        "#f7f3ea"
+      ]
+    },
+    {
+      "id": "nocturne",
+      "name": "Nocturne",
+      "desc": "Sinematik gelap. Tiap bagian satu adegan setinggi layar, tipografi besar di atas foto redup, aksen kuningan.",
+      "colors": [
+        "#0c0c10",
+        "#b3925f",
+        "#f1ece3"
+      ]
     }
   ]
 }

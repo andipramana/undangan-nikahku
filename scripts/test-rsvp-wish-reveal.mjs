@@ -1,6 +1,8 @@
 import fs from "node:fs/promises";
 
-const html = await fs.readFile("index.html", "utf8");
+// Markup RSVP milik template klasik sejak mesin template v4 — index.html
+// kini cuma cangkang tanpa markup section.
+const html = await fs.readFile("templates/klasik/markup.html", "utf8");
 const rsvp = await fs.readFile("assets/js/rsvp.js", "utf8");
 const reveal = await fs.readFile("assets/js/reveal.js", "utf8");
 
