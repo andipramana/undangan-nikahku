@@ -28,28 +28,40 @@
   "editor": {
     "colors": [
       {
+        "key": "bg",
         "var": "--nc-bg",
-        "label": "Latar utama"
+        "label": "Latar utama",
+        "default": "#0c0c10"
       },
       {
+        "key": "bg2",
         "var": "--nc-bg-2",
-        "label": "Latar kartu"
+        "label": "Latar kartu",
+        "default": "#15151b"
       },
       {
+        "key": "ink",
         "var": "--nc-ink",
-        "label": "Teks utama"
+        "label": "Teks utama",
+        "default": "#f1ece3"
       },
       {
+        "key": "ink2",
         "var": "--nc-ink-2",
-        "label": "Teks sekunder"
+        "label": "Teks sekunder",
+        "default": "#a5a09a"
       },
       {
+        "key": "ink3",
         "var": "--nc-ink-3",
-        "label": "Teks redup"
+        "label": "Teks redup",
+        "default": "#6f6b66"
       },
       {
+        "key": "brass",
         "var": "--nc-brass",
-        "label": "Aksen kuningan"
+        "label": "Aksen kuningan",
+        "default": "#b3925f"
       }
     ],
     "sections": [

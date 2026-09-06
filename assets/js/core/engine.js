@@ -81,6 +81,26 @@
     });
   }
 
+  /** Warna pilihan client di atas warna bawaan manifest.
+   *
+   * Pemetaannya milik template: manifest.editor.colors mendaftarkan pasangan
+   * key (tempat simpan di content.templates[<id>].theme.colors) ↔ variabel CSS
+   * (nama var milik style.css template itu). Dengan begitu template dengan
+   * variabel bernama apa pun — --color-* milik klasik, --nc-* milik Nocturne —
+   * bisa diwarnai lewat halaman Warna yang sama, tanpa mesin tahu nama var
+   * satu pun. Key yang tidak diisi client dilewati, jadi bawaan manifest tetap
+   * berlaku (jangan pernah menulis string kosong ke CSS var). */
+  function applyThemeOverrides(manifest, savedTheme) {
+    const schema = (manifest.editor && manifest.editor.colors) || [];
+    const saved = (savedTheme && savedTheme.colors) || {};
+    const vars = {};
+    schema.forEach((c) => {
+      const value = saved[c.key];
+      if (c.var && value) vars[c.var] = value;
+    });
+    applyTheme(vars);
+  }
+
   /** Pasang template ke halaman: aset → markup → render.js → render(ctx). */
   async function mount(pending, ctxFactory) {
     const { id } = pending;
@@ -95,9 +115,16 @@
       loadCss(`templates/${id}/style.css`, "templateStyle")
     ]);
 
-    applyTheme(manifest.theme);
-
+    // ctx dibangun lebih awal daripada markup semata-mata supaya setelan warna
+    // milik template aktif (ctx.tpl.theme) sudah bisa dipakai di bawah ini —
+    // dipasang SEBELUM markup muncul, jadi tamu tidak pernah melihat kedipan
+    // warna bawaan sebelum warna pilihan client.
     const root = document.getElementById("inv-root");
+    const ctx = ctxFactory(manifest, root);
+
+    applyTheme(manifest.theme);
+    applyThemeOverrides(manifest, ctx.tpl && ctx.tpl.theme);
+
     root.innerHTML = markup;
     root.dataset.tpl = id;
     document.documentElement.dataset.tpl = id;
@@ -111,12 +138,11 @@
     if (!tpl || typeof tpl.render !== "function") {
       throw new Error(`Template "${id}" tidak mendaftarkan render() di window.WeddingTemplates`);
     }
-    const ctx = ctxFactory(manifest, root);
     await tpl.render(ctx);
     cacheId(id);
     window.__ACTIVE_TEMPLATE = { id, manifest };
     return ctx;
   }
 
-  window.WeddingEngine = { DEFAULT_ID, initialId, prefetch, mount, applyTheme };
+  window.WeddingEngine = { DEFAULT_ID, initialId, prefetch, mount, applyTheme, applyThemeOverrides };
 })();

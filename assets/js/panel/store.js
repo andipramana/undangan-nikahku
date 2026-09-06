@@ -190,8 +190,28 @@
    * bawah satu key itu. */
   function saveTpl() { return save(["templates"]); }
 
+  /** Manifest template aktif (templates/<id>/template.json), di-cache per id.
+   *
+   * Inilah yang membuat panel bisa menyesuaikan diri dengan template: skema
+   * warna, overlay, preset, dan daftar section editor semuanya dideklarasikan
+   * di manifest, bukan dihardcode di halaman admin. Gagal memuat dikembalikan
+   * sebagai manifest kosong supaya halaman tetap bisa dirender (dengan
+   * pemberitahuan), bukan meledak. */
+  const manifestCache = new Map();
+  async function activeManifest() {
+    const id = activeTemplateId();
+    if (manifestCache.has(id)) return manifestCache.get(id);
+    let manifest = { id, editor: {} };
+    try {
+      const res = await fetch(`templates/${id}/template.json`, { cache: "no-cache" });
+      if (res.ok) manifest = await res.json();
+    } catch (_) { /* offline / file hilang — pakai manifest kosong */ }
+    manifestCache.set(id, manifest);
+    return manifest;
+  }
+
   window.PanelStore = {
     load, reload, getContent, get, set, save,
-    activeTemplateId, tplGet, tplSet, saveTpl
+    activeTemplateId, tplGet, tplSet, saveTpl, activeManifest
   };
 })();

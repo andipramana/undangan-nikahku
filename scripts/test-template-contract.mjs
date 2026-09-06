@@ -53,6 +53,30 @@ for (const id of folders) {
     check(`${id}: tiap section & field punya key/label/path/type`, bad.length === 0);
   }
 
+  // Skema warna: halaman Warna admin menyimpan `key`, sisi tamu memasangkannya
+  // ke `var`. Salah ketik nama var tidak pernah melempar error — client cuma
+  // mendapati pengaturan warna yang diam-diam tidak berefek, jadi dicek di sini.
+  const colors = (manifest.editor && manifest.editor.colors) || [];
+  if (colors.length) {
+    const css = await fs.readFile(path.join("templates", id, "style.css"), "utf8");
+    const badShape = colors.filter((c) => !c.key || !c.var || !c.label || !c.default);
+    check(`${id}: tiap warna editor punya key/var/label/default`, badShape.length === 0);
+
+    const keys = colors.map((c) => c.key);
+    check(`${id}: key warna tidak ada yang kembar`, new Set(keys).size === keys.length);
+
+    const unused = colors.filter((c) => c.var && !css.includes(c.var));
+    check(`${id}: tiap var warna benar-benar dipakai style.css`, unused.length === 0);
+    if (unused.length) fail.push(`  → var tak terpakai di ${id}: ${unused.map((c) => c.var).join(", ")}`);
+
+    // manifest.theme adalah nilai bawaan yang dipasang mesin sebelum override
+    // client; kalau var editor tidak ada di sana, "reset ke default" di admin
+    // dan tampilan awal template bisa berbeda.
+    const themeVars = Object.keys(manifest.theme || {});
+    const missingDefault = colors.filter((c) => !themeVars.includes(c.var));
+    check(`${id}: tiap var warna punya nilai bawaan di manifest.theme`, missingDefault.length === 0);
+  }
+
   // render.js WAJIB mendaftarkan dirinya dengan id yang sama, kalau tidak
   // mesin melempar "tidak mendaftarkan render()" saat tamu membuka undangan.
   const render = await fs.readFile(path.join("templates", id, "render.js"), "utf8");
