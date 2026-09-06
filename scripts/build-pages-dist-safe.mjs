@@ -37,10 +37,11 @@ const required = [
   ...routedFiles,
   ".nojekyll",
   "assets/img/favicon.png",
-  "assets/css/style.css",
   "assets/css/panel.css",
   "assets/css/wa.css",
-  "assets/js/template-engine.js",
+  "assets/js/core/engine.js",
+  "assets/js/core/context.js",
+  "assets/js/core/template-photos.js",
   "assets/js/config.js",
   "assets/js/tenant.js",
   "assets/js/wa.js",
@@ -50,11 +51,10 @@ const required = [
   "assets/js/panel/router.js",
   "assets/js/panel/pages/home.js",
   "assets/js/register.js",
-  "templates/classic-elegance.json",
-  "templates/modern-minimal.json",
-  "templates/classic-elegance.css",
-  "templates/modern-minimal.css",
-  "templates/modern-minimal.js"
+  "templates/klasik/template.json",
+  "templates/klasik/markup.html",
+  "templates/klasik/style.css",
+  "templates/klasik/render.js"
 ];
 for (const file of required) {
   try { await access(path.join(dist, file)); }

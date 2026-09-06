@@ -1,0 +1,11 @@
+{
+  "comment": "Katalog template. SATU sumber kebenaran yang dibaca picker di panel admin dan (nanti) katalog publik /templates/. Tambah template baru = tambah folder templates/<id>/ + satu entri di sini.",
+  "templates": [
+    {
+      "id": "klasik",
+      "name": "Classic Elegance",
+      "desc": "Hangat, emas, timeless. Cover layar penuh, kartu akad & resepsi, linimasa cerita.",
+      "colors": ["#14120f", "#c9a668", "#f7f3ea"]
+    }
+  ]
+}
