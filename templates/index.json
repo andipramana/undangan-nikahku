@@ -30,6 +30,16 @@
         "#8c3b2a",
         "#201d18"
       ]
+    },
+    {
+      "id": "sekar-jagat",
+      "name": "Sekar Jagat",
+      "desc": "Keraton Jawa. Indigo wedelan & emas tua, ornamen SVG, potret berbingkai lengkung, motif kawung.",
+      "colors": [
+        "#16233f",
+        "#b08d3f",
+        "#f2ebdd"
+      ]
     }
   ]
 }
