@@ -22,10 +22,13 @@ try {
       opening: { quote: "Doa terbaik untuk perjalanan kami." },
       quotePhoto: { quote: "Cinta yang bertumbuh." },
       dresscode: { text: "" }, loveStory: [{ title: "" }], closing: { text: "" },
-      typography: { elements: {} }
+      typography: { elements: {} },
+      // Setelan font kini tersimpan per-template (content.templates[<id>]),
+      // bukan global — templateId menentukan blok mana yang ditulis font.js.
+      templateId: "klasik"
     };
     const chain = () => ({ select() { return this; }, eq() { return this; }, maybeSingle: async () => ({ data: { content }, error: null }) });
-    window.sb = { from: (table) => table === "site_content" ? { ...chain(), upsert: async (row) => { window.__saved = row; content.typography = row.content.typography; return { error: null }; } } : chain() };
+    window.sb = { from: (table) => table === "site_content" ? { ...chain(), upsert: async (row) => { window.__saved = row; content.templates = row.content.templates; return { error: null }; } } : chain() };
     window.AdminAPI = { sb: window.sb, tenant: { invitationId: "test", slug: "test" }, query: async (q) => q, contentFromConfig: () => content, toast: () => {} };
     window.WEDDING_CONFIG = { supabase: {} };
     // Router distub minimal: font.js hanya butuh setDirty untuk mendaftarkan
@@ -47,7 +50,7 @@ try {
   await page.locator('[data-font-size="cover-names"]').fill('56');
   await page.evaluate(() => window.__save());
   let saved = await page.evaluate(() => window.__saved);
-  if (saved.content.typography.elements['cover-names'].family !== 'Great Vibes') throw new Error('Individual element was not persisted.');
+  if (saved.content.templates.klasik.typography.elements['cover-names'].family !== 'Great Vibes') throw new Error('Individual element was not persisted into the active template block.');
 
   await page.locator('[data-font-reset="cover-names"]').click();
   const resetState = await page.evaluate(() => ({
@@ -77,7 +80,7 @@ try {
   }
   await page.evaluate(() => window.__save());
   saved = await page.evaluate(() => window.__saved);
-  if (Object.keys(saved.content.typography.elements).length) throw new Error('Global reset did not clear all saved overrides.');
+  if (Object.keys(saved.content.templates.klasik.typography.elements).length) throw new Error('Global reset did not clear all saved overrides.');
 
   // 7 grup section (§3.1 rencana v2) harus lengkap, bukan cuma Cover.
   const sectionCount = await page.locator('#fn-section option').count();

@@ -96,7 +96,7 @@ window.PanelPages["warna"] = {
       return null;
     }
 
-    const theme = mergeTheme(window.PanelStore.get("theme", {}));
+    const theme = mergeTheme(window.PanelStore.tplGet("theme", {}));
     let previewPhotoUrl = "";
     const path = await fetchPreviewPhoto();
     if (path) previewPhotoUrl = photoUrl(path);
@@ -181,8 +181,8 @@ window.PanelPages["warna"] = {
     render();
 
     async function onSave() {
-      window.PanelStore.set("theme", theme);
-      const { error } = await window.PanelStore.save(["theme"]);
+      window.PanelStore.tplSet("theme", theme);
+      const { error } = await window.PanelStore.saveTpl();
       if (error) { window.AdminAPI.toast("Gagal menyimpan tema: " + error.message, true); return false; }
       window.AdminAPI.toast("Tema disimpan.");
       return true;

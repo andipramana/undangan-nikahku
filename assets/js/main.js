@@ -62,6 +62,23 @@
     return all[id] || {};
   }
 
+  /** Proyeksikan setelan milik template aktif ke key yang dibaca modul lama
+   * (theme.js membaca cfg.theme & cfg.typography, guest-overrides.js membaca
+   * cfg.visualEditor). Dengan begini isolasi per-template tercapai TANPA
+   * mengubah satu baris pun di modul-modul itu: yang berbeda cuma nilai yang
+   * disodorkan sebelum render.
+   *
+   * Kalau template belum punya setelan tersimpan, key global dibiarkan apa
+   * adanya — template baru langsung tampil dengan nilai bawaan manifest-nya,
+   * bukan mewarisi warna template lain. */
+  function projectTemplateSettings(cfg, id) {
+    const blk = (cfg.templates || {})[id];
+    if (!blk) return;
+    if (blk.theme) cfg.theme = blk.theme;
+    if (blk.typography) cfg.typography = blk.typography;
+    if (blk.visualEditor) cfg.visualEditor = blk.visualEditor;
+  }
+
   function buildContext(cfg, id, manifest, root) {
     const tplBlock = templateBlock(cfg, id);
     return {
@@ -115,6 +132,8 @@
     // buang dan unduh yang benar. Hanya terjadi sekali; kunjungan berikutnya
     // cache sudah benar.
     if (wanted !== pending.id) pending = engine.prefetch(wanted);
+
+    projectTemplateSettings(cfg, wanted);
 
     try {
       await engine.mount(pending, (manifest, root) => buildContext(cfg, wanted, manifest, root));

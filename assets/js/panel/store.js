@@ -19,6 +19,15 @@
     return v !== null && typeof v === "object" && !Array.isArray(v);
   }
 
+  /** Id template aktif. Data lama menyimpan "classic-elegance"; template itu
+   * sekarang bernama "klasik" (punya folder sendiri) — dipetakan saat dibaca
+   * supaya tenant lama tidak perlu dimigrasi datanya. */
+  const TEMPLATE_ALIAS = { "classic-elegance": "klasik" };
+  function templateIdOf(c) {
+    const raw = String((c && (c.templateId || c.template)) || "klasik").replace(/\/+$/, "");
+    return TEMPLATE_ALIAS[raw] || raw;
+  }
+
   /** Tanam default untuk key yang belum ada di site_content versi lama —
    * dipindah dari content.js lama (seedDefaults), dijalankan SEKALI di sini
    * saat load supaya seluruh halaman melihat state yang sudah konsisten,
@@ -73,6 +82,28 @@
     if (!isPlainObject(c.typography.elements)) c.typography.elements = {};
     if (!isPlainObject(c.visualEditor)) c.visualEditor = { elements: {} };
     if (!isPlainObject(c.visualEditor.elements)) c.visualEditor.elements = {};
+
+    // ── Setelan per-template ────────────────────────────────────────────────
+    // Warna, font, override editor visual, dan pilihan+crop foto disimpan
+    // TERPISAH per template (content.templates[<id>]). Sebelumnya semuanya
+    // global, jadi warna/font yang disetel untuk template A ikut terbawa dan
+    // merusak template B saat client mencoba tampilan lain.
+    //
+    // Data inti (nama, tanggal, venue, cerita, rekening) sengaja TETAP global:
+    // client mengisinya sekali, dan mencoba template lain tidak boleh membuat
+    // mereka mengetik ulang semuanya.
+    if (!isPlainObject(c.templates)) c.templates = {};
+    const activeId = templateIdOf(c);
+    if (!isPlainObject(c.templates[activeId])) c.templates[activeId] = {};
+    const blk = c.templates[activeId];
+    // Migrasi sekali jalan untuk tenant lama: setelan global yang sudah ada
+    // menjadi milik template yang sedang aktif. Key global TIDAK dihapus —
+    // dibiarkan sebagai jaring pengaman kalau perlu dibaca kode lama.
+    if (!isPlainObject(blk.theme)) blk.theme = JSON.parse(JSON.stringify(c.theme));
+    if (!isPlainObject(blk.typography)) blk.typography = JSON.parse(JSON.stringify(c.typography));
+    if (!isPlainObject(blk.visualEditor)) blk.visualEditor = JSON.parse(JSON.stringify(c.visualEditor));
+    if (!isPlainObject(blk.photos)) blk.photos = {};
+    if (!isPlainObject(blk.extras)) blk.extras = {};
     return c;
   }
 
@@ -147,5 +178,20 @@
     return { error };
   }
 
-  window.PanelStore = { load, reload, getContent, get, set, save };
+  /* ── Accessor bercakupan template ──────────────────────────────────────
+     Dipakai halaman Warna, Font, dan Editor Visual. Bedanya dengan get/set
+     biasa: path-nya otomatis diawali templates.<id aktif>, jadi halaman itu
+     tidak perlu tahu template mana yang sedang dipakai. */
+  function activeTemplateId() { return templateIdOf(content); }
+  function tplGet(path, fallback) { return get(`templates.${activeTemplateId()}.${path}`, fallback); }
+  function tplSet(path, value) { set(`templates.${activeTemplateId()}.${path}`, value); }
+  /** Menyimpan SELURUH key `templates` (bukan cuma satu template): save()
+   * bekerja per top-level key, dan seluruh setelan per-template tinggal di
+   * bawah satu key itu. */
+  function saveTpl() { return save(["templates"]); }
+
+  window.PanelStore = {
+    load, reload, getContent, get, set, save,
+    activeTemplateId, tplGet, tplSet, saveTpl
+  };
 })();

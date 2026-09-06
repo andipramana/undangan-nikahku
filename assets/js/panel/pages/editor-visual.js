@@ -11,7 +11,7 @@ window.PanelPages["editor-visual"] = {
   timers: [],
   async mount(outlet) {
     const R = () => window.VisualEditorRegistry;
-    const state = window.PanelStore.get("visualEditor", { elements: {} });
+    const state = window.PanelStore.tplGet("visualEditor", { elements: {} });
     state.elements = state.elements || {};
     const section = "all"; // satu preview scrollable seluruh halaman — tidak ada saklar section
     let selected = null;
@@ -308,8 +308,8 @@ window.PanelPages["editor-visual"] = {
     }
 
     async function onSave() {
-      window.PanelStore.set("visualEditor", state);
-      const { error } = await window.PanelStore.save(["visualEditor"]);
+      window.PanelStore.tplSet("visualEditor", state);
+      const { error } = await window.PanelStore.saveTpl();
       if (error) { window.AdminAPI.toast("Gagal menyimpan: " + error.message, true); return false; }
       window.AdminAPI.toast("Perubahan visual disimpan.");
       return true;

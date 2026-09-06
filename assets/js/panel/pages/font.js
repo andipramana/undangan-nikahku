@@ -56,7 +56,7 @@ window.PanelPages["font"] = {
     ];
 
     const liveContent = window.PanelStore.getContent();
-    const elements = window.PanelStore.get("typography.elements", {});
+    const elements = window.PanelStore.tplGet("typography.elements", {});
     let activeSection = SECTIONS[0].id;
 
     const get = (path, fallback = "") => path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), liveContent) ?? fallback;
@@ -134,8 +134,8 @@ window.PanelPages["font"] = {
     render();
 
     async function onSave() {
-      window.PanelStore.set("typography.elements", elements);
-      const { error } = await window.PanelStore.save(["typography"]);
+      window.PanelStore.tplSet("typography.elements", elements);
+      const { error } = await window.PanelStore.saveTpl();
       if (error) { window.AdminAPI.toast("Gagal menyimpan font: " + error.message, true); return false; }
       window.AdminAPI.toast("Font disimpan.");
       return true;

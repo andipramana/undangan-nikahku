@@ -24,16 +24,13 @@
   };
   async function populateContent() {
     const cfg = window.WEDDING_CONFIG;
-    // Tema custom (tab "Tampilan" di admin) — JANGAN dipanggil kalau template
-    // AKTIF PUNYA CSS SENDIRI (template kustom mengelola semua CSS variable;
-    // theme.js menulis inline style yang akan mengalahkan CSS variable
-    // template). Template "base" (css: null, mis. Classic Elegance) tetap
-    // memakai style.css yang membaca variabel dari theme.js — kalau di-skip,
-    // perubahan overlay/warna di admin tidak pernah punya efek.
-    const activeTemplate = window.getActiveTemplate && window.getActiveTemplate();
-    if (!activeTemplate || !activeTemplate.css) {
-      if (window.applyTheme) window.applyTheme(cfg);
-    }
+    // Warna & font dari admin. Syarat lama ("skip kalau template punya CSS
+    // sendiri") sudah tidak berlaku: SEKARANG SEMUA template punya CSS
+    // sendiri, jadi syarat itu akan mematikan tab Tampilan/Font untuk semua
+    // orang. Nilai bawaan template sudah dipasang mesin dari manifest.theme;
+    // ini menimpanya dengan setelan milik template ini saja — bootstrapper
+    // yang memproyeksikan blok per-template ke cfg.theme/typography.
+    if (window.applyTheme) window.applyTheme(cfg);
     document.title = cfg.siteTitle;
     // Meta share (pratinjau WhatsApp/sosmed) ikut dinamis — kalau nama atau
     // tanggal diubah lewat admin, tautan yang dibagikan tidak menampilkan
