@@ -529,6 +529,257 @@
           }
         ]
       }
+    ],
+    "typography": [
+      {
+        "id": "cover",
+        "label": "Sampul",
+        "elements": [
+          {
+            "key": "cover-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-cover",
+            "sample": "{bride} & {groom}",
+            "family": "Bodoni Moda",
+            "size": 56,
+            "weight": 400
+          },
+          {
+            "key": "cover-date",
+            "label": "Tanggal di sampul",
+            "selector": "#cover-date",
+            "sample": "{tanggal}",
+            "family": "Karla",
+            "size": 15,
+            "weight": 400
+          },
+          {
+            "key": "cover-guest",
+            "label": "Sapaan & nama tamu",
+            "selector": "#guest-label, #guest-name",
+            "sample": "Kepada Yth. {tamu}",
+            "family": "Bodoni Moda",
+            "size": 26,
+            "weight": 400
+          },
+          {
+            "key": "cover-button",
+            "label": "Tombol buka undangan",
+            "selector": "#btn-open",
+            "sample": "Buka Undangan",
+            "family": "Karla",
+            "size": 13,
+            "weight": 500
+          }
+        ]
+      },
+      {
+        "id": "opening",
+        "label": "Doa Pembuka",
+        "elements": [
+          {
+            "key": "opening-arabic",
+            "label": "Teks arab",
+            "selector": "#opening-arabic",
+            "sample": "Bismillah",
+            "family": "Bodoni Moda",
+            "size": 26,
+            "weight": 400
+          },
+          {
+            "key": "opening-quote",
+            "label": "Terjemahan ayat",
+            "selector": "#wfl-quote",
+            "sample": "{quote}",
+            "family": "Bodoni Moda",
+            "size": 22,
+            "weight": 400
+          },
+          {
+            "key": "opening-source",
+            "label": "Sumber ayat",
+            "selector": "#wfl-source",
+            "sample": "QS. Ar-Rum: 21",
+            "family": "Karla",
+            "size": 13,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "couple",
+        "label": "Mempelai",
+        "elements": [
+          {
+            "key": "couple-role",
+            "label": "Keterangan mempelai",
+            "selector": ".nc-role",
+            "sample": "Mempelai wanita",
+            "family": "Karla",
+            "size": 14,
+            "weight": 400
+          },
+          {
+            "key": "couple-name",
+            "label": "Nama mempelai",
+            "selector": ".nc-person__name",
+            "sample": "{bridefull}",
+            "family": "Bodoni Moda",
+            "size": 40,
+            "weight": 400
+          },
+          {
+            "key": "couple-parents",
+            "label": "Nama orang tua",
+            "selector": ".nc-person__parents",
+            "sample": "Putri dari Bapak {ayah} & Ibu {ibu}",
+            "family": "Karla",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "event",
+        "label": "Acara",
+        "elements": [
+          {
+            "key": "event-date",
+            "label": "Tanggal besar",
+            "selector": ".nc-date",
+            "sample": "{tanggal}",
+            "family": "Bodoni Moda",
+            "size": 34,
+            "weight": 400
+          },
+          {
+            "key": "event-countdown",
+            "label": "Angka hitung mundur",
+            "selector": ".nc-countdown b",
+            "sample": "12",
+            "family": "Bodoni Moda",
+            "size": 30,
+            "weight": 400
+          },
+          {
+            "key": "event-label",
+            "label": "Judul Akad / Resepsi",
+            "selector": ".nc-card h3",
+            "sample": "{akad}",
+            "family": "Bodoni Moda",
+            "size": 24,
+            "weight": 400
+          },
+          {
+            "key": "event-time",
+            "label": "Jam acara",
+            "selector": ".nc-card__time",
+            "sample": "08.00",
+            "family": "Bodoni Moda",
+            "size": 26,
+            "weight": 400
+          },
+          {
+            "key": "event-venue",
+            "label": "Nama & alamat venue",
+            "selector": ".nc-card__venue, .nc-card__addr",
+            "sample": "{venue}",
+            "family": "Karla",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "story",
+        "label": "Cerita & Galeri",
+        "elements": [
+          {
+            "key": "section-title",
+            "label": "Judul bagian",
+            "selector": ".nc-h2",
+            "sample": "Perjalanan kami",
+            "family": "Bodoni Moda",
+            "size": 34,
+            "weight": 400
+          },
+          {
+            "key": "story-title",
+            "label": "Judul babak cerita",
+            "selector": ".nc-story__item h4",
+            "sample": "{cerita}",
+            "family": "Bodoni Moda",
+            "size": 22,
+            "weight": 400
+          },
+          {
+            "key": "story-text",
+            "label": "Isi cerita",
+            "selector": ".nc-story__item p",
+            "sample": "Awal perjalanan kami",
+            "family": "Karla",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "rsvp",
+        "label": "Ucapan & Hadiah",
+        "elements": [
+          {
+            "key": "rsvp-form",
+            "label": "Isian formulir",
+            "selector": ".nc-form input, .nc-form textarea, .rsvp-pill",
+            "sample": "Nama",
+            "family": "Karla",
+            "size": 15,
+            "weight": 400
+          },
+          {
+            "key": "wishes-name",
+            "label": "Nama pengirim ucapan",
+            "selector": ".wish-card__name",
+            "sample": "Nadia",
+            "family": "Bodoni Moda",
+            "size": 18,
+            "weight": 400
+          },
+          {
+            "key": "wishes-text",
+            "label": "Isi ucapan",
+            "selector": ".wish-card__message",
+            "sample": "Semoga bahagia selalu",
+            "family": "Karla",
+            "size": 14,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "closing",
+        "label": "Penutup",
+        "elements": [
+          {
+            "key": "closing-text",
+            "label": "Teks penutup",
+            "selector": ".nc-closing__text",
+            "sample": "{closing}",
+            "family": "Karla",
+            "size": 16,
+            "weight": 400
+          },
+          {
+            "key": "closing-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-closing",
+            "sample": "{bride} & {groom}",
+            "family": "Bodoni Moda",
+            "size": 34,
+            "weight": 400
+          }
+        ]
+      }
     ]
   }
 }

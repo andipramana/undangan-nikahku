@@ -522,6 +522,266 @@
         ],
         "photos": []
       }
+    ],
+    "typography": [
+      {
+        "id": "cover",
+        "label": "Sampul",
+        "elements": [
+          {
+            "key": "cover-lede",
+            "label": "Kalimat pembuka",
+            "selector": ".kt-lede",
+            "sample": "Dengan sukacita, kami menikah.",
+            "family": "Newsreader",
+            "size": 19,
+            "weight": 400
+          },
+          {
+            "key": "cover-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-cover",
+            "sample": "{bride} & {groom}",
+            "family": "Bricolage Grotesque",
+            "size": 56,
+            "weight": 600
+          },
+          {
+            "key": "cover-date",
+            "label": "Tanggal & tempat",
+            "selector": ".kt-cover__date, .kt-cover__venue",
+            "sample": "{tanggal}",
+            "family": "Bricolage Grotesque",
+            "size": 17,
+            "weight": 500
+          },
+          {
+            "key": "cover-guest",
+            "label": "Sapaan & nama tamu",
+            "selector": "#guest-label, #guest-name",
+            "sample": "Kepada Yth. {tamu}",
+            "family": "Bricolage Grotesque",
+            "size": 26,
+            "weight": 500
+          },
+          {
+            "key": "cover-button",
+            "label": "Tombol buka undangan",
+            "selector": "#btn-open",
+            "sample": "Buka Undangan",
+            "family": "Bricolage Grotesque",
+            "size": 15,
+            "weight": 500
+          }
+        ]
+      },
+      {
+        "id": "opening",
+        "label": "Doa Pembuka",
+        "elements": [
+          {
+            "key": "opening-arabic",
+            "label": "Teks arab",
+            "selector": ".kt-arabic",
+            "sample": "Bismillah",
+            "family": "Newsreader",
+            "size": 24,
+            "weight": 400
+          },
+          {
+            "key": "opening-quote",
+            "label": "Terjemahan ayat",
+            "selector": ".kt-quote",
+            "sample": "{quote}",
+            "family": "Newsreader",
+            "size": 21,
+            "weight": 400
+          },
+          {
+            "key": "opening-source",
+            "label": "Sumber ayat",
+            "selector": ".kt-source",
+            "sample": "QS. Ar-Rum: 21",
+            "family": "Bricolage Grotesque",
+            "size": 14,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "couple",
+        "label": "Mempelai",
+        "elements": [
+          {
+            "key": "couple-role",
+            "label": "Keterangan mempelai",
+            "selector": ".kt-role",
+            "sample": "Mempelai wanita",
+            "family": "Newsreader",
+            "size": 14,
+            "weight": 400
+          },
+          {
+            "key": "couple-name",
+            "label": "Nama mempelai",
+            "selector": ".kt-person__name",
+            "sample": "{bridefull}",
+            "family": "Bricolage Grotesque",
+            "size": 34,
+            "weight": 500
+          },
+          {
+            "key": "couple-parents",
+            "label": "Nama orang tua",
+            "selector": ".kt-person__parents",
+            "sample": "Putri dari Bapak {ayah} & Ibu {ibu}",
+            "family": "Newsreader",
+            "size": 16,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "event",
+        "label": "Acara",
+        "elements": [
+          {
+            "key": "section-title",
+            "label": "Judul bagian",
+            "selector": ".kt-h2",
+            "sample": "Rangkaian Acara",
+            "family": "Bricolage Grotesque",
+            "size": 38,
+            "weight": 500
+          },
+          {
+            "key": "event-label",
+            "label": "Label Akad / Resepsi",
+            "selector": ".kt-schedule dt",
+            "sample": "{akad}",
+            "family": "Bricolage Grotesque",
+            "size": 17,
+            "weight": 500
+          },
+          {
+            "key": "event-time",
+            "label": "Jam acara",
+            "selector": ".kt-schedule__time",
+            "sample": "08.00",
+            "family": "Bricolage Grotesque",
+            "size": 24,
+            "weight": 500
+          },
+          {
+            "key": "event-venue",
+            "label": "Nama & alamat venue",
+            "selector": ".kt-schedule__venue, .kt-schedule__addr",
+            "sample": "{venue}",
+            "family": "Newsreader",
+            "size": 16,
+            "weight": 400
+          },
+          {
+            "key": "event-countdown",
+            "label": "Angka hitung mundur",
+            "selector": ".kt-countdown b",
+            "sample": "12",
+            "family": "Bricolage Grotesque",
+            "size": 28,
+            "weight": 600
+          }
+        ]
+      },
+      {
+        "id": "story",
+        "label": "Cerita",
+        "elements": [
+          {
+            "key": "story-year",
+            "label": "Tahun babak",
+            "selector": ".kt-story__date",
+            "sample": "2019",
+            "family": "Bricolage Grotesque",
+            "size": 17,
+            "weight": 600
+          },
+          {
+            "key": "story-title",
+            "label": "Judul babak",
+            "selector": ".kt-story__item h4",
+            "sample": "{cerita}",
+            "family": "Bricolage Grotesque",
+            "size": 22,
+            "weight": 500
+          },
+          {
+            "key": "story-text",
+            "label": "Isi cerita",
+            "selector": ".kt-story__item p",
+            "sample": "Awal perjalanan kami",
+            "family": "Newsreader",
+            "size": 16,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "rsvp",
+        "label": "Kartu Balasan",
+        "elements": [
+          {
+            "key": "rsvp-form",
+            "label": "Isian formulir",
+            "selector": ".kt-form input, .kt-form textarea, .rsvp-pill",
+            "sample": "Nama",
+            "family": "Bricolage Grotesque",
+            "size": 16,
+            "weight": 400
+          },
+          {
+            "key": "wishes-name",
+            "label": "Nama pengirim ucapan",
+            "selector": ".wish-card__name",
+            "sample": "Nadia",
+            "family": "Bricolage Grotesque",
+            "size": 17,
+            "weight": 500
+          },
+          {
+            "key": "wishes-text",
+            "label": "Isi ucapan",
+            "selector": ".wish-card__message",
+            "sample": "Semoga bahagia selalu",
+            "family": "Newsreader",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "closing",
+        "label": "Penutup",
+        "elements": [
+          {
+            "key": "closing-text",
+            "label": "Teks penutup",
+            "selector": ".kt-closing__text",
+            "sample": "{closing}",
+            "family": "Newsreader",
+            "size": 17,
+            "weight": 400
+          },
+          {
+            "key": "closing-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-closing",
+            "sample": "{bride} & {groom}",
+            "family": "Bricolage Grotesque",
+            "size": 34,
+            "weight": 600
+          }
+        ]
+      }
     ]
   }
 }

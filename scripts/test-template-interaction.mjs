@@ -167,6 +167,48 @@ for (const id of folders) {
     check(`${id}: halaman tidak meluber ke samping`, overflow.over <= 1,
       `lebih ${overflow.over}px — ${overflow.culprits.join(", ")}`);
 
+    /* 5. Lightbox galeri: satu-satunya jalan tamu melihat foto ukuran penuh.
+          Kalau tidak mau menutup, tamu terkunci di layar hitam dan harus
+          memuat ulang undangan — persis kegagalan yang tadi terjadi. */
+    const lightbox = await page.evaluate(async () => {
+      const box = document.querySelector(".nc-lightbox, .kt-lightbox, .sj-lightbox, #lightbox");
+      if (!box) return { skip: true };
+      const thumb = document.querySelector("[data-full], .gallery-item, #gallery img");
+      if (!thumb) return { skip: true };
+      thumb.click();
+      await new Promise((r) => setTimeout(r, 80));
+      const opened = box.getClientRects().length > 0;
+      const closer = box.querySelector("[data-close], #lightbox-close");
+      if (closer) closer.click();
+      await new Promise((r) => setTimeout(r, 80));
+      return { skip: false, opened, closed: box.getClientRects().length === 0 };
+    });
+    if (!lightbox.skip) {
+      check(`${id}: lightbox galeri terbuka saat foto diketuk`, lightbox.opened);
+      check(`${id}: lightbox galeri bisa ditutup lagi`, lightbox.closed);
+    }
+
+    /* 6. Tiap selector di skema tipografi harus benar-benar mengenai elemen.
+          Selector yang salah ketik tidak pernah melempar error — gejalanya
+          cuma "setelan font tidak ngefek", yang sulit dilacak client maupun
+          kita. Kelas yang DIHASILKAN modul bersama (ucapan & rekening baru ada
+          setelah data Supabase masuk) dikecualikan karena memang belum ada di
+          test ini. */
+    const typo = await page.evaluate((groups) => {
+      const SKIP = /wish-card|gift-account|gift-rec-card|wishes-/;
+      const miss = [];
+      (groups || []).forEach((g) => (g.elements || []).forEach((e) => {
+        if (!e.selector || SKIP.test(e.selector)) return;
+        const anyHit = e.selector.split(",").some((sel) => {
+          try { return document.querySelector(sel.trim()); } catch (_) { return false; }
+        });
+        if (!anyHit) miss.push(`${e.key} (${e.selector})`);
+      }));
+      return miss;
+    }, (manifest.editor || {}).typography || []);
+    check(`${id}: semua selector skema font mengenai elemen nyata`,
+      typo.length === 0, typo.join("; "));
+
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);
   } finally {
     await page.close();

@@ -537,6 +537,257 @@
           }
         ]
       }
+    ],
+    "typography": [
+      {
+        "id": "cover",
+        "label": "Sampul",
+        "elements": [
+          {
+            "key": "cover-greeting",
+            "label": "Sapaan pembuka",
+            "selector": ".sj-kicker",
+            "sample": "Sugeng rawuh",
+            "family": "Cormorant Garamond",
+            "size": 17,
+            "weight": 400
+          },
+          {
+            "key": "cover-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-cover",
+            "sample": "{bride} & {groom}",
+            "family": "Cormorant Garamond",
+            "size": 52,
+            "weight": 400
+          },
+          {
+            "key": "cover-date",
+            "label": "Tanggal di sampul",
+            "selector": "#cover-date",
+            "sample": "{tanggal}",
+            "family": "Cormorant Garamond",
+            "size": 20,
+            "weight": 400
+          },
+          {
+            "key": "cover-guest",
+            "label": "Sapaan & nama tamu",
+            "selector": "#guest-label, #guest-name",
+            "sample": "Kepada Yth. {tamu}",
+            "family": "Cormorant Garamond",
+            "size": 26,
+            "weight": 400
+          },
+          {
+            "key": "cover-button",
+            "label": "Tombol buka undangan",
+            "selector": "#btn-open",
+            "sample": "Buka Undangan",
+            "family": "Mulish",
+            "size": 15,
+            "weight": 500
+          }
+        ]
+      },
+      {
+        "id": "opening",
+        "label": "Pembuka",
+        "elements": [
+          {
+            "key": "opening-arabic",
+            "label": "Teks arab",
+            "selector": "#opening-arabic",
+            "sample": "Bismillah",
+            "family": "Cormorant Garamond",
+            "size": 28,
+            "weight": 400
+          },
+          {
+            "key": "opening-quote",
+            "label": "Terjemahan ayat",
+            "selector": "#wfl-quote",
+            "sample": "{quote}",
+            "family": "Cormorant Garamond",
+            "size": 22,
+            "weight": 400
+          },
+          {
+            "key": "opening-source",
+            "label": "Sumber ayat",
+            "selector": "#wfl-source",
+            "sample": "QS. Ar-Rum: 21",
+            "family": "Mulish",
+            "size": 14,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "couple",
+        "label": "Mempelai",
+        "elements": [
+          {
+            "key": "couple-name",
+            "label": "Nama mempelai",
+            "selector": ".sj-person__name",
+            "sample": "{bridefull}",
+            "family": "Cormorant Garamond",
+            "size": 34,
+            "weight": 400
+          },
+          {
+            "key": "couple-parents",
+            "label": "Nama orang tua",
+            "selector": ".sj-person__parents",
+            "sample": "Putri dari Bapak {ayah} & Ibu {ibu}",
+            "family": "Mulish",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "event",
+        "label": "Acara",
+        "elements": [
+          {
+            "key": "section-title",
+            "label": "Judul bagian",
+            "selector": ".sj-h2",
+            "sample": "Rangkaian acara",
+            "family": "Cormorant Garamond",
+            "size": 40,
+            "weight": 400
+          },
+          {
+            "key": "event-label",
+            "label": "Judul Akad / Resepsi",
+            "selector": ".sj-card h3",
+            "sample": "{akad}",
+            "family": "Cormorant Garamond",
+            "size": 26,
+            "weight": 400
+          },
+          {
+            "key": "event-time",
+            "label": "Jam acara",
+            "selector": ".sj-card__time",
+            "sample": "08.00",
+            "family": "Cormorant Garamond",
+            "size": 24,
+            "weight": 400
+          },
+          {
+            "key": "event-venue",
+            "label": "Nama & alamat venue",
+            "selector": ".sj-card__venue, .sj-card__addr",
+            "sample": "{venue}",
+            "family": "Mulish",
+            "size": 15,
+            "weight": 400
+          },
+          {
+            "key": "event-countdown",
+            "label": "Angka hitung mundur",
+            "selector": ".sj-countdown b",
+            "sample": "12",
+            "family": "Cormorant Garamond",
+            "size": 30,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "story",
+        "label": "Cerita",
+        "elements": [
+          {
+            "key": "story-year",
+            "label": "Tahun babak",
+            "selector": ".sj-story__date",
+            "sample": "2019",
+            "family": "Cormorant Garamond",
+            "size": 17,
+            "weight": 400
+          },
+          {
+            "key": "story-title",
+            "label": "Judul babak",
+            "selector": ".sj-story__item h4",
+            "sample": "{cerita}",
+            "family": "Cormorant Garamond",
+            "size": 23,
+            "weight": 400
+          },
+          {
+            "key": "story-text",
+            "label": "Isi cerita",
+            "selector": ".sj-story__item p",
+            "sample": "Awal perjalanan kami",
+            "family": "Mulish",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "rsvp",
+        "label": "Ucapan & Hadiah",
+        "elements": [
+          {
+            "key": "rsvp-form",
+            "label": "Isian formulir",
+            "selector": ".sj-form input, .sj-form textarea, .rsvp-pill",
+            "sample": "Nama",
+            "family": "Mulish",
+            "size": 15,
+            "weight": 400
+          },
+          {
+            "key": "wishes-name",
+            "label": "Nama pengirim ucapan",
+            "selector": ".wish-card__name",
+            "sample": "Nadia",
+            "family": "Cormorant Garamond",
+            "size": 19,
+            "weight": 400
+          },
+          {
+            "key": "wishes-text",
+            "label": "Isi ucapan",
+            "selector": ".wish-card__message",
+            "sample": "Semoga bahagia selalu",
+            "family": "Mulish",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "closing",
+        "label": "Penutup",
+        "elements": [
+          {
+            "key": "closing-text",
+            "label": "Teks penutup",
+            "selector": ".sj-closing__text",
+            "sample": "{closing}",
+            "family": "Mulish",
+            "size": 16,
+            "weight": 400
+          },
+          {
+            "key": "closing-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-closing",
+            "sample": "{bride} & {groom}",
+            "family": "Cormorant Garamond",
+            "size": 36,
+            "weight": 400
+          }
+        ]
+      }
     ]
   }
 }

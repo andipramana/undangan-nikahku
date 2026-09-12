@@ -8,11 +8,23 @@
  * reset semua.
  */
 import { chromium } from "@playwright/test";
+import fs from "node:fs/promises";
+
+// Skema tipografi kini tinggal di manifest template, dan store.js mengambilnya
+// lewat fetch(). Test ini berjalan tanpa server, jadi manifest KLASIK YANG ASLI
+// dibaca dari disk dan disuguhkan ke halaman — bukan skema karangan, supaya
+// kalau manifest berubah test ini ikut menangkapnya.
+const klasikManifest = await fs.readFile("templates/klasik/template.json", "utf8");
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 try {
   await page.setContent('<div id="p-outlet-inner"></div>');
+  await page.evaluate((manifestJson) => {
+    window.fetch = async (url) => String(url).includes("template.json")
+      ? { ok: true, json: async () => JSON.parse(manifestJson) }
+      : { ok: false, json: async () => ({}) };
+  }, klasikManifest);
   await page.evaluate(() => {
     window.__saved = null;
     const content = {

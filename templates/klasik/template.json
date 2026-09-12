@@ -904,6 +904,284 @@
           "quote": "#362521"
         }
       }
+    ],
+    "typography": [
+      {
+        "id": "cover",
+        "label": "Cover",
+        "elements": [
+          {
+            "key": "cover-eyebrow",
+            "label": "Tulisan 'The Wedding Of'",
+            "selector": "#cover .eyebrow",
+            "sample": "THE WEDDING OF",
+            "family": "Alegreya Sans",
+            "size": 13,
+            "weight": 500
+          },
+          {
+            "key": "cover-names",
+            "label": "Nama mempelai",
+            "selector": ".cover-names, #couple-names-cover",
+            "sample": "{bride} & {groom}",
+            "family": "Beau Rivage",
+            "size": 50,
+            "weight": 400
+          },
+          {
+            "key": "cover-guest",
+            "label": "Sapaan & nama tamu",
+            "selector": ".guest-label, .guest-name",
+            "sample": "Kepada Yth. {tamu}",
+            "family": "Poppins",
+            "size": 16,
+            "weight": 500
+          },
+          {
+            "key": "cover-button",
+            "label": "Tombol buka undangan",
+            "selector": ".btn-open",
+            "sample": "BUKA UNDANGAN",
+            "family": "Poppins",
+            "size": 14,
+            "weight": 500
+          }
+        ]
+      },
+      {
+        "id": "opening",
+        "label": "Save the Date & Pembuka",
+        "elements": [
+          {
+            "key": "opening-eyebrow",
+            "label": "Eyebrow Save the Date",
+            "selector": "#opening .eyebrow",
+            "sample": "SAVE THE DATE",
+            "family": "Alegreya Sans",
+            "size": 13,
+            "weight": 500
+          },
+          {
+            "key": "opening-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-opening",
+            "sample": "{bride} & {groom}",
+            "family": "Beau Rivage",
+            "size": 50,
+            "weight": 400
+          },
+          {
+            "key": "opening-date",
+            "label": "Tanggal acara",
+            "selector": ".save-date, .cover-countdown__date",
+            "sample": "{tanggal}",
+            "family": "Poppins",
+            "size": 16,
+            "weight": 500
+          },
+          {
+            "key": "opening-quote",
+            "label": "Quote pembuka",
+            "selector": ".opening-quote",
+            "sample": "{quote}",
+            "family": "Poppins",
+            "size": 20,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "couple",
+        "label": "Mempelai",
+        "elements": [
+          {
+            "key": "couple-name",
+            "label": "Nama mempelai di kartu",
+            "selector": ".couple-info__name",
+            "sample": "{bridefull}",
+            "family": "Beau Rivage",
+            "size": 42,
+            "weight": 400
+          },
+          {
+            "key": "couple-label",
+            "label": "Label & keterangan keluarga",
+            "selector": ".couple-info__label, .couple-info__parents",
+            "sample": "Putri dari Bpk. {ayah} & Ibu {ibu}",
+            "family": "Alegreya Sans",
+            "size": 13,
+            "weight": 500
+          }
+        ]
+      },
+      {
+        "id": "event",
+        "label": "Acara & Dresscode",
+        "elements": [
+          {
+            "key": "event-label",
+            "label": "Label Akad / Resepsi",
+            "selector": ".event-block__title",
+            "sample": "{akad}",
+            "family": "Alegreya Sans",
+            "size": 20,
+            "weight": 500
+          },
+          {
+            "key": "event-date",
+            "label": "Angka & detail tanggal",
+            "selector": ".event-hero__num, .event-hero__day, .event-hero__monthyear, .event-hero__date",
+            "sample": "{hari} · {tanggal}",
+            "family": "Beau Rivage",
+            "size": 38,
+            "weight": 400
+          },
+          {
+            "key": "event-venue",
+            "label": "Nama & alamat venue",
+            "selector": ".event-block__venue, .event-block__address",
+            "sample": "{venue}",
+            "family": "Poppins",
+            "size": 16,
+            "weight": 500
+          },
+          {
+            "key": "dresscode",
+            "label": "Dresscode",
+            "selector": ".dresscode-label, .dresscode-text",
+            "sample": "{dresscode}",
+            "family": "Alegreya Sans",
+            "size": 16,
+            "weight": 500
+          }
+        ]
+      },
+      {
+        "id": "story",
+        "label": "Cerita, Galeri & Quote",
+        "elements": [
+          {
+            "key": "story-title",
+            "label": "Judul Our Story",
+            "selector": "#love-story .section-title--script",
+            "sample": "Perjalanan Kami",
+            "family": "Beau Rivage",
+            "size": 40,
+            "weight": 400
+          },
+          {
+            "key": "story-content",
+            "label": "Judul & isi cerita",
+            "selector": ".timeline-item h4, .timeline-item p",
+            "sample": "{cerita}",
+            "family": "Poppins",
+            "size": 16,
+            "weight": 400
+          },
+          {
+            "key": "gallery-title",
+            "label": "Judul Galeri",
+            "selector": "#gallery .section-title--script",
+            "sample": "Galeri Foto",
+            "family": "Beau Rivage",
+            "size": 40,
+            "weight": 400
+          },
+          {
+            "key": "quote",
+            "label": "Quote foto",
+            "selector": ".quote-text",
+            "sample": "{quotefoto}",
+            "family": "Poppins",
+            "size": 20,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "gift",
+        "label": "Gift & RSVP",
+        "elements": [
+          {
+            "key": "gift-title",
+            "label": "Judul Gift",
+            "selector": "#gift .section-title",
+            "sample": "Tanda Kasih",
+            "family": "Poppins",
+            "size": 30,
+            "weight": 500
+          },
+          {
+            "key": "gift-content",
+            "label": "Rekening & rekomendasi kado",
+            "selector": ".gift-account__bank, .gift-account__number, .gift-rec-card__name, .gift-rec-card__price",
+            "sample": "Wedding Gift",
+            "family": "Poppins",
+            "size": 16,
+            "weight": 500
+          },
+          {
+            "key": "gift-button",
+            "label": "Tombol Gift",
+            "selector": "#gift .btn-primary, #gift .btn-outline, #gift .btn-text",
+            "sample": "KIRIM HADIAH",
+            "family": "Poppins",
+            "size": 14,
+            "weight": 500
+          },
+          {
+            "key": "rsvp-title",
+            "label": "Judul RSVP",
+            "selector": "#rsvp .section-title",
+            "sample": "Doa & Ucapan",
+            "family": "Poppins",
+            "size": 30,
+            "weight": 500
+          },
+          {
+            "key": "rsvp-form",
+            "label": "Label, input & tombol RSVP",
+            "selector": ".rsvp-form label, .rsvp-form input, .rsvp-form select, .rsvp-form textarea, .rsvp-pill, #rsvp-submit",
+            "sample": "Kirim Konfirmasi",
+            "family": "Poppins",
+            "size": 14,
+            "weight": 500
+          },
+          {
+            "key": "wishes",
+            "label": "Daftar ucapan",
+            "selector": ".wishes-heading p, .wishes-intro, .wish-card__name, .wish-card__status, .wish-card__message",
+            "sample": "Nadia · Semoga bahagia",
+            "family": "Poppins",
+            "size": 14,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "closing",
+        "label": "Closing & Footer",
+        "elements": [
+          {
+            "key": "closing-text",
+            "label": "Teks penutup",
+            "selector": ".closing-text, footer",
+            "sample": "{closing}",
+            "family": "Poppins",
+            "size": 16,
+            "weight": 400
+          },
+          {
+            "key": "closing-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-closing",
+            "sample": "{bride} & {groom}",
+            "family": "Beau Rivage",
+            "size": 40,
+            "weight": 400
+          }
+        ]
+      }
     ]
   }
 }

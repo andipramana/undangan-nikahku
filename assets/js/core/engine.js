@@ -101,6 +101,51 @@
     applyTheme(vars);
   }
 
+  /** Tipografi pilihan client, dipasang SETELAH render karena selector-nya
+   * menunjuk elemen yang baru dibuat template.
+   *
+   * Pemetaannya milik template: manifest.editor.typography mendaftarkan
+   * pasangan key (tempat simpan) ↔ selector (milik markup template itu).
+   * Dengan begitu halaman Font di admin melayani template mana pun tanpa tahu
+   * satu pun nama kelas — sama seperti halaman Warna. Hanya elemen yang
+   * benar-benar disetel client yang disentuh; sisanya dibiarkan apa adanya
+   * supaya desain bawaan template tetap utuh. */
+  function applyTypographyOverrides(manifest, savedTypography) {
+    const groups = (manifest.editor && manifest.editor.typography) || [];
+    const saved = (savedTypography && savedTypography.elements) || {};
+    if (!groups.length) return;
+
+    const specs = new Map();
+    groups.forEach((g) => (g.elements || []).forEach((e) => specs.set(e.key, e)));
+
+    Object.entries(saved).forEach(([key, setting]) => {
+      const spec = specs.get(key);
+      if (!spec || !spec.selector || !setting) return;
+
+      const family = String(setting.family || "").trim();
+      if (family) loadFont(family);
+
+      document.querySelectorAll(spec.selector).forEach((el) => {
+        if (family) el.style.fontFamily = `"${family.replace(/"/g, "")}", sans-serif`;
+        if (setting.size !== "" && Number(setting.size) > 0) el.style.fontSize = `${Number(setting.size)}px`;
+        if (setting.weight !== "" && Number(setting.weight) >= 100) el.style.fontWeight = String(Number(setting.weight));
+        if (setting.color) el.style.color = String(setting.color);
+      });
+    });
+  }
+
+  /** Muat satu keluarga font dari Google Fonts, sekali saja per nama. */
+  function loadFont(family) {
+    const id = "tpl-font-" + encodeURIComponent(family).replace(/%/g, "");
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=" +
+      encodeURIComponent(family).replace(/%20/g, "+") + ":wght@300;400;500;600;700&display=swap";
+    document.head.appendChild(link);
+  }
+
   /** Pasang template ke halaman: aset → markup → render.js → render(ctx). */
   async function mount(pending, ctxFactory) {
     const { id } = pending;
@@ -139,10 +184,11 @@
       throw new Error(`Template "${id}" tidak mendaftarkan render() di window.WeddingTemplates`);
     }
     await tpl.render(ctx);
+    applyTypographyOverrides(manifest, ctx.tpl && ctx.tpl.typography);
     cacheId(id);
     window.__ACTIVE_TEMPLATE = { id, manifest };
     return ctx;
   }
 
-  window.WeddingEngine = { DEFAULT_ID, initialId, prefetch, mount, applyTheme, applyThemeOverrides };
+  window.WeddingEngine = { DEFAULT_ID, initialId, prefetch, mount, applyTheme, applyThemeOverrides, applyTypographyOverrides };
 })();
