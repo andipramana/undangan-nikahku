@@ -5,17 +5,21 @@
    (docs/kontrak-template.md). Reset dan seluruh komponennya ditulis di sini,
    tidak mewarisi apa pun dari template lain.
 
-   Bahasa desain — sengaja berlawanan dengan Nocturne:
-   - Terang dan berpori: kertas gading #f3efe6 dengan tekstur bintik halus
-     (gradient, bukan file gambar), tinta cokelat-hitam #201d18.
-   - Tidak ada kartu, tidak ada bayangan, tidak ada sudut membulat. Yang
-     memisahkan bagian adalah GARIS dan RUANG KOSONG, seperti halaman cetak.
-   - Grid asimetris: kolom teks tidak pernah di tengah — digeser ke kanan dan
-     diimbangi nomor bab (folio) di margin kiri.
-   - Tipografi yang memimpin: Fraunces (serif optical) ukuran sangat besar
-     untuk nama, Archivo untuk teks; angka & label pakai huruf kecil-kapital.
-   - Gerak sangat pelan dan sedikit: naik 12px + fade. Tidak ada scroll-snap —
-     halaman mengalir bebas, karena ini "dibaca", bukan "dijelajahi".
+   Bahasa desain — cetak risograph dua warna di kertas daur ulang:
+   - Kertas abu-netral #f0efe9 (sengaja BUKAN cream hangat kekuningan, yang
+     sudah jadi bunyi klise), tinta hijau-tua #17231f, dan satu warna kedua
+     biru ultramarine #2f46c8 — persis dua drum tinta mesin riso.
+   - Tidak ada kartu, bayangan, atau sudut membulat. Pemisahnya garis dan
+     ruang kosong, seperti halaman cetak.
+   - Grid asimetris: kolom teks digeser ke kanan, margin kiri lebar dibiarkan
+     lapang — bukan diisi nomor bab.
+   - Tipografi memimpin: Bricolage Grotesque (grotesk kontemporer, lebar
+     variabel) untuk nama & judul, Newsreader untuk teks bacaan.
+   - TIDAK memakai label kapital-berspasi di atas judul dan tidak menomori
+     bagian: undangan bukan daftar prosedur, dan label semacam itu tidak
+     menambah satu pun informasi yang belum dikatakan judulnya.
+   - Gerak sangat pelan dan sedikit: naik 12px + fade, sekali. Tidak ada
+     scroll-snap — halaman mengalir, karena ini "dibaca", bukan "dijelajahi".
    ========================================================================== */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -28,17 +32,17 @@
 
 
 :root {
-  --kt-paper: #f3efe6;
-  --kt-paper-2: #ece7db;
-  --kt-ink: #201d18;
-  --kt-ink-2: #57514a;
-  --kt-ink-3: #8b8378;
-  --kt-accent: #8c3b2a;              /* merah bata tinta cetak */
-  --kt-line: rgba(32, 29, 24, .18);
-  --kt-line-2: rgba(32, 29, 24, .08);
+  --kt-paper: #f0efe9;
+  --kt-paper-2: #e4e3db;
+  --kt-ink: #17231f;
+  --kt-ink-2: #4d5a55;
+  --kt-ink-3: #8a938e;
+  --kt-accent: #2f46c8;              /* drum tinta kedua: ultramarine riso */
+  --kt-line: rgba(23, 35, 31, .2);
+  --kt-line-2: rgba(23, 35, 31, .09);
 
-  --kt-serif: "Fraunces", "Iowan Old Style", Georgia, serif;
-  --kt-sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --kt-serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --kt-sans: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
 
   --kt-measure: 34rem;               /* lebar baca nyaman */
   --kt-gutter: clamp(1.25rem, 5vw, 4rem);
@@ -51,14 +55,14 @@ body {
   margin: 0;
   background: var(--kt-paper);
   color: var(--kt-ink);
-  font-family: var(--kt-sans);
-  font-size: 16px;
-  line-height: 1.7;
+  font-family: var(--kt-serif);
+  font-size: 17px;
+  line-height: 1.72;
   /* Bintik kertas: dua radial-gradient sangat halus, diulang kecil. Tidak
      memakai file gambar supaya template tetap satu berkas CSS. */
   background-image:
-    radial-gradient(rgba(32, 29, 24, .028) 1px, transparent 1px),
-    radial-gradient(rgba(32, 29, 24, .022) 1px, transparent 1px);
+    radial-gradient(rgba(23, 35, 31, .03) 1px, transparent 1px),
+    radial-gradient(rgba(47, 70, 200, .022) 1px, transparent 1px);
   background-size: 22px 22px, 37px 37px;
   background-position: 0 0, 11px 18px;
 }
@@ -75,10 +79,10 @@ a { color: inherit; text-decoration: none; }
   background: color-mix(in srgb, var(--kt-paper) 88%, transparent);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--kt-line-2);
-  font-size: .62rem; letter-spacing: .22em; text-transform: uppercase;
+  font-family: var(--kt-sans); font-size: .8rem;
   color: var(--kt-ink-3);
 }
-.kt-masthead__names { justify-self: center; color: var(--kt-ink); letter-spacing: .18em; }
+.kt-masthead__names { justify-self: center; color: var(--kt-ink); }
 .kt-masthead__tools { justify-self: end; display: flex; gap: .5rem; }
 
 .kt-tool {
@@ -95,8 +99,8 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Daftar isi ---------- */
 .kt-index-btn {
   position: fixed; z-index: 41; left: var(--kt-gutter); bottom: 1.2rem;
-  padding: .55rem 1rem; background: var(--kt-ink); color: var(--kt-paper);
-  font-size: .6rem; letter-spacing: .2em; text-transform: uppercase;
+  padding: .55rem 1.1rem; background: var(--kt-ink); color: var(--kt-paper);
+  font-family: var(--kt-sans); font-size: .82rem;
 }
 .kt-index {
   position: fixed; z-index: 42; inset: auto auto 4.2rem var(--kt-gutter);
@@ -109,7 +113,6 @@ a { color: inherit; text-decoration: none; }
   display: flex; gap: .9rem; align-items: baseline;
   padding: .3rem 0; font-size: .82rem; color: var(--kt-ink-2);
 }
-.kt-index a b { font-family: var(--kt-serif); font-weight: 400; font-size: .72rem; color: var(--kt-ink-3); min-width: 1.6rem; }
 .kt-index a.is-active { color: var(--kt-accent); }
 .kt-index a.is-active b { color: var(--kt-accent); }
 
@@ -150,41 +153,38 @@ a { color: inherit; text-decoration: none; }
   .kt-sheet > * { opacity: 1; transform: none; transition: none; }
 }
 
-.kt-folio {
-  margin: 0 0 1.6rem;
-  font-family: var(--kt-serif); font-size: .95rem; letter-spacing: .3em;
-  color: var(--kt-ink-3);
-}
-@media (min-width: 1100px) {
-  .kt-folio { position: absolute; left: -5rem; top: clamp(3.5rem, 12vw, 7rem); margin: 0; }
-}
-
 .kt-rule { height: 1px; margin: 0 0 2rem; background: var(--kt-ink); }
-.kt-eyebrow {
-  margin: 0 0 .6rem; font-size: .6rem; letter-spacing: .28em;
-  text-transform: uppercase; color: var(--kt-ink-3);
+/* Kalimat pembuka sampul — dibaca sebagai kalimat, bukan label. */
+.kt-lede {
+  margin: 0 0 .7rem; font-family: var(--kt-serif); font-style: italic;
+  font-size: clamp(1rem, 3.4vw, 1.2rem); color: var(--kt-ink-2);
 }
-.kt-label { margin: 0 0 .3rem; font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-role { margin: 0 0 .25rem; font-size: .82rem; color: var(--kt-accent); }
+.kt-label { margin: 0 0 .3rem; font-size: .84rem; color: var(--kt-ink-3); }
 .kt-h2 {
-  margin: 0 0 2rem; font-family: var(--kt-serif); font-weight: 400;
-  font-size: clamp(1.9rem, 6vw, 2.9rem); line-height: 1.06; letter-spacing: -.01em;
+  margin: 0 0 1.8rem; font-family: var(--kt-sans); font-weight: 500;
+  font-size: clamp(1.8rem, 5.6vw, 2.6rem); line-height: 1.04; letter-spacing: -.02em;
 }
-.kt-h3 { margin: 0 0 1rem; font-family: var(--kt-serif); font-weight: 400; font-size: 1.35rem; }
+.kt-h3 { margin: 0 0 1rem; font-family: var(--kt-sans); font-weight: 500; font-size: 1.3rem; letter-spacing: -.01em; }
 
+/* Nama mempelai: satu-satunya tempat template ini berteriak. Grotesk lebar,
+   rapat, dan besar — bukan serif dekoratif. */
 .kt-display {
-  margin: 0; font-family: var(--kt-serif); font-weight: 400;
-  font-size: clamp(3rem, 15vw, 6.5rem); line-height: .92; letter-spacing: -.03em;
+  margin: 0; font-family: var(--kt-sans); font-weight: 600;
+  font-size: clamp(2.9rem, 14.5vw, 6.2rem); line-height: .9; letter-spacing: -.045em;
+  font-stretch: 105%;
 }
 .kt-display .amp {
-  display: block; font-size: .38em; font-style: italic;
-  color: var(--kt-accent); margin: .12em 0;
+  display: block; font-family: var(--kt-serif); font-weight: 400;
+  font-size: .26em; font-style: italic; letter-spacing: 0;
+  color: var(--kt-accent); margin: .16em 0;
 }
 .kt-display--sm { font-size: clamp(2rem, 9vw, 3.4rem); }
 
 .kt-btn {
-  display: inline-block; padding: .8rem 1.5rem;
+  display: inline-block; padding: .78rem 1.5rem;
   border: 1px solid var(--kt-ink); color: var(--kt-ink);
-  font-size: .66rem; letter-spacing: .2em; text-transform: uppercase;
+  font-family: var(--kt-sans); font-size: .92rem; font-weight: 500;
   transition: background .2s, color .2s;
 }
 .kt-btn:hover { background: var(--kt-ink); color: var(--kt-paper); }
@@ -192,7 +192,7 @@ a { color: inherit; text-decoration: none; }
 .kt-btn--solid:hover { background: var(--kt-accent); border-color: var(--kt-accent); }
 .kt-link {
   display: inline-block; color: var(--kt-accent);
-  font-size: .74rem; letter-spacing: .06em;
+  font-family: var(--kt-sans); font-size: .88rem;
   border-bottom: 1px solid currentColor; padding-bottom: 1px;
 }
 
@@ -208,7 +208,7 @@ a { color: inherit; text-decoration: none; }
   row-gap: 0;
 }
 .kt-cover__meta { display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; margin: 1.1rem 0 1.4rem; }
-.kt-cover__date { margin: 0; font-family: var(--kt-serif); font-size: 1.1rem; }
+.kt-cover__date { margin: 0; font-family: var(--kt-sans); font-weight: 500; font-size: 1.05rem; }
 .kt-cover__venue { margin: 0; font-size: .82rem; color: var(--kt-ink-2); }
 .kt-cover__figure { margin: 0 0 1.4rem; }
 .kt-cover__figure img {
@@ -216,7 +216,7 @@ a { color: inherit; text-decoration: none; }
   object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%);
 }
 .kt-cover__to { border-top: 1px solid var(--kt-line); padding-top: 1.1rem; }
-.kt-guest { margin: 0 0 1.1rem; font-family: var(--kt-serif); font-size: clamp(1.3rem, 4.5vw, 2rem); }
+.kt-guest { margin: 0 0 1.1rem; font-family: var(--kt-sans); font-weight: 500; font-size: clamp(1.25rem, 4.4vw, 1.9rem); letter-spacing: -.02em; }
 .kt-cover .kt-display { font-size: clamp(2.5rem, 13vw, 6.5rem); }
 .kt-cover .kt-rule { margin-bottom: 1.4rem; }
 
@@ -230,13 +230,13 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--kt-serif); font-size: clamp(1.1rem, 3.6vw, 1.45rem);
   line-height: 1.65; font-style: italic;
 }
-.kt-source { margin: 1rem 0 0 1.4rem; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-source { margin: 1rem 0 0 1.4rem; font-family: var(--kt-sans); font-size: .86rem; color: var(--kt-ink-3); }
 
 /* ---------- Mempelai ---------- */
 .kt-person { display: grid; gap: 1.2rem; margin-bottom: 3.2rem; }
 .kt-person__figure { margin: 0; }
 .kt-person__figure img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%); }
-.kt-person__name { margin: 0 0 .5rem; font-family: var(--kt-serif); font-weight: 400; font-size: clamp(1.7rem, 6vw, 2.4rem); line-height: 1.05; }
+.kt-person__name { margin: 0 0 .5rem; font-family: var(--kt-sans); font-weight: 500; font-size: clamp(1.6rem, 5.4vw, 2.2rem); line-height: 1.06; letter-spacing: -.025em; }
 .kt-person__parents { margin: 0; font-size: .9rem; line-height: 1.75; color: var(--kt-ink-2); }
 .kt-person__ig { margin: .7rem 0 0; }
 .kt-person__ig a { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--kt-accent); }
@@ -256,7 +256,7 @@ a { color: inherit; text-decoration: none; }
 @media (min-width: 1100px) { .kt-bleed img { aspect-ratio: 21/8; } }
 
 /* ---------- Acara ---------- */
-.kt-event__date { margin: -1rem 0 2rem; font-family: var(--kt-serif); font-size: 1.2rem; color: var(--kt-ink-2); }
+.kt-event__date { margin: -1rem 0 2rem; font-size: 1.1rem; color: var(--kt-ink-2); }
 .kt-schedule { margin: 0 0 2.4rem; }
 .kt-schedule__row {
   display: grid; gap: .5rem; padding: 1.3rem 0;
@@ -264,18 +264,18 @@ a { color: inherit; text-decoration: none; }
 }
 .kt-schedule__row:last-child { border-bottom: 1px solid var(--kt-line); }
 .kt-schedule dt {
-  font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; color: var(--kt-ink-3);
+  font-family: var(--kt-sans); font-weight: 500; font-size: 1rem; color: var(--kt-accent);
 }
 .kt-schedule dd { margin: 0; }
-.kt-schedule__time { margin: 0 0 .35rem; font-family: var(--kt-serif); font-size: 1.5rem; line-height: 1; }
+.kt-schedule__time { margin: 0 0 .35rem; font-family: var(--kt-sans); font-weight: 500; font-size: 1.45rem; line-height: 1; letter-spacing: -.02em; }
 .kt-schedule__venue { margin: 0; font-size: .95rem; }
 .kt-schedule__addr { margin: .2rem 0 .6rem; font-size: .84rem; color: var(--kt-ink-2); }
 @media (min-width: 620px) {
   .kt-schedule__row { grid-template-columns: 7rem 1fr; gap: 1.5rem; align-items: baseline; }
 }
 
-.kt-countdown { display: flex; flex-wrap: wrap; gap: 1.4rem; margin: 0 0 2rem; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--kt-ink-3); }
-.kt-countdown b { font-family: var(--kt-serif); font-weight: 400; font-size: 1.6rem; letter-spacing: 0; color: var(--kt-ink); margin-right: .3rem; }
+.kt-countdown { display: flex; flex-wrap: wrap; gap: 1.3rem; margin: 0 0 2rem; font-size: .88rem; color: var(--kt-ink-3); }
+.kt-countdown b { font-family: var(--kt-sans); font-weight: 600; font-size: 1.7rem; letter-spacing: -.02em; color: var(--kt-ink); margin-right: .28rem; }
 .kt-event__actions { margin-bottom: 2rem; }
 .kt-dress { border-top: 1px solid var(--kt-line); padding-top: 1.3rem; }
 .kt-dress p { margin: 0 0 .7rem; font-size: .92rem; color: var(--kt-ink-2); }
@@ -288,9 +288,10 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Cerita ---------- */
 .kt-story__item { padding: 1.6rem 0; border-top: 1px solid var(--kt-line); }
 .kt-story__item:last-child { border-bottom: 1px solid var(--kt-line); }
-.kt-story__no { font-family: var(--kt-serif); font-size: .8rem; color: var(--kt-accent); letter-spacing: .1em; }
-.kt-story__date { display: block; margin: .3rem 0 .5rem; font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--kt-ink-3); }
-.kt-story__item h4 { margin: 0 0 .5rem; font-family: var(--kt-serif); font-weight: 400; font-size: 1.4rem; line-height: 1.15; }
+/* Tahun adalah penanda yang sesungguhnya di sini — itu yang dicari mata,
+   bukan nomor urut babak. */
+.kt-story__date { display: block; margin: 0 0 .35rem; font-family: var(--kt-sans); font-weight: 600; font-size: 1rem; color: var(--kt-accent); }
+.kt-story__item h4 { margin: 0 0 .5rem; font-family: var(--kt-sans); font-weight: 500; font-size: 1.3rem; line-height: 1.2; letter-spacing: -.015em; }
 .kt-story__item p { margin: 0; font-size: .95rem; line-height: 1.8; color: var(--kt-ink-2); }
 
 /* ---------- Galeri ---------- */
@@ -306,7 +307,7 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Kartu balasan ---------- */
 .kt-form { display: grid; gap: 1.2rem; margin-bottom: 2.6rem; }
 .kt-field { display: grid; gap: .45rem; }
-.kt-field > span { font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-field > span { font-family: var(--kt-sans); font-size: .85rem; color: var(--kt-ink-3); }
 .kt-form input, .kt-form textarea {
   width: 100%; padding: .6rem 0;
   background: none; border: 0; border-bottom: 1px solid var(--kt-line);
@@ -320,7 +321,7 @@ a { color: inherit; text-decoration: none; }
 /* .rsvp-pill & .is-selected = kontrak assets/js/rsvp.js */
 .rsvp-pill {
   padding: .5rem 1rem; border: 1px solid var(--kt-line); color: var(--kt-ink-2);
-  font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+  font-family: var(--kt-sans); font-size: .9rem;
   transition: color .2s, border-color .2s, background .2s;
 }
 .rsvp-pill:hover { border-color: var(--kt-ink); color: var(--kt-ink); }
@@ -330,24 +331,24 @@ a { color: inherit; text-decoration: none; }
    visual Kertas, bukan diimpor dari stylesheet template lain. */
 .kt-wishes { display: grid; gap: 0; margin-bottom: 2.6rem; }
 .kt-wishes .wish-card { padding: 1.2rem 0; border-top: 1px solid var(--kt-line-2); }
-.kt-wishes .wish-card__name { font-family: var(--kt-serif); font-size: 1.1rem; }
-.kt-wishes .wish-card__status { display: block; margin: .15rem 0 .4rem; font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-wishes .wish-card__name { font-family: var(--kt-sans); font-weight: 500; font-size: 1.05rem; }
+.kt-wishes .wish-card__status { display: block; margin: .15rem 0 .4rem; font-family: var(--kt-sans); font-size: .8rem; color: var(--kt-ink-3); }
 .kt-wishes .wish-card__status--hadir { color: var(--kt-accent); }
 .kt-wishes .wish-card__message { margin: 0; font-size: .92rem; line-height: 1.75; color: var(--kt-ink-2); }
 .kt-wishes .wishes-empty { margin: 0; padding: 1.2rem 0; font-size: .88rem; color: var(--kt-ink-3); }
 .kt-wishes__nav { display: flex; gap: 1.2rem; align-items: center; margin-bottom: 2.6rem; }
-.kt-wishes__nav .wishes-page-btn { color: var(--kt-accent); font-size: .7rem; letter-spacing: .14em; border-bottom: 1px solid currentColor; }
+.kt-wishes__nav .wishes-page-btn { color: var(--kt-accent); font-family: var(--kt-sans); font-size: .86rem; border-bottom: 1px solid currentColor; }
 .kt-wishes__nav .wishes-page-btn:disabled { color: var(--kt-ink-3); border-bottom-color: transparent; cursor: default; }
-.kt-wishes__nav .wishes-page-info { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-wishes__nav .wishes-page-info { font-family: var(--kt-sans); font-size: .82rem; color: var(--kt-ink-3); }
 
 /* ---------- Hadiah (markup dari assets/js/gift.js) ---------- */
 .kt-gift { border-top: 1px solid var(--kt-ink); padding-top: 1.8rem; }
 #gift-panel { display: grid; gap: 1.2rem; margin-top: 1.2rem; }
 .gift-account { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--kt-line-2); }
-.gift-account__bank { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: var(--kt-ink-3); }
+.gift-account__bank { font-family: var(--kt-sans); font-size: .84rem; color: var(--kt-ink-3); }
 .gift-account__number { margin-top: .25rem; font-family: var(--kt-serif); font-size: 1.3rem; }
 .gift-account__holder { margin-top: .15rem; font-size: .82rem; color: var(--kt-ink-2); }
-.gift-copy-btn { flex: none; padding: .45rem .8rem; border: 1px solid var(--kt-line); color: var(--kt-ink); font-size: .6rem; letter-spacing: .16em; text-transform: uppercase; }
+.gift-copy-btn { flex: none; padding: .45rem .85rem; border: 1px solid var(--kt-line); color: var(--kt-ink); font-family: var(--kt-sans); font-size: .84rem; }
 .gift-copy-btn:hover { background: var(--kt-ink); color: var(--kt-paper); }
 #gift-address { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--kt-line-2); }
 .gift-address__text { font-size: .88rem; line-height: 1.7; color: var(--kt-ink-2); }
@@ -362,12 +363,12 @@ a { color: inherit; text-decoration: none; }
 .gift-rec-card__name { font-size: .88rem; }
 .gift-rec-card__price { font-size: .78rem; color: var(--kt-accent); }
 .gift-rec-card__nobuy { font-size: .7rem; color: var(--kt-ink-3); }
-.gift-rec-card .btn-outline { justify-self: start; margin-top: .3rem; padding: .4rem .75rem; border: 1px solid var(--kt-line); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+.gift-rec-card .btn-outline { justify-self: start; margin-top: .3rem; padding: .4rem .8rem; border: 1px solid var(--kt-line); font-family: var(--kt-sans); font-size: .82rem; }
 
 /* ---------- Penutup ---------- */
 .kt-closing { text-align: left; }
 .kt-closing__text { margin: 0 0 1.8rem; font-size: 1rem; line-height: 1.9; color: var(--kt-ink-2); }
-.kt-colophon { margin: 3rem 0 0; font-size: .58rem; letter-spacing: .26em; text-transform: uppercase; color: var(--kt-ink-3); }
+.kt-colophon { margin: 3rem 0 0; font-family: var(--kt-sans); font-size: .8rem; color: var(--kt-ink-3); }
 
 /* ---------- Modal & lightbox ---------- */
 .kt-modal, .kt-lightbox {
@@ -382,7 +383,7 @@ a { color: inherit; text-decoration: none; }
 }
 .kt-modal__panel--qr { width: min(20rem, 100%); }
 .kt-modal__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.kt-modal__head h3 { margin: 0; font-family: var(--kt-serif); font-weight: 400; font-size: 1.25rem; }
+.kt-modal__head h3 { margin: 0; font-family: var(--kt-sans); font-weight: 500; font-size: 1.2rem; }
 .kt-modal__x { font-size: 1.5rem; line-height: 1; color: var(--kt-ink-3); }
 .kt-modal select, .kt-modal textarea {
   width: 100%; padding: .7rem; background: var(--kt-paper-2);

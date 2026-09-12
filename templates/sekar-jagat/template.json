@@ -5,7 +5,7 @@
   "description": "Nuansa keraton Jawa. Indigo wedelan dan emas tua, ornamen digambar SVG, potret mempelai berbingkai lengkung gebyok, motif kawung halus, dan latar yang bergerak lebih lambat dari isinya.",
   "assets": {
     "fonts": [
-      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap"
+      "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Mulish:wght@300;400;500;600&display=swap"
     ],
     "css": [],
     "js": [

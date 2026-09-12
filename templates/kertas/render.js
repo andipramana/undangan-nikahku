@@ -5,9 +5,9 @@
  * toast, dan gerak masuk memakai WeddingBehaviors — elemennya diserahkan dari
  * sini, jadi penamaan & tata letaknya tetap milik Kertas.
  *
- * Yang khas template ini: daftar isi bernomor yang menyorot bab terbaca,
- * angka Romawi sebagai folio, foto full-bleed pemisah, dan galeri berirama
- * majalah (lebar kartu bergantian lewat CSS, bukan diatur di sini).
+ * Yang khas template ini: daftar isi di tepi yang menyorot bab yang sedang
+ * terbaca, foto full-bleed sebagai pemisah, dan galeri berirama majalah
+ * (lebar kartu bergantian lewat CSS, bukan diatur di sini).
  */
 (function () {
   "use strict";
@@ -16,7 +16,6 @@
 
   const $ = (id) => document.getElementById(id);
   const cleanups = [];
-  const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
   function setPhoto(img, photo) {
     if (!img) return false;
@@ -46,18 +45,14 @@
   }
 
   /** Daftar isi dibangun dari bab yang BENAR-BENAR ada di halaman, jadi bab
-   * yang dihapus (mis. live streaming tanpa URL) tidak meninggalkan entri
-   * mati. Folio Romawi juga dinomori ulang dari sini dengan alasan sama. */
+   * yang dihapus (mis. live streaming tanpa URL) tidak meninggalkan entri mati. */
   function setupIndex(root) {
     const sheets = [...root.querySelectorAll(".kt-sheet[data-chapter]")];
     const index = $("kt-index");
     const btn = $("kt-index-btn");
 
-    // Folio: sampul & penutup tidak bernomor (keduanya bukan "bab").
-    root.querySelectorAll(".kt-folio").forEach((el, i) => { el.textContent = ROMAN[i] || ""; });
-
-    index.innerHTML = sheets.map((sheet, i) =>
-      `<a href="#${sheet.id}" data-go="${sheet.id}"><b>${String(i + 1).padStart(2, "0")}</b><span>${sheet.dataset.chapter}</span></a>`
+    index.innerHTML = sheets.map((sheet) =>
+      `<a href="#${sheet.id}" data-go="${sheet.id}"><span>${sheet.dataset.chapter}</span></a>`
     ).join("");
 
     const close = () => { index.classList.remove("is-open"); btn.setAttribute("aria-expanded", "false"); };
@@ -194,9 +189,8 @@
 
       /* Cerita */
       const story = Array.isArray(cfg.loveStory) ? cfg.loveStory : [];
-      $("love-story-list").innerHTML = story.map((item, i) => `
+      $("love-story-list").innerHTML = story.map((item) => `
         <article class="kt-story__item">
-          <span class="kt-story__no">${String(i + 1).padStart(2, "0")}</span>
           <span class="kt-story__date">${esc(item.date)}</span>
           <h4>${esc(item.title)}</h4>
           <p>${esc(item.text)}</p>

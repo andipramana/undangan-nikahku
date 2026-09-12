@@ -16,6 +16,10 @@
      berulang — tidak memuat satu berkas gambar pun.
    - Gerak: latar bergeser lebih lambat dari isinya (parallax berlapis, nilai
      --p diatur render.js), isi masuk dengan naik + fade lembut.
+   - Tidak ada label kapital-berspasi di atas judul. Nuansa Jawa dibawa
+     ornamen, bentuk lengkung, dan sapaan — bukan ditempeli eyebrow. Label
+     tombol tetap bahasa Indonesia supaya tamu yang tidak berbahasa Jawa
+     tidak perlu menebak apa yang akan terjadi saat menekannya.
    ========================================================================== */
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -37,7 +41,7 @@
   --sj-ink-2: #6b6151;
 
   --sj-serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
-  --sj-sans: "Jost", "Helvetica Neue", Arial, sans-serif;
+  --sj-sans: "Mulish", "Helvetica Neue", Arial, sans-serif;
   --sj-line: rgba(176, 141, 63, .35);
 }
 
@@ -123,8 +127,10 @@ a { color: inherit; text-decoration: none; }
 .sj-divider svg { width: min(240px, 62%); height: auto; }
 
 .sj-crest { width: clamp(56px, 16vw, 84px); height: auto; margin: 0 auto 1.4rem; color: var(--sj-gold); }
-.sj-kicker { margin: 0 0 .5rem; font-size: .62rem; letter-spacing: .34em; text-transform: uppercase; color: var(--sj-gold); }
-.sj-label { margin: 0 0 .3rem; font-size: .6rem; letter-spacing: .28em; text-transform: uppercase; opacity: .75; }
+/* Sapaan pembuka & baris merek — kalimat, bukan label dekoratif. */
+.sj-kicker { margin: 0 0 .6rem; font-family: var(--sj-serif); font-style: italic; font-size: 1.05rem; color: var(--sj-gold); }
+.sj-label { margin: 0 0 .3rem; font-size: .86rem; opacity: .78; }
+.sj-role { margin: 0 0 .35rem; font-size: .86rem; color: var(--sj-gold); }
 .sj-h2 { margin: 0 0 2.2rem; font-family: var(--sj-serif); font-weight: 400; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.08; }
 .sj-h2--light { color: var(--sj-cream); }
 .sj-h3 { margin: 0 0 1rem; font-family: var(--sj-serif); font-weight: 400; font-size: 1.5rem; }
@@ -137,15 +143,15 @@ a { color: inherit; text-decoration: none; }
 .sj-names--sm { font-size: clamp(1.9rem, 8vw, 3rem); }
 
 .sj-btn {
-  display: inline-block; padding: .85rem 2rem;
+  display: inline-block; padding: .82rem 1.9rem;
   border: 1px solid var(--sj-gold); color: inherit;
-  font-size: .66rem; letter-spacing: .26em; text-transform: uppercase;
+  font-size: .95rem; font-weight: 500;
   transition: background .25s, color .25s;
 }
 .sj-btn:hover { background: var(--sj-gold); color: var(--sj-indigo); }
 .sj-btn--solid { background: var(--sj-gold); color: var(--sj-indigo); }
 .sj-btn--solid:hover { background: transparent; color: var(--sj-gold); }
-.sj-link { display: inline-block; color: var(--sj-gold); font-size: .74rem; letter-spacing: .1em; border-bottom: 1px solid currentColor; }
+.sj-link { display: inline-block; color: var(--sj-gold); font-size: .9rem; border-bottom: 1px solid currentColor; }
 
 /* ---------- Sampul ---------- */
 .sj-cover__date { margin: 0 0 2rem; font-family: var(--sj-serif); font-size: clamp(1.1rem, 4vw, 1.5rem); letter-spacing: .05em; }
@@ -155,7 +161,7 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Ayat ---------- */
 .sj-arabic { margin: 0 0 1.6rem; font-family: var(--sj-serif); font-size: clamp(1.3rem, 5.5vw, 1.9rem); line-height: 2.1; direction: rtl; }
 .sj-verse__text { margin: 0 auto; max-width: 34rem; font-family: var(--sj-serif); font-size: clamp(1.1rem, 4vw, 1.5rem); font-style: italic; line-height: 1.75; }
-.sj-verse__src { margin: 1rem 0 0; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--sj-ink-2); }
+.sj-verse__src { margin: 1rem 0 0; font-size: .88rem; color: var(--sj-ink-2); }
 
 /* ---------- Mempelai ---------- */
 .sj-pair { display: grid; gap: 2.6rem; align-items: start; }
@@ -198,7 +204,7 @@ a { color: inherit; text-decoration: none; }
 
 .sj-countdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; margin: 0 auto 2rem; max-width: 24rem; }
 .sj-countdown b { display: block; font-family: var(--sj-serif); font-weight: 400; font-size: clamp(1.5rem, 6vw, 2.1rem); line-height: 1; color: var(--sj-gold); }
-.sj-countdown span { font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; opacity: .75; }
+.sj-countdown span { font-size: .82rem; opacity: .8; }
 
 .sj-dress { margin-top: 2rem; padding-top: 1.4rem; border-top: 1px solid var(--sj-line); }
 .sj-dress p { margin: 0 0 .8rem; font-size: .92rem; }
@@ -217,7 +223,7 @@ a { color: inherit; text-decoration: none; }
   width: 11px; height: 11px; border-radius: 50%;
   border: 1px solid var(--sj-gold); background: var(--sj-cream);
 }
-.sj-story__date { font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--sj-gold); }
+.sj-story__date { font-family: var(--sj-serif); font-size: 1.05rem; color: var(--sj-gold); }
 .sj-story__item h4 { margin: .3rem 0 .5rem; font-family: var(--sj-serif); font-weight: 400; font-size: 1.45rem; line-height: 1.15; }
 .sj-story__item p { margin: 0; font-size: .93rem; line-height: 1.85; color: var(--sj-ink-2); }
 
@@ -231,7 +237,7 @@ a { color: inherit; text-decoration: none; }
 /* ---------- Ucapan ---------- */
 .sj-form { display: grid; gap: 1.1rem; text-align: left; max-width: 32rem; margin: 0 auto 2.4rem; }
 .sj-field { display: grid; gap: .4rem; }
-.sj-field > span { font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--sj-ink-2); }
+.sj-field > span { font-size: .86rem; color: var(--sj-ink-2); }
 .sj-form input, .sj-form textarea {
   width: 100%; padding: .8rem .9rem;
   background: rgba(255, 255, 255, .5); border: 1px solid var(--sj-line);
@@ -244,8 +250,8 @@ a { color: inherit; text-decoration: none; }
 .sj-pills { display: flex; flex-wrap: wrap; gap: .5rem; }
 /* .rsvp-pill & .is-selected = kontrak assets/js/rsvp.js */
 .rsvp-pill {
-  padding: .55rem 1.05rem; border: 1px solid var(--sj-line); border-radius: 999px;
-  color: var(--sj-ink-2); font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+  padding: .55rem 1.1rem; border: 1px solid var(--sj-line); border-radius: 999px;
+  color: var(--sj-ink-2); font-size: .92rem;
   transition: background .2s, color .2s, border-color .2s;
 }
 .rsvp-pill:hover { border-color: var(--sj-gold); color: var(--sj-ink); }
@@ -256,23 +262,23 @@ a { color: inherit; text-decoration: none; }
 .sj-wishes { display: grid; gap: .7rem; text-align: left; max-width: 32rem; margin: 0 auto 1.6rem; }
 .sj-wishes .wish-card { padding: 1.1rem 1.2rem; background: rgba(255, 255, 255, .48); border: 1px solid var(--sj-line); }
 .sj-wishes .wish-card__name { font-family: var(--sj-serif); font-size: 1.2rem; }
-.sj-wishes .wish-card__status { display: block; margin: .1rem 0 .4rem; font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--sj-ink-2); }
+.sj-wishes .wish-card__status { display: block; margin: .1rem 0 .4rem; font-size: .82rem; color: var(--sj-ink-2); }
 .sj-wishes .wish-card__status--hadir { color: var(--sj-gold); }
 .sj-wishes .wish-card__message { margin: 0; font-size: .92rem; line-height: 1.8; color: var(--sj-ink-2); }
 .sj-wishes .wishes-empty { margin: 0; padding: 1.2rem; background: rgba(255, 255, 255, .4); border: 1px solid var(--sj-line); font-size: .88rem; color: var(--sj-ink-2); }
 .sj-wishes__nav { display: flex; justify-content: center; align-items: center; gap: 1.2rem; margin-bottom: 2.4rem; }
-.sj-wishes__nav .wishes-page-btn { color: var(--sj-gold); font-size: .7rem; letter-spacing: .14em; border-bottom: 1px solid currentColor; }
+.sj-wishes__nav .wishes-page-btn { color: var(--sj-gold); font-size: .88rem; border-bottom: 1px solid currentColor; }
 .sj-wishes__nav .wishes-page-btn:disabled { color: var(--sj-ink-2); border-bottom-color: transparent; cursor: default; }
-.sj-wishes__nav .wishes-page-info { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--sj-ink-2); }
+.sj-wishes__nav .wishes-page-info { font-size: .82rem; color: var(--sj-ink-2); }
 
 /* ---------- Hadiah (markup dari assets/js/gift.js) ---------- */
 .sj-gift { padding-top: 2rem; border-top: 1px solid var(--sj-line); }
 #gift-panel { display: grid; gap: 1rem; margin-top: 1.2rem; text-align: left; max-width: 32rem; margin-inline: auto; }
 .gift-account { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.1rem; background: rgba(255, 255, 255, .48); border: 1px solid var(--sj-line); }
-.gift-account__bank { font-size: .58rem; letter-spacing: .22em; text-transform: uppercase; color: var(--sj-ink-2); }
+.gift-account__bank { font-size: .84rem; color: var(--sj-ink-2); }
 .gift-account__number { margin-top: .25rem; font-family: var(--sj-serif); font-size: 1.35rem; }
 .gift-account__holder { margin-top: .15rem; font-size: .82rem; color: var(--sj-ink-2); }
-.gift-copy-btn { flex: none; padding: .45rem .85rem; border: 1px solid var(--sj-gold); border-radius: 999px; color: var(--sj-gold); font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; }
+.gift-copy-btn { flex: none; padding: .45rem .9rem; border: 1px solid var(--sj-gold); border-radius: 999px; color: var(--sj-gold); font-size: .84rem; }
 .gift-copy-btn:hover { background: var(--sj-gold); color: var(--sj-indigo); }
 #gift-address { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1rem 1.1rem; background: rgba(255, 255, 255, .48); border: 1px solid var(--sj-line); }
 .gift-address__text { font-size: .88rem; line-height: 1.7; color: var(--sj-ink-2); }
@@ -287,7 +293,7 @@ a { color: inherit; text-decoration: none; }
 .gift-rec-card__name { font-size: .88rem; }
 .gift-rec-card__price { font-size: .78rem; color: var(--sj-gold); }
 .gift-rec-card__nobuy { font-size: .7rem; color: var(--sj-ink-2); }
-.gift-rec-card .btn-outline { justify-self: start; margin-top: .3rem; padding: .4rem .8rem; border: 1px solid var(--sj-line); border-radius: 999px; font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+.gift-rec-card .btn-outline { justify-self: start; margin-top: .3rem; padding: .4rem .85rem; border: 1px solid var(--sj-line); border-radius: 999px; font-size: .84rem; }
 
 /* ---------- Penutup ---------- */
 .sj-closing__text { margin: 0 auto 1.6rem; max-width: 34rem; font-size: 1rem; line-height: 1.95; }

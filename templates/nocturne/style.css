@@ -6,12 +6,14 @@
    lain, jadi reset dan seluruh komponennya ditulis di sini.
 
    Bahasa desain — sengaja dibedakan dari template lain:
-   - Bukan hitam pekat: dasar #0c0c10 berlapis #15151b, supaya foto tidak
-     terlihat "menempel" di kotak hitam mati.
-   - Satu aksen kuningan (#b3925f), dipakai amat hemat: garis rambut, angka,
-     dan garis bawah tautan. Tidak ada tombol berwarna penuh.
-   - Tipografi kontras tinggi: Instrument Serif ukuran besar untuk nama &
-     angka, Inter kecil ber-letterspacing lebar untuk label.
+   - BUKAN hitam dengan aksen emas (kombinasi yang sudah jadi bunyi klise):
+     dasarnya plum malam #1b1420 berlapis #261c2e — ungu tua yang masih
+     menyimpan warna, sehingga kulit pada foto tidak menguning.
+   - Satu cahaya hangat, blush #e4a08a, dipakai amat hemat: garis rambut,
+     angka, garis bawah tautan. Tidak ada tombol berwarna penuh.
+   - Tipografi kontras ekstrem: Bodoni Moda (didone — tebal-tipisnya tajam)
+     untuk nama & angka, Karla untuk teks. Tidak ada label kapital-berspasi
+     di atas judul; nama bagian sudah dibawa titik navigasi di tepi.
    - Sudut hampir siku (radius 2px). Yang membulat sempurna hanya kontrol
      bundar (tombol musik) — supaya tidak terbaca "kartu membulat" generik.
    - Tiap section = satu adegan setinggi layar yang mendarat lewat scroll-snap.
@@ -20,15 +22,15 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
-  --nc-bg: #0c0c10;
-  --nc-bg-2: #15151b;
-  --nc-ink: #f1ece3;
-  --nc-ink-2: #a5a09a;
-  --nc-ink-3: #6f6b66;
-  --nc-brass: #b3925f;
-  --nc-line: rgba(241, 236, 227, .12);
-  --nc-line-2: rgba(241, 236, 227, .06);
-  --nc-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --nc-bg: #1b1420;
+  --nc-bg-2: #261c2e;
+  --nc-ink: #f6eef0;
+  --nc-ink-2: #b3a4ae;
+  --nc-ink-3: #7d6e79;
+  --nc-brass: #e4a08a;
+  --nc-line: rgba(246, 238, 240, .14);
+  --nc-line-2: rgba(246, 238, 240, .07);
+  --nc-serif: "Bodoni Moda", "Didot", Georgia, serif;
   --nc-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --nc-pad: clamp(1.25rem, 5vw, 3.5rem);
 }
@@ -106,10 +108,9 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 }
 
 /* ---------- Tipografi dasar ---------- */
-.nc-kicker {
-  margin: 0 0 1.1rem; font-size: .68rem; font-weight: 500;
-  letter-spacing: .34em; text-transform: uppercase; color: var(--nc-brass);
-}
+.nc-kicker { margin: 0 0 .5rem; font-size: .82rem; color: var(--nc-ink-3); }
+/* Peran mempelai: keterangan singkat, bukan label dekoratif. */
+.nc-role { margin: 0 0 .4rem; font-size: .86rem; color: var(--nc-brass); }
 .nc-label { margin: 0 0 .3rem; font-size: .66rem; letter-spacing: .26em; text-transform: uppercase; color: var(--nc-ink-3); }
 .nc-h2 { margin: 0 0 1.6rem; font-family: var(--nc-serif); font-weight: 400; font-size: clamp(2rem, 7vw, 3.2rem); line-height: 1.05; }
 .nc-names {

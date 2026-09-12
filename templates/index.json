@@ -14,21 +14,21 @@
     {
       "id": "nocturne",
       "name": "Nocturne",
-      "desc": "Sinematik gelap. Tiap bagian satu adegan setinggi layar, tipografi besar di atas foto redup, aksen kuningan.",
+      "desc": "Sinematik plum malam. Adegan setinggi layar, nama didone kontras tinggi di atas foto redup, aksen blush.",
       "colors": [
-        "#0c0c10",
-        "#b3925f",
-        "#f1ece3"
+        "#1b1420",
+        "#e4a08a",
+        "#f6eef0"
       ]
     },
     {
       "id": "kertas",
       "name": "Kertas",
-      "desc": "Editorial. Kertas gading, tipografi besar, grid asimetris, daftar isi bernomor di tepi.",
+      "desc": "Cetak risograph dua warna. Kertas daur ulang, tinta hijau tua, aksen ultramarine, nama dicetak besar.",
       "colors": [
-        "#f3efe6",
-        "#8c3b2a",
-        "#201d18"
+        "#f0efe9",
+        "#2f46c8",
+        "#17231f"
       ]
     },
     {

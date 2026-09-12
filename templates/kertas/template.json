@@ -2,10 +2,10 @@
   "id": "kertas",
   "name": "Kertas",
   "version": 1,
-  "description": "Editorial. Dibaca seperti buku acara cetak: kertas gading, tipografi besar, grid asimetris, daftar isi bernomor di tepi. Mengalir bebas, tanpa layar penuh.",
+  "description": "Cetak risograph dua warna. Kertas daur ulang abu-netral, tinta hijau tua, dan satu warna kedua ultramarine. Nama mempelai dicetak besar dengan grotesk, halaman mengalir seperti majalah dengan daftar isi di tepi.",
   "assets": {
     "fonts": [
-      "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Archivo:wght@300;400;500&display=swap"
+      "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..700&family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..400&display=swap"
     ],
     "css": [],
     "js": [
@@ -18,12 +18,12 @@
     ]
   },
   "theme": {
-    "--kt-paper": "#f3efe6",
-    "--kt-paper-2": "#ece7db",
-    "--kt-ink": "#201d18",
-    "--kt-ink-2": "#57514a",
-    "--kt-ink-3": "#8b8378",
-    "--kt-accent": "#8c3b2a"
+    "--kt-paper": "#f0efe9",
+    "--kt-paper-2": "#e4e3db",
+    "--kt-ink": "#17231f",
+    "--kt-ink-2": "#4d5a55",
+    "--kt-ink-3": "#8a938e",
+    "--kt-accent": "#2f46c8"
   },
   "editor": {
     "colors": [
@@ -31,37 +31,37 @@
         "key": "paper",
         "var": "--kt-paper",
         "label": "Kertas",
-        "default": "#f3efe6"
+        "default": "#f0efe9"
       },
       {
         "key": "paper2",
         "var": "--kt-paper-2",
         "label": "Kertas (tua)",
-        "default": "#ece7db"
+        "default": "#e4e3db"
       },
       {
         "key": "ink",
         "var": "--kt-ink",
         "label": "Tinta utama",
-        "default": "#201d18"
+        "default": "#17231f"
       },
       {
         "key": "ink2",
         "var": "--kt-ink-2",
         "label": "Tinta sekunder",
-        "default": "#57514a"
+        "default": "#4d5a55"
       },
       {
         "key": "ink3",
         "var": "--kt-ink-3",
         "label": "Tinta redup",
-        "default": "#8b8378"
+        "default": "#8a938e"
       },
       {
         "key": "accent",
         "var": "--kt-accent",
-        "label": "Aksen cetak",
-        "default": "#8c3b2a"
+        "label": "Tinta kedua",
+        "default": "#2f46c8"
       }
     ],
     "sections": [

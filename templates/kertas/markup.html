@@ -30,7 +30,7 @@
     <!-- Sampul: tipografi besar, foto mengapit asimetris -->
     <section class="kt-sheet kt-cover" id="cover" data-chapter="Sampul">
       <p class="kt-rule" aria-hidden="true"></p>
-      <p class="kt-eyebrow">Undangan Pernikahan</p>
+      <p class="kt-lede">Dengan sukacita, kami menikah.</p>
       <h1 class="kt-display" id="couple-names-cover"></h1>
       <div class="kt-cover__meta">
         <p class="kt-cover__date" id="cover-date"></p>
@@ -48,7 +48,6 @@
 
     <!-- Ayat: satu kolom sempit, dikutip besar -->
     <section class="kt-sheet kt-verse" id="opening" data-chapter="Doa">
-      <p class="kt-folio">I</p>
       <p class="kt-arabic" id="opening-arabic"></p>
       <blockquote class="kt-quote" id="wfl-quote"></blockquote>
       <p class="kt-source" id="wfl-source"></p>
@@ -56,13 +55,12 @@
 
     <!-- Mempelai: dua entri, foto kecil di kolom sempit, teks di kolom lebar -->
     <section class="kt-sheet kt-couple" id="couple" data-chapter="Mempelai">
-      <p class="kt-folio">II</p>
       <h2 class="kt-h2">Kedua Mempelai</h2>
 
       <article class="kt-person">
         <figure class="kt-person__figure"><img id="bride-photo" alt="" loading="lazy"></figure>
         <div class="kt-person__text">
-          <p class="kt-eyebrow">Mempelai Wanita</p>
+          <p class="kt-role">Mempelai wanita</p>
           <h3 class="kt-person__name" id="bride-name"></h3>
           <p class="kt-person__parents" id="bride-parents"></p>
           <p class="kt-person__ig" id="bride-instagram"></p>
@@ -72,7 +70,7 @@
       <article class="kt-person kt-person--flip">
         <figure class="kt-person__figure"><img id="groom-photo" alt="" loading="lazy"></figure>
         <div class="kt-person__text">
-          <p class="kt-eyebrow">Mempelai Pria</p>
+          <p class="kt-role">Mempelai pria</p>
           <h3 class="kt-person__name" id="groom-name"></h3>
           <p class="kt-person__parents" id="groom-parents"></p>
           <p class="kt-person__ig" id="groom-instagram"></p>
@@ -87,7 +85,6 @@
 
     <!-- Acara: disusun seperti tabel jadwal cetak, bukan kartu -->
     <section class="kt-sheet kt-event" id="event" data-chapter="Acara">
-      <p class="kt-folio">III</p>
       <h2 class="kt-h2">Rangkaian Acara</h2>
       <p class="kt-event__date" id="event-date-line"></p>
 
@@ -124,35 +121,31 @@
       </div>
 
       <div class="kt-dress" id="kt-dress" hidden>
-        <p class="kt-eyebrow">Dresscode</p>
+        <h3 class="kt-h3">Dresscode</h3>
         <p id="dresscode-text"></p>
         <div class="kt-swatches" id="dresscode-swatches"></div>
       </div>
     </section>
 
     <section class="kt-sheet kt-live" id="livestream" data-chapter="Live">
-      <p class="kt-folio">IV</p>
       <h2 class="kt-h2">Siaran Langsung</h2>
       <div class="kt-live__links" id="livestream-links"></div>
     </section>
 
     <!-- Cerita: entri bernomor bergaya editorial -->
     <section class="kt-sheet kt-story" id="love-story" data-chapter="Cerita">
-      <p class="kt-folio">V</p>
       <h2 class="kt-h2">Perjalanan Kami</h2>
       <div class="kt-story__list" id="love-story-list"></div>
     </section>
 
     <!-- Galeri: grid majalah asimetris (besar-kecil bergantian) -->
     <section class="kt-sheet kt-gallery" id="gallery" data-chapter="Galeri">
-      <p class="kt-folio">VI</p>
       <h2 class="kt-h2">Album</h2>
       <div class="kt-gallery__grid" id="kt-gallery-grid"></div>
     </section>
 
     <!-- RSVP & hadiah: blok formulir bergaya kartu balasan cetak -->
     <section class="kt-sheet kt-rsvp" id="gift" data-chapter="Balasan">
-      <p class="kt-folio">VII</p>
       <h2 class="kt-h2">Kartu Balasan</h2>
 
       <form class="kt-form" id="rsvp-form">

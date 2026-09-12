@@ -161,13 +161,13 @@
       /* Mempelai */
       $("bride-name").textContent = cfg.couple.bride.name;
       $("bride-parents").innerHTML =
-        `Putri saking<br>Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
+        `Putri dari<br>Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
       fillInstagram($("bride-instagram"), cfg.couple.bride.instagram, esc);
       setPhoto($("bride-photo"), photos("bride")[0]);
 
       $("groom-name").textContent = cfg.couple.groom.name;
       $("groom-parents").innerHTML =
-        `Putra saking<br>Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
+        `Putra dari<br>Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
       fillInstagram($("groom-instagram"), cfg.couple.groom.instagram, esc);
       setPhoto($("groom-photo"), photos("groom")[0]);
 
