@@ -192,7 +192,10 @@
     </div>
 
     <!-- 07 · Ucapan & tanda kasih -->
-    <section class="sj-part sj-rsvp" id="gift" data-part="Ucapan">
+    <!-- Ucapan & kehadiran. Sengaja TERPISAH dari Tanda Kasih: daftar ucapan
+         tumbuh tanpa batas, dan kalau keduanya menyatu, bagian hadiah ikut
+         terseret ke bawah daftar panjang sehingga jarang terlihat. -->
+    <section class="sj-part sj-rsvp" id="rsvp" data-part="Ucapan">
       <div class="sj-part__inner">
         <h2 class="sj-h2" data-reveal="unfurl">Ucapan &amp; kehadiran</h2>
 
@@ -219,19 +222,39 @@
         <div class="sj-wishes" id="wishes-list" data-reveal="fade" style="--reveal-i:2"></div>
         <div class="sj-wishes__nav" id="wishes-pagination" hidden></div>
 
-        <div class="sj-gift">
-          <h3 class="sj-h3" data-reveal="drop">Tanda kasih</h3>
-          <button type="button" class="sj-btn" id="btn-gift-toggle" data-reveal="hold" style="--reveal-i:1">Lihat rekening &amp; alamat</button>
-          <div id="gift-panel" hidden>
-            <div id="gift-accounts" data-reveal="fade"></div>
-            <div id="gift-address" data-reveal="fade" style="--reveal-i:1"></div>
-            <div class="sj-gift__actions">
-              <button type="button" class="sj-link" id="btn-gift-recs">Rekomendasi kado</button>
-              <button type="button" class="sj-link" id="btn-gift-confirm">Konfirmasi pengiriman</button>
-              <button type="button" class="sj-link" id="btn-gift-hide">Tutup</button>
-            </div>
+      </div>
+    </section>
+
+    <!-- Tanda Kasih — bagian tersendiri setinggi layar dan jadi titik snap.
+         Inilah alasan undangan disebar, jadi ia tidak menumpang di ekor
+         bagian lain. Rekeningnya TIDAK disembunyikan di balik tombol. -->
+    <section class="sj-part sj-giftscene" id="gift" data-part="Tanda Kasih">
+      <div class="sj-part__inner">
+        <svg class="sj-envelope" viewBox="0 0 64 44" fill="none" aria-hidden="true" data-reveal="draw">
+          <rect x="1" y="1" width="62" height="42" rx="2" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M1 3l31 22L63 3" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M32 25v12" stroke="currentColor" stroke-width="1.2" opacity=".5"/>
+        </svg>
+        <h2 class="sj-h2" data-reveal="unfurl" style="--reveal-i:1">Tanda kasih</h2>
+        <p class="sj-giftscene__lede" data-reveal="drop" style="--reveal-i:2">
+          Donga pangestu panjenengan sampun langkung saking cekap. Menawi
+          kersa maringi tanda katresnan, kami tampi kanthi bingahing manah.
+        </p>
+
+        <div class="sj-gift" id="gift-panel" data-reveal="fade" style="--reveal-i:3">
+          <div id="gift-accounts" data-reveal="fade" style="--reveal-i:3"></div>
+          <div id="gift-address" data-reveal="fade" style="--reveal-i:4"></div>
+          <div class="sj-gift__actions" data-reveal="hold" style="--reveal-i:5">
+            <button type="button" class="sj-link" id="btn-gift-recs">Rekomendasi kado</button>
+            <button type="button" class="sj-link" id="btn-gift-confirm">Konfirmasi pengiriman</button>
           </div>
         </div>
+
+        <!-- Dua tombol ini TIDAK dipakai template ini (panel selalu terbuka),
+             tapi assets/js/gift.js keluar lebih awal kalau keduanya tidak ada
+             di DOM — yang berarti rekening tidak pernah terisi sama sekali. -->
+        <button type="button" id="btn-gift-toggle" hidden>Lihat tanda kasih</button>
+        <button type="button" id="btn-gift-hide" hidden>Tutup</button>
       </div>
     </section>
 

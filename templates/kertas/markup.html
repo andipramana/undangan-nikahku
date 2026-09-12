@@ -145,7 +145,10 @@
     </section>
 
     <!-- RSVP & hadiah: blok formulir bergaya kartu balasan cetak -->
-    <section class="kt-sheet kt-rsvp" id="gift" data-chapter="Balasan">
+    <!-- Kartu balasan. Sengaja TERPISAH dari Tanda Kasih: daftar ucapan
+         tumbuh tanpa batas, dan kalau menyatu, bagian hadiah ikut terseret ke
+         bawah daftar panjang sehingga jarang terlihat. -->
+    <section class="kt-sheet kt-rsvp" id="rsvp" data-chapter="Balasan">
       <h2 class="kt-h2" data-reveal="offset">Kartu Balasan</h2>
 
       <form class="kt-form" id="rsvp-form" data-reveal="hold" style="--reveal-i:1">
@@ -171,19 +174,34 @@
       <div class="kt-wishes" id="wishes-list" data-reveal="fade" style="--reveal-i:2"></div>
       <div class="kt-wishes__nav" id="wishes-pagination" hidden></div>
 
-      <div class="kt-gift">
-        <h3 class="kt-h3" data-reveal="ink">Tanda Kasih</h3>
-        <button type="button" class="kt-btn" id="btn-gift-toggle" data-reveal="hold" style="--reveal-i:1">Lihat rekening &amp; alamat</button>
-        <div id="gift-panel" hidden>
-          <div id="gift-accounts" data-reveal="fade"></div>
-          <div id="gift-address" data-reveal="fade" style="--reveal-i:1"></div>
-          <div class="kt-gift__actions">
-            <button type="button" class="kt-link" id="btn-gift-recs">Rekomendasi kado</button>
-            <button type="button" class="kt-link" id="btn-gift-confirm">Konfirmasi pengiriman</button>
-            <button type="button" class="kt-link" id="btn-gift-hide">Tutup</button>
-          </div>
+    </section>
+
+    <!-- Tanda Kasih — halaman tersendiri setinggi layar dan satu-satunya
+         titik snap di tengah dokumen. Inilah alasan undangan disebar, jadi ia
+         tidak menumpang di ekor halaman lain, dan rekeningnya tidak
+         disembunyikan di balik tombol. -->
+    <section class="kt-sheet kt-giftscene" id="gift" data-chapter="Tanda Kasih">
+      <p class="kt-rule" aria-hidden="true" data-reveal="rule"></p>
+      <h2 class="kt-h2" data-reveal="offset" style="--reveal-i:1">Tanda Kasih</h2>
+      <p class="kt-giftscene__lede" data-reveal="ink" style="--reveal-i:2">
+        Doa restu Anda sudah lebih dari cukup bagi kami. Bila ingin menambah
+        tanda kasih, kami menerimanya dengan senang hati.
+      </p>
+
+      <div id="gift-panel" data-reveal="ink" style="--reveal-i:3">
+        <div id="gift-accounts" data-reveal="fade" style="--reveal-i:3"></div>
+        <div id="gift-address" data-reveal="fade" style="--reveal-i:4"></div>
+        <div class="kt-gift__actions" data-reveal="hold" style="--reveal-i:5">
+          <button type="button" class="kt-link" id="btn-gift-recs">Rekomendasi kado</button>
+          <button type="button" class="kt-link" id="btn-gift-confirm">Konfirmasi pengiriman</button>
         </div>
       </div>
+
+      <!-- Dua tombol ini TIDAK dipakai template ini (panel selalu terbuka),
+           tapi assets/js/gift.js keluar lebih awal kalau keduanya tidak ada di
+           DOM — yang berarti rekening tidak pernah terisi sama sekali. -->
+      <button type="button" id="btn-gift-toggle" hidden>Lihat tanda kasih</button>
+      <button type="button" id="btn-gift-hide" hidden>Tutup</button>
     </section>
 
     <!-- Penutup: colophon -->

@@ -120,7 +120,7 @@ a { color: inherit; text-decoration: none; }
    proximity, bukan mandatory: magnetnya menarik kalau sudah dekat, tidak
    memaksa. Di HP itu bedanya antara "enak" dan "gulirnya direbut". */
 html { scroll-snap-type: y proximity; }
-.sj-cover, .sj-verse, .sj-live, .sj-closing {
+.sj-cover, .sj-verse, .sj-live, .sj-giftscene, .sj-closing {
   min-height: 100dvh;
   display: grid; align-items: center;
   scroll-snap-align: start;
@@ -373,6 +373,18 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.3s; }
 .sj-wishes__nav .wishes-page-btn { color: var(--sj-gold); font-size: .88rem; border-bottom: 1px solid currentColor; }
 .sj-wishes__nav .wishes-page-btn:disabled { color: var(--sj-ink-2); border-bottom-color: transparent; cursor: default; }
 .sj-wishes__nav .wishes-page-info { font-size: .82rem; color: var(--sj-ink-2); }
+
+/* ---------- Bagian Tanda Kasih ----------
+   Setinggi layar dan jadi titik snap: inilah bagian yang paling ingin dilihat
+   pengirim undangan. Isinya dijaga ringkas supaya benar-benar muat. */
+.sj-giftscene { text-align: center; }
+.sj-envelope { width: clamp(44px, 12vw, 62px); height: auto; margin: 0 auto 1.2rem; color: var(--sj-gold); }
+.sj-giftscene__lede {
+  margin: -1.2rem auto 1.8rem; max-width: 30rem;
+  font-size: .95rem; line-height: 1.85; color: var(--sj-ink-2);
+}
+.sj-giftscene .sj-gift { padding-top: 0; border-top: 0; }
+.sj-giftscene .sj-gift__actions { justify-content: center; }
 
 /* ---------- Hadiah (markup dari assets/js/gift.js) ---------- */
 .sj-gift { padding-top: 2rem; border-top: 1px solid var(--sj-line); }

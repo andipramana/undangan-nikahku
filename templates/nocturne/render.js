@@ -210,6 +210,11 @@
         $("gallery").remove();
       }
 
+      /* Tanda kasih: latar foto dipakai ulang dari slot penutup/sampul —
+         adegan ini tidak punya slot fotonya sendiri di admin, dan latar polos
+         membuatnya terasa seperti halaman sisipan, bukan bagian utama. */
+      setBg($("gift-media"), photos("closing")[0] || photos("cover")[0]);
+
       /* Penutup */
       $("closing-text").textContent = guest.closing;
       coupleNames($("couple-names-closing"), cfg.couple.bride.nickname, cfg.couple.groom.nickname, esc);

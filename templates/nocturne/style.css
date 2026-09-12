@@ -383,6 +383,19 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
 
 /* ---------- RSVP & hadiah ---------- */
 .nc-rsvp { align-content: start; scroll-snap-align: none; scroll-snap-stop: normal; }
+
+/* ---------- Tanda Kasih ----------
+   Adegan tersendiri setinggi layar, dan SATU-SATUNYA bagian panjang yang
+   tetap jadi titik snap — isinya dijaga ringkas supaya muat. Inilah bagian
+   yang paling ingin dilihat pengirim undangan. */
+.nc-giftscene { align-content: center; text-align: center; }
+.nc-envelope { width: clamp(44px, 12vw, 62px); height: auto; margin: 0 auto 1.2rem; color: var(--nc-brass); }
+.nc-giftscene__lede {
+  margin: -1rem auto 1.8rem; max-width: 30rem;
+  font-size: .95rem; line-height: 1.8; color: var(--nc-ink-2);
+}
+.nc-giftscene .nc-gift { margin-top: 0; text-align: left; }
+.nc-giftscene .nc-gift__actions { justify-content: center; }
 .nc-form { display: grid; gap: .7rem; text-align: left; }
 .nc-form input, .nc-form select, .nc-form textarea {
   width: 100%; padding: .85rem .9rem;
@@ -429,7 +442,7 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
 #gift-accounts { display: grid; gap: 1px; background: var(--nc-line-2); }
 .gift-account {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-  background: var(--nc-bg); padding: 1rem 1.1rem;
+  background: var(--nc-bg); padding: .85rem 1.1rem;
 }
 .gift-account__bank { font-size: .64rem; letter-spacing: .18em; text-transform: uppercase; color: var(--nc-ink-3); }
 .gift-account__number { margin-top: .3rem; font-family: var(--nc-serif); font-size: 1.3rem; letter-spacing: .04em; }

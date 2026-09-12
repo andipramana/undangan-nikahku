@@ -52,7 +52,30 @@ window.audioUrl = window.photoUrl;
 window.__PHOTO_PAYLOAD = ${JSON.stringify(PHOTO_PAYLOAD)};
 window.__called = [];
 window.initRsvp = () => window.__called.push("rsvp");
-window.initGift = () => window.__called.push("gift");
+// Stub gift.js mengisi konten SEPERTI ASLINYA (dua rekening + alamat, kelas
+// yang sama). Tanpa ini bagian Tanda Kasih diukur dalam keadaan kosong,
+// sehingga pemeriksaan tinggi titik snap di bawah tidak bermakna — padahal
+// justru isi inilah yang menentukan apakah bagian itu muat satu layar.
+// Ditulis dengan rangkaian string biasa: blok ini berada DI DALAM template
+// literal, jadi backtick dan penanda interpolasi tidak boleh dipakai.
+window.initGift = function () {
+  window.__called.push("gift");
+  var rek = [["Bank BCA", "1234567890", "Mita Meliana"],
+             ["Bank Mandiri", "0987654321", "Andi Pramana"]];
+  var acc = document.getElementById("gift-accounts");
+  if (acc) acc.innerHTML = rek.map(function (r, i) {
+    return '<div class="gift-account" data-reveal="up" style="--reveal-i:' + i + '">' +
+      '<div><div class="gift-account__bank">' + r[0] + '</div>' +
+      '<div class="gift-account__number">' + r[1] + '</div>' +
+      '<div class="gift-account__holder">a.n. ' + r[2] + '</div></div>' +
+      '<button class="gift-copy-btn" type="button">Salin</button></div>';
+  }).join("");
+  var addr = document.getElementById("gift-address");
+  if (addr) addr.innerHTML =
+    '<div class="gift-address__text"><strong>Mita &amp; Andi</strong><br>' +
+    '081234567890<br>Jl. Raya Ciwidey KM 27 No. 66, Pasirjambu</div>' +
+    '<button class="gift-copy-btn gift-address__copy" type="button">Salin</button>';
+};
 window.initQrCheckin = () => window.__called.push("qr");
 window.applyVisualEditorOverrides = () => {};
 window.WeddingTemplates = {};
