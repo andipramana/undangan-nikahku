@@ -151,6 +151,22 @@ for (const id of folders) {
     check(`${id}: setelah klik, halaman bisa digulir`, after.scrollable);
     check(`${id}: setelah klik, kunci gulir dilepas`, !after.locked);
 
+    /* 4. Tidak meluber ke samping. Di HP gejalanya halus tapi merusak: halaman
+          bisa digeser horizontal, teks ikut bergeser, dan tata letak terasa
+          "goyang" — biasanya karena satu elemen lebar tetap atau margin negatif. */
+    const overflow = await page.evaluate(() => {
+      const doc = document.documentElement;
+      const over = doc.scrollWidth - doc.clientWidth;
+      if (over <= 1) return { over, culprits: [] };
+      const culprits = [...document.querySelectorAll("#inv-root *")]
+        .filter((el) => el.getBoundingClientRect().right > doc.clientWidth + 1)
+        .slice(0, 4)
+        .map((el) => el.id || el.className || el.tagName);
+      return { over, culprits };
+    });
+    check(`${id}: halaman tidak meluber ke samping`, overflow.over <= 1,
+      `lebih ${overflow.over}px — ${overflow.culprits.join(", ")}`);
+
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);
   } finally {
     await page.close();
