@@ -108,8 +108,25 @@ a { color: inherit; text-decoration: none; }
 
 /* Bagian berlatar foto memakai tema gelap; sisanya krem. */
 .sj-cover, .sj-event, .sj-closing { color: var(--sj-cream); }
-.sj-cover { min-height: 100dvh; display: grid; align-items: center; }
-.sj-closing { min-height: 78dvh; display: grid; align-items: center; }
+
+/* ── Snap "magnet" ────────────────────────────────────────────────────────
+   Hanya bagian yang MUAT dalam satu layar yang jadi titik snap. Bagian
+   panjang (mempelai, acara, cerita, galeri, ucapan) dibiarkan mengalir:
+   menariknya ke titik snap berarti merebut gulir tamu di tengah membaca.
+   Prinsip ini dipinjam dari template klasik, yang menyalakan snap hanya pada
+   deretan layar penuh yang berdekatan dan mengecualikan #closing karena
+   terpisah jauh oleh bagian-bagian panjang.
+
+   proximity, bukan mandatory: magnetnya menarik kalau sudah dekat, tidak
+   memaksa. Di HP itu bedanya antara "enak" dan "gulirnya direbut". */
+html { scroll-snap-type: y proximity; }
+.sj-cover, .sj-verse, .sj-live, .sj-closing {
+  min-height: 100dvh;
+  display: grid; align-items: center;
+  scroll-snap-align: start;
+}
+.sj-cover { min-height: 100dvh; }
+.sj-closing { min-height: 100dvh; }
 
 .sj-parallax { position: absolute; inset: -12% 0; z-index: 0; will-change: transform; transform: translate3d(0, var(--p, 0px), 0); }
 .sj-bg { position: absolute; inset: 0; background: var(--sj-indigo) center/cover no-repeat; background-position: var(--fx, 50%) var(--fy, 50%); }

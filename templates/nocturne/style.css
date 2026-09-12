@@ -63,14 +63,26 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 /* ---------- Panggung & adegan ---------- */
 .nc-scroll {
   height: 100dvh; overflow-y: auto; overflow-x: hidden;
-  scroll-snap-type: y mandatory;
+  /* proximity, BUKAN mandatory. Dengan mandatory, adegan yang jauh lebih
+     tinggi dari layar (galeri, ucapan) ikut ditarik paksa sehingga gulir
+     terasa direbut di tengah membaca. proximity hanya menarik kalau memang
+     sudah dekat titik snap — magnetnya terasa di adegan penuh, dan lepas
+     sendiri di bagian panjang. Pelajaran yang sama sudah ada di template
+     klasik: di sana snap dinyalakan hanya pada deretan layar penuh yang
+     berdekatan (snap-mode--upper / --gift), tidak untuk seluruh halaman. */
+  scroll-snap-type: y proximity;
   scroll-behavior: smooth;
+  /* Sedikit ruang di atas titik snap supaya baris pertama tidak menempel
+     persis di tepi layar. */
+  scroll-padding-top: 0;
 }
 .nc-scene {
   position: relative;
   min-height: 100dvh;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  /* Adegan yang isinya melebihi satu layar mencabut sendiri titik snapnya —
+     lihat .nc-gallery & .nc-rsvp di bawah. */
   display: grid; align-content: center;
   padding: calc(var(--nc-pad) + 2.5rem) var(--nc-pad);
   overflow: hidden;
@@ -331,7 +343,16 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
 .nc-story { scroll-snap-stop: normal; align-content: start; }
 
 /* ---------- Galeri ---------- */
-.nc-gallery { align-content: start; scroll-snap-stop: normal; }
+/* Adegan acara juga dicabut: isinya padat (tanggal besar, hitung mundur, dua
+   kartu, tombol kalender, dresscode) sehingga tingginya melewati satu layar.
+   Lebih baik dibiarkan mengalir daripada ditarik ke titik snap yang tidak
+   pernah pas. */
+.nc-event { scroll-snap-align: none; scroll-snap-stop: normal; }
+
+/* Galeri & ucapan JAUH lebih tinggi dari layar (2.000px+ dengan belasan foto
+   atau belasan ucapan). Keduanya dicabut dari snap: menariknya ke titik snap
+   berarti merebut gulir tamu di tengah-tengah membaca. */
+.nc-gallery { align-content: start; scroll-snap-align: none; scroll-snap-stop: normal; }
 .nc-gallery__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
 @media (min-width: 720px) { .nc-gallery__grid { grid-template-columns: repeat(3, 1fr); } }
 .nc-gallery__grid button { display: block; aspect-ratio: 3/4; overflow: hidden; }
@@ -344,7 +365,7 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
 .nc-gallery__grid button:hover img { filter: none; transform: scale(1.04); }
 
 /* ---------- RSVP & hadiah ---------- */
-.nc-rsvp { align-content: start; scroll-snap-stop: normal; }
+.nc-rsvp { align-content: start; scroll-snap-align: none; scroll-snap-stop: normal; }
 .nc-form { display: grid; gap: .7rem; text-align: left; }
 .nc-form input, .nc-form select, .nc-form textarea {
   width: 100%; padding: .85rem .9rem;
@@ -432,14 +453,28 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
 }
 /* Titik navigasi sengaja kecil secara visual, tapi area sentuhnya dibesarkan
    lewat padding transparan — titik 7px mustahil dikenai jari dengan yakin. */
+/* Titik navigasi: tampil kecil, tapi area sentuhnya 41px lewat padding
+   transparan — titik 7px mustahil dikenai jari dengan yakin.
+   URUTAN PENTING: `background-clip` HARUS ditulis SETELAH `background`.
+   Shorthand `background:` mereset background-clip ke border-box, dan itu
+   pernah membuat seluruh area sentuh ikut berwarna — titiknya tampil sebagai
+   bulatan raksasa di tepi layar. */
 .nc-dots button {
-  padding: 17px; background-clip: content-box; box-sizing: content-box;
+  display: block; box-sizing: content-box;
+  width: 7px; height: 7px; padding: 17px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--nc-ink) 22%, transparent);
+  background-clip: content-box;
+  transition: background .3s, transform .3s;
 }
-.nc-dots button {
-  display: block; width: 7px; height: 7px; border-radius: 50%;
-  background: rgba(241,236,227,.22); transition: background .3s, transform .3s;
+/* background-clip diulang di sini dengan alasan yang sama seperti di atas:
+   shorthand `background` meresetnya, dan titik AKTIF-lah yang tampil sebagai
+   bulatan raksasa berwarna aksen kalau baris ini hilang. */
+.nc-dots button.is-active {
+  background: var(--nc-brass);
+  background-clip: content-box;
+  transform: scale(1.5);
 }
-.nc-dots button.is-active { background: var(--nc-brass); transform: scale(1.5); }
 @media (max-width: 560px) { .nc-dots { gap: .6rem; } }
 
 /* ---------- Kontrol mengambang ---------- */

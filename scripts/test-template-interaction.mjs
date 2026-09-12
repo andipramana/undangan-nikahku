@@ -282,6 +282,42 @@ for (const id of folders) {
     check(`${id}: kontrol tidak terlalu kecil/tipis untuk jari`, kecil.length === 0,
       kecil.map((x) => `${x.id} ${x.w}×${x.h}`).join(", "));
 
+    /* 9. Tidak ada potongan atribut HTML yang bocor jadi teks terbaca.
+          Markup yang tag-nya ditutup terlalu awal TIDAK melempar error apa
+          pun: browser hanya menampilkan sisa atributnya sebagai teks biasa.
+          Dilaporkan dari HP sebagai tombol berbunyi
+          `target="_blank" rel="noopener">Simpan ke kalender`. */
+    const bocor = await page.evaluate(() => {
+      const teks = document.getElementById("inv-root").innerText;
+      return ['target="_blank"', 'rel="noopener"', "data-reveal=", 'loading="lazy"',
+              "class=", "style=\"--reveal"]
+        .filter((frag) => teks.includes(frag));
+    });
+    check(`${id}: tidak ada potongan atribut HTML yang tampil sebagai teks`,
+      bocor.length === 0, bocor.join(", "));
+
+    /* 10. Titik snap hanya untuk bagian yang MUAT dalam satu layar.
+           Bagian yang lebih tinggi dari layar tapi tetap jadi titik snap akan
+           merebut gulir tamu di tengah membaca — gejala yang muncul di
+           Nocturne ketika galeri 2.000px ikut di-snap paksa. Ambangnya 1,2×
+           layar: sedikit lebih tinggi masih wajar, dua kali lipat tidak.
+           Aturan yang sama dipakai template klasik, yang menyalakan snap
+           hanya pada deretan layar penuh dan mengecualikan #closing. */
+    const snapBuruk = await page.evaluate(() => {
+      const vh = window.innerHeight;
+      return [...document.querySelectorAll("#inv-root section, #inv-root .kt-sheet, #inv-root .sj-part, #inv-root .nc-scene")]
+        .filter((el) => {
+          const align = getComputedStyle(el).scrollSnapAlign;
+          return align && align !== "none" && !align.startsWith("none");
+        })
+        .map((el) => ({ id: el.id || el.className, h: Math.round(el.getBoundingClientRect().height) }))
+        .filter((x) => x.h > vh * 1.2)
+        .slice(0, 6);
+    });
+    check(`${id}: titik snap hanya di bagian yang muat satu layar`,
+      snapBuruk.length === 0,
+      snapBuruk.map((x) => `${x.id} ${x.h}px`).join(", "));
+
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);
   } finally {
     await page.close();

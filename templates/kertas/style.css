@@ -127,6 +127,16 @@ a { color: inherit; text-decoration: none; }
   .kt-index a { border: 0; }
 }
 
+/* ── Snap "magnet" — sengaja hemat ───────────────────────────────────────
+   Template ini dibaca MENGALIR seperti majalah; itu identitasnya. Menarik
+   tiap lembar ke titik snap akan melawan gagasan itu dan membuat membaca
+   terasa direbut. Yang diberi magnet hanya SAMPUL dan PENUTUP — dua halaman
+   yang memang berdiri sendiri setinggi layar — sehingga tamu mendapat
+   pendaratan tegas di awal dan akhir, sementara isinya bebas digulir. */
+html { scroll-snap-type: y proximity; }
+.kt-cover, .kt-closing { scroll-snap-align: start; }
+.kt-closing { min-height: 100dvh; display: grid; align-content: center; }
+
 /* ---------- Kerangka halaman ---------- */
 .kt-paper { padding-bottom: 5rem; }
 
