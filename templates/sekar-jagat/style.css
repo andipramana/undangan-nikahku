@@ -169,6 +169,12 @@ html.reveal-ready [data-reveal="draw"].is-revealed path { stroke-dashoffset: 0; 
 html.reveal-ready [data-reveal="draw"] circle { transform: scale(.2); transform-origin: center; transition: transform .9s cubic-bezier(.2, .9, .3, 1) .8s; }
 html.reveal-ready [data-reveal="draw"].is-revealed circle { transform: none; }
 
+/* Latar foto muncul perlahan — sangat lambat, karena ini lapisan paling
+   belakang dan tidak boleh menarik perhatian lebih dari isinya. Aman memakai
+   data-reveal: .sj-bg tidak punya transform sendiri (parallax dipasang di
+   pembungkusnya), jadi tidak ada gerak yang tertimpa. */
+html.reveal-ready [data-reveal="veil"] { --reveal-dur: 1.8s; }
+
 /* Mengembang dari tengah — untuk satuan berangka & kepingan warna. */
 html.reveal-ready [data-reveal="bloom"] { transform: scale(.7); --reveal-dur: 1s; }
 html.reveal-ready [data-reveal="bloom"].is-revealed { transform: none; }

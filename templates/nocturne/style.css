@@ -147,6 +147,14 @@ html.reveal-ready [data-reveal="lift"].is-revealed { transform: none; }
    ditekan (clip-path & transform ikut memotong/menggeser area sentuh). */
 html.reveal-ready [data-reveal="hold"] { --reveal-dur: .9s; }
 
+/* Tirai foto dibuka dari tepi luar layar ke dalam. Dipakai foto mempelai
+   yang menempati separuh layar: arah bukanya mengikuti sisi tempat fotonya
+   berada, jadi terasa seperti panel yang digeser, bukan gambar yang muncul. */
+html.reveal-ready [data-reveal="curtain-left"] { clip-path: inset(0 100% 0 0); --reveal-dur: 1.6s; }
+html.reveal-ready [data-reveal="curtain-left"].is-revealed { clip-path: inset(0); }
+html.reveal-ready [data-reveal="curtain-right"] { clip-path: inset(0 0 0 100%); --reveal-dur: 1.6s; }
+html.reveal-ready [data-reveal="curtain-right"].is-revealed { clip-path: inset(0); }
+
 /* Mengembang dari kecil — untuk satuan berangka & kepingan warna. */
 html.reveal-ready [data-reveal="bloom"] { transform: scale(.72); --reveal-dur: .95s; }
 html.reveal-ready [data-reveal="bloom"].is-revealed { transform: none; }
@@ -199,7 +207,16 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
   background-size: cover; background-position: var(--fx, 50%) var(--fy, 50%);
   transform: scale(var(--zoom, 1));
   filter: brightness(.42) saturate(.85) contrast(1.05);
-  transition: transform 9s linear;
+  /* opacity IKUT di transition yang sama. Latar ini TIDAK boleh memakai
+     data-reveal: aturan reveal menetapkan transition-property sendiri dan
+     akan menimpa gerak ken-burns 9 detik ini. Karena itu kemunculannya
+     digantung pada .is-live milik adegan. */
+  opacity: 0;
+  transition: opacity 1.7s ease, transform 9s linear;
+}
+.nc-scene.is-live .nc-bg { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .nc-bg { opacity: 1; }
 }
 .nc-scene .nc-bg { transform: scale(calc(var(--zoom, 1) * 1.12)); }
 .nc-scene.is-live .nc-bg { transform: scale(var(--zoom, 1)); }

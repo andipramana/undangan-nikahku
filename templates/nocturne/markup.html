@@ -51,7 +51,7 @@
 
     <!-- 03 · Mempelai — dua adegan terpisah, foto penuh di satu sisi -->
     <section class="nc-scene nc-person nc-person--bride" id="couple-bride" data-scene="Mempelai">
-      <div class="nc-person__media" id="bride-media" aria-hidden="true"></div>
+      <div class="nc-person__media" id="bride-media" aria-hidden="true" data-reveal="curtain-left"></div>
       <div class="nc-person__body">
         <p class="nc-role" data-reveal="lift">Mempelai wanita</p>
         <h2 class="nc-person__name" id="bride-name" data-reveal="pan-left" style="--reveal-i:1"></h2>
@@ -61,7 +61,7 @@
     </section>
 
     <section class="nc-scene nc-person nc-person--groom" id="couple-groom" data-scene="Mempelai">
-      <div class="nc-person__media" id="groom-media" aria-hidden="true"></div>
+      <div class="nc-person__media" id="groom-media" aria-hidden="true" data-reveal="curtain-right"></div>
       <div class="nc-person__body">
         <p class="nc-role" data-reveal="lift">Mempelai pria</p>
         <h2 class="nc-person__name" id="groom-name" data-reveal="pan-right" style="--reveal-i:1"></h2>
@@ -169,8 +169,8 @@
 
         <button type="button" class="nc-btn" id="btn-gift-toggle" data-reveal="hold" style="--reveal-i:2">Kirim tanda kasih</button>
         <div class="nc-gift" id="gift-panel" hidden data-reveal="fade">
-          <div id="gift-accounts"></div>
-          <div id="gift-address"></div>
+          <div id="gift-accounts" data-reveal="fade"></div>
+          <div id="gift-address" data-reveal="fade" style="--reveal-i:1"></div>
           <div class="nc-gift__actions">
             <button type="button" class="nc-link" id="btn-gift-recs">Rekomendasi kado</button>
             <button type="button" class="nc-link" id="btn-gift-confirm">Konfirmasi pengiriman</button>

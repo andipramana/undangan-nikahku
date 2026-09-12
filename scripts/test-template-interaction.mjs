@@ -356,6 +356,34 @@ for (const id of folders) {
         huruf.tampak > 0 && huruf.tampak >= huruf.total * 0.5);
     }
 
+    /* 12. Foto latar adegan kini juga mulai transparan agar ikut muncul.
+           Konsekuensinya: kalau penandanya gagal, adegan kehilangan fotonya
+           dan tinggal warna rata — tanpa satu pun error. Elemen ini
+           aria-hidden dan bukan teks, jadi pemeriksaan "bagian tidak kosong"
+           di atas tidak menyentuhnya. */
+    const latar = await page.evaluate(async () => {
+      const style = document.createElement("style");
+      style.textContent = "*{scroll-behavior:auto !important}";
+      document.head.appendChild(style);
+      const bg = [...document.querySelectorAll("#inv-root [id$='-media'], #inv-root .nc-bg, #inv-root .sj-bg")]
+        .filter((el) => getComputedStyle(el).backgroundImage !== "none");
+      const gelap = [];
+      for (const el of bg) {
+        el.scrollIntoView({ block: "center" });
+        await new Promise((r) => setTimeout(r, 2200));
+        const tampak = el.checkVisibility
+          ? el.checkVisibility({ opacityProperty: true })
+          : Number(getComputedStyle(el).opacity) > 0.05;
+        if (!tampak) gelap.push(el.id || el.className);
+      }
+      style.remove();
+      return { total: bg.length, gelap };
+    });
+    if (latar.total) {
+      check(`${id}: foto latar adegan benar-benar muncul (${latar.total - latar.gelap.length}/${latar.total})`,
+        latar.gelap.length === 0, latar.gelap.join(", "));
+    }
+
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);
   } finally {
     await page.close();

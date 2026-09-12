@@ -89,7 +89,7 @@
       <p class="kt-event__date" id="event-date-line" data-reveal="ink" style="--reveal-i:1"></p>
 
       <dl class="kt-schedule">
-        <div class="kt-schedule__row">
+        <div class="kt-schedule__row" data-reveal="ink">
           <dt id="akad-label" data-reveal="ink" style="--reveal-i:0">Akad</dt>
           <dd>
             <p class="kt-schedule__time" data-reveal="stamp" style="--reveal-i:1"><span id="akad-time"></span></p>
@@ -98,7 +98,7 @@
             <a class="kt-link" id="akad-maps" data-reveal="hold" style="--reveal-i:4" target="_blank" rel="noopener">Lihat peta</a>
           </dd>
         </div>
-        <div class="kt-schedule__row">
+        <div class="kt-schedule__row" data-reveal="ink" style="--reveal-i:1">
           <dt id="resepsi-label" data-reveal="ink" style="--reveal-i:1">Resepsi</dt>
           <dd>
             <p class="kt-schedule__time" data-reveal="stamp" style="--reveal-i:2"><span id="resepsi-time"></span></p>
@@ -175,8 +175,8 @@
         <h3 class="kt-h3" data-reveal="ink">Tanda Kasih</h3>
         <button type="button" class="kt-btn" id="btn-gift-toggle" data-reveal="hold" style="--reveal-i:1">Lihat rekening &amp; alamat</button>
         <div id="gift-panel" hidden>
-          <div id="gift-accounts"></div>
-          <div id="gift-address"></div>
+          <div id="gift-accounts" data-reveal="fade"></div>
+          <div id="gift-address" data-reveal="fade" style="--reveal-i:1"></div>
           <div class="kt-gift__actions">
             <button type="button" class="kt-link" id="btn-gift-recs">Rekomendasi kado</button>
             <button type="button" class="kt-link" id="btn-gift-confirm">Konfirmasi pengiriman</button>
