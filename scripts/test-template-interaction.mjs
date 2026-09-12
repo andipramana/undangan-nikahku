@@ -89,6 +89,17 @@ for (const id of folders) {
       Object.entries(theme || {}).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
       document.documentElement.classList.add("no-scroll");
     }, manifest.theme);
+    // Modul lokal yang DIMINTA MANIFEST ikut dimuat — tanpa ini test menguji
+    // halaman tanpa sistem reveal aktif (html.reveal-ready tidak pernah
+    // dipasang, sehingga tidak ada elemen yang pernah tersembunyi) dan
+    // seluruh pemeriksaan gerak di bawah jadi tidak bermakna. Yang butuh
+    // Supabase tetap distub di atas.
+    const STUB_ONLY = /rsvp\.js|gift\.js|qr-checkin\.js|visual-editor\//;
+    for (const src of (manifest.assets || {}).js || []) {
+      if (!src.startsWith("assets/js/") || STUB_ONLY.test(src)) continue;
+      await page.addScriptTag({ content: await fs.readFile(src, "utf8") });
+    }
+
     await page.addScriptTag({ content: renderJs });
 
     await page.evaluate(async (tplId) => {
@@ -184,8 +195,14 @@ for (const id of folders) {
       const opened = box.getClientRects().length > 0;
       const closer = box.querySelector("[data-close], #lightbox-close");
       if (closer) closer.click();
-      await new Promise((r) => setTimeout(r, 80));
-      return { skip: false, opened, closed: box.getClientRects().length === 0 };
+      await new Promise((r) => setTimeout(r, 400));
+      // Tiap template menutup lightbox dengan caranya sendiri: atribut hidden
+      // (tiga template baru) atau pelepasan kelas + opacity (klasik). Jadi
+      // yang diperiksa adalah HASILNYA — apakah masih terlihat tamu.
+      const masihTampak = box.checkVisibility
+        ? box.checkVisibility({ opacityProperty: true, visibilityProperty: true })
+        : box.getClientRects().length > 0;
+      return { skip: false, opened, closed: !masihTampak };
     });
     if (!lightbox.skip) {
       check(`${id}: lightbox galeri terbuka saat foto diketuk`, lightbox.opened);
@@ -233,7 +250,10 @@ for (const id of folders) {
 
       for (const sec of sections) {
         sec.scrollIntoView({ block: "center", behavior: "auto" });
-        await new Promise((r) => setTimeout(r, 220));
+        // Jeda HARUS lebih panjang dari animasi terlama template (1,8s plus
+        // jeda antar elemen). Dengan 220ms, cek ini melaporkan bagian sebagai
+        // "kosong" padahal animasinya baru mulai — salah lapor, bukan bug.
+        await new Promise((r) => setTimeout(r, 2600));
         const kids = [...sec.querySelectorAll("h1,h2,h3,h4,p,form,img,button,a")]
           .filter((el) => el.getClientRects().length > 0);
         if (!kids.length) continue;
@@ -317,6 +337,24 @@ for (const id of folders) {
     check(`${id}: titik snap hanya di bagian yang muat satu layar`,
       snapBuruk.length === 0,
       snapBuruk.map((x) => `${x.id} ${x.h}px`).join(", "));
+
+    /* 11. Kalau template memecah nama mempelai per huruf, hurufnya harus
+           benar-benar terlihat. Pemeriksaan "bagian tidak kosong" di atas
+           tidak cukup: induknya (h1) sudah opacity 1 begitu di-reveal, jadi
+           span huruf yang terjebak transparan tetap lolos — dan yang dilihat
+           tamu justru nama yang hilang. */
+    const huruf = await page.evaluate(() => {
+      const spans = [...document.querySelectorAll("#inv-root .ch")];
+      if (!spans.length) return { ada: false };
+      const tampak = spans.filter((el) => el.checkVisibility
+        ? el.checkVisibility({ opacityProperty: true })
+        : Number(getComputedStyle(el).opacity) > 0.05);
+      return { ada: true, total: spans.length, tampak: tampak.length };
+    });
+    if (huruf.ada) {
+      check(`${id}: huruf nama mempelai benar-benar tampil (${huruf.tampak}/${huruf.total})`,
+        huruf.tampak > 0 && huruf.tampak >= huruf.total * 0.5);
+    }
 
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);
   } finally {

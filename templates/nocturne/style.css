@@ -524,3 +524,20 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
   font-size: .82rem; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
 }
 .nc-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ── Nama mempelai, huruf demi huruf ─────────────────────────────────────
+   Dipecah assets/js/split-text.js. Tiap huruf membawa nomor urutnya di --c,
+   jadi jedanya dihitung dari situ. Geraknya senada dialek template ini:
+   tersingkap dari bawah sambil mendarat ke fokus. */
+.nc-names .ch {
+  display: inline-block;
+  opacity: 0; transform: translateY(.22em) scale(1.06); filter: blur(6px);
+  transition: opacity .8s ease, transform 1s cubic-bezier(.22,.61,.36,1), filter .9s ease;
+  transition-delay: calc(var(--c, 0) * 55ms + 120ms);
+}
+.nc-names .ch--space { filter: none; }
+html.reveal-ready [data-reveal].is-revealed .ch,
+.is-live .nc-names .ch { opacity: 1; transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) {
+  .nc-names .ch { opacity: 1; transform: none; filter: none; transition: none; }
+}

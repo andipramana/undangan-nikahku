@@ -248,6 +248,13 @@
       if (window.initGift) window.initGift();
       if (window.initQrCheckin) window.initQrCheckin();
       if (window.applyVisualEditorOverrides) window.applyVisualEditorOverrides(cfg);
+      // Nama mempelai dipecah per huruf lalu dimunculkan bergantian. Dipanggil
+      // PALING AKHIR: applyVisualEditorOverrides menulis ulang textContent,
+      // yang akan menghapus span-span ini kalau urutannya dibalik.
+      if (window.splitChars) {
+        [$("couple-names-cover"), $("couple-names-closing")].forEach((el) => window.splitChars(el));
+      }
+
 
       // Sampul langsung hidup — adegan lain menunggu discroll.
       requestAnimationFrame(() => $("cover").classList.add("is-live"));

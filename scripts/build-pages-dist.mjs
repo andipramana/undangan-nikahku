@@ -39,6 +39,7 @@ const required = [
   "assets/js/core/context.js",
   "assets/js/core/template-photos.js",
   "assets/js/core/behaviors.js",
+  "assets/js/split-text.js",
   "assets/js/config.js",
   "assets/js/tenant.js",
   "assets/js/wa.js",

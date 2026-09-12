@@ -49,6 +49,10 @@
 }
 
 html { -webkit-text-size-adjust: 100%; }
+/* Jaring pengaman: gerak masuk memakai transform scale() di beberapa tempat,
+   dan luberannya membuat halaman bisa digeser ke samping. `clip` memotong
+   tanpa menjadikan wadah ini bisa digulir sendiri. */
+.kt { overflow-x: clip; }
 html.no-scroll, body.no-scroll { overflow: hidden; }
 
 body {
@@ -142,6 +146,12 @@ html { scroll-snap-type: y proximity; }
 
 .kt-sheet {
   position: relative;
+  /* Gerak masuk memakai transform scale() pada beberapa elemen selebar kolom
+     (jam acara "stamp", huruf nama). Selama animasinya berjalan, elemen itu
+     melebar melewati tepi dan halaman jadi bisa digeser ke samping. `clip`
+     memotongnya tanpa membuat wadah ini bisa digulir sendiri — beda dari
+     `hidden`, yang juga akan mematikan posisi sticky di dalamnya. */
+  overflow-x: clip;
   max-width: var(--kt-measure);
   /* Asimetris: dorong kolom ke kanan dari tengah, sisakan margin kiri lebar
      untuk folio — komposisi halaman kanan buku. */
@@ -180,8 +190,11 @@ html.reveal-ready [data-reveal="ink-right"] { clip-path: inset(0 0 0 100%); }
 html.reveal-ready [data-reveal="ink-right"].is-revealed { clip-path: inset(-30% 0 -30% -10%); }
 
 /* Kertas diangkat dari bawah — untuk foto dan blok bergambar. */
-html.reveal-ready [data-reveal="sheet"] { clip-path: inset(0 0 100% 0); transform: scale(1.02); --reveal-dur: 1.25s; }
-html.reveal-ready [data-reveal="sheet"].is-revealed { clip-path: inset(0); transform: none; }
+/* Tanpa scale: varian ini dipakai foto full-bleed selebar layar, dan
+   pembesaran sekecil 2% pun membuat halaman bisa digeser ke samping.
+   Pengangkatan sudah cukup terasa dari clip-path saja. */
+html.reveal-ready [data-reveal="sheet"] { clip-path: inset(0 0 100% 0); --reveal-dur: 1.25s; }
+html.reveal-ready [data-reveal="sheet"].is-revealed { clip-path: inset(0); }
 
 /* Dua drum tinta meleset lalu bertemu: tanda tangan cetak riso. Dipakai
    hemat — nama mempelai dan judul bab saja. */
@@ -492,3 +505,17 @@ html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.2s; }
 .kt-paper.is-locked { overflow: hidden; }
 .kt-paper.is-locked .kt-sheet:not(.kt-cover),
 .kt-paper.is-locked .kt-bleed { display: none; }
+
+/* ── Nama mempelai, huruf demi huruf ─────────────────────────────────────
+   Dipecah assets/js/split-text.js. Senada dialek cetak: tiap huruf seperti
+   dicap ke kertas satu per satu, bukan meluncur. */
+.kt-display .ch {
+  display: inline-block;
+  opacity: 0; transform: scale(1.18) translateY(-.04em);
+  transition: opacity .45s ease, transform .7s cubic-bezier(.2,.9,.3,1);
+  transition-delay: calc(var(--c, 0) * 48ms + 140ms);
+}
+html.reveal-ready [data-reveal].is-revealed .ch { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .kt-display .ch { opacity: 1; transform: none; transition: none; }
+}

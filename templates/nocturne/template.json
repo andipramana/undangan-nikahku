@@ -10,6 +10,7 @@
     "css": [],
     "js": [
       "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js",
+      "assets/js/split-text.js",
       "assets/js/reveal.js",
       "assets/js/rsvp.js",
       "assets/js/gift.js",
