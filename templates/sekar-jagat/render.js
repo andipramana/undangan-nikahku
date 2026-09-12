@@ -113,13 +113,13 @@
       if (inner) [...inner.children].forEach((el, i) => el.style.setProperty("--i", String(i)));
     });
 
-    cleanups.push(window.WeddingBehaviors.revealOnView(parts, {
-      threshold: 0.25,
-      once: false,
-      onEnter(part) {
-        menu.querySelectorAll("a").forEach((a) =>
-          a.classList.toggle("is-active", a.dataset.go === part.id));
-      }
+    // Bagian Ucapan & Galeri jauh lebih tinggi dari layar; ambang rasio tidak
+    // akan pernah tercapai di situ, jadi gerak masuk dan penyorotan menu
+    // masing-masing memakai pemicu berbasis posisi.
+    cleanups.push(window.WeddingBehaviors.revealOnView(parts));
+    cleanups.push(window.WeddingBehaviors.trackActive(parts, (part) => {
+      menu.querySelectorAll("a").forEach((a) =>
+        a.classList.toggle("is-active", a.dataset.go === part.id));
     }));
   }
 

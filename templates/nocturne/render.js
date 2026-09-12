@@ -62,17 +62,17 @@
       });
     }
 
-    // once:false — titik navigasi harus ikut berpindah tiap kali adegan
-    // dilewati lagi, bukan sekali saat pertama muncul.
-    cleanups.push(window.WeddingBehaviors.revealOnView(scenes, {
-      threshold: 0.45,
-      once: false,
-      onEnter(scene) {
-        if (!dots) return;
+    // Dua pengamat dengan tugas berbeda: yang satu menghidupkan adegan begitu
+    // tepinya masuk layar, yang satu menyorot titik navigasi milik adegan yang
+    // sedang dibaca. Keduanya tidak memakai ambang rasio — adegan galeri &
+    // ucapan jauh lebih tinggi dari layar dan tidak akan pernah mencapainya.
+    cleanups.push(window.WeddingBehaviors.revealOnView(scenes));
+    if (dots) {
+      cleanups.push(window.WeddingBehaviors.trackActive(scenes, (scene) => {
         dots.querySelectorAll("button").forEach((b) =>
           b.classList.toggle("is-active", b.dataset.go === scene.id));
-      }
-    }));
+      }));
+    }
   }
 
   function setupModals(root) {
@@ -226,6 +226,9 @@
         window.__openCallbacks = [];
         audio.play();
         $("cover").classList.add("is-live");
+        // Bawa tamu ke adegan berikutnya, supaya jelas undangannya benar-benar
+        // terbuka — tanpa ini layar tidak berubah sama sekali setelah ditekan.
+        $("opening").scrollIntoView({ behavior: "smooth" });
       }, { once: true });
 
       // Modul bersama yang netral markup (memakai ID semantik yang sudah

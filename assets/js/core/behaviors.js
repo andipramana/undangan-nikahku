@@ -74,6 +74,16 @@
   /** Tandai elemen dengan kelas begitu masuk viewport (sekali saja).
    * Animasinya sepenuhnya urusan CSS template — di sini cuma penanda, supaya
    * tiap template bisa punya gerak masuk yang benar-benar berbeda.
+   *
+   * PEMICUNYA SENGAJA BUKAN AMBANG RASIO. Ambang rasio (mis. 0.45) mustahil
+   * tercapai oleh bagian yang LEBIH TINGGI dari layar: rasio terbesar yang
+   * bisa terlihat hanya setinggi layar dibagi tinggi elemen — galeri 2000px
+   * di layar 844px mentok di 0.42. Akibatnya bagian itu tidak pernah ditandai
+   * dan isinya tinggal transparan: tamu melihat ruang kosong yang sangat
+   * panjang (dilaporkan dari HP untuk galeri & halaman ucapan). Karena itu
+   * ambangnya 0 dan yang dipakai rootMargin — "begitu tepinya masuk layar" —
+   * yang berlaku sama untuk elemen setinggi apa pun.
+   *
    * Tanpa IntersectionObserver (browser lama), semua langsung ditandai —
    * lebih baik terlihat tanpa animasi daripada tidak terlihat sama sekali. */
   function revealOnView(elements, options) {
@@ -92,7 +102,24 @@
         if (opts.onEnter) opts.onEnter(entry.target);
         if (opts.once !== false) io.unobserve(entry.target);
       });
-    }, { threshold: opts.threshold ?? 0.2, rootMargin: opts.rootMargin || "0px" });
+    }, { threshold: 0, rootMargin: opts.rootMargin || "0px 0px -10% 0px" });
+
+    list.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }
+
+  /** Lapor elemen mana yang sedang "dibaca" tamu — dipakai menyorot entri
+   * navigasi (titik, daftar isi, menu). Berbeda dari revealOnView: yang
+   * dicari di sini elemen yang menempati PITA TENGAH layar, dan laporannya
+   * berulang setiap kali berganti, bukan sekali. Ambangnya juga 0 dengan
+   * alasan yang sama — bagian yang lebih tinggi dari layar tetap terdeteksi. */
+  function trackActive(elements, onActive) {
+    const list = [...elements];
+    if (!("IntersectionObserver" in window) || !list.length) return () => {};
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) onActive(entry.target); });
+    }, { threshold: 0, rootMargin: "-45% 0px -45% 0px" });
 
     list.forEach((el) => io.observe(el));
     return () => io.disconnect();
@@ -115,5 +142,5 @@
     return () => { clearTimeout(timer); };
   }
 
-  window.WeddingBehaviors = { countdown, audio, revealOnView, toast };
+  window.WeddingBehaviors = { countdown, audio, revealOnView, trackActive, toast };
 })();

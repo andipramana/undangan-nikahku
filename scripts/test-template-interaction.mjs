@@ -36,7 +36,11 @@ const PX = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAA
 const PHOTO_PAYLOAD = {};
 for (const slot of ["cover", "subcover", "opening", "std2", "bride", "groom",
                     "event", "story", "gallery", "quote", "closing", "gift_item"]) {
-  PHOTO_PAYLOAD[slot] = [1, 2, 3].map((n) => ({
+  // Galeri diisi banyak supaya bagiannya benar-benar jauh lebih tinggi dari
+  // layar, seperti undangan sungguhan — itulah kondisi yang membuat pemicu
+  // gerak masuk berbasis rasio gagal.
+  const count = slot === "gallery" ? 16 : 3;
+  PHOTO_PAYLOAD[slot] = Array.from({ length: count }, (_, i) => i + 1).map((n) => ({
     id: `${slot}-${n}`, path: `${slot}/${n}.webp`, alt: `${slot} ${n}`,
     focalX: 50, focalY: 45, zoom: 1
   }));
@@ -208,6 +212,52 @@ for (const id of folders) {
     }, (manifest.editor || {}).typography || []);
     check(`${id}: semua selector skema font mengenai elemen nyata`,
       typo.length === 0, typo.join("; "));
+
+    /* 7. Hampiri tiap bagian seperti tamu menggulir, lalu pastikan isinya
+          benar-benar terlihat. Gerak masuk menyembunyikan isi (opacity 0)
+          sampai IntersectionObserver menandainya; kalau pemicunya memakai
+          ambang RASIO (mis. 0.45), bagian yang lebih tinggi dari layar tidak
+          akan pernah mencapainya — rasio maksimum yang bisa terlihat hanya
+          setinggi layar dibagi tinggi bagian itu. Gejalanya: ruang kosong
+          sangat panjang di galeri atau halaman ucapan. */
+    const blank = await page.evaluate(async () => {
+      // Animasi gulir dimatikan dulu, kalau tidak posisi akhir tidak pernah
+      // benar-benar tercapai dalam satu langkah dan hasilnya bohong.
+      const style = document.createElement("style");
+      style.textContent = "*, *::before, *::after { scroll-behavior: auto !important; }";
+      document.head.appendChild(style);
+
+      const sections = [...document.querySelectorAll(".nc-scene, .kt-sheet, .sj-part")]
+        .filter((el) => el.getClientRects().length > 0);
+      const kosong = [];
+
+      for (const sec of sections) {
+        sec.scrollIntoView({ block: "center", behavior: "auto" });
+        await new Promise((r) => setTimeout(r, 220));
+        const kids = [...sec.querySelectorAll("h1,h2,h3,h4,p,form,img,button,a")]
+          .filter((el) => el.getClientRects().length > 0);
+        if (!kids.length) continue;
+
+        // HARUS memakai opacity EFEKTIF (ikut leluhur). getComputedStyle(el)
+        // .opacity hanya melaporkan nilai elemen itu sendiri: saat pembungkus
+        // bagian masih opacity 0, tiap anaknya tetap melaporkan 1 — dan cek
+        // yang begitu pernah meloloskan bug galeri kosong ini.
+        const terlihat = (el) => el.checkVisibility
+          ? el.checkVisibility({ opacityProperty: true, visibilityProperty: true })
+          : (() => {
+              for (let n = el; n && n !== document.body; n = n.parentElement) {
+                if (Number(getComputedStyle(n).opacity) < 0.05) return false;
+              }
+              return true;
+            })();
+
+        if (!kids.some(terlihat)) kosong.push(sec.id || sec.className);
+      }
+      style.remove();
+      return kosong;
+    });
+    check(`${id}: tiap bagian menampilkan isinya saat dihampiri`,
+      blank.length === 0, `masih kosong: ${blank.join(", ")}`);
 
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);
   } finally {

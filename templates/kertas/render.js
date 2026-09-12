@@ -68,16 +68,15 @@
       close();
     });
 
-    // Gerak masuk tiap lembar + penyorotan entri daftar isi. once:false karena
-    // sorotan harus ikut berpindah saat tamu menggulir balik ke atas.
+    // Gerak masuk tiap lembar, lalu penyorotan entri daftar isi sebagai
+    // pengamat terpisah — lembar yang lebih tinggi dari layar (galeri, kartu
+    // balasan) tidak akan pernah memenuhi ambang rasio, jadi keduanya memakai
+    // pemicu berbasis posisi, bukan rasio.
     const all = [...root.querySelectorAll(".kt-sheet")];
-    cleanups.push(window.WeddingBehaviors.revealOnView(all, {
-      threshold: 0.15,
-      once: false,
-      onEnter(sheet) {
-        index.querySelectorAll("a").forEach((a) =>
-          a.classList.toggle("is-active", a.dataset.go === sheet.id));
-      }
+    cleanups.push(window.WeddingBehaviors.revealOnView(all));
+    cleanups.push(window.WeddingBehaviors.trackActive(all, (sheet) => {
+      index.querySelectorAll("a").forEach((a) =>
+        a.classList.toggle("is-active", a.dataset.go === sheet.id));
     }));
   }
 
