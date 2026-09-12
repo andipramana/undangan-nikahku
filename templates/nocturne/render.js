@@ -154,7 +154,10 @@
         $("nc-dress").hidden = false;
         $("dresscode-text").textContent = dress.text || "";
         $("dresscode-swatches").innerHTML =
-          (dress.colors || []).map((c) => `<span style="background:${esc(c)}" title="${esc(c)}"></span>`).join("");
+          // Satu atribut style saja: HTML mengabaikan style kedua, jadi
+          // warna dan urutan reveal harus digabung dalam satu deklarasi.
+          (dress.colors || []).map((c, i) =>
+            `<span style="background:${esc(c)}; --reveal-i:${i}" title="${esc(c)}" data-reveal="bloom"></span>`).join("");
       }
 
       cleanups.push(window.WeddingBehaviors.countdown({
@@ -170,7 +173,9 @@
       ].filter(([, url]) => url);
       if (liveLinks.length) {
         $("livestream-links").innerHTML = liveLinks
-          .map(([label, url]) => `<a class="nc-btn" href="${esc(url)}" target="_blank" rel="noopener">${label}</a>`)
+          .map(([label, url], i) =>
+            `<a class="nc-btn" href="${esc(url)}" target="_blank" rel="noopener"
+                data-reveal="hold" style="--reveal-i:${i}">${label}</a>`)
           .join("");
       } else {
         $("livestream").remove();
@@ -178,8 +183,8 @@
 
       /* Cerita */
       const story = Array.isArray(cfg.loveStory) ? cfg.loveStory : [];
-      $("love-story-list").innerHTML = story.map((item) => `
-        <article class="nc-story__item">
+      $("love-story-list").innerHTML = story.map((item, i) => `
+        <article class="nc-story__item" data-reveal="pan-left" style="--reveal-i:${i % 4}">
           <span class="nc-story__date">${esc(item.date)}</span>
           <h4>${esc(item.title)}</h4>
           <p>${esc(item.text)}</p>
@@ -190,7 +195,8 @@
       const grid = $("nc-gallery-grid");
       if (gal.length) {
         grid.innerHTML = gal.map((p, i) => `
-          <button type="button" data-full="${esc(p.url)}" aria-label="Foto ${i + 1}">
+          <button type="button" data-full="${esc(p.url)}" aria-label="Foto ${i + 1}"
+                  data-reveal="iris" style="--reveal-i:${i % 4}">
             <img src="${esc(p.url)}" alt="${esc(p.alt)}" loading="lazy"
                  style="--fx:${p.focalX}%; --fy:${p.focalY}%">
           </button>`).join("");
@@ -233,6 +239,11 @@
 
       // Modul bersama yang netral markup (memakai ID semantik yang sudah
       // disediakan markup.html di atas).
+      // Mesin reveal dijalankan SETELAH markup terisi, supaya elemen yang baru
+      // dibuat (babak cerita, foto galeri) ikut terdaftar. rsvp.js & gift.js
+      // memanggil revealScan/revealNow sendiri untuk isi yang menyusul.
+      if (window.initReveal) window.initReveal();
+
       if (window.initRsvp) window.initRsvp();
       if (window.initGift) window.initGift();
       if (window.initQrCheckin) window.initQrCheckin();

@@ -116,57 +116,89 @@ a { color: inherit; text-decoration: none; }
 .sj-veil { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(22,35,63,.78), rgba(22,35,63,.86)); }
 @media (prefers-reduced-motion: reduce) { .sj-parallax { transform: none !important; } }
 
-/* ── Gerak masuk: bahasa ukiran & kain ───────────────────────────────────
-   Gagasannya diambil dari bahan template ini sendiri: ornamen GARIS yang
-   tertarik seperti sedang diukir, lalu isi bagian yang TURUN melayang seperti
-   kain yang dilepas — bukan naik-dan-pudar seperti kebanyakan halaman.
-   Turun, bukan naik: arahnya mengikuti kain jatuh, dan itu pula yang
-   membedakan geraknya dari dua template lain. */
-.sj-part__inner > * {
-  opacity: 0; transform: translateY(-10px) scale(1.02);
-  transition: opacity 1s ease, transform 1.1s cubic-bezier(.18,.72,.3,1);
-  transition-delay: calc(var(--i, 0) * 110ms);
+/* ── Gerak masuk: satu bahasa, banyak dialek ─────────────────────────────
+   Memakai mesin bersama assets/js/reveal.js (sama seperti template klasik):
+   elemen ber-atribut data-reveal mulai tersembunyi, dapat .is-revealed saat
+   masuk layar, urutannya diatur --reveal-i, durasi bisa ditimpa lewat
+   --reveal-dur. Dialek template INI diambil dari bahannya sendiri: ORNAMEN
+   YANG DIUKIR dan KAIN YANG DILEPAS. Arah pokoknya TURUN, bukan naik —
+   mengikuti kain jatuh, dan itu pula yang membedakannya dari dua template
+   lain yang geraknya menyingkap dan menyapu.
+
+   Durasi 1,0–1,7 detik: bagian di sini lapang dan berjarak, jadi gerak yang
+   tenang terasa pantas; yang cepat justru terasa tergesa. */
+html.reveal-ready [data-reveal] {
+  opacity: 0;
+  transition-property: opacity, transform, clip-path, stroke-dashoffset;
+  transition-duration: var(--reveal-dur, 1.2s);
+  transition-timing-function: cubic-bezier(.18, .72, .3, 1);
+  transition-delay: calc(var(--reveal-i, 0) * 120ms);
 }
-.sj-part.is-live .sj-part__inner > * { opacity: 1; transform: none; }
+html.reveal-ready [data-reveal].is-revealed { opacity: 1; }
 
-/* Ornamen ditarik garisnya, tidak sekadar muncul. Panjang dash sengaja
-   dilebihkan dari panjang path terpanjang supaya satu nilai cukup untuk
-   semua ornamen. */
-.sj-crest path, .sj-divider svg path {
-  stroke-dasharray: 260; stroke-dashoffset: 260;
-  transition: stroke-dashoffset 1.5s cubic-bezier(.3,.7,.3,1) .2s;
-}
-.sj-part.is-live .sj-crest path,
-.sj-divider.is-live svg path { stroke-dashoffset: 0; }
+/* Kain dilepas: turun melayang sedikit membesar. Gerak pokok template ini. */
+html.reveal-ready [data-reveal="drop"] { transform: translateY(-14px) scale(1.02); }
+html.reveal-ready [data-reveal="drop"].is-revealed { transform: none; }
 
-/* Simpul di tengah pemisah mengembang setelah garisnya sampai. */
-.sj-divider svg circle {
-  transform: scale(.2); transform-origin: 120px 12px;
-  opacity: 0; transition: transform .8s cubic-bezier(.2,.9,.3,1) .75s, opacity .6s ease .75s;
-}
-.sj-divider.is-live svg circle { transform: none; opacity: 1; }
-.sj-divider { opacity: 1; }
+/* Tirai terangkat dari bawah — untuk potret & foto berbingkai lengkung. */
+html.reveal-ready [data-reveal="unfurl"] { clip-path: inset(0 0 100% 0); transform: scale(1.06); --reveal-dur: 1.5s; }
+html.reveal-ready [data-reveal="unfurl"].is-revealed { clip-path: inset(0 0 -2% 0); transform: none; }
 
-/* Potret mempelai tersingkap dari bawah bingkai lengkungnya, seperti tirai
-   yang diangkat — foto ikut tenang ke tempatnya. */
-.sj-arch img { transform: scale(1.09); transition: transform 1.6s cubic-bezier(.18,.72,.3,1); }
-.sj-part.is-live .sj-arch img { transform: none; }
-.sj-arch { clip-path: inset(0 0 100% 0); transition: clip-path 1.2s cubic-bezier(.18,.72,.3,1) .15s; }
-.sj-part.is-live .sj-arch { clip-path: inset(0 0 -2% 0); }
+/* Ornamen ditarik garisnya, seperti sedang diukir. Panjang dash dilebihkan
+   dari path terpanjang supaya satu nilai cukup untuk semua ornamen. */
+html.reveal-ready [data-reveal="draw"] { --reveal-dur: 1.7s; }
+html.reveal-ready [data-reveal="draw"] path { stroke-dasharray: 260; stroke-dashoffset: 260; transition: stroke-dashoffset 1.7s cubic-bezier(.3, .7, .3, 1); }
+html.reveal-ready [data-reveal="draw"].is-revealed path { stroke-dashoffset: 0; }
+html.reveal-ready [data-reveal="draw"] circle { transform: scale(.2); transform-origin: center; transition: transform .9s cubic-bezier(.2, .9, .3, 1) .8s; }
+html.reveal-ready [data-reveal="draw"].is-revealed circle { transform: none; }
 
-/* Foto galeri menyusul berurutan, mengikuti irama kisi. */
-.sj-gallery__grid button { opacity: 0; transform: translateY(-8px); transition: opacity .8s ease, transform 1s cubic-bezier(.18,.72,.3,1); }
-.sj-gallery.is-live .sj-gallery__grid button { opacity: 1; transform: none; }
-.sj-gallery__grid button:nth-child(2n) { transition-delay: .09s; }
-.sj-gallery__grid button:nth-child(3n) { transition-delay: .18s; }
+/* Mengembang dari tengah — untuk satuan berangka & kepingan warna. */
+html.reveal-ready [data-reveal="bloom"] { transform: scale(.7); --reveal-dur: 1s; }
+html.reveal-ready [data-reveal="bloom"].is-revealed { transform: none; }
+
+/* Masuk dari tepi, untuk pasangan elemen kiri/kanan. */
+html.reveal-ready [data-reveal="from-left"] { transform: translateX(-22px); }
+html.reveal-ready [data-reveal="from-right"] { transform: translateX(22px); }
+html.reveal-ready [data-reveal="from-left"].is-revealed,
+html.reveal-ready [data-reveal="from-right"].is-revealed { transform: none; }
+
+/* Naik pelan, untuk teks bacaan yang tidak boleh mencuri perhatian. */
+html.reveal-ready [data-reveal="lift"] { transform: translateY(16px); --reveal-dur: 1.25s; }
+html.reveal-ready [data-reveal="lift"].is-revealed { transform: none; }
+
+/* Muncul di tempat — untuk kontrol yang harus segera bisa ditekan, karena
+   clip-path dan transform ikut memotong serta menggeser area sentuh. */
+html.reveal-ready [data-reveal="hold"] { --reveal-dur: .85s; }
+
+/* ── Jenis milik modul bersama ────────────────────────────────────────────
+   assets/js/gift.js & rsvp.js menulis sendiri data-reveal pada markup yang
+   mereka hasilkan (rekening "up", ucapan "slide-left"/"slide-right"). Nama
+   itu lahir di template klasik, tapi elemen ber-data-reveal dimulai dari
+   opacity 0 — jadi template ini wajib mengenalinya, kalau tidak rekening dan
+   ucapan muncul tanpa gerak sementara tetangganya bergerak semua. */
+html.reveal-ready [data-reveal="up"] { transform: translateY(16px); --reveal-dur: 1.2s; }
+html.reveal-ready [data-reveal="down"] { transform: translateY(-14px) scale(1.02); --reveal-dur: 1.2s; }
+html.reveal-ready [data-reveal="up"].is-revealed,
+html.reveal-ready [data-reveal="down"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="slide-left"] { transform: translateX(-22px); --reveal-dur: 1.15s; }
+html.reveal-ready [data-reveal="slide-right"] { transform: translateX(22px); --reveal-dur: 1.15s; }
+html.reveal-ready [data-reveal="slide-left"].is-revealed,
+html.reveal-ready [data-reveal="slide-right"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="pop"] { transform: scale(.8); --reveal-dur: 1s; }
+html.reveal-ready [data-reveal="zoom"] { transform: scale(1.05); --reveal-dur: 1.3s; }
+html.reveal-ready [data-reveal="pop"].is-revealed,
+html.reveal-ready [data-reveal="zoom"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.3s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .sj-part__inner > *, .sj-gallery__grid button, .sj-arch img {
-    opacity: 1; transform: none; transition: none;
+  html.reveal-ready [data-reveal],
+  html.reveal-ready [data-reveal].is-revealed {
+    opacity: 1; transform: none; clip-path: none; transition: none;
   }
-  .sj-arch { clip-path: none; transition: none; }
-  .sj-crest path, .sj-divider svg path { stroke-dasharray: none; stroke-dashoffset: 0; transition: none; }
-  .sj-divider svg circle { transform: none; opacity: 1; transition: none; }
+  html.reveal-ready [data-reveal="draw"] path,
+  html.reveal-ready [data-reveal="draw"] circle {
+    stroke-dasharray: none; stroke-dashoffset: 0; transform: none; transition: none;
+  }
 }
 
 .sj-divider { display: grid; place-items: center; padding: 0 1.4rem; color: var(--sj-gold); }

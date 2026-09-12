@@ -77,63 +77,108 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 }
 .nc-scene__inner { position: relative; z-index: 2; width: min(100%, 46rem); margin: 0 auto; }
 
-/* ── Gerak masuk: bahasa kamera film ─────────────────────────────────────
-   Bukan fade-naik yang sama di tiap bagian (gerak bawaan yang dipakai di mana
-   mana), melainkan satu gagasan yang konsisten dengan template ini: TITEL
-   FILM. Baris teks tersingkap dari bawah ke atas seperti kartu judul, sangat
-   pelan, sementara kamera mendekat ke foto latarnya.
+/* ── Gerak masuk: satu bahasa, banyak dialek ─────────────────────────────
+   Memakai mesin bersama assets/js/reveal.js (sama seperti template klasik):
+   elemen ber-atribut data-reveal mulai tersembunyi, dapat .is-revealed saat
+   masuk layar, urutannya diatur --reveal-i, durasinya bisa ditimpa per elemen
+   lewat --reveal-dur. Yang khas template INI adalah dialeknya: semua varian
+   di bawah berasal dari satu gagasan — RUANG PROYEKSI FILM. Tidak ada yang
+   sekadar "naik lalu pudar".
 
-   Yang menandai .is-live adalah render.js (IntersectionObserver), bukan
-   animasi otomatis — jadi tamu selalu melihat gerakannya, tidak "terpakai
-   habis" sebelum adegannya sampai. */
-.nc-scene__inner > * {
+   Durasinya sengaja panjang (1,1–1,8 detik). Adegan di sini mendarat satu per
+   satu lewat scroll-snap, jadi tamu punya waktu menonton; gerak cepat justru
+   terasa gugup di tempat yang ingin terasa tenang. */
+html.reveal-ready [data-reveal] {
   opacity: 0;
-  /* Tersingkap, bukan bergeser: isi ditutup dari bawah lalu dibuka. Inset
-     akhir dibuat negatif supaya ekor huruf (g, y) dan bayangan tidak ikut
-     terpotong setelah animasinya selesai. */
-  clip-path: inset(0 0 105% 0);
-  transform: translateY(8px);
-  transition:
-    opacity .9s cubic-bezier(.22,.61,.36,1),
-    clip-path 1.15s cubic-bezier(.22,.61,.36,1),
-    transform 1.15s cubic-bezier(.22,.61,.36,1);
-  transition-delay: calc(var(--i, 0) * 110ms);
+  transition-property: opacity, transform, clip-path, letter-spacing, filter;
+  transition-duration: var(--reveal-dur, 1.15s);
+  transition-timing-function: cubic-bezier(.22, .61, .36, 1);
+  transition-delay: calc(var(--reveal-i, 0) * 120ms);
 }
-.nc-scene.is-live .nc-scene__inner > * {
-  opacity: 1; clip-path: inset(-25% 0 -25% 0); transform: none;
-}
+html.reveal-ready [data-reveal].is-revealed { opacity: 1; }
 
-/* Nama mempelai mendarat ke fokus: jarak huruf merapat pelan, seperti lensa
-   yang menemukan titik tajamnya. Hanya di sini — satu tempat, satu kejutan. */
-.nc-names { letter-spacing: .07em; transition: letter-spacing 1.6s cubic-bezier(.22,.61,.36,1) .15s; }
-.nc-scene.is-live .nc-names { letter-spacing: 0; }
+/* Kartu judul tersingkap dari bawah — gerak pokok template ini. */
+html.reveal-ready [data-reveal="title"] { clip-path: inset(0 0 105% 0); transform: translateY(10px); }
+html.reveal-ready [data-reveal="title"].is-revealed { clip-path: inset(-30% 0); transform: none; }
 
-/* Garis rambut melebar dari tengah, bukan ikut tersingkap. */
-.nc-cover__guest, .nc-dress { transform-origin: center; }
-.nc-scene .nc-hairline, .nc-cover__guest::before {
-  transform: scaleX(0); transform-origin: center;
-  transition: transform 1.1s cubic-bezier(.22,.61,.36,1) .25s;
-}
-.nc-scene.is-live .nc-hairline, .nc-scene.is-live .nc-cover__guest::before { transform: scaleX(1); }
+/* Kebalikannya, untuk baris yang menutup sebuah adegan. */
+html.reveal-ready [data-reveal="title-down"] { clip-path: inset(105% 0 0 0); transform: translateY(-10px); }
+html.reveal-ready [data-reveal="title-down"].is-revealed { clip-path: inset(0 0 -30% 0); transform: none; }
 
-/* Foto galeri menyusul satu per satu, tidak serentak — mata sempat singgah. */
-.nc-gallery__grid button {
-  opacity: 0; transform: scale(1.04);
-  transition: opacity .8s ease, transform 1.1s cubic-bezier(.22,.61,.36,1);
+/* Lensa menemukan fokus: buram + huruf merenggang, lalu mendarat tajam.
+   Dipakai hemat — nama mempelai dan angka besar saja. */
+html.reveal-ready [data-reveal="focus"] {
+  filter: blur(9px); letter-spacing: .14em; transform: scale(1.03);
+  --reveal-dur: 1.8s;
 }
-.nc-gallery.is-live .nc-gallery__grid button { opacity: 1; transform: none; }
-.nc-gallery__grid button:nth-child(2n) { transition-delay: .08s; }
-.nc-gallery__grid button:nth-child(3n) { transition-delay: .16s; }
-.nc-gallery__grid button:nth-child(5n) { transition-delay: .24s; }
+html.reveal-ready [data-reveal="focus"].is-revealed { filter: none; letter-spacing: 0; transform: none; }
+
+/* Iris kamera membuka dari tengah. */
+html.reveal-ready [data-reveal="iris"] { clip-path: inset(0 42% 0 42%); transform: scale(1.04); --reveal-dur: 1.35s; }
+html.reveal-ready [data-reveal="iris"].is-revealed { clip-path: inset(0 -2%); transform: none; }
+
+/* Sorotan masuk dari tepi — untuk pasangan elemen kiri/kanan. */
+html.reveal-ready [data-reveal="pan-left"] { transform: translateX(-26px); }
+html.reveal-ready [data-reveal="pan-right"] { transform: translateX(26px); }
+html.reveal-ready [data-reveal="pan-left"].is-revealed,
+html.reveal-ready [data-reveal="pan-right"].is-revealed { transform: none; }
+
+/* Garis rambut yang ditarik dari tengah. */
+html.reveal-ready [data-reveal="line"] { transform: scaleX(0); transform-origin: center; --reveal-dur: 1.1s; }
+html.reveal-ready [data-reveal="line"].is-revealed { transform: none; }
+
+/* Naik sangat pelan — untuk teks paragraf yang tidak boleh mencuri perhatian. */
+html.reveal-ready [data-reveal="lift"] { transform: translateY(18px); --reveal-dur: 1.3s; }
+html.reveal-ready [data-reveal="lift"].is-revealed { transform: none; }
+
+/* Muncul di tempat, tanpa gerak — untuk kontrol yang harus segera bisa
+   ditekan (clip-path & transform ikut memotong/menggeser area sentuh). */
+html.reveal-ready [data-reveal="hold"] { --reveal-dur: .9s; }
+
+/* Mengembang dari kecil — untuk satuan berangka & kepingan warna. */
+html.reveal-ready [data-reveal="bloom"] { transform: scale(.72); --reveal-dur: .95s; }
+html.reveal-ready [data-reveal="bloom"].is-revealed { transform: none; }
+
+/* ── Jenis milik modul bersama ────────────────────────────────────────────
+   assets/js/gift.js dan assets/js/rsvp.js MENULIS SENDIRI data-reveal pada
+   markup yang mereka hasilkan (rekening "up", kartu ucapan "slide-left"/
+   "slide-right"). Nama-nama itu lahir di template klasik, tapi karena elemen
+   ber-data-reveal dimulai dari opacity 0, template ini WAJIB mengenalinya
+   juga — kalau tidak, rekening dan ucapan hanya muncul tanpa gerak sementara
+   semua tetangganya bergerak. Di sini semuanya dialihkan ke dialek Nocturne
+   supaya tetap satu bahasa. */
+html.reveal-ready [data-reveal="up"] { transform: translateY(18px); --reveal-dur: 1.2s; }
+html.reveal-ready [data-reveal="down"] { transform: translateY(-16px); --reveal-dur: 1.2s; }
+html.reveal-ready [data-reveal="up"].is-revealed,
+html.reveal-ready [data-reveal="down"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="slide-left"] { transform: translateX(-24px); --reveal-dur: 1.1s; }
+html.reveal-ready [data-reveal="slide-right"] { transform: translateX(24px); --reveal-dur: 1.1s; }
+html.reveal-ready [data-reveal="slide-left"].is-revealed,
+html.reveal-ready [data-reveal="slide-right"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="pop"] { transform: scale(.8); --reveal-dur: .95s; }
+html.reveal-ready [data-reveal="zoom"] { transform: scale(1.06); --reveal-dur: 1.3s; }
+html.reveal-ready [data-reveal="pop"].is-revealed,
+html.reveal-ready [data-reveal="zoom"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.25s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .nc-scene__inner > *, .nc-gallery__grid button {
-    opacity: 1; transform: none; clip-path: none; transition: none;
+  html.reveal-ready [data-reveal],
+  html.reveal-ready [data-reveal].is-revealed {
+    opacity: 1; transform: none; clip-path: none; filter: none;
+    letter-spacing: normal; transition: none;
   }
-  .nc-names, .nc-scene.is-live .nc-names { letter-spacing: 0; transition: none; }
-  .nc-scene .nc-hairline { transform: none; transition: none; }
   .nc-scroll { scroll-behavior: auto; }
 }
+
+/* Aturan gerak lawas berbasis .is-live per ADEGAN sudah dibuang dari sini:
+   nama mempelai, garis, dan foto galeri kini diurus mesin reveal per elemen
+   di atas. Sempat keduanya hidup bersamaan, dan yang lawas justru MENANG
+   karena spesifisitasnya lebih tinggi (.nc-gallery.is-live .nc-gallery__grid
+   button = tiga kelas) — akibatnya foto galeri langsung tampil tanpa gerak
+   dan jarak huruf nama sudah rapat sebelum animasinya jalan.
+
+   Yang MASIH memakai .is-live hanyalah latar foto adegan (push-in kamera di
+   bawah), karena itu milik adegan sebagai satu kesatuan, bukan per elemen. */
 
 /* Latar foto adegan: dipadamkan supaya teks selalu terbaca, lalu perlahan
    membesar selama adegannya aktif (ken burns lambat). */

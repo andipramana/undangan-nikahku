@@ -142,55 +142,88 @@ a { color: inherit; text-decoration: none; }
   .kt-sheet { margin-left: max(22rem, 26vw); margin-right: auto; padding-left: 0; padding-right: 2rem; }
 }
 
-/* ── Gerak masuk: bahasa mesin cetak ─────────────────────────────────────
-   Bukan fade-naik yang dipakai di mana-mana, melainkan gagasan yang berasal
-   dari subjeknya: TINTA DISAPU ROL. Tiap baris tersingkap dari kiri ke kanan
-   — arah baca, arah rol — tanpa bergeser naik-turun sama sekali. Kertasnya
-   diam; yang berubah cuma tintanya. */
-.kt-sheet > * {
+/* ── Gerak masuk: satu bahasa, banyak dialek ─────────────────────────────
+   Memakai mesin bersama assets/js/reveal.js (sama seperti template klasik):
+   elemen ber-atribut data-reveal mulai tersembunyi, dapat .is-revealed saat
+   masuk layar, urutannya diatur --reveal-i, durasinya bisa ditimpa lewat
+   --reveal-dur. Dialek template INI berasal dari MESIN CETAK: tinta disapu
+   rol, kertas diangkat, huruf dicap. Tidak ada satu pun yang "naik lalu
+   pudar" seperti halaman kebanyakan.
+
+   Durasi 0,9–1,6 detik: halaman ini dibaca sambil mengalir, jadi geraknya
+   harus selesai tanpa menahan mata, tapi tetap cukup lama untuk dinikmati. */
+html.reveal-ready [data-reveal] {
   opacity: 0;
-  clip-path: inset(0 100% 0 0);
-  transition: opacity .5s ease, clip-path .85s cubic-bezier(.33,.8,.35,1);
+  transition-property: opacity, transform, clip-path, text-shadow, filter;
+  transition-duration: var(--reveal-dur, 1.05s);
+  transition-timing-function: cubic-bezier(.33, .8, .35, 1);
+  transition-delay: calc(var(--reveal-i, 0) * 110ms);
 }
-.kt-sheet > *:nth-child(2) { transition-delay: .07s; }
-.kt-sheet > *:nth-child(3) { transition-delay: .14s; }
-.kt-sheet > *:nth-child(4) { transition-delay: .21s; }
-.kt-sheet > *:nth-child(n+5) { transition-delay: .28s; }
-.kt-sheet.is-live > * { opacity: 1; clip-path: inset(-30% -10% -30% 0); }
+html.reveal-ready [data-reveal].is-revealed { opacity: 1; }
 
-/* Nama mempelai: dua drum tinta yang meleset lalu bertemu — salah cetak
-   (misregistration) yang justru jadi tanda tangan cetak riso. Cuma di sini;
-   sisanya dijaga tenang. */
-.kt-cover .kt-display {
-  text-shadow: .18em -.12em 0 var(--kt-accent);
-  transition: text-shadow 1.1s cubic-bezier(.2,.7,.3,1) .25s,
-              opacity .5s ease, clip-path .85s cubic-bezier(.33,.8,.35,1);
+/* Rol tinta menyapu dari kiri — arah baca. Gerak pokok template ini. */
+html.reveal-ready [data-reveal="ink"] { clip-path: inset(0 100% 0 0); }
+html.reveal-ready [data-reveal="ink"].is-revealed { clip-path: inset(-30% -10% -30% 0); }
+
+/* Sapuan dari kanan, untuk elemen yang dirata-kanan atau berpasangan. */
+html.reveal-ready [data-reveal="ink-right"] { clip-path: inset(0 0 0 100%); }
+html.reveal-ready [data-reveal="ink-right"].is-revealed { clip-path: inset(-30% 0 -30% -10%); }
+
+/* Kertas diangkat dari bawah — untuk foto dan blok bergambar. */
+html.reveal-ready [data-reveal="sheet"] { clip-path: inset(0 0 100% 0); transform: scale(1.02); --reveal-dur: 1.25s; }
+html.reveal-ready [data-reveal="sheet"].is-revealed { clip-path: inset(0); transform: none; }
+
+/* Dua drum tinta meleset lalu bertemu: tanda tangan cetak riso. Dipakai
+   hemat — nama mempelai dan judul bab saja. */
+html.reveal-ready [data-reveal="offset"] {
+  text-shadow: .16em -.1em 0 var(--kt-accent); transform: translateX(-6px);
+  --reveal-dur: 1.35s;
 }
-.kt-cover.is-live .kt-display { text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+html.reveal-ready [data-reveal="offset"].is-revealed {
+  text-shadow: 0 0 0 rgba(0, 0, 0, 0); transform: none;
+}
 
-/* Blok ajakan di sampul sengaja TIDAK ikut disapu. clip-path memotong area
-   sentuh, bukan cuma tampilan — dengan giliran sapuan paling akhir, tombol
-   "Buka Undangan" tidak bisa ditekan selama hampir satu detik pertama.
-   Tombol utama harus siap sejak tamu melihatnya. */
-.kt-cover__to { clip-path: none; transition: opacity .5s ease .1s; }
-.kt-cover.is-live .kt-cover__to { clip-path: none; }
+/* Cap ditekan ke kertas. */
+html.reveal-ready [data-reveal="stamp"] { transform: scale(1.14); --reveal-dur: .9s; }
+html.reveal-ready [data-reveal="stamp"].is-revealed { transform: none; }
 
-/* Garis pemisah ditarik dari kiri, seperti mistar penggaris halaman. */
-.kt-rule { transform: scaleX(0); transform-origin: left center; transition: transform .9s cubic-bezier(.33,.8,.35,1); }
-.kt-sheet.is-live .kt-rule { transform: scaleX(1); }
+/* Mistar ditarik dari kiri — khusus garis pemisah. */
+html.reveal-ready [data-reveal="rule"] { transform: scaleX(0); transform-origin: left center; --reveal-dur: 1.05s; }
+html.reveal-ready [data-reveal="rule"].is-revealed { transform: none; }
 
-/* Foto galeri: satu per satu mengikuti irama kisinya, bukan serentak. */
-.kt-gallery__grid button { opacity: 0; clip-path: inset(0 0 100% 0); transition: opacity .6s ease, clip-path .9s cubic-bezier(.33,.8,.35,1); }
-.kt-gallery.is-live .kt-gallery__grid button { opacity: 1; clip-path: inset(0); }
-.kt-gallery__grid button:nth-child(2n) { transition-delay: .1s; }
-.kt-gallery__grid button:nth-child(3n) { transition-delay: .2s; }
+/* Naik pelan, untuk teks bacaan yang tidak boleh mencuri perhatian. */
+html.reveal-ready [data-reveal="lift"] { transform: translateY(16px); --reveal-dur: 1.15s; }
+html.reveal-ready [data-reveal="lift"].is-revealed { transform: none; }
+
+/* Muncul di tempat — untuk kontrol yang harus segera bisa ditekan, karena
+   clip-path dan transform ikut memotong serta menggeser area sentuh. */
+html.reveal-ready [data-reveal="hold"] { --reveal-dur: .8s; }
+
+/* ── Jenis milik modul bersama ────────────────────────────────────────────
+   assets/js/gift.js & rsvp.js menulis sendiri data-reveal pada markup yang
+   mereka hasilkan (rekening "up", ucapan "slide-left"/"slide-right"). Nama
+   itu lahir di template klasik, tapi elemen ber-data-reveal dimulai dari
+   opacity 0 — jadi template ini wajib mengenalinya, kalau tidak rekening dan
+   ucapan muncul tanpa gerak sementara tetangganya bergerak semua. */
+html.reveal-ready [data-reveal="up"] { transform: translateY(16px); --reveal-dur: 1.1s; }
+html.reveal-ready [data-reveal="down"] { transform: translateY(-14px); --reveal-dur: 1.1s; }
+html.reveal-ready [data-reveal="up"].is-revealed,
+html.reveal-ready [data-reveal="down"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="slide-left"] { clip-path: inset(0 100% 0 0); --reveal-dur: 1s; }
+html.reveal-ready [data-reveal="slide-left"].is-revealed { clip-path: inset(-30% -10% -30% 0); }
+html.reveal-ready [data-reveal="slide-right"] { clip-path: inset(0 0 0 100%); --reveal-dur: 1s; }
+html.reveal-ready [data-reveal="slide-right"].is-revealed { clip-path: inset(-30% 0 -30% -10%); }
+html.reveal-ready [data-reveal="pop"] { transform: scale(.84); --reveal-dur: .9s; }
+html.reveal-ready [data-reveal="zoom"] { transform: scale(1.05); --reveal-dur: 1.2s; }
+html.reveal-ready [data-reveal="pop"].is-revealed,
+html.reveal-ready [data-reveal="zoom"].is-revealed { transform: none; }
+html.reveal-ready [data-reveal="fade"] { --reveal-dur: 1.2s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .kt-sheet > *, .kt-gallery__grid button {
-    opacity: 1; clip-path: none; transition: none;
+  html.reveal-ready [data-reveal],
+  html.reveal-ready [data-reveal].is-revealed {
+    opacity: 1; transform: none; clip-path: none; text-shadow: none; transition: none;
   }
-  .kt-cover .kt-display { text-shadow: none; transition: none; }
-  .kt-rule, .kt-sheet.is-live .kt-rule { transform: none; transition: none; }
 }
 
 .kt-rule { height: 1px; margin: 0 0 2rem; background: var(--kt-ink); }

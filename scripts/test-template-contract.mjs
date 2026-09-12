@@ -77,6 +77,46 @@ for (const id of folders) {
     check(`${id}: tiap var warna punya nilai bawaan di manifest.theme`, missingDefault.length === 0);
   }
 
+  // Kontrak mesin reveal bersama (assets/js/reveal.js). Elemen ber-atribut
+  // data-reveal dimulai dari opacity 0, jadi tiap JENIS yang dipakai harus
+  // punya definisi di CSS template itu — kalau tidak, elemennya cuma muncul
+  // tanpa gerak sementara tetangganya bergerak semua, dan itu tidak pernah
+  // melempar error apa pun.
+  const usesReveal = ((manifest.assets || {}).js || []).some((f) => f.endsWith("/reveal.js"));
+  if (usesReveal) {
+    const [markup, renderSrc, css] = await Promise.all([
+      fs.readFile(path.join("templates", id, "markup.html"), "utf8"),
+      fs.readFile(path.join("templates", id, "render.js"), "utf8"),
+      fs.readFile(path.join("templates", id, "style.css"), "utf8")
+    ]);
+    const dipakai = new Set(
+      [...markup.matchAll(/data-reveal="([a-z-]+)"/g), ...renderSrc.matchAll(/data-reveal="([a-z-]+)"/g)]
+        .map((m) => m[1]));
+
+    // gift.js & rsvp.js menulis data-reveal sendiri pada markup yang mereka
+    // hasilkan; template yang memuatnya mewarisi jenis-jenis ini.
+    if (((manifest.assets || {}).js || []).some((f) => f.endsWith("/gift.js"))) dipakai.add("up");
+    if (((manifest.assets || {}).js || []).some((f) => f.endsWith("/rsvp.js"))) {
+      dipakai.add("slide-left");
+      dipakai.add("slide-right");
+    }
+
+    // "fade" tidak wajib punya definisi sendiri: itu perilaku dasar mesin ini
+    // (hanya opacity), dan template klasik pun memakainya begitu.
+    const tanpaDefinisi = [...dipakai]
+      .filter((jenis) => jenis !== "fade")
+      .filter((jenis) => !css.includes(`[data-reveal="${jenis}"]`));
+    check(`${id}: tiap jenis data-reveal punya definisi di style.css`, tanpaDefinisi.length === 0);
+    if (tanpaDefinisi.length) fail.push(`  → jenis tanpa definisi di ${id}: ${tanpaDefinisi.join(", ")}`);
+
+    // Kelasnya dipasang di <html>, tapi selectornya boleh ditulis dengan atau
+    // tanpa awalan `html` — klasik memakai bentuk tanpa awalan.
+    check(`${id}: style.css menggantung state tersembunyi pada .reveal-ready`,
+      /\.reveal-ready\s*\[data-reveal\]/.test(css));
+    check(`${id}: render.js memanggil initReveal setelah markup terisi`,
+      /initReveal\(\)/.test(renderSrc));
+  }
+
   // render.js WAJIB mendaftarkan dirinya dengan id yang sama, kalau tidak
   // mesin melempar "tidak mendaftarkan render()" saat tamu membuka undangan.
   const render = await fs.readFile(path.join("templates", id, "render.js"), "utf8");

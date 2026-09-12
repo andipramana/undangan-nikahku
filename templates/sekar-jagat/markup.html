@@ -44,25 +44,25 @@
       <div class="sj-parallax" data-parallax="0.35"><div class="sj-bg" id="cover-media"></div></div>
       <div class="sj-veil" aria-hidden="true"></div>
       <div class="sj-part__inner">
-        <svg class="sj-crest" viewBox="0 0 80 60" fill="none" aria-hidden="true">
+        <svg class="sj-crest" viewBox="0 0 80 60" fill="none" aria-hidden="true" data-reveal="draw">
           <path d="M40 4c8 10 8 22 0 30-8-8-8-20 0-30z" fill="currentColor" opacity=".7"/>
           <path d="M40 34c10-6 22-4 28 4-10 6-22 4-28-4zM40 34c-10-6-22-4-28 4 10 6 22 4 28-4z" fill="currentColor" opacity=".45"/>
           <circle cx="40" cy="44" r="3" fill="currentColor"/>
           <path d="M6 54h68" stroke="currentColor" stroke-width="1"/>
         </svg>
-        <p class="sj-kicker">Sugeng rawuh — dengan hormat kami mengundang</p>
-        <h1 class="sj-names" id="couple-names-cover"></h1>
-        <p class="sj-cover__date" id="cover-date"></p>
+        <p class="sj-kicker" data-reveal="drop" style="--reveal-i:1">Sugeng rawuh — dengan hormat kami mengundang</p>
+        <h1 class="sj-names" id="couple-names-cover" data-reveal="unfurl" style="--reveal-i:2"></h1>
+        <p class="sj-cover__date" id="cover-date" data-reveal="drop" style="--reveal-i:3"></p>
         <div class="sj-cover__guest">
-          <p class="sj-label" id="guest-label"></p>
-          <p class="sj-guest" id="guest-name"></p>
+          <p class="sj-label" id="guest-label" data-reveal="lift"></p>
+          <p class="sj-guest" id="guest-name" data-reveal="drop" style="--reveal-i:1"></p>
         </div>
-        <button class="sj-btn sj-btn--solid" id="btn-open" type="button">Buka Undangan</button>
+        <button class="sj-btn sj-btn--solid" id="btn-open" type="button" data-reveal="hold" data-reveal-early style="--reveal-i:4">Buka Undangan</button>
       </div>
     </section>
 
     <!-- Pemisah ornamen: dipakai berulang antar bagian -->
-    <div class="sj-divider" aria-hidden="true">
+    <div class="sj-divider" aria-hidden="true" data-reveal="draw">
       <svg viewBox="0 0 240 24" fill="none" preserveAspectRatio="xMidYMid meet">
         <path d="M0 12h88M152 12h88" stroke="currentColor" stroke-width="1"/>
         <circle cx="120" cy="12" r="5" stroke="currentColor" stroke-width="1"/>
@@ -75,38 +75,38 @@
     <!-- 02 · Ayat -->
     <section class="sj-part sj-verse" id="opening" data-part="Pembuka">
       <div class="sj-part__inner">
-        <p class="sj-arabic" id="opening-arabic"></p>
-        <p class="sj-verse__text" id="wfl-quote"></p>
-        <p class="sj-verse__src" id="wfl-source"></p>
+        <p class="sj-arabic" id="opening-arabic" data-reveal="drop"></p>
+        <p class="sj-verse__text" id="wfl-quote" data-reveal="unfurl" style="--reveal-i:1"></p>
+        <p class="sj-verse__src" id="wfl-source" data-reveal="lift" style="--reveal-i:2"></p>
       </div>
     </section>
 
     <!-- 03 · Mempelai: dua potret berbingkai lengkung, berdampingan -->
     <section class="sj-part sj-couple" id="couple" data-part="Mempelai">
       <div class="sj-part__inner">
-        <h2 class="sj-h2">Calon penganten</h2>
+        <h2 class="sj-h2" data-reveal="unfurl">Calon penganten</h2>
 
         <div class="sj-pair">
           <article class="sj-person">
-            <div class="sj-arch"><img id="bride-photo" alt="" loading="lazy"></div>
-            <h3 class="sj-person__name" id="bride-name"></h3>
-            <p class="sj-person__parents" id="bride-parents"></p>
-            <p class="sj-person__ig" id="bride-instagram"></p>
+            <div class="sj-arch" data-reveal="unfurl" style="--reveal-i:1"><img id="bride-photo" alt="" loading="lazy"></div>
+            <h3 class="sj-person__name" id="bride-name" data-reveal="from-left" style="--reveal-i:2"></h3>
+            <p class="sj-person__parents" id="bride-parents" data-reveal="lift" style="--reveal-i:3"></p>
+            <p class="sj-person__ig" id="bride-instagram" data-reveal="lift" style="--reveal-i:4"></p>
           </article>
 
-          <span class="sj-pair__amp" aria-hidden="true">&amp;</span>
+          <span class="sj-pair__amp" aria-hidden="true" data-reveal="bloom" style="--reveal-i:2">&amp;</span>
 
           <article class="sj-person">
-            <div class="sj-arch"><img id="groom-photo" alt="" loading="lazy"></div>
-            <h3 class="sj-person__name" id="groom-name"></h3>
-            <p class="sj-person__parents" id="groom-parents"></p>
-            <p class="sj-person__ig" id="groom-instagram"></p>
+            <div class="sj-arch" data-reveal="unfurl" style="--reveal-i:1"><img id="groom-photo" alt="" loading="lazy"></div>
+            <h3 class="sj-person__name" id="groom-name" data-reveal="from-right" style="--reveal-i:2"></h3>
+            <p class="sj-person__parents" id="groom-parents" data-reveal="lift" style="--reveal-i:3"></p>
+            <p class="sj-person__ig" id="groom-instagram" data-reveal="lift" style="--reveal-i:4"></p>
           </article>
         </div>
       </div>
     </section>
 
-    <div class="sj-divider" aria-hidden="true">
+    <div class="sj-divider" aria-hidden="true" data-reveal="draw">
       <svg viewBox="0 0 240 24" fill="none" preserveAspectRatio="xMidYMid meet">
         <path d="M0 12h88M152 12h88" stroke="currentColor" stroke-width="1"/>
         <circle cx="120" cy="12" r="5" stroke="currentColor" stroke-width="1"/>
@@ -121,37 +121,37 @@
       <div class="sj-parallax" data-parallax="0.25"><div class="sj-bg" id="event-media"></div></div>
       <div class="sj-veil" aria-hidden="true"></div>
       <div class="sj-part__inner">
-        <h2 class="sj-h2 sj-h2--light">Rangkaian acara</h2>
-        <p class="sj-event__date" id="event-date-line"></p>
+        <h2 class="sj-h2 sj-h2--light" data-reveal="unfurl">Rangkaian acara</h2>
+        <p class="sj-event__date" id="event-date-line" data-reveal="drop" style="--reveal-i:1"></p>
 
         <div class="sj-cards">
-          <article class="sj-card">
+          <article class="sj-card" data-reveal="from-left" style="--reveal-i:2">
             <h3 id="akad-label">Akad</h3>
-            <p class="sj-card__time" id="akad-time"></p>
-            <p class="sj-card__venue" id="venue-name-akad"></p>
-            <p class="sj-card__addr" id="venue-address-akad"></p>
-            <a class="sj-link" id="akad-maps" target="_blank" rel="noopener">Lihat peta</a>
+            <p class="sj-card__time" id="akad-time" data-reveal="bloom" style="--reveal-i:1"></p>
+            <p class="sj-card__venue" id="venue-name-akad" data-reveal="lift" style="--reveal-i:2"></p>
+            <p class="sj-card__addr" id="venue-address-akad" data-reveal="lift" style="--reveal-i:3"></p>
+            <a class="sj-link" id="akad-maps" data-reveal="hold" style="--reveal-i:4" target="_blank" rel="noopener">Lihat peta</a>
           </article>
-          <article class="sj-card">
+          <article class="sj-card" data-reveal="from-right" style="--reveal-i:3">
             <h3 id="resepsi-label">Resepsi</h3>
-            <p class="sj-card__time" id="resepsi-time"></p>
-            <p class="sj-card__venue" id="venue-name-resepsi"></p>
-            <p class="sj-card__addr" id="venue-address-resepsi"></p>
-            <a class="sj-link" id="resepsi-maps" target="_blank" rel="noopener">Lihat peta</a>
+            <p class="sj-card__time" id="resepsi-time" data-reveal="bloom" style="--reveal-i:1"></p>
+            <p class="sj-card__venue" id="venue-name-resepsi" data-reveal="lift" style="--reveal-i:2"></p>
+            <p class="sj-card__addr" id="venue-address-resepsi" data-reveal="lift" style="--reveal-i:3"></p>
+            <a class="sj-link" id="resepsi-maps" data-reveal="hold" style="--reveal-i:4" target="_blank" rel="noopener">Lihat peta</a>
           </article>
         </div>
 
-        <div class="sj-countdown" aria-label="Hitung mundur">
-          <div><b id="cd-days">0</b><span>Hari</span></div>
-          <div><b id="cd-hours">00</b><span>Jam</span></div>
-          <div><b id="cd-minutes">00</b><span>Menit</span></div>
-          <div><b id="cd-seconds">00</b><span>Detik</span></div>
+        <div class="sj-countdown" aria-label="Hitung mundur" data-reveal="drop" style="--reveal-i:4">
+          <div data-reveal="bloom" style="--reveal-i:0"><b id="cd-days">0</b><span>Hari</span></div>
+          <div data-reveal="bloom" style="--reveal-i:1"><b id="cd-hours">00</b><span>Jam</span></div>
+          <div data-reveal="bloom" style="--reveal-i:2"><b id="cd-minutes">00</b><span>Menit</span></div>
+          <div data-reveal="bloom" style="--reveal-i:3"><b id="cd-seconds">00</b><span>Detik</span></div>
         </div>
 
-        <a class="sj-btn" id="btn-add-calendar" target="_blank" rel="noopener">Simpan ke kalender</a>
+        <a class="sj-btn" id="btn-add-calendar" data-reveal="hold" style="--reveal-i:5"> target="_blank" rel="noopener">Simpan ke kalender</a>
 
-        <div class="sj-dress" id="sj-dress" hidden>
-          <p class="sj-label">Dresscode</p>
+        <div class="sj-dress" id="sj-dress" hidden data-reveal="lift" style="--reveal-i:6">
+          <p class="sj-label" data-reveal="lift">Dresscode</p>
           <p id="dresscode-text"></p>
           <div class="sj-swatches" id="dresscode-swatches"></div>
         </div>
@@ -160,15 +160,15 @@
 
     <section class="sj-part sj-live" id="livestream" data-part="Siaran">
       <div class="sj-part__inner">
-        <h2 class="sj-h2">Siaran langsung</h2>
-        <div class="sj-live__links" id="livestream-links"></div>
+        <h2 class="sj-h2" data-reveal="unfurl">Siaran langsung</h2>
+        <div class="sj-live__links" id="livestream-links" data-reveal="drop" style="--reveal-i:1"></div>
       </div>
     </section>
 
     <!-- 05 · Cerita: linimasa dengan simpul ornamen -->
     <section class="sj-part sj-story" id="love-story" data-part="Cerita">
       <div class="sj-part__inner">
-        <h2 class="sj-h2">Cerita kami</h2>
+        <h2 class="sj-h2" data-reveal="unfurl">Cerita kami</h2>
         <div class="sj-story__list" id="love-story-list"></div>
       </div>
     </section>
@@ -176,12 +176,12 @@
     <!-- 06 · Galeri: bingkai lengkung, tinggi bergantian -->
     <section class="sj-part sj-gallery" id="gallery" data-part="Galeri">
       <div class="sj-part__inner">
-        <h2 class="sj-h2">Galeri</h2>
+        <h2 class="sj-h2" data-reveal="unfurl">Galeri</h2>
         <div class="sj-gallery__grid" id="sj-gallery-grid"></div>
       </div>
     </section>
 
-    <div class="sj-divider" aria-hidden="true">
+    <div class="sj-divider" aria-hidden="true" data-reveal="draw">
       <svg viewBox="0 0 240 24" fill="none" preserveAspectRatio="xMidYMid meet">
         <path d="M0 12h88M152 12h88" stroke="currentColor" stroke-width="1"/>
         <circle cx="120" cy="12" r="5" stroke="currentColor" stroke-width="1"/>
@@ -194,9 +194,9 @@
     <!-- 07 · Ucapan & tanda kasih -->
     <section class="sj-part sj-rsvp" id="gift" data-part="Ucapan">
       <div class="sj-part__inner">
-        <h2 class="sj-h2">Ucapan &amp; kehadiran</h2>
+        <h2 class="sj-h2" data-reveal="unfurl">Ucapan &amp; kehadiran</h2>
 
-        <form class="sj-form" id="rsvp-form">
+        <form class="sj-form" id="rsvp-form" data-reveal="hold" style="--reveal-i:1">
           <label class="sj-field"><span>Nama</span>
             <input id="rsvp-name" type="text" autocomplete="name" required>
           </label>
@@ -216,12 +216,12 @@
           <p id="rsvp-status" class="sj-status" role="status"></p>
         </form>
 
-        <div class="sj-wishes" id="wishes-list"></div>
+        <div class="sj-wishes" id="wishes-list" data-reveal="fade" style="--reveal-i:2"></div>
         <div class="sj-wishes__nav" id="wishes-pagination" hidden></div>
 
         <div class="sj-gift">
-          <h3 class="sj-h3">Tanda kasih</h3>
-          <button type="button" class="sj-btn" id="btn-gift-toggle">Lihat rekening &amp; alamat</button>
+          <h3 class="sj-h3" data-reveal="drop">Tanda kasih</h3>
+          <button type="button" class="sj-btn" id="btn-gift-toggle" data-reveal="hold" style="--reveal-i:1">Lihat rekening &amp; alamat</button>
           <div id="gift-panel" hidden>
             <div id="gift-accounts"></div>
             <div id="gift-address"></div>
@@ -240,15 +240,15 @@
       <div class="sj-parallax" data-parallax="0.3"><div class="sj-bg" id="closing-media"></div></div>
       <div class="sj-veil" aria-hidden="true"></div>
       <div class="sj-part__inner">
-        <p class="sj-closing__text" id="closing-text"></p>
-        <h2 class="sj-names sj-names--sm" id="couple-names-closing"></h2>
-        <svg class="sj-crest" viewBox="0 0 80 60" fill="none" aria-hidden="true">
+        <p class="sj-closing__text" id="closing-text" data-reveal="drop"></p>
+        <h2 class="sj-names sj-names--sm" id="couple-names-closing" data-reveal="unfurl" style="--reveal-i:1"></h2>
+        <svg class="sj-crest" viewBox="0 0 80 60" fill="none" aria-hidden="true" data-reveal="draw" style="--reveal-i:2">
           <path d="M6 6h68" stroke="currentColor" stroke-width="1"/>
           <circle cx="40" cy="18" r="3" fill="currentColor"/>
           <path d="M40 26c10-6 22-4 28 4-10 6-22 4-28-4zM40 26c-10-6-22-4-28 4 10 6 22 4 28-4z" fill="currentColor" opacity=".45"/>
           <path d="M40 56c8-10 8-22 0-30-8 8-8 20 0 30z" fill="currentColor" opacity=".7"/>
         </svg>
-        <p class="sj-kicker" id="sj-brand">Undangan Nikahku</p>
+        <p class="sj-kicker" id="sj-brand" data-reveal="lift" style="--reveal-i:3">Undangan Nikahku</p>
       </div>
     </section>
 

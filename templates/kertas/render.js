@@ -68,12 +68,10 @@
       close();
     });
 
-    // Gerak masuk tiap lembar, lalu penyorotan entri daftar isi sebagai
-    // pengamat terpisah — lembar yang lebih tinggi dari layar (galeri, kartu
-    // balasan) tidak akan pernah memenuhi ambang rasio, jadi keduanya memakai
-    // pemicu berbasis posisi, bukan rasio.
+    // Gerak masuk isi lembar kini diurus mesin reveal per elemen
+    // (assets/js/reveal.js), jadi di sini tinggal penyorotan entri daftar isi:
+    // lembar mana yang sedang dibaca tamu.
     const all = [...root.querySelectorAll(".kt-sheet")];
-    cleanups.push(window.WeddingBehaviors.revealOnView(all));
     cleanups.push(window.WeddingBehaviors.trackActive(all, (sheet) => {
       index.querySelectorAll("a").forEach((a) =>
         a.classList.toggle("is-active", a.dataset.go === sheet.id));
@@ -171,7 +169,9 @@
         $("kt-dress").hidden = false;
         $("dresscode-text").textContent = dress.text || "";
         $("dresscode-swatches").innerHTML =
-          (dress.colors || []).map((c) => `<span style="background:${esc(c)}" title="${esc(c)}"></span>`).join("");
+          // Satu atribut style saja: HTML mengabaikan style kedua.
+          (dress.colors || []).map((c, i) =>
+            `<span style="background:${esc(c)}; --reveal-i:${i}" title="${esc(c)}" data-reveal="stamp"></span>`).join("");
       }
 
       /* Live streaming — babnya dibuang kalau tidak ada satu pun URL. */
@@ -180,7 +180,9 @@
         .filter(([, url]) => url);
       if (links.length) {
         $("livestream-links").innerHTML = links
-          .map(([label, url]) => `<a class="kt-btn" href="${esc(url)}" target="_blank" rel="noopener">${label}</a>`)
+          .map(([label, url], i) =>
+            `<a class="kt-btn" href="${esc(url)}" target="_blank" rel="noopener"
+                data-reveal="hold" style="--reveal-i:${i}">${label}</a>`)
           .join("");
       } else {
         $("livestream").remove();
@@ -188,8 +190,8 @@
 
       /* Cerita */
       const story = Array.isArray(cfg.loveStory) ? cfg.loveStory : [];
-      $("love-story-list").innerHTML = story.map((item) => `
-        <article class="kt-story__item">
+      $("love-story-list").innerHTML = story.map((item, i) => `
+        <article class="kt-story__item" data-reveal="ink" style="--reveal-i:${i % 4}">
           <span class="kt-story__date">${esc(item.date)}</span>
           <h4>${esc(item.title)}</h4>
           <p>${esc(item.text)}</p>
@@ -200,7 +202,8 @@
       const grid = $("kt-gallery-grid");
       if (gal.length) {
         grid.innerHTML = gal.map((p, i) => `
-          <button type="button" data-full="${esc(p.url)}" aria-label="Foto ${i + 1}">
+          <button type="button" data-full="${esc(p.url)}" aria-label="Foto ${i + 1}"
+                  data-reveal="sheet" style="--reveal-i:${i % 4}">
             <img src="${esc(p.url)}" alt="${esc(p.alt)}" loading="lazy"
                  style="--fx:${p.focalX}%; --fy:${p.focalY}%">
           </button>`).join("");
@@ -246,6 +249,11 @@
         $("kt-index-btn").hidden = false;
         $("opening").scrollIntoView({ behavior: "smooth" });
       }, { once: true });
+
+      // Mesin reveal dijalankan SETELAH markup terisi, supaya babak cerita &
+      // foto galeri yang baru dibuat ikut terdaftar. rsvp.js dan gift.js
+      // memanggil revealScan/revealNow sendiri untuk isi yang menyusul.
+      if (window.initReveal) window.initReveal();
 
       if (window.initRsvp) window.initRsvp();
       if (window.initGift) window.initGift();

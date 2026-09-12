@@ -26,13 +26,13 @@
     <section class="nc-scene nc-cover" id="cover" data-scene="Sampul">
       <div class="nc-bg" id="cover-media" aria-hidden="true"></div>
       <div class="nc-scene__inner nc-cover__inner">
-        <h1 class="nc-names" id="couple-names-cover"></h1>
-        <p class="nc-cover__date" id="cover-date"></p>
-        <div class="nc-cover__guest">
-          <p class="nc-label" id="guest-label"></p>
-          <p class="nc-guest" id="guest-name"></p>
+        <h1 class="nc-names" id="couple-names-cover" data-reveal="focus"></h1>
+        <p class="nc-cover__date" id="cover-date" data-reveal="title" style="--reveal-i:1"></p>
+        <div class="nc-cover__guest" data-reveal="title" style="--reveal-i:2">
+          <p class="nc-label" id="guest-label" data-reveal="lift"></p>
+          <p class="nc-guest" id="guest-name" data-reveal="title" style="--reveal-i:1"></p>
         </div>
-        <button class="nc-open" id="btn-open" type="button">
+        <button class="nc-open" id="btn-open" type="button" data-reveal="hold" data-reveal-early style="--reveal-i:3">
           <span>Buka Undangan</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </button>
@@ -43,9 +43,9 @@
     <!-- 02 · Ayat -->
     <section class="nc-scene nc-verse" id="opening" data-scene="Doa">
       <div class="nc-scene__inner">
-        <p class="nc-arabic" id="opening-arabic"></p>
-        <p class="nc-verse__text" id="wfl-quote"></p>
-        <p class="nc-verse__src" id="wfl-source"></p>
+        <p class="nc-arabic" id="opening-arabic" data-reveal="title"></p>
+        <p class="nc-verse__text" id="wfl-quote" data-reveal="title" style="--reveal-i:1"></p>
+        <p class="nc-verse__src" id="wfl-source" data-reveal="lift" style="--reveal-i:2"></p>
       </div>
     </section>
 
@@ -53,20 +53,20 @@
     <section class="nc-scene nc-person nc-person--bride" id="couple-bride" data-scene="Mempelai">
       <div class="nc-person__media" id="bride-media" aria-hidden="true"></div>
       <div class="nc-person__body">
-        <p class="nc-role">Mempelai wanita</p>
-        <h2 class="nc-person__name" id="bride-name"></h2>
-        <p class="nc-person__parents" id="bride-parents"></p>
-        <p class="nc-person__ig" id="bride-instagram"></p>
+        <p class="nc-role" data-reveal="lift">Mempelai wanita</p>
+        <h2 class="nc-person__name" id="bride-name" data-reveal="pan-left" style="--reveal-i:1"></h2>
+        <p class="nc-person__parents" id="bride-parents" data-reveal="lift" style="--reveal-i:2"></p>
+        <p class="nc-person__ig" id="bride-instagram" data-reveal="lift" style="--reveal-i:3"></p>
       </div>
     </section>
 
     <section class="nc-scene nc-person nc-person--groom" id="couple-groom" data-scene="Mempelai">
       <div class="nc-person__media" id="groom-media" aria-hidden="true"></div>
       <div class="nc-person__body">
-        <p class="nc-role">Mempelai pria</p>
-        <h2 class="nc-person__name" id="groom-name"></h2>
-        <p class="nc-person__parents" id="groom-parents"></p>
-        <p class="nc-person__ig" id="groom-instagram"></p>
+        <p class="nc-role" data-reveal="lift">Mempelai pria</p>
+        <h2 class="nc-person__name" id="groom-name" data-reveal="pan-right" style="--reveal-i:1"></h2>
+        <p class="nc-person__parents" id="groom-parents" data-reveal="lift" style="--reveal-i:2"></p>
+        <p class="nc-person__ig" id="groom-instagram" data-reveal="lift" style="--reveal-i:3"></p>
       </div>
     </section>
 
@@ -74,8 +74,8 @@
     <section class="nc-scene nc-event" id="event" data-scene="Acara">
       <div class="nc-bg nc-bg--dim" id="event-media" aria-hidden="true"></div>
       <div class="nc-scene__inner">
-        <p class="nc-event__day" id="event-day-label"></p>
-        <div class="nc-date">
+        <p class="nc-event__day" id="event-day-label" data-reveal="lift"></p>
+        <div class="nc-date" data-reveal="focus" style="--reveal-i:1">
           <span id="event-date-num"></span>
           <i aria-hidden="true"></i>
           <span id="event-month-label"></span>
@@ -83,36 +83,36 @@
           <span id="event-year-label"></span>
         </div>
 
-        <div class="nc-countdown" aria-label="Hitung mundur">
-          <div><b id="cd-days">0</b><span>Hari</span></div>
-          <div><b id="cd-hours">0</b><span>Jam</span></div>
-          <div><b id="cd-minutes">0</b><span>Menit</span></div>
-          <div><b id="cd-seconds">0</b><span>Detik</span></div>
+        <div class="nc-countdown" aria-label="Hitung mundur" data-reveal="title" style="--reveal-i:2">
+          <div data-reveal="bloom" style="--reveal-i:0"><b id="cd-days">0</b><span>Hari</span></div>
+          <div data-reveal="bloom" style="--reveal-i:1"><b id="cd-hours">0</b><span>Jam</span></div>
+          <div data-reveal="bloom" style="--reveal-i:2"><b id="cd-minutes">0</b><span>Menit</span></div>
+          <div data-reveal="bloom" style="--reveal-i:3"><b id="cd-seconds">0</b><span>Detik</span></div>
         </div>
 
         <div class="nc-cards">
-          <article class="nc-card">
-            <h3 id="akad-label">Akad</h3>
-            <p class="nc-card__time"><b id="akad-time-h"></b>:<b id="akad-time-m"></b>
+          <article class="nc-card" data-reveal="pan-left" style="--reveal-i:3">
+            <h3 id="akad-label" data-reveal="lift">Akad</h3>
+            <p class="nc-card__time" data-reveal="bloom" style="--reveal-i:1"><b id="akad-time-h"></b>:<b id="akad-time-m"></b>
               <span>– <i id="akad-time-end-h"></i>:<i id="akad-time-end-m"></i> WIB</span></p>
-            <p class="nc-card__venue" id="venue-name-akad"></p>
-            <p class="nc-card__addr" id="venue-address-akad"></p>
-            <a class="nc-link" id="akad-maps" target="_blank" rel="noopener">Lihat peta</a>
+            <p class="nc-card__venue" id="venue-name-akad" data-reveal="lift" style="--reveal-i:2"></p>
+            <p class="nc-card__addr" id="venue-address-akad" data-reveal="lift" style="--reveal-i:3"></p>
+            <a class="nc-link" id="akad-maps" data-reveal="hold" style="--reveal-i:4" target="_blank" rel="noopener">Lihat peta</a>
           </article>
-          <article class="nc-card">
-            <h3 id="resepsi-label">Resepsi</h3>
-            <p class="nc-card__time"><b id="resepsi-time-h"></b>:<b id="resepsi-time-m"></b>
+          <article class="nc-card" data-reveal="pan-right" style="--reveal-i:4">
+            <h3 id="resepsi-label" data-reveal="lift">Resepsi</h3>
+            <p class="nc-card__time" data-reveal="bloom" style="--reveal-i:1"><b id="resepsi-time-h"></b>:<b id="resepsi-time-m"></b>
               <span>– <i id="resepsi-time-end-h"></i>:<i id="resepsi-time-end-m"></i> WIB</span></p>
-            <p class="nc-card__venue" id="venue-name-resepsi"></p>
-            <p class="nc-card__addr" id="venue-address-resepsi"></p>
-            <a class="nc-link" id="resepsi-maps" target="_blank" rel="noopener">Lihat peta</a>
+            <p class="nc-card__venue" id="venue-name-resepsi" data-reveal="lift" style="--reveal-i:2"></p>
+            <p class="nc-card__addr" id="venue-address-resepsi" data-reveal="lift" style="--reveal-i:3"></p>
+            <a class="nc-link" id="resepsi-maps" data-reveal="hold" style="--reveal-i:4" target="_blank" rel="noopener">Lihat peta</a>
           </article>
         </div>
 
-        <a class="nc-btn" id="btn-add-calendar" target="_blank" rel="noopener">Simpan ke kalender</a>
-        <div class="nc-dress" id="nc-dress" hidden>
-          <p class="nc-label">Dresscode</p>
-          <p id="dresscode-text"></p>
+        <a class="nc-btn" id="btn-add-calendar" target="_blank" rel="noopener" data-reveal="hold" style="--reveal-i:5">Simpan ke kalender</a>
+        <div class="nc-dress" id="nc-dress" hidden data-reveal="lift" style="--reveal-i:6">
+          <p class="nc-label" data-reveal="lift">Dresscode</p>
+          <p id="dresscode-text" data-reveal="lift" style="--reveal-i:1"></p>
           <div class="nc-swatches" id="dresscode-swatches"></div>
         </div>
       </div>
@@ -121,15 +121,15 @@
     <!-- 05 · Live streaming (dihapus render.js kalau semua URL kosong) -->
     <section class="nc-scene nc-live" id="livestream" data-scene="Live">
       <div class="nc-scene__inner">
-        <h2 class="nc-h2">Siaran langsung</h2>
-        <div class="nc-live__links" id="livestream-links"></div>
+        <h2 class="nc-h2" data-reveal="title">Siaran langsung</h2>
+        <div class="nc-live__links" id="livestream-links" data-reveal="lift" style="--reveal-i:1"></div>
       </div>
     </section>
 
     <!-- 06 · Cerita -->
     <section class="nc-scene nc-story" id="love-story" data-scene="Cerita">
       <div class="nc-scene__inner">
-        <h2 class="nc-h2">Perjalanan kami</h2>
+        <h2 class="nc-h2" data-reveal="title">Perjalanan kami</h2>
         <div class="nc-story__list" id="love-story-list"></div>
       </div>
     </section>
@@ -137,7 +137,7 @@
     <!-- 07 · Galeri -->
     <section class="nc-scene nc-gallery" id="gallery" data-scene="Galeri">
       <div class="nc-scene__inner">
-        <h2 class="nc-h2">Momen</h2>
+        <h2 class="nc-h2" data-reveal="title">Momen</h2>
         <div class="nc-gallery__grid" id="nc-gallery-grid"></div>
       </div>
     </section>
@@ -145,9 +145,9 @@
     <!-- 08 · Hadiah + RSVP jadi satu adegan -->
     <section class="nc-scene nc-rsvp" id="gift" data-scene="Ucapan">
       <div class="nc-scene__inner">
-        <h2 class="nc-h2">Ucapan &amp; kehadiran</h2>
+        <h2 class="nc-h2" data-reveal="title">Ucapan &amp; kehadiran</h2>
 
-        <form class="nc-form" id="rsvp-form">
+        <form class="nc-form" id="rsvp-form" data-reveal="hold" style="--reveal-i:1">
           <input id="rsvp-name" type="text" placeholder="Nama" autocomplete="name" required>
           <!-- Kelas .rsvp-pill + data-value adalah kait yang dibaca rsvp.js
                (bukan gaya bawaan template lain — CSS-nya milik style.css ini). -->
@@ -161,14 +161,14 @@
           <p id="rsvp-status" class="nc-status" role="status"></p>
         </form>
 
-        <div class="nc-wishes" id="wishes-list"></div>
+        <div class="nc-wishes" id="wishes-list" data-reveal="fade" style="--reveal-i:3"></div>
         <div class="nc-wishes__nav" id="wishes-pagination" hidden>
           <button type="button" id="wishes-prev" class="nc-link">Sebelumnya</button>
           <button type="button" id="wishes-next" class="nc-link">Berikutnya</button>
         </div>
 
-        <button type="button" class="nc-btn" id="btn-gift-toggle">Kirim tanda kasih</button>
-        <div class="nc-gift" id="gift-panel" hidden>
+        <button type="button" class="nc-btn" id="btn-gift-toggle" data-reveal="hold" style="--reveal-i:2">Kirim tanda kasih</button>
+        <div class="nc-gift" id="gift-panel" hidden data-reveal="fade">
           <div id="gift-accounts"></div>
           <div id="gift-address"></div>
           <div class="nc-gift__actions">
@@ -184,9 +184,9 @@
     <section class="nc-scene nc-closing" id="closing" data-scene="Penutup">
       <div class="nc-bg nc-bg--dim" id="closing-media" aria-hidden="true"></div>
       <div class="nc-scene__inner">
-        <p class="nc-closing__text" id="closing-text"></p>
-        <h2 class="nc-names nc-names--sm" id="couple-names-closing"></h2>
-        <p class="nc-kicker" id="nc-brand">Undangan Nikahku</p>
+        <p class="nc-closing__text" id="closing-text" data-reveal="title"></p>
+        <h2 class="nc-names nc-names--sm" id="couple-names-closing" data-reveal="focus" style="--reveal-i:1"></h2>
+        <p class="nc-kicker" id="nc-brand" data-reveal="lift" style="--reveal-i:2">Undangan Nikahku</p>
       </div>
     </section>
 

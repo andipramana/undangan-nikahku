@@ -29,126 +29,126 @@
 
     <!-- Sampul: tipografi besar, foto mengapit asimetris -->
     <section class="kt-sheet kt-cover" id="cover" data-chapter="Sampul">
-      <p class="kt-rule" aria-hidden="true"></p>
-      <p class="kt-lede">Dengan sukacita, kami menikah.</p>
-      <h1 class="kt-display" id="couple-names-cover"></h1>
-      <div class="kt-cover__meta">
+      <p class="kt-rule" aria-hidden="true" data-reveal="rule"></p>
+      <p class="kt-lede" data-reveal="ink" style="--reveal-i:1">Dengan sukacita, kami menikah.</p>
+      <h1 class="kt-display" id="couple-names-cover" data-reveal="offset" style="--reveal-i:2"></h1>
+      <div class="kt-cover__meta" data-reveal="ink" style="--reveal-i:3">
         <p class="kt-cover__date" id="cover-date"></p>
         <p class="kt-cover__venue" id="cover-venue"></p>
       </div>
-      <figure class="kt-cover__figure">
+      <figure class="kt-cover__figure" data-reveal="sheet" style="--reveal-i:4">
         <img id="cover-photo" alt="" loading="eager">
       </figure>
       <div class="kt-cover__to">
-        <p class="kt-label" id="guest-label"></p>
-        <p class="kt-guest" id="guest-name"></p>
-        <button class="kt-btn kt-btn--solid" id="btn-open" type="button">Buka Undangan</button>
+        <p class="kt-label" id="guest-label" data-reveal="ink" style="--reveal-i:5"></p>
+        <p class="kt-guest" id="guest-name" data-reveal="ink" style="--reveal-i:6"></p>
+        <button class="kt-btn kt-btn--solid" id="btn-open" type="button" data-reveal="hold" data-reveal-early style="--reveal-i:7">Buka Undangan</button>
       </div>
     </section>
 
     <!-- Ayat: satu kolom sempit, dikutip besar -->
     <section class="kt-sheet kt-verse" id="opening" data-chapter="Doa">
-      <p class="kt-arabic" id="opening-arabic"></p>
-      <blockquote class="kt-quote" id="wfl-quote"></blockquote>
-      <p class="kt-source" id="wfl-source"></p>
+      <p class="kt-arabic" id="opening-arabic" data-reveal="ink"></p>
+      <blockquote class="kt-quote" id="wfl-quote" data-reveal="ink" style="--reveal-i:1"></blockquote>
+      <p class="kt-source" id="wfl-source" data-reveal="lift" style="--reveal-i:2"></p>
     </section>
 
     <!-- Mempelai: dua entri, foto kecil di kolom sempit, teks di kolom lebar -->
     <section class="kt-sheet kt-couple" id="couple" data-chapter="Mempelai">
-      <h2 class="kt-h2">Kedua Mempelai</h2>
+      <h2 class="kt-h2" data-reveal="offset">Kedua Mempelai</h2>
 
       <article class="kt-person">
-        <figure class="kt-person__figure"><img id="bride-photo" alt="" loading="lazy"></figure>
+        <figure class="kt-person__figure"><img id="bride-photo" data-reveal="sheet" style="--reveal-i:1"> alt="" loading="lazy"></figure>
         <div class="kt-person__text">
-          <p class="kt-role">Mempelai wanita</p>
-          <h3 class="kt-person__name" id="bride-name"></h3>
-          <p class="kt-person__parents" id="bride-parents"></p>
-          <p class="kt-person__ig" id="bride-instagram"></p>
+          <p class="kt-role" data-reveal="ink" style="--reveal-i:2">Mempelai wanita</p>
+          <h3 class="kt-person__name" id="bride-name" data-reveal="ink" style="--reveal-i:3"></h3>
+          <p class="kt-person__parents" id="bride-parents" data-reveal="lift" style="--reveal-i:4"></p>
+          <p class="kt-person__ig" id="bride-instagram" data-reveal="lift" style="--reveal-i:5"></p>
         </div>
       </article>
 
       <article class="kt-person kt-person--flip">
-        <figure class="kt-person__figure"><img id="groom-photo" alt="" loading="lazy"></figure>
+        <figure class="kt-person__figure"><img id="groom-photo" data-reveal="sheet" style="--reveal-i:1"> alt="" loading="lazy"></figure>
         <div class="kt-person__text">
-          <p class="kt-role">Mempelai pria</p>
-          <h3 class="kt-person__name" id="groom-name"></h3>
-          <p class="kt-person__parents" id="groom-parents"></p>
-          <p class="kt-person__ig" id="groom-instagram"></p>
+          <p class="kt-role" data-reveal="ink-right" style="--reveal-i:2">Mempelai pria</p>
+          <h3 class="kt-person__name" id="groom-name" data-reveal="ink-right" style="--reveal-i:3"></h3>
+          <p class="kt-person__parents" id="groom-parents" data-reveal="lift" style="--reveal-i:4"></p>
+          <p class="kt-person__ig" id="groom-instagram" data-reveal="lift" style="--reveal-i:5"></p>
         </div>
       </article>
     </section>
 
     <!-- Foto full-bleed pemisah, khas majalah -->
-    <figure class="kt-bleed" id="kt-bleed-1" hidden>
+    <figure class="kt-bleed" id="kt-bleed-1" hidden data-reveal="sheet">
       <img alt="" loading="lazy">
     </figure>
 
     <!-- Acara: disusun seperti tabel jadwal cetak, bukan kartu -->
     <section class="kt-sheet kt-event" id="event" data-chapter="Acara">
-      <h2 class="kt-h2">Rangkaian Acara</h2>
-      <p class="kt-event__date" id="event-date-line"></p>
+      <h2 class="kt-h2" data-reveal="offset">Rangkaian Acara</h2>
+      <p class="kt-event__date" id="event-date-line" data-reveal="ink" style="--reveal-i:1"></p>
 
       <dl class="kt-schedule">
         <div class="kt-schedule__row">
-          <dt id="akad-label">Akad</dt>
+          <dt id="akad-label" data-reveal="ink" style="--reveal-i:0">Akad</dt>
           <dd>
-            <p class="kt-schedule__time"><span id="akad-time"></span></p>
-            <p class="kt-schedule__venue" id="venue-name-akad"></p>
-            <p class="kt-schedule__addr" id="venue-address-akad"></p>
-            <a class="kt-link" id="akad-maps" target="_blank" rel="noopener">Lihat peta</a>
+            <p class="kt-schedule__time" data-reveal="stamp" style="--reveal-i:1"><span id="akad-time"></span></p>
+            <p class="kt-schedule__venue" id="venue-name-akad" data-reveal="ink" style="--reveal-i:2"></p>
+            <p class="kt-schedule__addr" id="venue-address-akad" data-reveal="lift" style="--reveal-i:3"></p>
+            <a class="kt-link" id="akad-maps" data-reveal="hold" style="--reveal-i:4" target="_blank" rel="noopener">Lihat peta</a>
           </dd>
         </div>
         <div class="kt-schedule__row">
-          <dt id="resepsi-label">Resepsi</dt>
+          <dt id="resepsi-label" data-reveal="ink" style="--reveal-i:1">Resepsi</dt>
           <dd>
-            <p class="kt-schedule__time"><span id="resepsi-time"></span></p>
-            <p class="kt-schedule__venue" id="venue-name-resepsi"></p>
-            <p class="kt-schedule__addr" id="venue-address-resepsi"></p>
-            <a class="kt-link" id="resepsi-maps" target="_blank" rel="noopener">Lihat peta</a>
+            <p class="kt-schedule__time" data-reveal="stamp" style="--reveal-i:2"><span id="resepsi-time"></span></p>
+            <p class="kt-schedule__venue" id="venue-name-resepsi" data-reveal="ink" style="--reveal-i:3"></p>
+            <p class="kt-schedule__addr" id="venue-address-resepsi" data-reveal="lift" style="--reveal-i:4"></p>
+            <a class="kt-link" id="resepsi-maps" data-reveal="hold" style="--reveal-i:5" target="_blank" rel="noopener">Lihat peta</a>
           </dd>
         </div>
       </dl>
 
-      <div class="kt-countdown" aria-label="Hitung mundur">
-        <span><b id="cd-days">0</b> hari</span>
-        <span><b id="cd-hours">00</b> jam</span>
-        <span><b id="cd-minutes">00</b> menit</span>
-        <span><b id="cd-seconds">00</b> detik</span>
+      <div class="kt-countdown" aria-label="Hitung mundur" data-reveal="ink" style="--reveal-i:2">
+        <span data-reveal="stamp" style="--reveal-i:0"><b id="cd-days">0</b> hari</span>
+        <span data-reveal="stamp" style="--reveal-i:1"><b id="cd-hours">00</b> jam</span>
+        <span data-reveal="stamp" style="--reveal-i:2"><b id="cd-minutes">00</b> menit</span>
+        <span data-reveal="stamp" style="--reveal-i:3"><b id="cd-seconds">00</b> detik</span>
       </div>
 
       <div class="kt-event__actions">
-        <a class="kt-btn" id="btn-add-calendar" target="_blank" rel="noopener">Simpan ke kalender</a>
+        <a class="kt-btn" id="btn-add-calendar" data-reveal="hold" style="--reveal-i:3"> target="_blank" rel="noopener">Simpan ke kalender</a>
       </div>
 
-      <div class="kt-dress" id="kt-dress" hidden>
-        <h3 class="kt-h3">Dresscode</h3>
+      <div class="kt-dress" id="kt-dress" hidden data-reveal="lift" style="--reveal-i:4">
+        <h3 class="kt-h3" data-reveal="ink">Dresscode</h3>
         <p id="dresscode-text"></p>
         <div class="kt-swatches" id="dresscode-swatches"></div>
       </div>
     </section>
 
     <section class="kt-sheet kt-live" id="livestream" data-chapter="Live">
-      <h2 class="kt-h2">Siaran Langsung</h2>
-      <div class="kt-live__links" id="livestream-links"></div>
+      <h2 class="kt-h2" data-reveal="offset">Siaran Langsung</h2>
+      <div class="kt-live__links" id="livestream-links" data-reveal="ink" style="--reveal-i:1"></div>
     </section>
 
     <!-- Cerita: entri bernomor bergaya editorial -->
     <section class="kt-sheet kt-story" id="love-story" data-chapter="Cerita">
-      <h2 class="kt-h2">Perjalanan Kami</h2>
+      <h2 class="kt-h2" data-reveal="offset">Perjalanan Kami</h2>
       <div class="kt-story__list" id="love-story-list"></div>
     </section>
 
     <!-- Galeri: grid majalah asimetris (besar-kecil bergantian) -->
     <section class="kt-sheet kt-gallery" id="gallery" data-chapter="Galeri">
-      <h2 class="kt-h2">Album</h2>
+      <h2 class="kt-h2" data-reveal="offset">Album</h2>
       <div class="kt-gallery__grid" id="kt-gallery-grid"></div>
     </section>
 
     <!-- RSVP & hadiah: blok formulir bergaya kartu balasan cetak -->
     <section class="kt-sheet kt-rsvp" id="gift" data-chapter="Balasan">
-      <h2 class="kt-h2">Kartu Balasan</h2>
+      <h2 class="kt-h2" data-reveal="offset">Kartu Balasan</h2>
 
-      <form class="kt-form" id="rsvp-form">
+      <form class="kt-form" id="rsvp-form" data-reveal="hold" style="--reveal-i:1">
         <label class="kt-field"><span>Nama</span>
           <input id="rsvp-name" type="text" autocomplete="name" required>
         </label>
@@ -168,12 +168,12 @@
         <p id="rsvp-status" class="kt-status" role="status"></p>
       </form>
 
-      <div class="kt-wishes" id="wishes-list"></div>
+      <div class="kt-wishes" id="wishes-list" data-reveal="fade" style="--reveal-i:2"></div>
       <div class="kt-wishes__nav" id="wishes-pagination" hidden></div>
 
       <div class="kt-gift">
-        <h3 class="kt-h3">Tanda Kasih</h3>
-        <button type="button" class="kt-btn" id="btn-gift-toggle">Lihat rekening &amp; alamat</button>
+        <h3 class="kt-h3" data-reveal="ink">Tanda Kasih</h3>
+        <button type="button" class="kt-btn" id="btn-gift-toggle" data-reveal="hold" style="--reveal-i:1">Lihat rekening &amp; alamat</button>
         <div id="gift-panel" hidden>
           <div id="gift-accounts"></div>
           <div id="gift-address"></div>
@@ -188,10 +188,10 @@
 
     <!-- Penutup: colophon -->
     <section class="kt-sheet kt-closing" id="closing" data-chapter="Penutup">
-      <p class="kt-rule" aria-hidden="true"></p>
-      <p class="kt-closing__text" id="closing-text"></p>
-      <h2 class="kt-display kt-display--sm" id="couple-names-closing"></h2>
-      <p class="kt-colophon" id="kt-colophon">Undangan Nikahku</p>
+      <p class="kt-rule" aria-hidden="true" data-reveal="rule"></p>
+      <p class="kt-closing__text" id="closing-text" data-reveal="ink" style="--reveal-i:1"></p>
+      <h2 class="kt-display kt-display--sm" id="couple-names-closing" data-reveal="offset" style="--reveal-i:2"></h2>
+      <p class="kt-colophon" id="kt-colophon" data-reveal="lift" style="--reveal-i:3">Undangan Nikahku</p>
     </section>
 
   </main>
