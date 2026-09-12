@@ -1845,7 +1845,10 @@ a { color: inherit; }
 .event-block:last-child { text-align: left; }
 .event-block:first-child .event-block__address { margin-right: 0; }
 .event-block:last-child .event-block__address { margin-left: 0; }
-.event-block:first-child .event-block__maps { margin-left: auto; }
+.event-block:first-child .event-block__maps { margin-left: auto;
+  /* Tinggi sasaran sentuh: tanpa padding ini hanya ~21px. */
+  padding: .4rem 0;
+}
 .event-block:last-child .event-block__maps { margin-right: auto; }
 .event-hero__divider { display: block; width: clamp(145px, 48%, 205px); height: auto; margin: clamp(.7rem, 2.2dvh, 1.15rem) auto; }
 .event-block__title {

@@ -117,6 +117,11 @@
     // akan pernah tercapai di situ, jadi gerak masuk dan penyorotan menu
     // masing-masing memakai pemicu berbasis posisi.
     cleanups.push(window.WeddingBehaviors.revealOnView(parts));
+    // Pemisah ornamen berdiri di antara bagian, bukan di dalamnya, jadi ia
+    // tidak ikut ditandai bersama bagian mana pun — diamati tersendiri supaya
+    // garisnya tetap tertarik saat dilewati.
+    cleanups.push(window.WeddingBehaviors.revealOnView(
+      root.querySelectorAll(".sj-divider"), { rootMargin: "0px 0px -5% 0px" }));
     cleanups.push(window.WeddingBehaviors.trackActive(parts, (part) => {
       menu.querySelectorAll("a").forEach((a) =>
         a.classList.toggle("is-active", a.dataset.go === part.id));

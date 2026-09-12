@@ -48,7 +48,7 @@ img { max-width: 100%; display: block; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 [hidden] { display: none !important; }
-::selection { background: var(--nc-brass); color: #0c0c10; }
+::selection { background: var(--nc-brass); color: var(--nc-bg); }
 :focus-visible { outline: 1px solid var(--nc-brass); outline-offset: 3px; }
 
 .nc { position: relative; }
@@ -77,17 +77,61 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 }
 .nc-scene__inner { position: relative; z-index: 2; width: min(100%, 46rem); margin: 0 auto; }
 
-/* Isi adegan naik & muncul saat adegannya mendarat. Ditandai render.js lewat
-   .is-live (IntersectionObserver), bukan animasi otomatis — jadi tamu selalu
-   melihat gerakannya, tidak "terpakai habis" sebelum sampai. */
+/* ── Gerak masuk: bahasa kamera film ─────────────────────────────────────
+   Bukan fade-naik yang sama di tiap bagian (gerak bawaan yang dipakai di mana
+   mana), melainkan satu gagasan yang konsisten dengan template ini: TITEL
+   FILM. Baris teks tersingkap dari bawah ke atas seperti kartu judul, sangat
+   pelan, sementara kamera mendekat ke foto latarnya.
+
+   Yang menandai .is-live adalah render.js (IntersectionObserver), bukan
+   animasi otomatis — jadi tamu selalu melihat gerakannya, tidak "terpakai
+   habis" sebelum adegannya sampai. */
 .nc-scene__inner > * {
-  opacity: 0; transform: translateY(14px);
-  transition: opacity .7s cubic-bezier(.22,.61,.36,1), transform .7s cubic-bezier(.22,.61,.36,1);
-  transition-delay: calc(var(--i, 0) * 90ms);
+  opacity: 0;
+  /* Tersingkap, bukan bergeser: isi ditutup dari bawah lalu dibuka. Inset
+     akhir dibuat negatif supaya ekor huruf (g, y) dan bayangan tidak ikut
+     terpotong setelah animasinya selesai. */
+  clip-path: inset(0 0 105% 0);
+  transform: translateY(8px);
+  transition:
+    opacity .9s cubic-bezier(.22,.61,.36,1),
+    clip-path 1.15s cubic-bezier(.22,.61,.36,1),
+    transform 1.15s cubic-bezier(.22,.61,.36,1);
+  transition-delay: calc(var(--i, 0) * 110ms);
 }
-.nc-scene.is-live .nc-scene__inner > * { opacity: 1; transform: none; }
+.nc-scene.is-live .nc-scene__inner > * {
+  opacity: 1; clip-path: inset(-25% 0 -25% 0); transform: none;
+}
+
+/* Nama mempelai mendarat ke fokus: jarak huruf merapat pelan, seperti lensa
+   yang menemukan titik tajamnya. Hanya di sini — satu tempat, satu kejutan. */
+.nc-names { letter-spacing: .07em; transition: letter-spacing 1.6s cubic-bezier(.22,.61,.36,1) .15s; }
+.nc-scene.is-live .nc-names { letter-spacing: 0; }
+
+/* Garis rambut melebar dari tengah, bukan ikut tersingkap. */
+.nc-cover__guest, .nc-dress { transform-origin: center; }
+.nc-scene .nc-hairline, .nc-cover__guest::before {
+  transform: scaleX(0); transform-origin: center;
+  transition: transform 1.1s cubic-bezier(.22,.61,.36,1) .25s;
+}
+.nc-scene.is-live .nc-hairline, .nc-scene.is-live .nc-cover__guest::before { transform: scaleX(1); }
+
+/* Foto galeri menyusul satu per satu, tidak serentak — mata sempat singgah. */
+.nc-gallery__grid button {
+  opacity: 0; transform: scale(1.04);
+  transition: opacity .8s ease, transform 1.1s cubic-bezier(.22,.61,.36,1);
+}
+.nc-gallery.is-live .nc-gallery__grid button { opacity: 1; transform: none; }
+.nc-gallery__grid button:nth-child(2n) { transition-delay: .08s; }
+.nc-gallery__grid button:nth-child(3n) { transition-delay: .16s; }
+.nc-gallery__grid button:nth-child(5n) { transition-delay: .24s; }
+
 @media (prefers-reduced-motion: reduce) {
-  .nc-scene__inner > * { opacity: 1; transform: none; transition: none; }
+  .nc-scene__inner > *, .nc-gallery__grid button {
+    opacity: 1; transform: none; clip-path: none; transition: none;
+  }
+  .nc-names, .nc-scene.is-live .nc-names { letter-spacing: 0; transition: none; }
+  .nc-scene .nc-hairline { transform: none; transition: none; }
   .nc-scroll { scroll-behavior: auto; }
 }
 
@@ -100,7 +144,11 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
   filter: brightness(.42) saturate(.85) contrast(1.05);
   transition: transform 9s linear;
 }
-.nc-scene.is-live .nc-bg { transform: scale(calc(var(--zoom, 1) * 1.07)); }
+.nc-scene .nc-bg { transform: scale(calc(var(--zoom, 1) * 1.12)); }
+.nc-scene.is-live .nc-bg { transform: scale(var(--zoom, 1)); }
+@media (prefers-reduced-motion: reduce) {
+  .nc-scene .nc-bg, .nc-scene.is-live .nc-bg { transform: scale(var(--zoom, 1)); transition: none; }
+}
 .nc-bg--dim { filter: brightness(.28) saturate(.8); }
 .nc-bg::after {
   content: ""; position: absolute; inset: 0;
@@ -208,11 +256,18 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
   transition: border-color .3s, color .3s, background .3s;
 }
 .nc-btn:hover { border-color: var(--nc-brass); color: var(--nc-brass); }
-.nc-btn--solid { background: var(--nc-brass); border-color: var(--nc-brass); color: #0c0c10; }
-.nc-btn--solid:hover { background: #c6a670; border-color: #c6a670; color: #0c0c10; }
+.nc-btn--solid { background: var(--nc-brass); border-color: var(--nc-brass); color: var(--nc-bg); }
+.nc-btn--solid:hover {
+  background: color-mix(in srgb, var(--nc-brass) 82%, var(--nc-ink));
+  border-color: color-mix(in srgb, var(--nc-brass) 82%, var(--nc-ink));
+  color: var(--nc-bg);
+}
 .nc-link {
-  color: var(--nc-brass); text-decoration: none; font-size: .78rem;
-  letter-spacing: .1em; border-bottom: 1px solid rgba(179,146,95,.4); padding-bottom: 2px;
+  /* display+padding bukan hiasan: tanpanya tinggi sasaran sentuh cuma ~19px,
+     dan tautan peta termasuk yang paling sering diketuk tamu. */
+  display: inline-block; padding: .4rem 0; line-height: 1.5;
+  color: var(--nc-brass); text-decoration: none; font-size: .84rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--nc-brass) 45%, transparent);
 }
 .nc-link:hover { border-bottom-color: var(--nc-brass); }
 
@@ -267,7 +322,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .nc-wishes__nav { display: flex; gap: 1rem; align-items: center; justify-content: center; margin-top: 1.2rem; }
 .nc-wishes__nav .wishes-page-btn {
   color: var(--nc-brass); font-size: .74rem; letter-spacing: .12em;
-  border-bottom: 1px solid rgba(179,146,95,.4); padding-bottom: 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--nc-brass) 40%, transparent); padding-bottom: 2px;
 }
 .nc-wishes__nav .wishes-page-btn:disabled { color: var(--nc-ink-3); border-bottom-color: transparent; cursor: default; }
 .nc-wishes__nav .wishes-page-info { font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: var(--nc-ink-3); }
@@ -298,10 +353,10 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .gift-account__holder { margin-top: .2rem; font-size: .8rem; color: var(--nc-ink-2); }
 .gift-copy-btn {
   flex: none; padding: .5rem .85rem; background: transparent; color: var(--nc-brass);
-  border: 1px solid rgba(179,146,95,.45); border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--nc-brass) 45%, transparent); border-radius: 2px;
   font-size: .64rem; letter-spacing: .16em; text-transform: uppercase; cursor: pointer;
 }
-.gift-copy-btn:hover { background: rgba(179,146,95,.12); }
+.gift-copy-btn:hover { background: color-mix(in srgb, var(--nc-brass) 12%, transparent); }
 #gift-address { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; background: var(--nc-bg-2); padding: 1rem 1.1rem; }
 .gift-address__text { font-size: .86rem; line-height: 1.7; color: var(--nc-ink-2); }
 .gift-address__text strong { color: var(--nc-ink); font-weight: 400; }
@@ -329,6 +384,11 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .nc-dots {
   position: fixed; z-index: 6; right: clamp(.7rem, 2vw, 1.4rem); top: 50%;
   transform: translateY(-50%); display: grid; gap: .85rem;
+}
+/* Titik navigasi sengaja kecil secara visual, tapi area sentuhnya dibesarkan
+   lewat padding transparan — titik 7px mustahil dikenai jari dengan yakin. */
+.nc-dots button {
+  padding: 17px; background-clip: content-box; box-sizing: content-box;
 }
 .nc-dots button {
   display: block; width: 7px; height: 7px; border-radius: 50%;

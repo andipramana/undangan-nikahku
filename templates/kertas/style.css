@@ -86,7 +86,7 @@ a { color: inherit; text-decoration: none; }
 .kt-masthead__tools { justify-self: end; display: flex; gap: .5rem; }
 
 .kt-tool {
-  width: 34px; height: 34px; display: grid; place-items: center;
+  width: 40px; height: 40px; display: grid; place-items: center;
   border: 1px solid var(--kt-line); color: var(--kt-ink);
 }
 .kt-tool svg { width: 16px; height: 16px; }
@@ -142,15 +142,55 @@ a { color: inherit; text-decoration: none; }
   .kt-sheet { margin-left: max(22rem, 26vw); margin-right: auto; padding-left: 0; padding-right: 2rem; }
 }
 
-/* Gerak masuk: pelan, sedikit, sekali. */
-.kt-sheet > * { opacity: 0; transform: translateY(12px); transition: opacity .7s ease, transform .7s ease; }
-.kt-sheet > *:nth-child(2) { transition-delay: .06s; }
-.kt-sheet > *:nth-child(3) { transition-delay: .12s; }
-.kt-sheet > *:nth-child(4) { transition-delay: .18s; }
-.kt-sheet > *:nth-child(n+5) { transition-delay: .24s; }
-.kt-sheet.is-live > * { opacity: 1; transform: none; }
+/* ── Gerak masuk: bahasa mesin cetak ─────────────────────────────────────
+   Bukan fade-naik yang dipakai di mana-mana, melainkan gagasan yang berasal
+   dari subjeknya: TINTA DISAPU ROL. Tiap baris tersingkap dari kiri ke kanan
+   — arah baca, arah rol — tanpa bergeser naik-turun sama sekali. Kertasnya
+   diam; yang berubah cuma tintanya. */
+.kt-sheet > * {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: opacity .5s ease, clip-path .85s cubic-bezier(.33,.8,.35,1);
+}
+.kt-sheet > *:nth-child(2) { transition-delay: .07s; }
+.kt-sheet > *:nth-child(3) { transition-delay: .14s; }
+.kt-sheet > *:nth-child(4) { transition-delay: .21s; }
+.kt-sheet > *:nth-child(n+5) { transition-delay: .28s; }
+.kt-sheet.is-live > * { opacity: 1; clip-path: inset(-30% -10% -30% 0); }
+
+/* Nama mempelai: dua drum tinta yang meleset lalu bertemu — salah cetak
+   (misregistration) yang justru jadi tanda tangan cetak riso. Cuma di sini;
+   sisanya dijaga tenang. */
+.kt-cover .kt-display {
+  text-shadow: .18em -.12em 0 var(--kt-accent);
+  transition: text-shadow 1.1s cubic-bezier(.2,.7,.3,1) .25s,
+              opacity .5s ease, clip-path .85s cubic-bezier(.33,.8,.35,1);
+}
+.kt-cover.is-live .kt-display { text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+
+/* Blok ajakan di sampul sengaja TIDAK ikut disapu. clip-path memotong area
+   sentuh, bukan cuma tampilan — dengan giliran sapuan paling akhir, tombol
+   "Buka Undangan" tidak bisa ditekan selama hampir satu detik pertama.
+   Tombol utama harus siap sejak tamu melihatnya. */
+.kt-cover__to { clip-path: none; transition: opacity .5s ease .1s; }
+.kt-cover.is-live .kt-cover__to { clip-path: none; }
+
+/* Garis pemisah ditarik dari kiri, seperti mistar penggaris halaman. */
+.kt-rule { transform: scaleX(0); transform-origin: left center; transition: transform .9s cubic-bezier(.33,.8,.35,1); }
+.kt-sheet.is-live .kt-rule { transform: scaleX(1); }
+
+/* Foto galeri: satu per satu mengikuti irama kisinya, bukan serentak. */
+.kt-gallery__grid button { opacity: 0; clip-path: inset(0 0 100% 0); transition: opacity .6s ease, clip-path .9s cubic-bezier(.33,.8,.35,1); }
+.kt-gallery.is-live .kt-gallery__grid button { opacity: 1; clip-path: inset(0); }
+.kt-gallery__grid button:nth-child(2n) { transition-delay: .1s; }
+.kt-gallery__grid button:nth-child(3n) { transition-delay: .2s; }
+
 @media (prefers-reduced-motion: reduce) {
-  .kt-sheet > * { opacity: 1; transform: none; transition: none; }
+  .kt-sheet > *, .kt-gallery__grid button {
+    opacity: 1; clip-path: none; transition: none;
+  }
+  .kt-cover .kt-display { text-shadow: none; transition: none; }
+  .kt-rule, .kt-sheet.is-live .kt-rule { transform: none; transition: none; }
 }
 
 .kt-rule { height: 1px; margin: 0 0 2rem; background: var(--kt-ink); }
@@ -191,9 +231,12 @@ a { color: inherit; text-decoration: none; }
 .kt-btn--solid { background: var(--kt-ink); color: var(--kt-paper); }
 .kt-btn--solid:hover { background: var(--kt-accent); border-color: var(--kt-accent); }
 .kt-link {
+  /* Padding vertikal bukan hiasan: tanpa itu tinggi sasarannya cuma ~26px
+     dan tautan peta sering meleset saat diketuk. */
   display: inline-block; color: var(--kt-accent);
   font-family: var(--kt-sans); font-size: .88rem;
-  border-bottom: 1px solid currentColor; padding-bottom: 1px;
+  padding: .35rem 0; line-height: 1.5;
+  border-bottom: 1px solid currentColor;
 }
 
 /* ---------- Sampul ----------

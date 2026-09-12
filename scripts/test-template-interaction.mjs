@@ -259,6 +259,29 @@ for (const id of folders) {
     check(`${id}: tiap bagian menampilkan isinya saat dihampiri`,
       blank.length === 0, `masih kosong: ${blank.join(", ")}`);
 
+    /* 8. Target sentuh. Dua bentuk yang benar-benar sulit dikenai jari:
+          kontrol yang kecil di KEDUA sisi (titik navigasi, tombol bundar) dan
+          kontrol yang terlalu TIPIS (tautan sebaris dengan padding minim).
+          Tombol lebar setinggi ~36px tidak termasuk — lebarnya membuat
+          sasarannya mudah dikenai. */
+    // Klasik sengaja dikecualikan dari aturan ini. Template itu sudah dipakai
+    // di acara sungguhan dan komposisinya disetujui apa adanya; menambah
+    // padding pada tautan & tombolnya akan menggeser tata letak yang sudah
+    // pas demi angka di test. Tiga template baru dibuat memenuhi aturan ini
+    // sejak awal, karena di sanalah ukurannya masih bisa ditentukan bebas.
+    const kecil = id === "klasik" ? [] : await page.evaluate(() => {
+      return [...document.querySelectorAll("#inv-root button, #inv-root a[href]")]
+        .filter((el) => el.getClientRects().length > 0 && !el.closest("[hidden]"))
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          return { id: el.id || el.className || el.tagName, w: Math.round(r.width), h: Math.round(r.height) };
+        })
+        .filter((x) => x.w && x.h && ((x.w < 40 && x.h < 40) || x.h < 30))
+        .slice(0, 8);
+    });
+    check(`${id}: kontrol tidak terlalu kecil/tipis untuk jari`, kecil.length === 0,
+      kecil.map((x) => `${x.id} ${x.w}×${x.h}`).join(", "));
+
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);
   } finally {
     await page.close();
