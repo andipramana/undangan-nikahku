@@ -8,7 +8,7 @@
   <audio id="bg-audio" loop preload="none"></audio>
 
   <!-- Kepala tetap: nomor edisi + kendali. Meniru masthead majalah. -->
-  <header class="kt-masthead" id="kt-masthead">
+  <header class="kt-masthead" id="kt-masthead" hidden>
     <span class="kt-masthead__issue" id="kt-issue"></span>
     <span class="kt-masthead__names" id="kt-masthead-names"></span>
     <span class="kt-masthead__tools">
@@ -22,7 +22,7 @@
   </header>
 
   <!-- Daftar isi: kolom lengket di kiri pada layar lebar, laci di HP. -->
-  <button class="kt-index-btn" id="kt-index-btn" type="button" aria-expanded="false">Daftar isi</button>
+  <button class="kt-index-btn" id="kt-index-btn" type="button" aria-expanded="false" hidden>Daftar isi</button>
   <nav class="kt-index" id="kt-index" aria-label="Daftar isi"></nav>
 
   <main class="kt-paper" id="kt-paper">

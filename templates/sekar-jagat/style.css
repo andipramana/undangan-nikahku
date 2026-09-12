@@ -20,6 +20,13 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* WAJIB, jangan dihapus: modal & panel di template ini memakai display grid/flex
+   di kelasnya, dan aturan kelas MENGALAHKAN `[hidden] { display: none }` bawaan
+   browser. Tanpa baris ini, lightbox & modal yang "tersembunyi" tetap menutupi
+   layar dan menelan setiap klik — termasuk tombol Buka Undangan. */
+[hidden] { display: none !important; }
+
+
 :root {
   --sj-indigo: #16233f;
   --sj-indigo-2: #1f3054;

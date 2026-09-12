@@ -234,6 +234,11 @@
 
       const paper = $("kt-paper");
       paper.classList.add("is-locked");
+      // Isi undangan sudah ditahan oleh .is-locked (bagian lain di-display:none),
+      // jadi kunci gulir dokumen dilepas sejak awal: kalau sampul sedikit
+      // meluap di layar pendek, tamu tetap bisa menggeser untuk meraih tombol
+      // Buka Undangan — bukan terjebak melihat tombol yang tak bisa disentuh.
+      document.documentElement.classList.remove("no-scroll");
       $("btn-open").addEventListener("click", () => {
         paper.classList.remove("is-locked");
         document.documentElement.classList.remove("no-scroll");
@@ -241,6 +246,11 @@
         (window.__openCallbacks || []).forEach((fn) => fn());
         window.__openCallbacks = [];
         audio.play();
+        // Masthead & daftar isi baru berguna setelah ada isi untuk dinavigasi —
+        // sebelum itu keduanya cuma menutupi sampul (tombol daftar isi bahkan
+        // sempat menindih tombol Buka Undangan).
+        $("kt-masthead").hidden = false;
+        $("kt-index-btn").hidden = false;
         $("opening").scrollIntoView({ behavior: "smooth" });
       }, { once: true });
 

@@ -20,6 +20,13 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* WAJIB, jangan dihapus: modal & panel di template ini memakai display grid/flex
+   di kelasnya, dan aturan kelas MENGALAHKAN `[hidden] { display: none }` bawaan
+   browser. Tanpa baris ini, lightbox & modal yang "tersembunyi" tetap menutupi
+   layar dan menelan setiap klik — termasuk tombol Buka Undangan. */
+[hidden] { display: none !important; }
+
+
 :root {
   --kt-paper: #f3efe6;
   --kt-paper-2: #ece7db;
@@ -189,15 +196,29 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid currentColor; padding-bottom: 1px;
 }
 
-/* ---------- Sampul ---------- */
-.kt-cover { padding-top: clamp(2.5rem, 9vw, 5rem); }
-.kt-cover__meta { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; margin: 1.6rem 0 2.2rem; }
-.kt-cover__date { margin: 0; font-family: var(--kt-serif); font-size: 1.15rem; }
+/* ---------- Sampul ----------
+   Harus SELESAI dalam satu layar HP: tombol "Buka Undangan" pernah jatuh di
+   bawah lipatan sementara gulir masih terkunci, jadi tamu benar-benar tidak
+   bisa menjangkaunya. Karena itu tingginya dipatok ke layar dan foto memakai
+   tinggi yang ikut layar (dvh), bukan rasio tetap yang bisa memanjang. */
+.kt-cover {
+  min-height: 100dvh;
+  display: grid; align-content: center;
+  padding-block: clamp(1.5rem, 6vw, 3.5rem);
+  row-gap: 0;
+}
+.kt-cover__meta { display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; margin: 1.1rem 0 1.4rem; }
+.kt-cover__date { margin: 0; font-family: var(--kt-serif); font-size: 1.1rem; }
 .kt-cover__venue { margin: 0; font-size: .82rem; color: var(--kt-ink-2); }
-.kt-cover__figure { margin: 0 0 2.2rem; }
-.kt-cover__figure img { width: 100%; aspect-ratio: 4/5; object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%); }
-.kt-cover__to { border-top: 1px solid var(--kt-line); padding-top: 1.4rem; }
-.kt-guest { margin: 0 0 1.4rem; font-family: var(--kt-serif); font-size: clamp(1.4rem, 5vw, 2rem); }
+.kt-cover__figure { margin: 0 0 1.4rem; }
+.kt-cover__figure img {
+  width: 100%; height: min(34dvh, 320px);
+  object-fit: cover; object-position: var(--fx, 50%) var(--fy, 50%);
+}
+.kt-cover__to { border-top: 1px solid var(--kt-line); padding-top: 1.1rem; }
+.kt-guest { margin: 0 0 1.1rem; font-family: var(--kt-serif); font-size: clamp(1.3rem, 4.5vw, 2rem); }
+.kt-cover .kt-display { font-size: clamp(2.5rem, 13vw, 6.5rem); }
+.kt-cover .kt-rule { margin-bottom: 1.4rem; }
 
 /* ---------- Ayat ---------- */
 .kt-arabic {
