@@ -284,6 +284,12 @@
 
       if (window.initRsvp) window.initRsvp();
       if (window.initGift) window.initGift();
+      // WAJIB setelah initGift: gift.js hanya mendaftarkan markup rekening &
+      // alamat yang dibuatnya ke mesin reveal DI DALAM handler tombol toggle
+      // (revealNow/revealScan di assets/js/gift.js). Template ini membiarkan
+      // panelnya selalu terbuka, jadi tombol itu tidak pernah diklik — tanpa
+      // baris ini kartu rekening ada di DOM tapi tinggal transparan selamanya.
+      if (window.revealScan) window.revealScan(document.getElementById("gift-panel"));
       if (window.initQrCheckin) window.initQrCheckin();
       if (window.applyVisualEditorOverrides) window.applyVisualEditorOverrides(cfg);
       // Nama mempelai dipecah per huruf lalu dimunculkan bergantian. Dipanggil

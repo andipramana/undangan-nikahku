@@ -146,6 +146,16 @@ for (const id of folders) {
     check(`${id}: tidak ada elemen [hidden] yang tetap tampil`,
       visibleHidden.length === 0, visibleHidden.join(", "));
 
+    /* 1b. Sebelum undangan dibuka, kontrol navigasi belum boleh terlihat:
+           tamu belum punya apa pun untuk dinavigasi, dan titik/menu yang
+           mengambang di atas sampul hanya mengganggu fotonya. */
+    const navDini = await page.evaluate(() =>
+      [...document.querySelectorAll("#nc-dots, #kt-index-btn, #sj-menu-btn, #kt-masthead")]
+        .filter((el) => el.getClientRects().length > 0)
+        .map((el) => el.id));
+    check(`${id}: kontrol navigasi belum muncul sebelum undangan dibuka`,
+      navDini.length === 0, navDini.join(", "));
+
     /* 2. Yang benar-benar tersentuh jari di posisi tombol memang tombolnya. */
     const hit = await page.evaluate(() => {
       const btn = document.getElementById("btn-open");
@@ -405,6 +415,34 @@ for (const id of folders) {
     if (latar.total) {
       check(`${id}: foto latar adegan benar-benar muncul (${latar.total - latar.gelap.length}/${latar.total})`,
         latar.gelap.length === 0, latar.gelap.join(", "));
+    }
+
+    /* 13. Nomor rekening harus benar-benar TERLIHAT. Markup ini dibuat
+           gift.js setelah render, dan gift.js hanya mendaftarkannya ke mesin
+           reveal di dalam handler tombol toggle — template yang membiarkan
+           panelnya selalu terbuka tidak pernah melewati handler itu, sehingga
+           kartunya ada di DOM tapi tinggal transparan. Dilaporkan dari HP
+           sebagai "nomor rekeningnya pada gak ada". */
+    const rekening = await page.evaluate(async () => {
+      const gift = document.getElementById("gift");
+      if (!gift) return { ada: false };
+      gift.scrollIntoView({ block: "center", behavior: "auto" });
+      await new Promise((r) => setTimeout(r, 2600));
+      // Template yang masih menyembunyikan panelnya di balik tombol (klasik)
+      // dilewati: di sana kartu memang belum seharusnya terlihat sampai tamu
+      // menekan tombolnya sendiri.
+      const panel = document.getElementById("gift-panel");
+      if (!panel || panel.hidden) return { ada: false };
+      const nomor = [...document.querySelectorAll(".gift-account__number")];
+      if (!nomor.length) return { ada: false };
+      const tampak = nomor.filter((el) => el.checkVisibility
+        ? el.checkVisibility({ opacityProperty: true, visibilityProperty: true })
+        : Number(getComputedStyle(el).opacity) > 0.05);
+      return { ada: true, total: nomor.length, tampak: tampak.length };
+    });
+    if (rekening.ada) {
+      check(`${id}: nomor rekening terlihat di Tanda Kasih (${rekening.tampak}/${rekening.total})`,
+        rekening.tampak === rekening.total);
     }
 
     check(`${id}: tidak ada error sepanjang alur`, errors.length === 0, errors[0]);

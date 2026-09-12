@@ -53,7 +53,9 @@
 
     const dots = $("nc-dots");
     if (dots) {
-      dots.hidden = false;
+      // Sengaja TIDAK ditampilkan di sini. Selama sampul, tamu belum punya
+      // apa pun untuk dinavigasi — titiknya cuma mengambang mengganggu foto.
+      // Dimunculkan handler tombol "Buka Undangan".
       dots.innerHTML = scenes.map((sc) =>
         `<button type="button" data-go="${sc.id}" aria-label="${sc.dataset.scene || sc.id}"></button>`).join("");
       dots.addEventListener("click", (e) => {
@@ -237,6 +239,8 @@
         window.__openCallbacks = [];
         audio.play();
         $("cover").classList.add("is-live");
+        const dots = $("nc-dots");
+        if (dots) dots.hidden = false;
         // Bawa tamu ke adegan berikutnya, supaya jelas undangannya benar-benar
         // terbuka — tanpa ini layar tidak berubah sama sekali setelah ditekan.
         $("opening").scrollIntoView({ behavior: "smooth" });
@@ -251,6 +255,12 @@
 
       if (window.initRsvp) window.initRsvp();
       if (window.initGift) window.initGift();
+      // WAJIB setelah initGift: gift.js hanya mendaftarkan markup rekening &
+      // alamat yang dibuatnya ke mesin reveal DI DALAM handler tombol toggle
+      // (revealNow/revealScan di assets/js/gift.js). Template ini membiarkan
+      // panelnya selalu terbuka, jadi tombol itu tidak pernah diklik — tanpa
+      // baris ini kartu rekening ada di DOM tapi tinggal transparan selamanya.
+      if (window.revealScan) window.revealScan(document.getElementById("gift-panel"));
       if (window.initQrCheckin) window.initQrCheckin();
       if (window.applyVisualEditorOverrides) window.applyVisualEditorOverrides(cfg);
       // Nama mempelai dipecah per huruf lalu dimunculkan bergantian. Dipanggil
