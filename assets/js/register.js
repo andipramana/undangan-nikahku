@@ -183,6 +183,54 @@
   });
 
   /* ---------- Modal client baru (alur sekunder) ---------- */
+
+  /* Katalog template — file statis publik, tidak perlu menunggu sesi login
+   * gerbang di atas. Satu sumber kebenaran yang sama dibaca picker Template
+   * di admin panel tiap client (assets/js/panel/pages/template.js). */
+  let templateCatalog = [];
+  async function loadTemplateOptions() {
+    try {
+      const res = await fetch("templates/index.json", { cache: "no-cache" });
+      templateCatalog = (await res.json()).templates || [];
+    } catch (_) {
+      templateCatalog = [{ id: "klasik", name: "Classic Elegance", desc: "" }];
+    }
+    const select = $("template-id");
+    select.innerHTML = templateCatalog.map((t) =>
+      `<option value="${esc(t.id)}" ${t.id === "klasik" ? "selected" : ""}>${esc(t.name)}</option>`).join("");
+    updateTemplateHint();
+  }
+  function updateTemplateHint() {
+    const t = templateCatalog.find((x) => x.id === $("template-id").value);
+    $("template-id-hint").textContent = t ? t.desc || "" : "";
+  }
+  $("template-id").addEventListener("change", updateTemplateHint);
+  loadTemplateOptions();
+
+  /* Cek ketersediaan slug — peringatan lunak saja, constraint unik di DB
+   * (kode 23505, ditangani di handler submit) tetap jaring pengaman terakhir
+   * untuk race condition (dua tab admin, dsb.). */
+  let slugCheckTimer = null;
+  $("slug").addEventListener("input", () => {
+    const hint = $("slug-hint");
+    hint.className = "p-hint";
+    const slug = $("slug").value.trim().toLowerCase();
+    clearTimeout(slugCheckTimer);
+    if (!slug) { hint.textContent = ""; return; }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) { hint.textContent = "Hanya huruf kecil, angka, dan tanda hubung."; return; }
+    hint.textContent = "Memeriksa…";
+    slugCheckTimer = setTimeout(async () => {
+      try {
+        const { available } = await invoke({ action: "check_slug", slug });
+        // Slug di kotak bisa sudah berubah selagi menunggu jawaban server —
+        // jangan menimpa hint kalau begitu.
+        if ($("slug").value.trim().toLowerCase() !== slug) return;
+        hint.className = available ? "p-hint" : "p-warning";
+        hint.textContent = available ? "Tersedia ✓" : "Slug ini sudah dipakai.";
+      } catch (_) { /* offline / gagal — diam saja, submit tetap jadi jaring pengaman */ }
+    }, 400);
+  });
+
   $("client-new-open").addEventListener("click", () => { clientModal.hidden = false; });
   const closeClientModal = () => { clientModal.hidden = true; };
   $("client-modal-close").addEventListener("click", closeClientModal);
@@ -208,12 +256,15 @@
     try {
       await invoke({
         action: "create", slug, displayName,
+        templateId: $("template-id").value,
         brideName: get("bride-name"), groomName: get("groom-name"),
         adminEmail: get("admin-email"), adminPassword: $("admin-password").value,
         qrEmail: get("qr-email"), qrPassword: $("qr-password").value
       });
       closeClientModal();
       form.reset();
+      updateTemplateHint();
+      $("slug-hint").textContent = "";
       api.toast(`Client "${displayName}" berhasil dibuat.`, false);
       await loadClients();
     } catch (err) {

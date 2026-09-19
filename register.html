@@ -105,6 +105,11 @@ form.p-modal__panel { display: grid; gap: var(--p-3); }
 <form id="register-form" class="p-modal__panel" role="dialog" aria-modal="true" aria-labelledby="client-modal-title">
   <div class="p-modal__header"><h3 id="client-modal-title">Buat client baru</h3><button type="button" id="client-modal-close" class="p-modal__close" aria-label="Tutup">×</button></div>
   <label class="p-field"><span>Slug path</span><input class="p-input" id="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="siti-dan-ujang"></label>
+  <p class="p-hint" id="slug-hint" style="margin-top:-.4rem"></p>
+  <!-- Daftar diisi register.js dari templates/index.json — satu sumber
+       kebenaran yang sama dipakai picker Template di admin panel client. -->
+  <label class="p-field"><span>Template</span><select class="p-select" id="template-id" required></select></label>
+  <p class="p-hint" id="template-id-hint" style="margin-top:-.4rem"></p>
   <div class="p-grid-2">
     <label class="p-field"><span>Nama mempelai wanita</span><input class="p-input" id="bride-name" required placeholder="Siti"></label>
     <label class="p-field"><span>Nama mempelai pria</span><input class="p-input" id="groom-name" required placeholder="Ujang"></label>

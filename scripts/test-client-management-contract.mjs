@@ -23,6 +23,10 @@ const checks = [
   ['create client jadi modal terpisah', html.includes('id="client-new-open"') && html.includes('id="client-modal"') && /id="client-modal" class="p-modal"/.test(html) && /<form id="register-form" class="p-modal__panel"/.test(html)],
   ['field kredensial root dihapus total', !html.includes('owner-email') && !html.includes('owner-password') && !js.includes('ensureRootLogin')],
   ['form create tetap lengkap (slug, mempelai, akun admin & QR)', ['id="slug"','id="bride-name"','id="groom-name"','id="display-name"','id="admin-email"','id="admin-password"','id="qr-email"','id="qr-password"'].every(t => html.includes(t))],
+  ['form create punya pemilih template', html.includes('id="template-id"')],
+  ['pemilih template dimuat dari templates/index.json', js.includes('templates/index.json')],
+  ['create mengirim templateId terpilih', js.includes('templateId: $("template-id").value')],
+  ['slug dicek ketersediaannya sebelum submit (peringatan lunak)', html.includes('id="slug-hint"') && js.includes('action: "check_slug"')],
 
   // ---- URL per client selalu tampak (dibangun dari slug, konvensi tenant.js) ----
   ['URL undangan/admin/QR dibangun dari slug', /invitation:\s*`\/\$\{slug\}\/`/.test(js) && /admin:\s*`\/\$\{slug\}\/admin\/`/.test(js) && /adminQr:\s*`\/\$\{slug\}\/admin-qr\/`/.test(js)],
@@ -43,7 +47,10 @@ const checks = [
   ['fn: update_member_account memakai service-role Auth admin', fn.includes('action === "update_member_account"') && fn.includes('admin.auth.admin.updateUserById')],
   ['fn: target update wajib anggota invitation_members', /\.from\("invitation_members"\)\.select\("invitation_id"\)\.eq\("user_id", userId\)/.test(fn)],
   ['fn: sandi minimal 8 karakter divalidasi server', /newPassword\.length < 8/.test(fn)],
-  ['fn: hapus permanen tetap bersihkan Storage + Auth users', fn.includes('admin.auth.admin.deleteUser') && fn.includes('admin.storage.from("photos")')]
+  ['fn: hapus permanen tetap bersihkan Storage + Auth users', fn.includes('admin.auth.admin.deleteUser') && fn.includes('admin.storage.from("photos")')],
+  ['fn: aksi check_slug tersedia (root-owner-only, di bawah gerbang yang sama)', fn.includes('action === "check_slug"')],
+  ['fn: create menerima templateId dan menuliskannya ke content undangan baru', fn.includes('body.templateId') && fn.includes('content.templateId = templateId')],
+  ['fn: templateId divalidasi bentuknya, bukan daftar id yang di-hardcode (supaya template baru tidak perlu redeploy)', /templateId\)\s*\)\s*return fail/.test(fn) && !/templateId\s*===\s*"klasik"\s*\|\|\s*templateId\s*===\s*"nocturne"/.test(fn)]
 ];
 for (const [label, pass] of checks) {
   if (!pass) throw new Error(`FAIL: ${label}`);

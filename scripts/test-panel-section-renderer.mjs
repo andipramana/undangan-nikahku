@@ -64,6 +64,8 @@ window.PanelStore = {
 };
 window.PanelRouter = { setDirty(v, fn) { window.__dirty = v; window.__onSave = fn; } };
 window.PanelPhotos = { mount(el, slot) { el.dataset.mountedSlot = slot; return { destroy() {} }; } };
+window.__tplPhotoCommits = 0;
+window.PanelTemplatePhotos = { mount(el, photoSpec) { el.dataset.mountedTplSlot = photoSpec.slot; return { commit() { window.__tplPhotoCommits++; }, destroy() {} }; } };
 window.AdminAPI = { toast(msg, isErr) { window.__toast = { msg, isErr }; } };
 `;
 
@@ -98,8 +100,13 @@ try {
   await page.evaluate(() => window.__onSave());
   const writes = await page.evaluate(() => window.__writes);
   check("mempelai: menulis ke path bersarang yang benar", writes["couple.bride.name"] === "Ayu Lestari");
-  check("mempelai: menyimpan hanya top-level key yang tersentuh",
-    JSON.stringify(await page.evaluate(() => window.__saved)) === JSON.stringify(["couple"]));
+  // "templates" ikut tersimpan karena bab ini punya slot foto (bride/groom):
+  // onSave() commit() picker per-template lalu memasukkan "templates" ke
+  // keys, idempotent walau admin tidak menyentuh picker sama sekali.
+  check("mempelai: menyimpan top-level key yang tersentuh + templates (ada slot foto)",
+    JSON.stringify(await page.evaluate(() => window.__saved)) === JSON.stringify(["couple", "templates"]));
+  check("mempelai: picker per-template (bride & groom) di-commit saat simpan",
+    await page.evaluate(() => window.__tplPhotoCommits) === 2);
 
   /* ── Field wajib kosong memblokir simpan ─────────────────────────────── */
   await page.locator("#outlet input").first().fill("   ");
@@ -123,8 +130,8 @@ try {
   const acaraWrites = await page.evaluate(() => window.__writes);
   check("acara: warna dresscode tersimpan sebagai array, bukan string",
     Array.isArray(acaraWrites["dresscode.colors"]) && acaraWrites["dresscode.colors"].length === 3);
-  check("acara: menyimpan kedua top-level key yang tersentuh",
-    JSON.stringify(await page.evaluate(() => window.__saved)) === JSON.stringify(["event", "dresscode"]));
+  check("acara: menyimpan top-level key yang tersentuh + templates (ada slot foto)",
+    JSON.stringify(await page.evaluate(() => window.__saved)) === JSON.stringify(["event", "dresscode", "templates"]));
 
   /* ── Bab Cerita: editor daftar objek ─────────────────────────────────── */
   await mountSection("cerita");

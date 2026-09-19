@@ -672,6 +672,16 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
   font-family: var(--p-font-mono); font-size: 11px; letter-spacing: 0;
 }
 .p-photo-card__actions { display: flex; gap: .3rem; flex-wrap: wrap; }
+
+/* Kartu foto yang belum dicentang di picker per-template
+   (assets/js/panel/photo-template-picker.js) — meredup, bukan hilang, supaya
+   admin tetap melihat seluruh pool sambil memilih. */
+.p-photo-card--excluded .p-photo-card__thumb { opacity: .38; filter: grayscale(.3); }
+
+/* Panel picker per-template (di bawah picker pool dasar dalam kartu yang
+   sama) — garis tipis memisahkannya dari picker dasar di atasnya. */
+.p-tplphoto { margin-top: var(--p-4); padding-top: var(--p-3); border-top: 1px dashed var(--p-hairline); }
+.p-tplphoto__title { margin: 0; font-size: 13px; font-weight: 650; color: var(--p-ink); }
 .p-photo-card.dragging { opacity: .5; }
 .p-upload-wrap { display: inline-block; cursor: pointer; }
 /* Zona unggah — target klik & seret file dari OS */

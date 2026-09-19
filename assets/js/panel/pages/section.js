@@ -61,6 +61,7 @@
       group: "Isi Undangan",
       icon: window.PanelUI.icon(section.icon || "page"),
       photoHandles: [],
+      templatePhotoHandles: [],
 
       async mount(outlet) {
         const store = window.PanelStore;
@@ -89,7 +90,11 @@
             const p = part.photo;
             // Judul kartu sudah menyebut fotonya kalau kartunya memang milik
             // foto itu sendiri — jangan diulang jadi label ganda.
-            const inner = `<div id="ph-${escAttr(p.slot)}"></div>`;
+            // Dua mount: picker DASAR (pool bersama, upload/hapus/crop
+            // umum) lalu di bawahnya picker KHUSUS TEMPLATE AKTIF (pilih
+            // subset + urutan + crop sendiri dari pool yang sama) — lihat
+            // assets/js/panel/photo-template-picker.js.
+            const inner = `<div id="ph-${escAttr(p.slot)}"></div><div class="p-tplphoto" id="tph-${escAttr(p.slot)}"></div>`;
             return c.name === p.label ? inner : `<div class="p-field"><span>${esc(p.label)}</span>${inner}</div>`;
           }).join("");
           return card(c.name, c.desc, body);
@@ -130,6 +135,9 @@
 
         this.photoHandles = photos.map((p) =>
           window.PanelPhotos.mount(outlet.querySelector("#ph-" + p.slot), p.slot));
+        const templatePhotoHandles = photos.map((p) =>
+          window.PanelTemplatePhotos.mount(outlet.querySelector("#tph-" + p.slot), p, markDirty));
+        this.templatePhotoHandles = templatePhotoHandles;
 
         /* ── Simpan ───────────────────────────────────────────────────────── */
         async function onSave() {
@@ -153,7 +161,15 @@
           }
 
           const keys = [...new Set(fields.map((f) => topKey(f.path)))];
-          if (!keys.length) return true;   // section foto saja — tidak ada teks untuk disimpan
+          // Draft picker per-template (centang/urutan/crop) ditulis ke content
+          // in-memory di sini, lalu ikut UPSERT yang sama dengan field biasa —
+          // satu klik Simpan, satu panggilan jaringan. commit() idempotent,
+          // aman dipanggil walau admin tidak menyentuh picker sama sekali.
+          if (templatePhotoHandles.length) {
+            templatePhotoHandles.forEach((h) => h.commit());
+            if (!keys.includes("templates")) keys.push("templates");
+          }
+          if (!keys.length) return true;   // section tanpa field maupun foto
           const { error } = await store.save(keys);
           if (error) { window.AdminAPI.toast("Gagal menyimpan: " + error.message, true); return false; }
           window.AdminAPI.toast("Tersimpan ✓");
@@ -164,6 +180,8 @@
       destroy() {
         (this.photoHandles || []).forEach((h) => h.destroy());
         this.photoHandles = [];
+        (this.templatePhotoHandles || []).forEach((h) => h.destroy());
+        this.templatePhotoHandles = [];
       }
     };
   };

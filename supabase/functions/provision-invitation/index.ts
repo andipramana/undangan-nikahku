@@ -149,9 +149,16 @@ Deno.serve(async (req) => {
     if (error || !data) throw new Error("Default statis belum dibuat. Ambil snapshot root terlebih dahulu.");
     return { content: data.content as Record<string, unknown>, photos: (data.photos || []) as TemplatePhoto[] };
   };
-  const applyTemplate = async (toInvitationId: string, displayName: string, brideName = "Mempelai Wanita", groomName = "Mempelai Pria") => {
+  const applyTemplate = async (toInvitationId: string, displayName: string, brideName = "Mempelai Wanita", groomName = "Mempelai Pria", templateId = "klasik") => {
     const template = await readTemplate(); const content = sanitizeContent(template.content, displayName);
     content.couple = { ...(content.couple || {}), bride: blankPerson(brideName), groom: blankPerson(groomName) };
+    // Desain yang dipilih client saat dibuat. Sengaja TIDAK divalidasi
+    // terhadap daftar id yang di-hardcode di sini — templates/index.json
+    // adalah satu sumber kebenaran, dan id yang salah/tidak dikenal sudah
+    // otomatis jatuh ke klasik di sisi tamu (lihat fallback di main.js/
+    // core/engine.js). Kalau divalidasi di sini, menambah template baru akan
+    // butuh redeploy Edge Function — kopling yang tidak perlu.
+    content.templateId = templateId;
     const { error: contentError } = await admin.from("site_content").upsert({ invitation_id: toInvitationId, id: 1, content }, { onConflict: "invitation_id,id" });
     if (contentError) throw new Error(contentError.message);
     const { error: removeError } = await admin.from("photos").delete().eq("invitation_id", toInvitationId);
@@ -193,11 +200,26 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ demo: { slug: demo.slug }, copiedFrom: "static_default" }), { headers });
   }
 
+  // Cek ketersediaan slug SEBELUM submit — UX saja, bukan jaring pengaman
+  // utama. Constraint unik di kolom `slug` (kode 23505, ditangani di bawah)
+  // tetap yang terakhir menentukan; race condition antara cek ini dan submit
+  // sungguhan (dua tab admin, dsb.) tetap aman lewat itu.
+  if (action === "check_slug") {
+    const slug = clean(body.slug).toLowerCase();
+    if (slug === "root" || slug === "demo" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      return new Response(JSON.stringify({ available: false, reason: "invalid" }), { headers });
+    }
+    const { data } = await admin.from("invitations").select("id").eq("slug", slug).maybeSingle();
+    return new Response(JSON.stringify({ available: !data }), { headers });
+  }
+
   if (action !== "create") return fail("Aksi tidak dikenal");
   const slug = clean(body.slug).toLowerCase();
   if (slug === "root" || slug === "demo") return fail("Slug ini dicadangkan untuk template sistem");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return fail("Slug hanya huruf kecil, angka, dan tanda hubung");
   for (const field of ["adminEmail", "adminPassword", "qrEmail", "qrPassword"]) if (!clean(body[field])) return fail(`Field ${field} wajib diisi`);
+  const templateId = clean(body.templateId) || "klasik";
+  if (!/^[a-z0-9-]+$/.test(templateId)) return fail("Template tidak valid");
   const { data: created, error: invitationError } = await admin.from("invitations").insert({ slug, display_name: clean(body.displayName || slug) }).select("id,slug").single();
   if (invitationError) return fail(invitationError.code === "23505" ? "Slug sudah dipakai" : invitationError.message);
   const invitationId = created.id;
@@ -213,7 +235,7 @@ Deno.serve(async (req) => {
   try {
     await createAccount(clean(body.adminEmail), String(body.adminPassword), "admin");
     await createAccount(clean(body.qrEmail), String(body.qrPassword), "admin_qr");
-    await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"));
+    await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
     const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://undangan.andipramana.com/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
   return new Response(JSON.stringify({ invitation: created, urls: { invitation: `/${slug}/`, admin: `/${slug}/admin/`, adminQr: `/${slug}/admin-qr/` } }), { headers });

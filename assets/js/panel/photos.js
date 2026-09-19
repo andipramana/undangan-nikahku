@@ -49,7 +49,7 @@
   // -------------------------------------------------------------------------
   const Editor = (function () {
     const { sb, photoUrl, toast } = window.AdminAPI;
-    let item = null, folder = "", ratio = 1, zoom = 1, allPhotos = [], onSaved = null;
+    let item = null, folder = "", ratio = 1, zoom = 1, allPhotos = [], onSaved = null, saveFn = null;
 
     function ratioFor(folderName, index) {
       if (folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)) {
@@ -92,9 +92,22 @@
       return { x: Math.max(0, size.width - size.frameWidth), y: Math.max(0, size.height - size.frameHeight) };
     }
 
-    function open(photo, folderName, index, photosList, savedCb) {
+    /** `saveCustomFn`, kalau diisi, dipanggil sebagai
+     * `await saveCustomFn({focalX, focalY, zoom})` alih-alih menulis
+     * langsung ke tabel `photos` — dipakai photo-template-picker.js supaya
+     * crop per-template tersimpan di memori dulu (ditunda sampai bar Simpan
+     * halaman ditekan), bukan langsung ke DB seperti mode dasar. Tanpa
+     * argumen ini perilakunya persis seperti sebelumnya.
+     *
+     * `ratioOverride` (angka W/H), kalau diisi, dipakai apa adanya alih-alih
+     * `ratioFor()` — photo-template-picker.js memakainya supaya bingkai
+     * editor mengikuti rasio yang dideklarasikan TEMPLATE aktif (mis. "3/4"
+     * di manifest Nocturne), bukan FOLDER_RATIO milik klasik. Slot yang sama
+     * bisa minta rasio berbeda di template berbeda — itulah intinya. */
+    function open(photo, folderName, index, photosList, savedCb, saveCustomFn, ratioOverride) {
       item = photo; folder = folderName; allPhotos = photosList || [photo]; onSaved = savedCb || null;
-      ratio = ratioFor(folderName, index);
+      saveFn = saveCustomFn || null;
+      ratio = ratioOverride || ratioFor(folderName, index);
       zoom = Number(photo.zoom) || 1;
       const shape = folderName === "gallery" && window.GalleryLayout && Number.isInteger(index)
         ? ` — ${window.GalleryLayout.labelAt(index, allPhotos)}, baris ${window.GalleryLayout.rowAt(index, allPhotos)}`
@@ -171,12 +184,15 @@
       const img = document.getElementById("p-editor-img");
       const btn = document.getElementById("p-editor-save");
       btn.disabled = true;
-      const { error } = await sb.from("photos")
-        .update({ focal_x: Number(img.dataset.fx), focal_y: Number(img.dataset.fy), zoom })
-        .eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", item.id);
+      const focalX = Number(img.dataset.fx), focalY = Number(img.dataset.fy);
+      const result = saveFn
+        ? await saveFn({ focalX, focalY, zoom })
+        : await sb.from("photos")
+            .update({ focal_x: focalX, focal_y: focalY, zoom })
+            .eq("invitation_id", window.AdminAPI.tenant.invitationId).eq("id", item.id);
       btn.disabled = false;
-      if (error) { toast("Gagal menyimpan: " + error.message, true); return; }
-      toast("Pan & zoom tersimpan ✓");
+      if (result && result.error) { toast("Gagal menyimpan: " + result.error.message, true); return; }
+      toast((result && result.message) || "Pan & zoom tersimpan ✓");
       window.PanelUI.closeModal(document.getElementById("p-editor"));
       if (onSaved) onSaved();
     });
