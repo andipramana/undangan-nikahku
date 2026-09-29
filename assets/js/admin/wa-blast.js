@@ -95,13 +95,13 @@
 
   // Base URL publik undangan klien ini — SATU sumber untuk token ${link} dan
   // tampilan readonly di Pengaturan pesan. Domain produksi (CNAME) + basePath
-  // tenant: root → https://undangan.andipramana.com/, klien ber-slug →
+  // tenant: root → https://willcome.my.id/, klien ber-slug →
   // .../<slug>/. Sengaja tidak dibaca dari wa_settings.invitation_link lagi —
   // link adalah bagian dari provisioning, bukan sesuatu yang boleh berubah
   // dari panel (kalau beda dengan domain tamu, pesan WA menaut alamat salah).
   function publicInviteBase() {
     const base = window.TenantContext ? window.TenantContext.basePath : "/";
-    return "https://undangan.andipramana.com" + base;
+    return "https://willcome.my.id" + base;
   }
 
   window.WaBlast = { load };

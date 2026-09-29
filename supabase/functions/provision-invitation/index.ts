@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
   if (action === "sync_demo") {
     const { data: demo, error: demoError } = await admin.from("invitations").upsert({ slug: "demo", display_name: "Demo Undangan" }, { onConflict: "slug" }).select("id,slug").single();
     if (demoError || !demo) return fail(demoError?.message || "Gagal menyiapkan demo");
-    try { await applyTemplate(demo.id, "Demo Undangan"); const { error: waError } = await admin.from("wa_settings").upsert({ invitation_id: demo.id, id: 1, invitation_link: "https://undangan.andipramana.com/demo/" }, { onConflict: "invitation_id,id" }); if (waError) throw new Error(waError.message); }
+    try { await applyTemplate(demo.id, "Demo Undangan"); const { error: waError } = await admin.from("wa_settings").upsert({ invitation_id: demo.id, id: 1, invitation_link: "https://willcome.my.id/demo/" }, { onConflict: "invitation_id,id" }); if (waError) throw new Error(waError.message); }
     catch (error) { return fail(error instanceof Error ? error.message : "Gagal memperbarui demo dari default statis"); }
     return new Response(JSON.stringify({ demo: { slug: demo.slug }, copiedFrom: "static_default" }), { headers });
   }
@@ -236,7 +236,7 @@ Deno.serve(async (req) => {
     await createAccount(clean(body.adminEmail), String(body.adminPassword), "admin");
     await createAccount(clean(body.qrEmail), String(body.qrPassword), "admin_qr");
     await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
-    const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://undangan.andipramana.com/${slug}/` }); if (settingError) throw new Error(settingError.message);
+    const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://willcome.my.id/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
   return new Response(JSON.stringify({ invitation: created, urls: { invitation: `/${slug}/`, admin: `/${slug}/admin/`, adminQr: `/${slug}/admin-qr/` } }), { headers });
 });
