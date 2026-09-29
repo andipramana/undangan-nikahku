@@ -125,7 +125,13 @@ window.PanelPages["editor-visual"] = {
     function decorateFrame(frame) {
       const doc = frame.contentDocument; if (!doc) return;
       doc.documentElement.classList.remove("no-scroll");
-      doc.getElementById("invitation")?.classList.remove("is-locked");
+      // Bukan getElementById("invitation") — itu nama <main> milik klasik saja.
+      // Ketiga template baru mengunci sampul di elemen scroll masing-masing
+      // (#nc-scroll/#kt-paper/#sj-main), tapi keempatnya memakai NAMA KELAS
+      // yang sama (is-locked) untuk mekanisme "terkunci sampai tombol Buka
+      // Undangan ditekan" — cukup cari elemen mana pun yang masih membawanya,
+      // template ke-5 nanti otomatis ikut jalan tanpa menyentuh baris ini lagi.
+      doc.querySelector(".is-locked")?.classList.remove("is-locked");
       const cover = doc.getElementById("cover");
       cover?.classList.remove("is-exiting");
       if (cover) { cover.style.setProperty("transition", "none", "important"); cover.style.setProperty("transform", "none", "important"); }

@@ -8,7 +8,13 @@
   // dan override visualEditor yang tersimpan menunjuk elemen salah. Styling
   // kartu sudah ditangani target khusus wish.card.
   const EXCLUDE = "script,style,svg,path,option,.ve-pencil,[aria-hidden='true'],.wish-card";
-  const candidates = (doc) => [...doc.querySelectorAll("#invitation h1,#invitation h2,#invitation h3,#invitation h4,#invitation p,#invitation small,#invitation button,#invitation a,#invitation label,#invitation strong,#invitation legend,#gift-confirm-modal h3,#gift-confirm-modal p,#gift-confirm-modal button,#gift-confirm-modal label,#gift-recs-modal h3,#gift-recs-modal p,#gift-recs-modal button,#gift-recs-modal a")]
+  // #inv-root, BUKAN #invitation: itu elemen mount UNIVERSAL yang didefinisikan
+  // cangkang (index.html), sama untuk keempat template. #invitation cuma nama
+  // <main> milik klasik (templates/klasik/markup.html) — dulu selector ini
+  // ditulis untuk klasik saja, jadi candidates() kosong untuk Nocturne/Kertas/
+  // Sekar Jagat (id akar mereka nc-root/kt-root/sj-root). Klasik tetap tercakup
+  // karena <main id="invitation"> tetap ada DI DALAM #inv-root.
+  const candidates = (doc) => [...doc.querySelectorAll("#inv-root h1,#inv-root h2,#inv-root h3,#inv-root h4,#inv-root p,#inv-root small,#inv-root button,#inv-root a,#inv-root label,#inv-root strong,#inv-root legend,#gift-confirm-modal h3,#gift-confirm-modal p,#gift-confirm-modal button,#gift-confirm-modal label,#gift-recs-modal h3,#gift-recs-modal p,#gift-recs-modal button,#gift-recs-modal a")]
     .filter(el => !el.closest(EXCLUDE) && !el.closest("[data-ve-wish-dummy]") && el.textContent.trim() && !el.closest(".ve-pencil"));
   function markAutoTargets(doc) {
     candidates(doc).forEach((el, index) => {
