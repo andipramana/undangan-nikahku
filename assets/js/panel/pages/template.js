@@ -14,7 +14,10 @@ window.PanelPages["template"] = {
     let KNOWN_TEMPLATES = [];
     try {
       const res = await fetch("templates/index.json", { cache: "no-cache" });
-      KNOWN_TEMPLATES = (await res.json()).templates || [];
+      // `hidden: true` = template masih digarap: folder + entri katalog tetap
+      // ada (test kontrak mewajibkan katalog & folder sepadan, dan masih bisa
+      // dipratinjau lewat ?template=<id>), tapi client tidak boleh memilihnya.
+      KNOWN_TEMPLATES = ((await res.json()).templates || []).filter((t) => !t.hidden);
     } catch (_) {
       // Katalog tidak terbaca (offline) — jangan tampilkan halaman kosong.
       KNOWN_TEMPLATES = [{ id: "klasik", name: "Classic Elegance", desc: "", colors: [] }];
