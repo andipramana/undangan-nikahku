@@ -25,8 +25,21 @@
     const pre = document.getElementById("preloader");
     if (pre) pre.classList.add("hide");
   }
-  window.addEventListener("load", hidePreloader);
-  setTimeout(hidePreloader, 4000);
+  // Jaring pengaman keras sejak awal skrip (bukan setelah rantai await):
+  // preloader wajib hilang paling lambat 2,5 detik walau jaringan/decode lambat.
+  setTimeout(hidePreloader, 2500);
+
+  /** Tunggu foto cover selesai decode (maksimal 2,5 detik) sebelum menutup
+   * preloader, supaya preloader hilang karena SIAP, bukan karena timeout. */
+  async function waitForCoverDecode() {
+    const root = document.getElementById("inv-root");
+    const coverImg = root && (root.querySelector("#cover img[src]") || root.querySelector("img[src]"));
+    if (!coverImg || typeof coverImg.decode !== "function") return;
+    await Promise.race([
+      coverImg.decode().catch(() => {}),
+      new Promise((resolve) => setTimeout(resolve, 2500))
+    ]);
+  }
 
   /** Template lama memakai id "classic-elegance"; sejak template punya folder
    * sendiri namanya "klasik". Data tenant lama tidak perlu diubah — cukup
@@ -113,11 +126,16 @@
     // tiba — menambah satu perjalanan jaringan di jalur paling kritis.
     let pending = engine.prefetch(engine.initialId());
 
-    // Satu fetch payload (teks + foto). Gagal → localStorage; kosong semua →
-    // undangan tetap jalan dari config.js + manifest lokal (jaring pengaman).
-    const payload = await window.fetchInvitation();
+    const baseConfig = JSON.parse(JSON.stringify(window.WEDDING_CONFIG));
+    const cachedPayload = window.getCachedInvitation ? window.getCachedInvitation() : null;
+    const freshPromise = window.fetchInvitation();
+
+    // Stale-while-revalidate: kalau cache localStorage tersedia, render
+    // LANGSUNG dari cache (kunjungan ulang ≤ 0,8 s), lalu perbarui di latar
+    // belakang bila hasil RPC berbeda.
+    const payload = cachedPayload || (await freshPromise);
     if (payload && payload.content) {
-      window.WEDDING_CONFIG = core.mergeContent(window.WEDDING_CONFIG, payload.content);
+      window.WEDDING_CONFIG = core.mergeContent(JSON.parse(JSON.stringify(baseConfig)), payload.content);
     }
     window.__PHOTO_PAYLOAD = payload && payload.photos ? payload.photos : null;
     const cfg = window.WEDDING_CONFIG;
@@ -131,7 +149,7 @@
     const fromUrl = resolveId(new URLSearchParams(location.search).get("template"));
     const saved = resolveId(cfg.templateId || cfg.template);
     const rawWanted = fromUrl || saved || engine.DEFAULT_ID;
-    const wanted = engine.resolveKnownId ? await engine.resolveKnownId(rawWanted) : rawWanted;
+    let wanted = engine.resolveKnownId ? await engine.resolveKnownId(rawWanted) : rawWanted;
     // Tebakan awal meleset (mis. tenant baru saja ganti template di admin) —
     // buang dan unduh yang benar. Hanya terjadi sekali; kunjungan berikutnya
     // cache sudah benar.
@@ -146,6 +164,7 @@
       // Jangan tinggalkan tamu di layar kosong: kalau template pilihan tenant
       // rusak/hilang, jatuh ke template bawaan yang selalu ada di repo.
       if (wanted !== engine.DEFAULT_ID) {
+        wanted = engine.DEFAULT_ID;
         await engine.mount(
           engine.prefetch(engine.DEFAULT_ID),
           (manifest, root) => buildContext(cfg, engine.DEFAULT_ID, manifest, root)
@@ -153,6 +172,33 @@
       }
     }
 
+    await waitForCoverDecode();
     hidePreloader();
+
+    // Revalidasi latar belakang saat render awal berasal dari cache.
+    if (cachedPayload) {
+      freshPromise.then(async (fresh) => {
+        if (!fresh || !fresh.content || window.__invitationOpen) return;
+        const prevSig = JSON.stringify({ c: cachedPayload.content, p: cachedPayload.photos });
+        const nextSig = JSON.stringify({ c: fresh.content, p: fresh.photos });
+        if (prevSig === nextSig) return;
+        window.WEDDING_CONFIG = core.mergeContent(JSON.parse(JSON.stringify(baseConfig)), fresh.content);
+        window.__PHOTO_PAYLOAD = fresh.photos || null;
+        const nextCfg = window.WEDDING_CONFIG;
+        applyMeta(nextCfg);
+        const nextSaved = resolveId(nextCfg.templateId || nextCfg.template);
+        const nextRaw = fromUrl || nextSaved || engine.DEFAULT_ID;
+        const nextWanted = engine.resolveKnownId ? await engine.resolveKnownId(nextRaw) : nextRaw;
+        projectTemplateSettings(nextCfg, nextWanted);
+        const activeTpl = window.WeddingTemplates[wanted];
+        if (activeTpl && typeof activeTpl.destroy === "function") {
+          try { activeTpl.destroy(); } catch (_) {}
+        }
+        await engine.mount(
+          engine.prefetch(nextWanted),
+          (manifest, root) => buildContext(nextCfg, nextWanted, manifest, root)
+        ).catch(() => {});
+      }).catch(() => {});
+    }
   });
 })();

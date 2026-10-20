@@ -168,19 +168,33 @@
     document.head.appendChild(link);
   }
 
+  function preloadFont(href) {
+    if (document.querySelector(`link[rel="preload"][href="${href}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "font";
+    link.type = "font/woff2";
+    link.crossOrigin = "anonymous";
+    link.href = href;
+    link.dataset.templateFont = "1";
+    document.head.appendChild(link);
+  }
+
   /** Pasang template ke halaman: aset → markup → render.js → render(ctx). */
   async function mount(pending, ctxFactory) {
     const { id } = pending;
     const [manifest, markup] = await Promise.all([pending.manifest, pending.markup]);
 
     const assets = manifest.assets || {};
-    // CSS template dimuat SEBELUM markup dipasang supaya tidak ada kedip
-    // "markup tanpa gaya" di layar.
-    await Promise.all([
-      ...(assets.fonts || []).map((h) => loadCss(h, "templateFont")),
-      ...(assets.css || []).map((h) => loadCss(h, "templateAsset")),
-      loadCss(`templates/${id}/style.css`, "templateStyle")
-    ]);
+    // Preload maksimal 2 file font woff2 layar pertama; CSS font/pihak ketiga
+    // dimuat paralel TANPA memblokir paint pertama (hanya style.css template
+    // yang wajib di-await agar tidak ada kedip tanpa gaya).
+    const fontList = assets.fonts || [];
+    fontList.filter((h) => /\.woff2($|\?)/i.test(h)).slice(0, 2).forEach(preloadFont);
+    fontList.filter((h) => !/\.woff2($|\?)/i.test(h)).forEach((h) => loadCss(h, "templateFont"));
+    (assets.css || []).forEach((h) => loadCss(h, "templateAsset"));
+
+    await loadCss(`templates/${id}/style.css`, "templateStyle");
 
     // ctx dibangun lebih awal daripada markup semata-mata supaya setelan warna
     // milik template aktif (ctx.tpl.theme) sudah bisa dipakai di bawah ini —
@@ -196,10 +210,10 @@
     root.dataset.tpl = id;
     document.documentElement.dataset.tpl = id;
 
-    // Modul perilaku yang diminta template, lalu render.js-nya sendiri.
-    // Berurutan (async=false) karena sebagian modul lama saling bergantung.
-    for (const src of assets.js || []) await loadJs(src);
-    await loadJs(`templates/${id}/render.js`);
+    // Sisipkan semua <script> sekaligus dengan async=false: browser mengunduh
+    // seluruh berkas secara paralel namun mengeksekusinya berurutan sesuai DOM.
+    const jsFiles = [...(assets.js || []), `templates/${id}/render.js`];
+    await Promise.all(jsFiles.map((src) => loadJs(src)));
 
     const tpl = window.WeddingTemplates[id];
     if (!tpl || typeof tpl.render !== "function") {

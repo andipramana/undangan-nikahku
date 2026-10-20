@@ -6,12 +6,19 @@ window.initAudioPlayer = function () {
   if (!audio || !btn) return;
 
   const audioConfig = window.WEDDING_CONFIG.audio || {};
-  // Audio unggahan admin disimpan sebagai path tenant di Storage. `src` hanya
-  // fallback untuk instalasi lama yang masih memakai file lokal/URL langsung.
-  audio.src = audioConfig.path && window.audioUrl
+  // Audio (>200 KB) JANGAN dimuat saat boot: pasang preload="none" dan baru isi
+  // audio.src saat tamu benar-benar membuka undangan / menekan play.
+  audio.preload = "none";
+  const resolvedSrc = audioConfig.path && window.audioUrl
     ? window.audioUrl(audioConfig.path)
     : audioConfig.src || "";
   audio.volume = 0.6;
+
+  function ensureSrc() {
+    if (!audio.getAttribute("src") && resolvedSrc) {
+      audio.src = resolvedSrc;
+    }
+  }
 
   /* Icon fa-play/fa-pause mengikuti status sebenarnya (bukan cuma niat
      play()/pause()) — supaya kalau autoplay diblokir browser, icon tetap
@@ -23,6 +30,7 @@ window.initAudioPlayer = function () {
   }
 
   function play() {
+    ensureSrc();
     audio
       .play()
       .then(() => {
