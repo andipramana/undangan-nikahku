@@ -4,6 +4,9 @@ import fs from 'node:fs/promises';
 // client sebagai tampilan utama dengan URL per client dan aksi kelola akun
 // lintas tenant. Create client menjadi modal sekunder TANPA field
 // email/password root (sesi gerbang yang dipakai).
+// Enumerasi templates/index.json secara dinamis (jangan hardcode nama template lama).
+const catalog = JSON.parse(await fs.readFile('templates/index.json', 'utf8')).templates || [];
+const sampleTplId = (catalog[1] || catalog[0] || { id: 'klasik' }).id;
 const [html, js, fn, css] = await Promise.all(['register.html','assets/js/register.js','supabase/functions/provision-invitation/index.ts','assets/css/panel.css'].map(p=>fs.readFile(p,'utf8')));
 const checks = [
   // ---- Gerbang login wajib dulu ----
@@ -50,7 +53,7 @@ const checks = [
   ['fn: hapus permanen tetap bersihkan Storage + Auth users', fn.includes('admin.auth.admin.deleteUser') && fn.includes('admin.storage.from("photos")')],
   ['fn: aksi check_slug tersedia (root-owner-only, di bawah gerbang yang sama)', fn.includes('action === "check_slug"')],
   ['fn: create menerima templateId dan menuliskannya ke content undangan baru', fn.includes('body.templateId') && fn.includes('content.templateId = templateId')],
-  ['fn: templateId divalidasi bentuknya, bukan daftar id yang di-hardcode (supaya template baru tidak perlu redeploy)', /templateId\)\s*\)\s*return fail/.test(fn) && !/templateId\s*===\s*"klasik"\s*\|\|\s*templateId\s*===\s*"nocturne"/.test(fn)]
+  ['fn: templateId divalidasi bentuknya, bukan daftar id yang di-hardcode (supaya template baru tidak perlu redeploy)', /templateId\)\s*\)\s*return fail/.test(fn) && !new RegExp(`templateId\\s*===\\s*"${sampleTplId}"`).test(fn)]
 ];
 for (const [label, pass] of checks) {
   if (!pass) throw new Error(`FAIL: ${label}`);

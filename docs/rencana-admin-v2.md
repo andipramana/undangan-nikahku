@@ -3,6 +3,7 @@
 > **Dokumen ini adalah spesifikasi eksekusi.** Ditulis untuk dieksekusi oleh sesi
 > coding lain. Baca seluruhnya sebelum menulis kode. Bagian §11 (Definition of
 > Done) adalah kontrak penerimaan.
+> *(Catatan historis v5: tiga template eksperimental awal `nocturne`, `kertas`, dan `sekar-jagat` telah dihapus di v5; panel admin kini hanya menampilkan template yang terdaftar di `templates/index.json`.)*
 
 ---
 

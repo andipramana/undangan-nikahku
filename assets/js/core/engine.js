@@ -62,6 +62,28 @@
     return res.json();
   }
 
+  /** Katalog template (templates/index.json), di-cache di memori. Dipakai untuk
+   * memverifikasi bahwa templateId tersimpan milik tenant masih ada di katalog
+   * aktif — kalau template lama sudah dihapus (mis. nocturne/kertas/sekar-jagat),
+   * mesin jatuh ke DEFAULT_ID ("klasik") tanpa menulis balik ke database. */
+  let catalogIdsPromise = null;
+  function getCatalogIds() {
+    if (!catalogIdsPromise) {
+      catalogIdsPromise = fetchJson("templates/index.json")
+        .then((data) => (data && Array.isArray(data.templates) ? data.templates.map((t) => t.id) : null))
+        .catch(() => null);
+    }
+    return catalogIdsPromise;
+  }
+
+  async function resolveKnownId(id) {
+    const target = String(id || "").trim() || DEFAULT_ID;
+    if (target === DEFAULT_ID) return DEFAULT_ID;
+    const ids = await getCatalogIds();
+    if (Array.isArray(ids) && !ids.includes(target)) return DEFAULT_ID;
+    return target;
+  }
+
   /** Mulai unduh manifest + markup lebih awal, tanpa menunggu data undangan. */
   function prefetch(id) {
     return {
@@ -190,5 +212,9 @@
     return ctx;
   }
 
-  window.WeddingEngine = { DEFAULT_ID, initialId, prefetch, mount, applyTheme, applyThemeOverrides, applyTypographyOverrides };
+  window.WeddingEngine = {
+    DEFAULT_ID, initialId, prefetch, mount,
+    applyTheme, applyThemeOverrides, applyTypographyOverrides,
+    getCatalogIds, resolveKnownId
+  };
 })();

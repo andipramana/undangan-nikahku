@@ -18,12 +18,15 @@ function check(label, pass, detail) {
   else { console.error(`FAIL: ${label}${detail ? ' — ' + detail : ''}`); failed = true; }
 }
 
-const [css, uiSrc, photosSrc, pickerSrc] = await Promise.all([
+const [css, uiSrc, photosSrc, pickerSrc, indexJson] = await Promise.all([
   fs.readFile('assets/css/panel.css', 'utf8'),
   fs.readFile('assets/js/panel/ui.js', 'utf8'),
   fs.readFile('assets/js/panel/photos.js', 'utf8'),
-  fs.readFile('assets/js/panel/photo-template-picker.js', 'utf8')
+  fs.readFile('assets/js/panel/photo-template-picker.js', 'utf8'),
+  fs.readFile('templates/index.json', 'utf8')
 ]);
+const catalog = JSON.parse(indexJson).templates || [];
+const targetTpl = catalog[1] || catalog[0] || { id: 'klasik', name: 'Classic Elegance' };
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -61,7 +64,7 @@ try {
       __overrides: {},
       tplGet(path, fallback) { return window.PanelStore.__overrides[path] ?? fallback; },
       tplSet(path, value) { window.__tplSet = { path, value }; window.PanelStore.__overrides[path] = value; },
-      activeManifest: async () => ({ id: 'nocturne', name: 'Nocturne' })
+      activeManifest: async () => (${JSON.stringify({ id: targetTpl.id, name: targetTpl.name })})
     };
   ` });
   await page.addScriptTag({ content: uiSrc });

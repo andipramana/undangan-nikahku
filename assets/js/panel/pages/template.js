@@ -26,6 +26,9 @@ window.PanelPages["template"] = {
     const ALIAS = { "classic-elegance": "klasik" };
     const raw = c.templateId || c.template || "klasik";
     let activeId = ALIAS[raw] || raw;
+    if (KNOWN_TEMPLATES.length > 0 && !KNOWN_TEMPLATES.some((t) => t.id === activeId)) {
+      activeId = "klasik";
+    }
 
     function render() {
       outlet.innerHTML = `

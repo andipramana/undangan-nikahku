@@ -21,11 +21,18 @@
 
   /** Id template aktif. Data lama menyimpan "classic-elegance"; template itu
    * sekarang bernama "klasik" (punya folder sendiri) — dipetakan saat dibaca
-   * supaya tenant lama tidak perlu dimigrasi datanya. */
+   * supaya tenant lama tidak perlu dimigrasi datanya. Kalau templateId menunjuk
+   * template yang sudah dihapus dari templates/index.json, jatuh ke "klasik"
+   * di memori tanpa menulis balik ke database. */
   const TEMPLATE_ALIAS = { "classic-elegance": "klasik" };
+  let knownTemplateIds = null;
   function templateIdOf(c) {
     const raw = String((c && (c.templateId || c.template)) || "klasik").replace(/\/+$/, "");
-    return TEMPLATE_ALIAS[raw] || raw;
+    const id = TEMPLATE_ALIAS[raw] || raw;
+    if (Array.isArray(knownTemplateIds) && knownTemplateIds.length > 0 && !knownTemplateIds.includes(id)) {
+      return "klasik";
+    }
+    return id;
   }
 
   /** Tanam default untuk key yang belum ada di site_content versi lama —
@@ -199,11 +206,26 @@
    * pemberitahuan), bukan meledak. */
   const manifestCache = new Map();
   async function activeManifest() {
+    if (knownTemplateIds === null) {
+      try {
+        const catRes = await fetch("templates/index.json", { cache: "no-cache" });
+        if (catRes && catRes.ok) {
+          const catJson = await catRes.json();
+          if (catJson && Array.isArray(catJson.templates) && catJson.templates.length > 0) {
+            knownTemplateIds = catJson.templates.map((t) => t.id);
+          }
+        }
+      } catch (_) { /* offline / test stub — lanjutkan */ }
+      if (knownTemplateIds === null) knownTemplateIds = [];
+    }
     const id = activeTemplateId();
     if (manifestCache.has(id)) return manifestCache.get(id);
     let manifest = { id, editor: {} };
     try {
-      const res = await fetch(`templates/${id}/template.json`, { cache: "no-cache" });
+      let res = await fetch(`templates/${id}/template.json`, { cache: "no-cache" });
+      if (!res.ok && id !== "klasik") {
+        res = await fetch("templates/klasik/template.json", { cache: "no-cache" });
+      }
       if (res.ok) manifest = await res.json();
     } catch (_) { /* offline / file hilang — pakai manifest kosong */ }
     manifestCache.set(id, manifest);

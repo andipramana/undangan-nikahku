@@ -125,9 +125,13 @@
     applyMeta(cfg);
 
     // ?template= (pratinjau dari admin) menang atas pilihan tersimpan tenant.
+    // Kalau content.templateId menunjuk template yang sudah tidak ada di
+    // templates/index.json, jatuh ke DEFAULT_ID ("klasik") tanpa menulis balik
+    // ke database (biarkan admin yang mengubahnya sendiri).
     const fromUrl = resolveId(new URLSearchParams(location.search).get("template"));
     const saved = resolveId(cfg.templateId || cfg.template);
-    const wanted = fromUrl || saved || engine.DEFAULT_ID;
+    const rawWanted = fromUrl || saved || engine.DEFAULT_ID;
+    const wanted = engine.resolveKnownId ? await engine.resolveKnownId(rawWanted) : rawWanted;
     // Tebakan awal meleset (mis. tenant baru saja ganti template di admin) —
     // buang dan unduh yang benar. Hanya terjadi sekali; kunjungan berikutnya
     // cache sudah benar.
