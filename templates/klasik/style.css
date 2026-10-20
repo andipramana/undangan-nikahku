@@ -1,3 +1,31 @@
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/eb-garamond/eb-garamond-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/eb-garamond/eb-garamond-400i.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/poppins/poppins-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../../assets/fonts/poppins/poppins-500.woff2") format("woff2");
+}
 :root {
   --color-bg: #f4eee3;
   --color-dark: #14120f;
@@ -6,99 +34,42 @@
   --color-gold-soft: #e6d7b3;
   --color-text: #2b2620;
   --color-text-light: #f7f3ea;
-  /* Referensi luxury-02 memakai Poppins (UI/heading) + Alegreya Sans (label kecil) +
-     font kaligrafi berbayar "edensor-free" untuk nama mempelai — diganti Beau Rivage
-     (Google Font gratis dengan karakter goresan tipis yang serupa). */
   --font-serif: "Poppins", "Segoe UI", sans-serif;
   --font-script: "EB Garamond", sans-serif;
   --font-sans: "Poppins", "Segoe UI", sans-serif;
   --font-label: "Alegreya Sans", "Segoe UI", sans-serif;
   --max-w: 560px;
-  /* Satu sumber overlay gelap closing — dipakai juga oleh background footer
-     supaya warnanya persis sama dengan overlay slideshow. */
   --overlay-closing: linear-gradient(180deg, rgba(10,9,7,.7) 0%, rgba(10,9,7,.78) 50%, rgba(10,9,7,.88) 100%);
 }
-
 * { box-sizing: border-box; }
-
-/* Atribut `hidden` cuma bernilai `display: none` di stylesheet BAWAAN browser,
-   dan deklarasi `display` apa pun dari stylesheet ini mengalahkannya. Tanpa
-   aturan ini, `.rsvp-form label { display: flex }` membuat kolom "Jumlah Tamu"
-   tetap terlihat walau sudah di-`hidden` lewat JS. Dipasang sebagai aturan
-   umum supaya setiap elemen ber-`hidden` berikutnya otomatis aman. */
 [hidden] { display: none !important; }
-
 html, body {
   margin: 0;
   padding: 0;
   font-family: var(--font-sans);
   color: var(--color-text);
-  /* Latar halaman: POLOS GELAP. Di desktop, area kiri-kanan kolom HP
-     (.app-frame) memperlihatkan warna ini; di HP kolom menutup seluruh
-     layar sehingga latar ini tidak pernah terlihat. */
   background: var(--color-dark);
   scroll-behavior: smooth;
-  /* Pengaman tingkat dokumen untuk gerak reveal yang menyamping (geseran Our
-     Story, zoom foto mempelai, kartu event miring). Klip UTAMA kini terjadi di
-     .app-frame (overflow-x: hidden di tepi kolom selebar ponsel) — aturan ini
-     tinggal jaring pengaman terakhir. Dipasang di html DAN body karena iOS
-     Safari mengabaikannya kalau hanya di body. */
   overflow-x: hidden;
 }
-
-/* ---------- Bingkai HP portrait ----------
-   Seluruh halaman dikurung dalam kolom selebar ponsel (430px) yang di-tengah
-   di desktop; di HP (lebar <=430px) kolom = seluruh layar, jadi tampilan
-   persis seperti sebelumnya. Nilai lebar yang sama dipakai admin.html &
-   admin-qr.html (admin.css) supaya ketiga halaman konsisten.
-
-   DUA LAPIS — containing block DIPISAH dari scroll container (perbaikan bug
-   "FAB/modal hanya tampil saat section pertama di layar"):
-
-   1. .app-frame = containing block semua elemen position:fixed (FAB audio/QR,
-      menu hamburger, semua .modal, .lightbox, #cover, #preloader, .toast):
-      `transform: translateZ(0)` membuatnya containing block (CSS spec:
-      fixed mengacu ke ancestor TERDEKAT yang punya transform — bukan ancestor
-      position:relative), dan `height: 100dvh` membuat anchor bottom:/inset:
-      dihitung dari kolom setinggi viewport (bukan min-height — kalau tingginya
-      mengikuti isi halaman, FAB melayang ke dasar dokumen). Ia TIDAK discroll
-      (overflow: hidden): scroll tidak boleh terjadi di elemen yang juga
-      containing block — kalau keduanya menyatu (transform + overflow-y:auto
-      di elemen yang sama), engine browser ikut menyeret elemen fixed naik
-      bersama konten, dan elemen itu "hilang" begitu discroll lewat viewport
-      pertama (gejala persis: FAB/modal hanya tampil saat #opening di layar).
-
-   2. .app-frame__scroll = scroller isi undangan (membungkus main#invitation di
-      index.html): overflow-y:auto + height:100dvh, TANPA transform apa pun.
-      Karena ia bukan containing block, perputaran scroll-nya tidak bisa
-      menyentuh elemen fixed di luar dirinya; karena .app-frame tidak discroll,
-      elemen fixed menempel ke kolom selamanya.
-
-   Aman bagi JS: reveal.js memakai IntersectionObserver (relatif viewport, klip
-   kolom tetap berlaku karena scroller membentang penuh) dan tidak ada
-   window.scrollY/scrollTo di proyek, jadi tidak ada logika yang menyesuaikan. */
 .app-frame {
   max-width: 430px;
   margin: 0 auto;
   position: relative;
   height: 100dvh;
-  overflow: hidden;           /* klip geseran reveal — scroller ada di lapis bawah */
+  overflow: hidden;           
   overscroll-behavior: contain;
-  background: var(--color-bg);  /* warna asli halaman di dalam kolom */
-  transform: translateZ(0);     /* containing block fixed descendant (lihat atas) */
+  background: var(--color-bg);  
+  transform: translateZ(0);     
 }
 .app-frame__scroll {
-  height: 100dvh;               /* scrollport = kolom setinggi viewport */
-  overflow-x: hidden;           /* klip geseran reveal di tepi kolom */
-  overflow-y: auto;             /* halaman scroll DI SINI, bukan di .app-frame */
+  height: 100dvh;               
+  overflow-x: hidden;           
+  overflow-y: auto;             
   overscroll-behavior: contain;
   scroll-behavior: smooth;
-  scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
+  scrollbar-width: thin;               
 }
-/* Snap mandatory hanya hidup pada rail full-screen (cover, hero-hero, Event,
-   Gift). Zona bebas di antara rail (livestream/love-story/galeri/rsvp/closing)
-   tetap scroll bebas, jadi tidak ditarik balik ke snap point terakhir — class
-   ini diatur main.js berdasarkan posisi scroll. */
 .app-frame__scroll.snap-mode--upper,
 .app-frame__scroll.snap-mode--gift {
   scroll-snap-type: y mandatory;
@@ -109,28 +80,20 @@ html, body {
   scroll-snap-stop: always;
 }
 .app-frame__scroll {
-  scrollbar-width: thin;               /* scrollbar ramping: kesan "frame HP" */
+  scrollbar-width: thin;               
   scrollbar-color: var(--color-gold) transparent;
 }
 .app-frame__scroll::-webkit-scrollbar { width: 6px; }
 .app-frame__scroll::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 3px; }
-
 html.no-scroll,
 html.no-scroll body {
   overflow: hidden;
   height: 100%;
 }
-/* Saat undangan terkunci (sebelum Buka Undangan), scroller ikut terkunci —
-   yang discroll adalah .app-frame__scroll, bukan body, jadi pembatasan
-   dipasang di sana. (.app-frame sendiri selalu overflow:hidden.) */
 html.no-scroll .app-frame__scroll { overflow: hidden; }
-
 img { max-width: 100%; display: block; }
-
 h1, h2, h3 { font-family: var(--font-serif); font-weight: 500; margin: 0; }
-
 a { color: inherit; }
-
 /* ---------- Preloader ---------- */
 #preloader {
   position: fixed; inset: 0; z-index: 9999;
@@ -147,11 +110,7 @@ a { color: inherit; }
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
 /* ---------- Audio FAB ---------- */
-/* 40px (dari 48px): FAB ramping yang tetap enak di-thumb.
-   Background sama dengan .btn-open (kapsul putih transparan) — konsisten
-   satu bahasa visual dengan tombol Buka Undangan. */
 .audio-fab {
   position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 500;
   width: 40px; height: 40px; border-radius: 50%;
@@ -159,12 +118,10 @@ a { color: inherit; }
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; color: #ffffff;
 }
-.audio-fab i { font-size: 14px; }
-
-/* Tombol QR check-in — ditumpuk di KANAN-BAWAH, persis di atas audio FAB:
-   bottom = jarak audio FAB dari tepi (1.1rem) + tingginya (40px) + jarak
-   antar-tombol (.9rem), supaya tidak nempel. Muncul hanya untuk tamu
-   perorangan (URL ber-?to=), diatur qr-checkin.js. */
+.audio-fab i { display: inline-flex; align-items: center; justify-content: center; font-style: normal; }
+.audio-ico { width: 14px; height: 14px; display: block; }
+#audio-toggle-icon.fa-play .audio-ico--pause,
+#audio-toggle-icon.fa-pause .audio-ico--play { display: none; }
 .qr-fab {
   position: fixed; right: 1.1rem; bottom: calc(1.1rem + 40px + .9rem); z-index: 500;
   width: 40px; height: 40px; border-radius: 50%;
@@ -173,10 +130,6 @@ a { color: inherit; }
   cursor: pointer; color: #fff;
 }
 .qr-fab svg { width: 18px; height: 18px; }
-
-/* Tombol menu hamburger — kembaran visual FAB lain (bulat, kapsul putih
-   transparan + garis emas), tapi di kanan atas: kanan bawah sudah dipakai
-   audio + QR FAB. Muncul hanya setelah undangan dibuka (lihat nav-menu.js). */
 .nav-fab {
   position: fixed; top: 1.1rem; right: 1.1rem; z-index: 500;
   width: 48px; height: 48px; border-radius: 50%;
@@ -185,8 +138,7 @@ a { color: inherit; }
   cursor: pointer; color: #fff;
 }
 .nav-fab svg { width: 22px; height: 22px; }
-
-/* ---------- Hero sections (cover / opening / closing) ---------- */
+/* ---------- Hero sections (cover / opening / closing) ------- */
 .section-hero {
   position: relative;
   min-height: 100dvh;
@@ -194,31 +146,17 @@ a { color: inherit; }
   overflow: hidden;
   text-align: center;
   color: var(--color-text-light);
-  scroll-snap-align: start; /* semua .section-hero full-screen by design → snap point */
+  scroll-snap-align: start; 
 }
 .section-hero--short { min-height: 90dvh; }
-/* #closing dikecualikan dari snap point (lihat penjelasan scroll-snap-type
-   di .app-frame__scroll) — terpisah jauh dari cluster full-screen pertama
-   oleh section-section panjang, jadi TIDAK ikut snap paksa. */
 #closing { scroll-snap-align: none; }
-
-/* Section hero dengan foto STATIS (bukan slideshow Ken Burns) — foto di-set
-   lewat JS sebagai inline background-image di .hero-media, jadi cukup
-   cover+center supaya tampil penuh seperti slideshow biasa. */
 .section-hero--static-bg .hero-media { background-size: cover; background-position: center; }
-
 .hero-media { position: absolute; inset: 0; overflow: hidden; }
 .hero-media img {
   width: 100%; height: 100%;
   object-fit: cover;
-  /* pan/zoom admin pada hero: --fx/--fy dipakai object-position, --zoom sudah
-     ditangani keyframe kenburns di atas */
   object-position: var(--fx, 50%) var(--fy, 50%);
 }
-/* Slide bergeser dari kiri ke kanan (filmstrip) saat berganti — foto baru
-   masuk dari kiri, foto lama keluar ke kanan, sempat bersebelahan.
-   (Khusus #opening di-override crossfade di bawah; cover & closing tetap
-   filmstrip.) */
 .hero-slide {
   position: absolute; inset: 0; overflow: hidden;
   transform: translateX(-100%);
@@ -226,10 +164,6 @@ a { color: inherit; }
 }
 .hero-slide.active { transform: translateX(0); z-index: 1; }
 .hero-slide.exiting { transform: translateX(100%); z-index: 1; }
-/* Hanya Save The Date 1 (#opening): crossfade — foto lama fade out bersamaan
-   foto baru fade in (keduanya overlap, "saat fade foto berikutnya sudah
-   masuk"). Durasi 1.2s WAJIB SAMA dengan OPENING_TRANSITION_MS di
-   hero-slideshow.js. */
 #opening .hero-slide {
   transform: none;
   opacity: 0;
@@ -238,27 +172,16 @@ a { color: inherit; }
 #opening .hero-slide.active { opacity: 1; }
 #opening .hero-slide.exiting { opacity: 0; }
 .kenburns { animation: kenburns 9s ease-in-out infinite alternate; }
-/* Zoom admin (--zoom) dimasukkan KE DALAM keyframe, bukan transform biasa di
-   elemen — animasi selalu menimpa transform statis, jadi --zoom di luar
-   keyframe akan diabaikan diam-diam (jebakan #5 rencana admin panel). */
 @keyframes kenburns {
   from { transform: scale(var(--zoom, 1)); }
   to   { transform: scale(calc(var(--zoom, 1) * 1.15)); }
 }
-/* Slideshow yang sedang di luar layar (cover setelah keluar, closing sebelum
-   discroll) — animasinya dibekukan, lihat hero-slideshow.js. */
 .hero-media--paused .kenburns { animation-play-state: paused; }
-
-
-/* Selaraskan dengan timing asli Elementor (Animate.css): durasi 1s, zoomIn dari scale(.3).
-   AOS sekarang HANYA dipakai section #cover — section di bawahnya pindah ke
-   mekanisme [data-reveal] (lihat bawah). */
 [data-aos="zoom-in"] { transform: scale(.3) !important; }
 [data-aos].aos-animate { transform: none !important; }
-
 .hero-overlay {
   position: absolute; inset: 0;
-  z-index: 2; /* di atas foto slideshow (z-index 1), di bawah teks (z-index 2, DOM belakang) */
+  z-index: 2; 
   background: linear-gradient(180deg,
     rgba(10,9,7,.35) 0%,
     rgba(10,9,7,.08) 22%,
@@ -273,20 +196,13 @@ a { color: inherit; }
     rgba(10,9,7,.15) 60%,
     rgba(10,9,7,.75) 100%);
 }
-/* Untuk section dengan konten di tengah (opening/closing) — perlu gelap merata,
-   bukan profil gelap-di-tepi/terang-di-tengah seperti cover. */
 .hero-overlay--center {
   background: linear-gradient(180deg, rgba(10,9,7,.4) 0%, rgba(10,9,7,.58) 50%, rgba(10,9,7,.7) 100%);
 }
-/* Closing (footer): gelap transparan lebih pekat agar teks di atas slider terbaca jelas */
 .hero-overlay--closing {
   background: var(--overlay-closing);
 }
 .hero-content, .hero-content * { text-shadow: 0 2px 14px rgba(0,0,0,.55); }
-
-/* Cover diperpanjang: foto sama menyambung dari layar-1 (nama+tombol) ke layar-2
-   (countdown), lalu gradasi jadi solid --color-dark persis di titik section
-   berikutnya mulai -> transisi mulus tanpa "sambungan" terlihat. */
 #cover { min-height: 0; display: block; }
 .cover-screen { position: relative; min-height: 100dvh; }
 .cover-screen .hero-content--split { position: absolute; inset: 0; }
@@ -300,79 +216,43 @@ a { color: inherit; }
   letter-spacing: .1em; text-transform: uppercase;
   font-size: .85rem; color: #fff; margin: 0;
 }
-/* Dorong konten section countdown ke bawah (anchor bawah tetap), tapi
-   horizontal di-CENTER (dulu rata kanan, diganti sesuai permintaan).
-   Class ini dipakai #opening (STD1) DAN #save-the-date-2 (STD2) — JANGAN naikkan
-   angka ini untuk menaikkan STD2 saja, itu ikut menggeser STD1. Kenaikan
-   khusus STD2 ada di rule ID-scoped di bawah. */
 .section-hero--anchor-right-bottom { align-items: flex-end; padding-bottom: 2.5rem; }
-/* Khusus Save The Date 2: naikkan seluruh blok (tombol+tanggal+countdown)
-   supaya tidak terlalu mepet ke bawah layar DAN tombol "Save The Date"
-   dapat jarak lebih lega dari tipografi "Save the Date" di atasnya —
-   menaikkan seluruh blok otomatis melebarkan gap itu tanpa menggeser posisi
-   relatif tanggal/countdown terhadap tombol (semuanya naik bersama). */
 #save-the-date-2.section-hero--anchor-right-bottom { padding-bottom: 9rem; }
 .section-hero--anchor-right-bottom .hero-content {
   width: 100%; max-width: 100%;
   padding-right: .9rem; padding-left: .9rem; padding-bottom: 0;
   text-align: center;
 }
-
 .countdown-heading { width: 100%; text-align: center; margin-bottom: .85rem; }
 .countdown-heading .eyebrow { text-align: center; }
 .countdown-heading .script-names { text-align: center; margin: .1rem 0; }
-
-/* Save The Date 2: rata kiri (bukan center seperti Save The Date 1), sejajar
-   dengan typography "SAVE the DATE" yang mulai di left: 7.5%. Hanya section
-   ini yang di-override — #opening (Save The Date 1) tetap center. */
 #save-the-date-2 .hero-content { text-align: left; padding-left: 7.5%; }
 #save-the-date-2 .countdown-heading { text-align: left; }
 #save-the-date-2 .cover-countdown__date { text-align: left; }
-/* .countdown--plain default: width 80% + 4 item flex:1 dengan text-align:center
-   — digit pertama jadi ketengahan DI DALAM slot-nya sendiri, bukan nempel ke
-   tepi kiri kontainer (itu sebabnya masih ada "spasi" sebelum elemen lain yang
-   rata kiri). Untuk Save The Date 2: lebar auto + flex-start + tiap item rata
-   kiri, supaya digit pertama ("Hari") benar-benar nempel di tepi kiri yang
-   sama dengan tanggal/tombol/teks SAVE the DATE di atasnya. */
 #save-the-date-2 .countdown--plain {
   width: auto; margin-left: 0; margin-right: auto;
   justify-content: flex-start; gap: 1.5rem;
 }
 #save-the-date-2 .countdown--plain .countdown__item { flex: none; text-align: left; }
-/* Hari/Jam/Menit dikasih padding kanan tambahan (Detik dibiarkan, tidak perlu
-   jarak setelah item terakhir) supaya barisnya lebih lebar/lega. */
 #save-the-date-2 .countdown--plain .countdown__item:not(:last-child) { padding-right: 1rem; }
-
 .scroll-chevron {
   display: block; margin-top: 1.25rem;
   font-size: 1.4rem; color: #ffffff;
   animation: chevron-bounce 1.8s ease-in-out infinite;
 }
 @keyframes chevron-bounce { 0%,100% { transform: translateY(0); opacity:.6; } 50% { transform: translateY(6px); opacity:1; } }
-
 .hero-overlay--cover {
   background: linear-gradient(180deg,
     rgba(10,9,7,.32) 0%,
     rgba(10,9,7,.08) 42%,
     rgba(10,9,7,.9) 100%);
 }
-/* Cover (screen pertama): overlay flat & tipis saja — keterbacaan teks bawah
-   ditangani terpisah oleh pita .hero-content--split::after, bukan gradient ini,
-   supaya tidak ada dua gradient warna yang tumpuk (penyebab "patahan"). */
-/* Tema bisa menimpa warna dasarnya lewat var (alpha .22 TETAP dari sini,
-   cuma r,g,b yang diganti) — fallback = warna asli. */
 .hero-overlay--flat { background: var(--overlay-flat, rgba(10,9,7,.22)); }
-
-.opening-thumbs { display: flex; gap: .6rem; justify-content: center; margin-bottom: 1.75rem; }
-.opening-thumbs img { width: 110px; height: 140px; object-fit: cover; border-radius: 8px; }
-
 .hero-content {
   position: relative; z-index: 2;
   max-width: var(--max-w);
   padding: 2rem 1.5rem;
 }
-
-/* Cover: judul di atas, guest+tombol di bawah, wajah mempelai tetap terlihat di tengah */
 .hero-content--split {
   position: absolute; inset: 0;
   max-width: none;
@@ -384,21 +264,6 @@ a { color: inherit; }
   padding: 3.25rem 1.5rem 2.5rem;
 }
 .hero-content__top, .hero-content__bottom { max-width: var(--max-w); width: 100%; position: relative; z-index: 1; }
-
-/*
- * RESEP "blur-fade" yang dipakai berulang di file ini untuk menaruh teks di atas foto
- * tanpa membuat wajah/subjek jadi buram dan tanpa garis patahan:
- *   1. SATU pseudo-element (::after), bukan dua gradient warna yang tumpuk (tumpukan
- *      dua gradient warna menghasilkan "patahan" di titik pertemuannya).
- *   2. background: linear-gradient(warna-solid di ujung dekat teks -> transparent).
- *   3. backdrop-filter: blur(Npx) supaya foto di baliknya ikut buram di zona teks.
- *   4. mask-image dengan arah gradient YANG SAMA seperti background di atas — ini kunci
- *      supaya blur-nya ikut menipis/fade, bukan menyala penuh dengan tepi tegas (tanpa
- *      mask, backdrop-filter selalu 100% di seluruh kotak elemen, seolah ada garis).
- *   5. Elemen dibuat sedikit lebih lebar dari kontainer (left/right negatif) untuk
- *      menghindari sisi kiri-kanan yang belum ter-blur kelihatan saat discroll miring.
- * Pakai pola ini lagi untuk section lain yang butuh teks di atas foto (event card, dsb).
- */
 .hero-content--split::after {
   content: "";
   position: absolute;
@@ -411,10 +276,6 @@ a { color: inherit; }
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 85%);
   pointer-events: none;
 }
-
-/* Sama seperti .hero-content--split::after, TAPI nempel ke dasar SECTION (bukan ke
-   blok teks yang tingginya ikut konten) — elemen sibling sendiri, position:absolute
-   relatif ke .section-hero (position:relative), bottom:0 sungguhan. */
 .section-fade-bottom {
   position: absolute;
   left: -10%; right: -10%; bottom: -2px;
@@ -428,7 +289,6 @@ a { color: inherit; }
 }
 .section-fade-bottom--dark { background: linear-gradient(180deg, transparent 0%, var(--color-dark) 100%); }
 .hero-note { margin-top: .85rem; font-size: .65rem; opacity: .65; letter-spacing: .03em; }
-
 .eyebrow, .section-eyebrow {
   font-family: var(--font-label);
   text-transform: uppercase;
@@ -438,25 +298,7 @@ a { color: inherit; }
   margin: 0 0 .75rem;
 }
 .hero-content .eyebrow { color: #ffffff; font-weight: 500; }
-/* Eyebrow di semua hero section (cover/opening/closing, bg foto gelap) tetap
-   putih walau base rule di atas sekarang coklat tua (untuk section terang). */
 .section-hero .eyebrow { color: #fff; }
-
-/* Monogram dekoratif M/A di belakang "The Wedding Of" (cover & opening) —
-   murni visual, aria-hidden di markup jadi tidak dibaca screen reader.
-   Font SAMA dengan "Mita & Andi" (--font-script) supaya konsisten dengan
-   nama pasangan di tempat lain. Dua tahap animasi, dipicu class reveal
-   yang SUDAH ADA (.aos-animate di cover via AOS, .text-revealed di
-   #opening — keduanya baru aktif setelah konten section itu benar-benar
-   termuat/tampil, jadi monogram TIDAK animasi duluan sebelum cover/STD
-   siap): (1) fade-in DI TEMPAT (posisi awal off-screen, opacity 0->.28,
-   cepat), (2) BARU geser saling mendekat (transform, delay nyusul setelah
-   fade-in beres) — bukan barengan, biar fade-in kelihatan dulu baru
-   gerak. Posisi awal: M kiri-atas, A kanan-bawah, berhenti tumpang tindih
-   di belakang teks; M sengaja lebih tinggi dari A (tidak sejajar). Timing
-   & jarak akhir cover vs opening SENGAJA beda (lihat rule masing-masing
-   di bawah), makanya rule reveal-nya dipisah per section, bukan digabung
-   koma seperti sebelumnya. */
 .eyebrow-wrap { position: relative; display: inline-block; }
 .eyebrow-wrap .eyebrow { position: relative; z-index: 1; }
 .eyebrow-monogram {
@@ -470,53 +312,28 @@ a { color: inherit; }
   z-index: 0;
   pointer-events: none;
   line-height: 1;
-  /* Fade-in (opacity, .6s) selesai dulu, JEDA .5s (delay transform dimulai di
-     1.1s, bukan langsung nyambung di .6s), BARU geser mendekat pelan-pelan
-     (transform 2.2s, dulu 1.4s — sengaja diperlambat). */
   transition: opacity .6s ease, transform 2.2s cubic-bezier(.22,.61,.36,1) 1.1s;
 }
 .eyebrow-monogram--m {
   left: 50%;
-  transform: translate(-160%, -70%); /* mulai dari kiri layar, lebih tinggi */
+  transform: translate(-160%, -70%); 
 }
 .eyebrow-monogram--a {
   left: 50%;
-  transform: translate(60%, -30%); /* mulai dari kanan layar, lebih rendah */
+  transform: translate(60%, -30%); 
 }
-
-/* --- Opening/Save The Date: monogram BARU mulai animasi setelah SEMUA teks
-   lain di section ini selesai reveal. Teks lain (.script-names delay .1s,
-   .opening-verse delay .2s) dipicu bareng #opening.text-revealed dan beres
-   paling lambat di .2s + .75s = .95s sesudahnya — makanya opacity monogram
-   sengaja ditunda ke 1s (baru mulai fade-in SETELAH itu), lanjut jeda .2s
-   (dulu .5s, dirasa kelamaan), baru geser mendekat (delay transform 1.8s,
-   durasi tetap 2.2s). */
 #opening .eyebrow-monogram {
   transition: opacity .6s ease 1s, transform 2.2s cubic-bezier(.22,.61,.36,1) 1.8s;
 }
-/* M turun sedikit (dari -70% ke -64%), A naik sedikit (dari -30% awal ke
-   -51%) — keduanya saling mendekat vertikal, dan mulai sedikit melewati
-   tengah (-14%) — tumpang tindih ringan. M naik 2x lipat dari A. */
 #opening.text-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -64%); }
 #opening.text-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -51%); }
-
-/* --- Cover: monogram BARU mulai animasi setelah SEMUA animasi AOS lain di
-   section itu selesai (elemen AOS terakhir = #btn-open, data-aos-delay
-   300ms + durasi AOS 1600ms = kelar ~1900ms) — delay 2s aman di atas itu.
-   Animasi "mendekat" (transform) dibuat sedikit lebih lambat (2s, dulu
-   1.4s), dan jarak akhir M-A sedikit lebih jauh (dulu -90%/-10% = 80pp,
-   sekarang -93%/-7% = 86pp) dibanding versi opening — tapi tetap
-   tumpang tindih ringan. */
 #cover .eyebrow-monogram {
-  /* Sama pola: fade-in beres di 2.6s, JEDA .2s (dulu .6s, dirasa kelamaan —
-     transform baru mulai di 2.8s), lalu mendekat pelan (2.8s durasi). */
   transition: opacity .6s ease 2s, transform 2.8s cubic-bezier(.22,.61,.36,1) 2.8s;
 }
-.eyebrow-wrap.aos-animate .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -64%); }
-/* M turun sedikit, A naik sedikit (sama seperti versi opening) dan sedikit
-   melewati tengah (-7%) — overlap ringan dengan M. */
-.eyebrow-wrap.aos-animate .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -51%); }
-
+.eyebrow-wrap.aos-animate .eyebrow-monogram--m,
+.eyebrow-wrap.is-revealed .eyebrow-monogram--m { opacity: .28; transform: translate(-93%, -64%); }
+.eyebrow-wrap.aos-animate .eyebrow-monogram--a,
+.eyebrow-wrap.is-revealed .eyebrow-monogram--a { opacity: .28; transform: translate(-7%, -51%); }
 .script-names {
   font-family: var(--font-script);
   font-weight: 400;
@@ -527,26 +344,16 @@ a { color: inherit; }
 }
 .script-names--small { font-size: clamp(2rem, 8vw, 3rem); }
 .amp { padding: 0 .1em; }
-/* Nama mempelai di Cover & Save The Date 1 kapital semua (Closing dibiarkan
-   apa adanya, tidak diminta). */
 #couple-names-cover, #couple-names-opening { text-transform: uppercase; }
-/* "MITA & ANDI" di Cover disamakan ukurannya dengan nama di Save The Date 1
-   (#couple-names-opening) — sama persis clamp-nya. Base .script-names
-   clamp 3rem-5rem jelas kebesaran. */
 #couple-names-cover { font-size: clamp(1.8rem, 7vw, 2.6rem); margin-top: .9rem; }
-/* Nama di Save The Date 1 balik ke panggilan pendek "Mita & Andi" (bukan nama
-   lengkap lagi) — boleh dibesarkan lagi karena teksnya sudah pendek. */
 #couple-names-opening { font-size: clamp(1.8rem, 7vw, 2.6rem); margin-top: .9rem; }
-
 .hero-date {
   letter-spacing: .25em;
   font-size: .85rem;
   margin: .5rem 0 2rem;
 }
-
 .guest-label { margin: 0 0 .4rem; font-family: var(--font-sans); font-weight: 500; font-size: .8rem; letter-spacing: .02em; color: #ffffff; }
 .guest-name { margin: 0 0 1.5rem; font-family: var(--font-sans); font-weight: 500; font-size: 1.25rem; color: #ffffff; }
-
 .btn-open {
   font-family: var(--font-sans);
   letter-spacing: .1em;
@@ -564,11 +371,6 @@ a { color: inherit; }
 }
 .btn-open:hover { background: #ffffff; color: var(--color-dark); }
 .btn-open .icon-envelope { width: 15px; height: 15px; flex: none; }
-
-/* Tombol aksi utama (kirim RSVP, kirim hadiah). Semua tombol di halaman ini
-   memakai gaya tombol cover: kapsul putih semi-transparan (#ffffff61).
-   Warna teks tetap mengikuti konteksnya (gelap di atas latar terang, terang
-   di atas foto) supaya terbaca; hover memekatkan putih jadi penuh. */
 .btn-primary {
   font-family: var(--font-sans);
   letter-spacing: .1em;
@@ -587,18 +389,13 @@ a { color: inherit; }
   background: #ffffff;
   color: var(--color-dark);
 }
-/* rsvp.js menonaktifkan tombol selama pengiriman — beri tanda yang jelas supaya
-   tamu tidak menekan berulang kali karena mengira tidak ada yang terjadi. */
 .btn-primary:disabled {
   opacity: .5;
   cursor: default;
   box-shadow: none;
 }
-/* Kirim Konfirmasi (RSVP): bg gelap + teks putih, senada tombol Google Maps/
-   Kirim Hadiah/Konfirmasi WA/Rekomendasi Kado & pill RSVP terpilih. */
 #rsvp-submit { background: var(--color-dark); color: #fff; }
 #rsvp-submit:hover { background: #2a251d; color: #fff; }
-
 .btn-outline {
   display: inline-flex; align-items: center; gap: .5rem;
   font-family: var(--font-sans);
@@ -616,8 +413,6 @@ a { color: inherit; }
   transition: background .3s ease, color .3s ease;
 }
 .btn-outline:hover { background: #2a251d; color: #fff; }
-
-/* Tombol di atas foto (cover & countdown) — putih konsisten dengan .btn-open, bukan emas. */
 .btn-outline--light {
   background: #ffffff61; border: none; color: #fff;
   padding: .5rem 1rem; font-size: .68rem;
@@ -626,19 +421,13 @@ a { color: inherit; }
 }
 .btn-outline--light:hover { background: #fff; color: var(--color-dark); }
 .btn-outline--light svg { width: 13px; height: 13px; margin-right: .35rem; }
-
 .btn-text {
   background: none; border: none; text-decoration: underline;
   color: var(--color-text-light); cursor: pointer; font-family: var(--font-sans);
   margin-top: 1rem;
 }
-
 /* ---------- Invitation lock & open transition ---------- */
 #invitation.is-locked .invitation-body { display: none; }
-/* Tombol ikut fade/slide keluar bersama seluruh #cover (opacity+transform) —
-   jangan di-display:none mendadak, itu bikin tombol "hilang tiba-tiba" saat cover
-   masih dalam proses transisi keluar. */
-
 #cover {
   position: fixed; inset: 0; z-index: 50;
   transform: translateY(-100%);
@@ -647,23 +436,12 @@ a { color: inherit; }
 }
 #cover.cover-visible { transform: translateY(0); opacity: 1; }
 #cover.is-exiting { transform: translateX(-105%); opacity: 1; pointer-events: none; }
-
 #opening {
   opacity: 0;
   transform: translate(-20px, 20px);
-  /* Slide-in (transform) lebih pelan dari fade opacity foto, supaya foto pertama
-     benar-benar terasa "hanyut masuk" — bukan langsung nongol. Tempo ini sengaja
-     tenang mengikuti nuansa golden hour lagunya.
-     CATATAN: kalau durasi transform di bawah diubah, geser juga jeda
-     `opening.classList.add("text-revealed")` di main.js — teks memang dirancang
-     baru masuk SETELAH slide-in foto selesai. */
   transition: opacity 2.4s ease, transform 1.8s cubic-bezier(.22,.61,.36,1);
 }
 #opening.section-revealed { opacity: 1; transform: translate(0, 0); }
-
-/* Teks/tombol/countdown section countdown BARU animasi masuk SETELAH foto section
-   selesai (class .text-revealed ditambahkan lewat JS, bukan lewat AOS — AOS memicu
-   terlalu awal karena section induknya sudah "di viewport" walau masih opacity:0). */
 .text-enter { opacity: 0; transition: opacity .75s ease, transform .75s ease; }
 .text-enter--down { transform: translateY(-24px); }
 .text-enter--left { transform: translateX(34px); }
@@ -671,10 +449,6 @@ a { color: inherit; }
 #opening.text-revealed .text-enter { opacity: 1; transform: translate(0, 0); }
 #opening.text-revealed .script-names.text-enter { transition-delay: .1s; }
 #opening.text-revealed .opening-verse.text-enter { transition-delay: .2s; }
-
-/* Save The Date 2 (section baru setelah #couple): pola reveal sama persis dengan
-   #opening, tapi foto statis tanpa slideshow. Stagger hanya untuk 3 elemen yang
-   ada di section ini (tanggal/tombol/countdown) — yang lama sudah pindah ke sini. */
 #save-the-date-2 {
   opacity: 0;
   transform: translate(-20px, 20px);
@@ -686,21 +460,9 @@ a { color: inherit; }
 #save-the-date-2.text-revealed #btn-add-calendar.text-enter { transition-delay: .15s; }
 #save-the-date-2.text-revealed .cover-countdown__date.text-enter { transition-delay: .25s; }
 #save-the-date-2.text-revealed .countdown--plain.text-enter { transition-delay: .35s; }
-
-/* Typography editorial "SAVE the DATE" di atas foto Save The Date 2 — komposisi
-   majalah fashion: serif besar (Cormorant Garamond) + script (Italianno) yang
-   sedikit overlap di tengah, BUKAN heading section biasa. Murni dekoratif
-   (aria-hidden), terpisah dari .hero-content supaya posisinya bisa absolute
-   sendiri tanpa ikut align-center konten tanggal/tombol/countdown di bawahnya. */
 .save-date {
   position: absolute;
   left: 7.5%;
-  /* 53dvh cukup di layar tinggi, tapi di layar PENDEK teks besar ini bisa
-     nabrak tombol+tanggal+countdown di bawahnya (reserved: padding-bottom
-     STD2 9rem + tinggi tombol/tanggal/countdown ~7rem + setengah tinggi blok
-     teks "Save the Date" sendiri ~6rem + margin aman ~1rem = 23rem). min()
-     memastikan PUSAT teks tidak pernah lebih rendah dari batas aman itu —
-     di layar pendek otomatis terdorong ke atas, bukan menabrak. */
   top: min(53dvh, calc(100dvh - 23rem));
   transform: translateY(-50%);
   z-index: 3;
@@ -735,15 +497,6 @@ a { color: inherit; }
   margin-bottom: -.12em;
   z-index: 2;
 }
-
-/* Masked line reveal (clip-path kiri->kanan, BUKAN typewriter/fade biasa) —
-   teks utuh sejak awal, mask-nya yang membuka progresif. Trigger class
-   .is-visible dipasang JS (main.js, setupSaveTheDate2Reveal — observer yang
-   SUDAH ADA, lihat langkah JS). */
-/* Durasi per-kata: semuanya 0.5s (versi 0.3/0.2/0.3 terasa terlalu cepat di
-   HP — user minta coba 0.5). Delay antar kata = kata berikutnya mulai
-   SETELAH kata sebelumnya selesai + celah 50ms: the mulai 550ms (Save
-   selesai 500ms), Date mulai 1100ms (the selesai 1050ms). Total ~1.6s. */
 .save-date__save,
 .save-date__the,
 .save-date__date {
@@ -759,22 +512,15 @@ a { color: inherit; }
   transition-delay: 0ms;
 }
 .save-date.is-visible .save-date__the {
-  /* Inset sedikit NEGATIF di kanan (dan tipis atas/bawah): glyph cursive
-     Italianno punya ekor yang menggantung sedikit DI LUAR border-box-nya
-     sendiri ("e" di "the") — clip-path inset(0) yang pas box akan memotong
-     ekor itu. -8px/-2px memperluas area clip tanpa menggeser layout. */
   clip-path: inset(-2px -8px -2px -8px);
   transform: translateY(0);
-  transition-delay: 250ms; /* mulai di tengah "Save" — overlap, tidak ada momen diam */
+  transition-delay: 250ms; 
 }
 .save-date.is-visible .save-date__date {
   clip-path: inset(0 0 0 0);
   transform: translateY(0);
-  transition-delay: 500ms; /* mulai di tengah "the" — overlap, tidak ada momen diam */
+  transition-delay: 500ms; 
 }
-
-/* Reduced motion: langsung tampil utuh tanpa animasi apapun. none (bukan
-   inset(0)) supaya ekor glyph cursive yang meluber juga tidak terpotong. */
 @media (prefers-reduced-motion: reduce) {
   .save-date__save,
   .save-date__the,
@@ -784,98 +530,41 @@ a { color: inherit; }
     transition: none !important;
   }
 }
-
-/* ---------- Scroll-reveal section di bawah cover ([data-reveal]) ----------
-   Perluasan dari pola .text-enter di atas, tapi dipicu IntersectionObserver
-   (assets/js/reveal.js) alih-alih setTimeout. Semua state tersembunyi digantung
-   pada html.reveal-ready — kalau JS-nya mati, konten tetap terlihat.
-   Gerakannya sengaja dibatasi opacity + transform saja supaya murni di GPU;
-   tidak ada will-change agar 20 foto galeri tidak jadi 20 layer di HP. */
 .reveal-ready [data-reveal] {
   opacity: 0;
-  /* Tempo sengaja lambat & tidak terburu-buru, menyesuaikan nuansa golden hour
-     lagunya. Per elemen bisa ditimpa lewat --reveal-dur (foto besar lebih pelan
-     lagi). Easing easeOutQuad: melaju tenang lalu mengendap, bukan menyentak. */
   transition: opacity var(--reveal-dur, 1.8s) cubic-bezier(.22,.61,.36,1),
               transform var(--reveal-dur, 1.8s) cubic-bezier(.22,.61,.36,1);
-  /* Jeda berurutan dalam satu grup: style="--reveal-i:N" -> N x 200ms.
-     Indeks sengaja dibatasi di sisi pemanggil (i % 4) supaya daftar panjang
-     tidak menumpuk delay sampai elemen terakhir keburu lewat layar. */
   transition-delay: calc(var(--reveal-i, 0) * 200ms);
 }
 .reveal-ready [data-reveal].is-revealed { opacity: 1; }
-
-/* Tiap varian me-reset transform-nya SENDIRI (bukan satu aturan `transform: none`
-   bersama) — supaya elemen yang sudah punya transform sendiri, seperti .event-label
-   yang di-rotate -90deg, tidak kehilangan rotasinya saat direveal. Karena itu pula
-   varian "fade" sengaja tidak menyentuh properti transform sama sekali. */
-
-/* -- gerak dasar teks -- */
 .reveal-ready [data-reveal="up"]                     { transform: translateY(26px); }
 .reveal-ready [data-reveal="up"].is-revealed         { transform: translateY(0); }
 .reveal-ready [data-reveal="down"]                   { transform: translateY(-22px); }
 .reveal-ready [data-reveal="down"].is-revealed       { transform: translateY(0); }
-
-/* -- Our Story: item masuk selang-seling dari kanan lalu kiri, seperti langkah
-      bergantian menyusuri perjalanan. Section-nya diberi overflow hidden supaya
-      geseran ini tidak pernah memunculkan scroll horizontal. -- */
 .reveal-ready [data-reveal="slide-right"]            { transform: translateX(48px); }
 .reveal-ready [data-reveal="slide-right"].is-revealed{ transform: translateX(0); }
 .reveal-ready [data-reveal="slide-left"]             { transform: translateX(-48px); }
 .reveal-ready [data-reveal="slide-left"].is-revealed { transform: translateX(0); }
-
-/* -- Mempelai: foto besar MELUNCUR MASUK DARI LUAR LAYAR — mempelai wanita dari
-      kanan, mempelai pria dari kiri, seolah keduanya saling mendekat.
-      opacity sengaja dibiarkan 1: kalau ikut fade seperti varian lain, fotonya
-      terlihat "menyala di tengah jalan" alih-alih benar-benar meluncur masuk.
-      Selagi di luar layar ia sudah dikurung .couple-solo.section (overflow: hidden),
-      jadi tidak pernah terlihat maupun memicu scroll. -- */
 .reveal-ready [data-reveal="enter-right"]            { opacity: 1; transform: translateX(100%) scale(1.06); }
 .reveal-ready [data-reveal="enter-left"]             { opacity: 1; transform: translateX(-100%) scale(1.06); }
 .reveal-ready [data-reveal="enter-right"].is-revealed,
 .reveal-ready [data-reveal="enter-left"].is-revealed { transform: none; }
-
-/* Teks identitas mempelai ikut masuk bersama fotonya, bukan menunggu luncuran
-   2.8s di atas selesai — teksnya ada DI DALAM elemen yang meluncur, jadi ia ikut
-   terbawa masuk sambil memudar tampil. Jeda .5s hanya memberi fotonya kesempatan
-   mengisi layar lebih dulu; kalau dinaikkan mendekati 2.8s, namanya baru muncul
-   setelah tamu biasanya sudah menggulir lewat. */
 .reveal-ready .couple-info [data-reveal] {
   transition-delay: calc(.5s + var(--reveal-i, 0) * 200ms);
 }
-
 .reveal-ready [data-reveal="tilt-left"]              { transform: translateY(34px) rotate(-1.8deg); }
 .reveal-ready [data-reveal="tilt-right"]             { transform: translateY(34px) rotate(1.8deg); }
 .reveal-ready [data-reveal="tilt-left"].is-revealed,
 .reveal-ready [data-reveal="tilt-right"].is-revealed { transform: none; }
-
-/* -- Galeri: tiap foto mengembang pelan dari sedikit mengecil. -- */
 .reveal-ready [data-reveal="pop"]                    { transform: scale(.9); }
 .reveal-ready [data-reveal="pop"].is-revealed        { transform: scale(1); }
-
-/* -- Kartu berat (dresscode): naik dengan skala nyaris 1 — jauh lebih murah
-      daripada zoom dari scale(.3) yang dipakai versi AOS dulu. -- */
 .reveal-ready [data-reveal="rise"]                   { transform: translateY(34px) scale(.985); }
 .reveal-ready [data-reveal="rise"].is-revealed       { transform: translateY(0) scale(1); }
-
-/* -- Foto full-bleed (quote): mengendap dari 1.07 ke 1. -- */
 .reveal-ready [data-reveal="zoom"]                   { transform: scale(1.07); }
 .reveal-ready [data-reveal="zoom"].is-revealed       { transform: scale(1); }
-
-/* Durasi per jenis konten — makin besar & makin "foto", makin pelan. */
 .reveal-ready .couple-reveal[data-reveal]  { --reveal-dur: 2.2s; }
 .reveal-ready #quote-picture[data-reveal]  { --reveal-dur: 2.5s; }
-/* Gift: capsule zoom-in dulu (durasi lebih cepat, kontainer bukan foto),
-   teks di dalamnya (eyebrow/judul/deskripsi/tombol) baru reveal SETELAH
-   zoom-nya kelar — delay 500ms + stagger --reveal-i seperti biasa. Selector
-   discope ke anak LANGSUNG supaya #gift-panel (dibuka lewat klik, bukan
-   scroll) tidak ikut tertunda. */
 .reveal-ready .gift-capsule[data-reveal]   { --reveal-dur: 900ms; }
-/* Kebalikan dari varian "zoom" umum (yang MENGECIL dari 1.07->1): capsule
-   gift sengaja MEMBESAR dari kecil (.7) ke ukuran asli — override khusus,
-   specificity .gift-capsule[data-reveal="zoom"] (0,2,0) menang atas
-   [data-reveal="zoom"] biasa (0,1,0) tanpa mengganggu pemakaian "zoom" di
-   elemen lain (jam Akad/Resepsi). */
 .reveal-ready .gift-capsule[data-reveal="zoom"] { transform: scale(.7); }
 .reveal-ready .gift-capsule[data-reveal="zoom"].is-revealed { transform: scale(1); }
 .reveal-ready .gift-capsule > [data-reveal],
@@ -884,20 +573,7 @@ a { color: inherit; }
 }
 .reveal-ready .timeline-item[data-reveal]  { --reveal-dur: 2.1s; }
 .reveal-ready .gallery-item[data-reveal]   { --reveal-dur: 1.9s; }
-
-/* Geseran horizontal Our Story & zoom foto mempelai butuh ruang keluar layar —
-   kurung di section-nya masing-masing supaya tidak jadi scroll horizontal.
-   Transform foto mempelai sengaja dipasang di .couple-block, BUKAN di
-   .couple-slider — .couple-slider adalah root Swiper, dan menaruh scale di situ
-   berisiko membuat Swiper salah mengukur lebar slide saat init. */
 #love-story.section, .couple-solo.section { overflow: hidden; }
-
-/* ---------- Opening quote ---------- */
-/* Teks polos di atas foto hero (BUKAN kartu/kotak) — cuma tipografi:
-   Cormorant Garamond untuk ayat, Poppins uppercase kecil untuk sumber.
-   Warna putih (bukan coklat tua) karena tidak ada container terang di
-   belakangnya lagi — teks langsung di atas foto, sama seperti .script-names/
-   .eyebrow di section ini. */
 .opening-verse {
   margin-top: 1.4rem;
   text-align: center;
@@ -920,7 +596,6 @@ a { color: inherit; }
   text-transform: uppercase;
   color: rgba(255, 255, 255, .75);
 }
-
 /* ---------- Generic sections ---------- */
 .section {
   padding: 5rem 1.5rem;
@@ -928,8 +603,6 @@ a { color: inherit; }
   background: var(--color-bg);
 }
 .section--dark { background: var(--color-dark); color: var(--color-text-light); }
-/* Section Tanda Kasih (gift): full-screen + snap seperti event, bg coklat
-   tetap, konten dibungkus capsule krem (pola sama dengan .event-hero__capsule). */
 #gift.section {
   position: relative;
   height: 100dvh;
@@ -937,7 +610,7 @@ a { color: inherit; }
   display: grid;
   place-items: center;
   padding: clamp(.6rem, 2dvh, 1.25rem);
-  background: url("../img/rsvp-bg.jpg") center / cover;
+  background: url("../../assets/img/rsvp-bg.webp") center / cover;
   scroll-snap-align: start;
 }
 .gift-capsule {
@@ -957,17 +630,12 @@ a { color: inherit; }
 #gift .gift-capsule .section-eyebrow,
 #gift .gift-capsule .section-title { color: var(--color-dark); }
 .gift-capsule .section-desc { color: var(--color-dark); }
-/* Panel terbuka: judul & deskripsi disembunyikan agar rekening/alamat muat
-   di dalam capsule tanpa overflow. */
 .gift-capsule.is-open .section-title,
 .gift-capsule.is-open .section-desc { display: none; }
-/* Tombol aksi di capsule (Kirim Hadiah / Rekomendasi Kado / Konfirmasi WA):
-   bg gelap + teks putih, senada tombol Google Maps & pill RSVP terpilih. */
 .gift-capsule .btn-outline { background: var(--color-dark); color: #fff; }
 .gift-capsule .btn-outline:hover { background: #2a251d; color: #fff; }
 .gift-capsule .btn-text { color: var(--color-dark); }
 .section--dark .section-eyebrow { color: var(--color-text-light); }
-
 .section-title {
   font-size: clamp(1.8rem, 6vw, 2.4rem);
   margin-bottom: 2.5rem;
@@ -980,8 +648,6 @@ a { color: inherit; }
   margin-bottom: 2.5rem;
   line-height: 1;
 }
-/* Judul script di dark section (livestream/love-story) tetap putih walau base
-   rule di atas sekarang coklat tua (untuk section terang). */
 .section--dark .section-title--script { color: #fff; }
 #gallery .section-eyebrow,
 #gallery .section-title--script { color: var(--color-dark); }
@@ -989,37 +655,6 @@ a { color: inherit; }
   max-width: 480px; margin: -1.5rem auto 2rem;
   line-height: 1.7; font-size: .95rem;
 }
-
-/* ---------- Couple ---------- */
-.couple-grid {
-  display: flex; flex-direction: column; align-items: center; gap: 2rem;
-  max-width: 720px; margin: 0 auto;
-}
-@media (min-width: 720px) {
-  .couple-grid { flex-direction: row; justify-content: center; align-items: center; }
-}
-.couple-card {
-  position: relative;
-  width: 100%; max-width: 340px;
-  aspect-ratio: 3 / 4;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid var(--color-gold);
-}
-.couple-card__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.couple-card__info {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 3rem 1.25rem 1.25rem;
-  background: linear-gradient(180deg, transparent, rgba(10,9,7,.55) 45%, rgba(10,9,7,.92) 100%);
-  text-align: center;
-}
-.couple-name { font-size: 1.4rem; color: var(--color-text-light); margin-bottom: .35rem; }
-.couple-parents { font-size: .8rem; line-height: 1.55; opacity: .9; color: var(--color-text-light); }
-.couple-divider {
-  font-family: var(--font-script);
-  font-size: 2.5rem; color: var(--color-text-light);
-}
-
 /* ---------- Event + Countdown ---------- */
 .countdown {
   display: flex; justify-content: center; gap: .75rem;
@@ -1035,13 +670,6 @@ a { color: inherit; }
   display: block; font-family: var(--font-serif); font-size: 1.7rem; color: var(--color-text-light);
 }
 .countdown__item small { font-family: var(--font-label); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
-
-/* Countdown polos di atas foto (tanpa kartu gelap), dipakai di section countdown.
-   Lebarnya SELALU 4/5 (80%) lebar layar di HP mana pun: tiap item flex:1 membagi
-   lebarnya secara merata, jadi jarak antar item otomatis menyesuaikan layar
-   (longgar di HP besar, rapat tanpa meluber di HP sempit) dan keempat item tetap
-   sejajar satu baris. Grup di-CENTER (margin auto kiri-kanan) — dulu nempel
-   kanan mengikuti gaya anchor-right-bottom, sekarang center sesuai permintaan. */
 .countdown--plain {
   width: 80%; margin-left: auto; margin-right: auto;
   justify-content: space-between; gap: .6rem; margin-bottom: 0;
@@ -1052,15 +680,7 @@ a { color: inherit; }
 }
 .countdown--plain .countdown__item span { color: #fff; font-size: 1.15rem; }
 .countdown--plain .countdown__item small { color: #fff; opacity: .85; font-size: .6rem; }
-
-.venue { max-width: 420px; margin: 0 auto; }
-.venue h3 { font-size: 1.3rem; margin-bottom: .5rem; }
-.venue p { line-height: 1.6; font-size: .9rem; margin-bottom: 1.25rem; opacity: .85; }
-
 /* ---------- Love story timeline ---------- */
-/* Samakan kanvas Perjalanan Kami dengan Galeri agar transisinya lebih tenang.
-   Section ini sebelumnya memakai modifier .section--dark, maka seluruh teks
-   yang mewarisi putih harus ditetapkan kembali ke warna gelap. */
 #love-story.section {
   background: var(--color-bg);
   color: var(--color-text);
@@ -1068,10 +688,6 @@ a { color: inherit; }
 #love-story .section-eyebrow,
 #love-story .section-title--script { color: var(--color-dark); }
 .timeline { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.5rem; }
-/* Foto dipersempit ke 6/8 (75%) lebar kontainer (≈ layar di HP) dan diposisikan
-   ke sisi sesuai arah reveal-nya — slide dari kiri -> rata kiri, dari kanan ->
-   rata kanan; teks ikut rata ke sisi yang sama supaya jelas foto mana milik
-   teks mana. */
 .timeline-item { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
 .timeline-item--right { align-items: flex-end; text-align: right; }
 .timeline-item__photo {
@@ -1082,49 +698,28 @@ a { color: inherit; }
 .timeline-item .timeline-date { color: #85652d; font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
 .timeline-item h4 { font-family: var(--font-serif); font-size: 1.3rem; margin: .3rem 0; color: var(--color-dark); }
 .timeline-item p { margin: 0; font-size: .9rem; line-height: 1.6; color: var(--color-text); opacity: .85; max-width: min(100%, 260px); }
-
-/* ---------- Gallery (grid 4 kolom, pola: landscape / 2 potrait / landscape / 1-4+3-4 / landscape / 2 potrait / landscape) ---------- */
 .gallery-grid {
   max-width: 720px; margin: 0 auto;
   display: grid;
-  /* 12 kolom, bukan 4: baris campur memakai pembagian PERTIGA (1/3 + 2/3),
-     sedangkan baris potret memakai PERDUA. 12 adalah kelipatan persekutuan
-     terkecil dari 2, 3, dan 4 — dengan 4 kolom, sepertiga tidak bisa dibentuk
-     sama sekali. */
   grid-template-columns: repeat(12, 1fr);
   gap: .5rem;
-  /* Semua baris sama tinggi = tinggi foto landscape (16:10 dari lebar kontainer ~96vw).
-     min(450px, 60vw) meniru aspek 16/10: 0.96vw / 0.6vw = 1.6, dan 720/450 = 1.6. */
   grid-auto-rows: min(450px, 60vw);
 }
 .gallery-item { border-radius: 8px; overflow: hidden; cursor: zoom-in; }
 .gallery-item img, .gallery-item picture { display: block; width: 100%; height: 100%; }
 .gallery-item img { object-fit: cover; }
-
-/* Pan/zoom admin — satu aturan untuk semua foto non-hero: object-position
-   menggeser titik fokus (--fx/--fy), transform menge-zoom (--zoom). Setiap
-   wadah foto di atas sudah overflow:hidden, jadi scale tidak bocor keluar.
-   Hero tidak ikut di sini (kenburns menangani transform-nya sendiri). */
 .couple-slide img,
 .gallery-item img,
 .timeline-item__photo,
 #quote-img {
   object-position: var(--fx, 50%) var(--fy, 50%);
-  /* Titik zoom sama dengan titik pan supaya crop setelah zoom persis seperti
-     editor admin, dan ruang baru tersedia ke dua arah pada tiap sumbu. */
   transform-origin: var(--fx, 50%) var(--fy, 50%);
   transform: scale(var(--zoom, 1));
 }
-/* 1 foto landscape selebar grid — seukuran foto Our Story (16/10) */
 .gallery-item--landscape, .gallery-item--full { grid-column: 1 / -1; }
-/* Dua foto setengah lebar pada baris yang sama. */
 .gallery-item--portrait, .gallery-item--half { grid-column: span 6; }
-/* Baris campur: 1/3 + 2/3, tinggi sama. */
 .gallery-item--third { grid-column: span 4; }
 .gallery-item--twothirds { grid-column: span 8; }
-
-/* Slot video galeri (baris pertama, opsional): thumbnail dulu, iframe baru
-   dibuat saat tombol putar diklik — tidak ada beban YouTube sebelum diminta. */
 .gallery-video { cursor: default; }
 .gallery-video__launcher {
   position: relative; display: block; width: 100%; height: 100%;
@@ -1140,26 +735,18 @@ a { color: inherit; }
 }
 .gallery-video__play svg { width: 26px; height: 26px; margin-left: 3px; }
 .gallery-video__frame { display: block; width: 100%; height: 100%; border: 0; }
-
 .lightbox {
   position: fixed; inset: 0; background: rgba(10,9,8,.94); z-index: 900;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none; transition: opacity .3s ease;
 }
 .lightbox.show { opacity: 1; pointer-events: auto; }
-/* max-width 100% (bukan 92vw): lightbox kini terkurung di kolom 430px; 92vw di
-   desktop bisa lebih lebar dari kolom dan foto terpotong di tepinya. */
 .lightbox img { max-width: 100%; max-height: 88vh; border-radius: 6px; }
 .lightbox__close {
   position: absolute; top: 1rem; right: 1.25rem;
   background: none; border: none; color: var(--color-text-light);
   font-size: 2.2rem; cursor: pointer; line-height: 1;
 }
-
-/* ---------- Modal (overlay + panel) ----------
-   Pola yang sama dengan .lightbox: fixed inset-0, konten di tengah, panel
-   gelap berbingkai emas supaya konsisten di atas section terang maupun gelap.
-   Dibuka/ditutup lewat atribut `hidden` (lihat aturan [hidden] di atas). */
 .modal {
   position: fixed; inset: 0; z-index: 950;
   background: rgba(10, 9, 8, .9);
@@ -1190,9 +777,6 @@ a { color: inherit; }
 .modal__field select:focus, .modal__field textarea:focus { outline: none; border-color: var(--color-gold-soft); }
 .modal__panel .btn-primary { width: 100%; }
 .modal__hint { font-size: .7rem; opacity: .6; margin: .9rem 0 0; text-align: center; }
-
-/* Modal Rekomendasi Kado — senada dengan tombol aksinya: bg coklat #846d57,
-   tanpa border, semua teks putih agar visible. */
 #gift-recs-modal .modal__panel {
   background: #846d57;
   border: none;
@@ -1202,9 +786,6 @@ a { color: inherit; }
 #gift-recs-modal .modal__close {
   color: #fff;
 }
-/* Modal Konfirmasi Pengiriman — sama dengan modal QR & Menu: bg putih solid
-   (#ffffffcc), tanpa border, teks gelap agar selalu terbaca. Panel dibatasi
-   6/8 tinggi layar (75dvh); isi berlebih discroll di dalam panel. */
 #gift-confirm-modal .modal__panel {
   background: #ffffffcc;
   border: none;
@@ -1217,12 +798,8 @@ a { color: inherit; }
   color: var(--color-dark);
 }
 #gift-confirm-modal .modal__hint { color: var(--color-dark); opacity: .85; }
-/* Tombol aksi modal: putih dengan teks hitam — senada dengan tombol panel
-   Kirim Hadiah. */
 #gift-confirm-modal #gift-confirm-send { background: var(--color-dark); color: #fff; }
 #gift-confirm-modal #gift-confirm-send:hover { background: #2a251d; color: #fff; }
-/* Modal QR check-in & Menu — bg putih lebih solid (opacity dinaikkan dari
-   transparan FAB), tanpa border, teks gelap agar selalu terbaca. */
 #qr-checkin-modal .modal__panel,
 #nav-menu-modal .modal__panel {
   background: #ffffffcc;
@@ -1238,21 +815,11 @@ a { color: inherit; }
 #nav-menu-modal .nav-menu-list button { color: var(--color-dark); }
 #nav-menu-modal .nav-menu-list button:hover { background: #846d57; color: #fff; }
 #qr-checkin-modal .qr-modal__hint { color: var(--color-dark); opacity: .85; }
-/* Field input Konfirmasi WA: putih (bukan transparan) supaya teks isian jelas
-   di atas panel modal yang coklat — teks isian gelap agar terbaca. */
 #gift-confirm-modal .modal__field select,
 #gift-confirm-modal .modal__field textarea {
   background: #fff;
   color: var(--color-dark);
 }
-
-/* Elemen dalam modal Konfirmasi Pengiriman & Rekomendasi Kado muncul
-   BERURUTAN (stagger) setiap modal dibuka. Dipakai animasi keyframes (bukan
-   transition) supaya di-REPLAY ulang tiap kali modal dibuka: saat `hidden`
-   (display:none) elemen keluar dari rendering, lalu saat dibuka mereka masuk
-   lagi dari state awal bersama panelnya (panel memakai fadeUp milik
-   .modal__panel) — pola yang sama dengan menu navigasi. Modal lain
-   (QR check-in) sengaja tidak ikut. */
 #gift-confirm-modal .modal__panel > *,
 #gift-recs-modal .modal__panel > * {
   animation: modalItemIn .5s cubic-bezier(.22,.61,.36,1) both;
@@ -1261,7 +828,6 @@ a { color: inherit; }
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-/* Jeda berurutan: anak ke-N mulai ~80ms setelah anak sebelumnya */
 #gift-confirm-modal .modal__panel > *:nth-child(1) { animation-delay: .05s; }
 #gift-confirm-modal .modal__panel > *:nth-child(2) { animation-delay: .13s; }
 #gift-confirm-modal .modal__panel > *:nth-child(3) { animation-delay: .21s; }
@@ -1269,18 +835,11 @@ a { color: inherit; }
 #gift-confirm-modal .modal__panel > *:nth-child(5) { animation-delay: .37s; }
 #gift-recs-modal .modal__panel > *:nth-child(1) { animation-delay: .05s; }
 #gift-recs-modal .modal__panel > *:nth-child(2) { animation-delay: .13s; }
-/* Tombol aksi utama mengembang (pop) — pusat perhatian saat modal terbuka */
 #gift-confirm-modal #gift-confirm-send { animation-name: modalBtnPop; }
 @keyframes modalBtnPop {
   from { opacity: 0; transform: scale(.9); }
   to   { opacity: 1; transform: scale(1); }
 }
-
-/* Daftar shortcut menu navigasi — gaya premium: tanpa bingkai kotak, tiap item
-   hanya dipisah garis bawah tipis emas; item muncul BERURUTAN (stagger) setiap
-   modal dibuka. Animasi di-replay otomatis tiap kali modal terbuka karena saat
-   `hidden` (display:none) item keluar dari rendering, lalu masuk lagi bersama
-   panelnya (panel memakai animasi fadeUp milik .modal__panel). */
 .nav-menu-list { display: flex; flex-direction: column; }
 .nav-menu-list button {
   font-family: var(--font-sans);
@@ -1301,7 +860,6 @@ a { color: inherit; }
   from { opacity: 0; transform: translateY(26px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-/* Jeda berurutan: item ke-N mulai ~60ms setelah item sebelumnya */
 .nav-menu-list button:nth-child(1) { animation-delay: .08s; }
 .nav-menu-list button:nth-child(2) { animation-delay: .14s; }
 .nav-menu-list button:nth-child(3) { animation-delay: .2s; }
@@ -1309,16 +867,11 @@ a { color: inherit; }
 .nav-menu-list button:nth-child(5) { animation-delay: .32s; }
 .nav-menu-list button:nth-child(6) { animation-delay: .38s; }
 .nav-menu-list button:nth-child(7) { animation-delay: .44s; }
-/* Hover: putih penuh sedikit redup + item "maju" halus ke kanan */
 .nav-menu-list button:hover {
   background: #f2ead9;
   color: var(--color-dark);
   padding-left: .6rem;
 }
-
-/* Tombol DI DALAM modal — putih PENUH (berbeda dari tombol luar yang
-   translucent #ffffff61), bentuk kapsul, supaya aksi di panel terang tetap
-   menonjol. Selector scoped .modal — tidak memengaruhi tombol di section. */
 .modal .btn-outline,
 .modal .btn-primary,
 .modal .gift-copy-btn {
@@ -1334,9 +887,6 @@ a { color: inherit; }
   background: #f2ead9;
   color: var(--color-dark);
 }
-
-/* Kanvas QR check-in tamu — kotak putih supaya kontras QR-nya jelas saat
-   dipindai petugas (QR itu di atas panel gelap). */
 .qr-container {
   background: #fff; border-radius: 12px; padding: 1rem;
   display: flex; align-items: center; justify-content: center;
@@ -1344,7 +894,6 @@ a { color: inherit; }
 .qr-modal__canvas-wrap { max-width: 250px; margin: 0 auto; }
 .qr-modal__canvas-wrap canvas { display: block; width: 100%; height: auto; }
 .qr-modal__hint { font-size: .72rem; opacity: .65; margin-top: 1rem; text-align: center; }
-
 /* ---------- Gift ---------- */
 .gift-panel { max-width: 480px; margin: 2rem auto 0; opacity: 0; animation: fadeUp .4s ease forwards; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(12px);} to { opacity: 1; transform: translateY(0);} }
@@ -1352,11 +901,8 @@ a { color: inherit; }
 .gift-account {
   border: 1px solid var(--color-gold); border-radius: 10px; padding: 1rem 1.25rem;
   display: flex; justify-content: space-between; align-items: center; gap: 1rem; text-align: left;
-  /* Kartu putih solid, font hitam. */
   background: #fff; color: var(--color-dark);
 }
-/* Kolom teks rekening boleh menyusut (wrap) — yang mengecil font-nya, bukan
-   kartu keluar capsule. */
 .gift-account > div { flex: 1; min-width: 0; }
 .gift-account__bank { font-family: var(--font-serif); font-size: clamp(.8rem, 4vw, 1.1rem); color: var(--color-dark); }
 .gift-account__number { font-size: clamp(.72rem, 3.6vw, .95rem); letter-spacing: .05em; overflow-wrap: anywhere; }
@@ -1369,27 +915,14 @@ a { color: inherit; }
   border: 1px dashed var(--color-gold); border-radius: 10px; padding: 1rem 1.25rem;
   text-align: left; font-size: clamp(.66rem, 3.3vw, .88rem); line-height: 1.6;
   display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
-  /* Sama: kartu putih solid, font hitam. */
   background: #fff; color: var(--color-dark);
 }
 .gift-address__text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .gift-address__copy { align-self: flex-end; flex: none; }
 .gift-note { font-size: .7rem; opacity: .6; margin-top: .75rem; }
-
-/* Amplop digital di section Tanda Kasih; tombol rekomendasi kado pindah ke
-   dalam #gift-panel (alur: Kirim Hadiah -> panel termasuk tombol -> modal). */
 .gift-actions { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
-/* Dua tombol panel (Rekomendasi & Konfirmasi) sama-sama selebar panel — lebar
-   seragam mengikuti kartu rekening/alamat, tidak bergantung panjang teks. */
 .gift-confirm-btn,
 .gift-recs-btn { display: block; width: 100%; margin: 1.1rem auto 0; }
-
-/* Rekomendasi kado (modal): kartu SEJAJAR yang bisa DIGESER KE SAMPING
-   (flex row + overflow-x:auto), bukan grid yang wrap ke bawah. Foto
-   dipasangkan by-index dengan entri giftRecommendations[] oleh gift.js.
-   margin/padding -1.5rem/+1.5rem meniadakan padding panel (1.5rem) supaya
-   kartu menyentuh tepi modal dan kartu pertama/terakhir tidak terpotong
-   scrollbar horizontal emasnya. */
 .gift-recs {
   display: flex; gap: .8rem;
   overflow-x: auto;
@@ -1420,16 +953,11 @@ a { color: inherit; }
   margin-top: .4rem; padding: .5rem 1rem; font-size: .68rem; text-align: center;
 }
 .gift-rec-card__nobuy { font-size: .68rem; opacity: .4; letter-spacing: .12em; text-transform: uppercase; margin-top: .4rem; }
-
-/* Tombol platform live streaming — ikon + label sejajar */
 .livestream-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .8rem; margin-top: 1.75rem; }
 .livestream-actions .btn-outline { display: inline-flex; align-items: center; gap: .45rem; }
 .livestream-actions svg { width: 15px; height: 15px; }
-
 /* ---------- RSVP ---------- */
 .rsvp-wrap { max-width: 480px; margin: 1.8rem auto 0; }
-/* Kartu FORM reservasi: putih solid — sama seperti capsule event/gift —
-   TANPA foto bg. Label gelap, field diberi border gelap. */
 .rsvp-form {
   position: relative;
   overflow: hidden;
@@ -1445,7 +973,6 @@ a { color: inherit; }
   font-family: "Segoe UI", var(--font-sans); font-size: .72rem;
   font-weight: 700;
   letter-spacing: .12em; text-transform: uppercase;
-  /* Gelap — di atas kartu putih tidak perlu shadow. */
   color: var(--color-dark);
 }
 .rsvp-form input, .rsvp-form select, .rsvp-form textarea {
@@ -1460,56 +987,27 @@ a { color: inherit; }
   outline: none; background: #fff; border-color: var(--color-gold);
   box-shadow: 0 0 0 3px rgba(201,166,104,.18);
 }
-
-/* Tombol pilihan kehadiran capsule: Hadir full-width, Tidak Hadir & Ragu setengah */
 .rsvp-attendance { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: .1rem; }
 .rsvp-form .rsvp-pill {
   grid-column: span 1; padding: .7rem .75rem;
   border: 1px solid var(--color-dark); border-radius: 10px;
   background: #fff;
-  /* Warna teks di-hardcode (bukan var(--color-text)) supaya tidak ikut
-     berubah jadi tak terbaca kalau var di-override lewat tab Tampilan
-     admin — pill ini bg-nya selalu terang. Selector discope ke
-     .rsvp-form supaya specificity (0,2,0) menang atas .rsvp-form label. */
   color: var(--color-dark);
   font-family: var(--font-sans); font-size: .82rem; cursor: pointer;
   transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
 }
-/* Discope ke .rsvp-form supaya specificity (0,2,0) sama dengan
-   .rsvp-form .rsvp-pill (grid-column: span 1) — dan muncul BELAKANG di
-   file, jadi menang: tombol Hadir tetap full width satu baris penuh. */
 .rsvp-form .rsvp-pill--full { grid-column: 1 / -1; }
 .rsvp-form .rsvp-pill:not(.is-selected) { color: var(--color-dark); }
-/* Pengaman: discope ke ID supaya specificity (1,1,0) menang atas apa pun
-   (termasuk .rsvp-form label { color:#fff }) — teks pill WAJIB gelap di atas
-   bg putih, apa pun perubahan style label. :not(.is-selected) supaya pill
-   yang sedang aktif (bg gelap) tidak ikut dipaksa teks gelap — sebelumnya
-   BUG: rule ini menimpa .rsvp-pill.is-selected (specificity 0,2,0 kalah dari
-   ID), teks jadi warna gelap di atas bg gelap = tak terlihat. */
 #rsvp-form .rsvp-pill:not(.is-selected) { color: var(--color-dark); }
 .rsvp-pill:hover { transform: translateY(-1px); }
 .rsvp-pill.is-selected { background: var(--color-dark); color: #fff; font-weight: 600; box-shadow: 0 5px 12px rgba(20,18,15,.3); }
 .rsvp-form .btn-primary { width: 100%; margin-top: .25rem; }
 .rsvp-status { text-align: center; font-size: .82rem; min-height: 1.2em; margin: 0; color: #6e5730; }
-
 .wishes-heading { display: flex; align-items: center; gap: .75rem; margin: 2.8rem 0 .55rem; }
 .wishes-heading span { height: 1px; flex: 1; background: rgba(201,166,104,.7); }
 .wishes-heading p { margin: 0; color: #85652d; font-size: .66rem; font-weight: 600; letter-spacing: .16em; white-space: nowrap; }
 .wishes-intro { margin: 0 0 1.15rem; text-align: center; color: rgba(60,48,31,.7); font-size: .84rem; line-height: 1.55; }
 .wishes-list {
-  /* Dulu max-height:360px + overflow-y:auto (kotak scroll kecil bersarang di
-     dalam halaman) — dua masalah: (1) cuma ~2-3 kartu kelihatan sebelum harus
-     discroll DI DALAM kotak kecilnya sendiri, (2) gesture scroll di atas
-     kotak itu KETANGKAP olehnya duluan (bukan discroll halaman), jadi terasa
-     "macet" — padahal reveal.js sudah pakai data-reveal-early (early
-     observer, ambang -5% bawah viewport) yang seharusnya trigger secepat
-     kartu menyentuh layar. Kartu yang terkurung di bawah area 360px yang
-     terpotong itu TIDAK PERNAH dianggap "intersecting" sampai kotaknya
-     digulir manual — makanya kelihatan seperti reveal baru muncul kalau
-     sudah scroll jauh/ke tengah. Dihapus jadi mengalir alami mengikuti
-     scroll halaman biasa — reveal-early bekerja normal, dan semua ucapan
-     (maksimal 50, lihat loadWishes() limit di rsvp.js) langsung kelihatan
-     tanpa kotak scroll tersembunyi. */
   display: flex; flex-direction: column; gap: .75rem; padding: .15rem .2rem .15rem 0; text-align: left;
 }
 .wish-card {
@@ -1520,13 +1018,11 @@ a { color: inherit; }
 .wish-card::before { content: ""; position: absolute; left: 0; top: .9rem; bottom: .9rem; width: 3px; border-radius: 99px; background: var(--color-gold); }
 .wish-card__name { display: inline-block; font-weight: 600; font-size: .9rem; color: #443621; }
 .wish-card__status { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-left: .45rem; padding: .2rem .5rem; border-radius: 999px; }
-/* Badge warna berbeda per status kehadiran */
 .wish-card__status--hadir { background: rgba(61,132,89,.16); color: #34724d; }
 .wish-card__status--tidak_hadir { background: rgba(176,68,60,.13); color: #a33d37; }
 .wish-card__status--ragu { background: rgba(190,133,51,.18); color: #966617; }
 .wish-card__message { font-size: .86rem; line-height: 1.6; margin: .55rem 0 0; color: rgba(43,38,32,.84); }
 .wishes-empty { margin: 0; padding: 1.2rem; border: 1px dashed rgba(201,166,104,.65); border-radius: 13px; text-align: center; font-size: .84rem; color: rgba(60,48,31,.63); }
-
 .wishes-pagination { display: flex; align-items: center; justify-content: center; gap: .7rem; margin-top: 1.1rem; flex-wrap: wrap; }
 .wishes-page-btn {
   border: 1px solid rgba(201,166,104,.55); border-radius: 999px;
@@ -1537,18 +1033,9 @@ a { color: inherit; }
 .wishes-page-btn:hover:not(:disabled) { background: rgba(201,166,104,.2); }
 .wishes-page-btn:disabled { opacity: .35; cursor: default; }
 .wishes-page-info { font-size: .76rem; color: rgba(60,48,31,.72); white-space: nowrap; }
-
-/* ---------- Share / QR ---------- */
-.share-box { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
 .qr-container { background: #fff; padding: .75rem; border-radius: 10px; }
-.share-actions { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; }
-
 /* ---------- Closing ---------- */
 .closing-text { line-height: 1.8; font-size: 1rem; margin-bottom: 1.5rem; }
-
-/* Footer punya background sendiri — memakai overlay gelap yang SAMA dengan
-   overlay slideshow (var --overlay-closing) agar warnanya seragam, tanpa
-   menampilkan foto slideshow di belakangnya. */
 .site-footer {
   position: absolute; left: 0; right: 0; bottom: 0;
   height: 4.5rem;
@@ -1557,22 +1044,12 @@ a { color: inherit; }
   font-size: .75rem; opacity: .6;
   background: var(--overlay-closing);
   color: var(--color-text-light);
-  z-index: 3; /* di atas overlay (z-index 2) dan foto slideshow (z-index 1) */
+  z-index: 3; 
 }
-/* Slideshow full selayar: foto menutupi seluruh section, footer tampil
-   di atasnya dengan background overlay gelap yang sama.
-   100vh (bukan 100dvh) supaya di HP saat discroll penuh — bar browser sudah
-   mengecil — foto tetap pas menutupi layar tanpa sisa piksel. */
 #closing { min-height: 100vh; }
 #closing .hero-media { inset: 0; }
-/* Teks penutup ditempatkan di BAWAH section, bukan di tengah — foto slideshow
-   punya wajah di tengah layar yang tidak boleh tertutup teks. .section-hero
-   default flex center; #closing menimpa ke flex-end (tetap center horizontal
-   via text-align di parent). */
 #closing { align-items: flex-end; }
-/* Teks penutup di dasar section tidak bertabrakan dengan footer di bawahnya */
 #closing .hero-content { padding-bottom: 5.5rem; }
-
 /* ---------- Toast ---------- */
 .toast {
   position: fixed; left: 50%; bottom: 1.5rem; transform: translate(-50%, 20px);
@@ -1582,51 +1059,32 @@ a { color: inherit; }
   z-index: 1000; border: 1px solid var(--color-gold);
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-
-/* Tone overlay global — menyatukan warna semua foto (beda sesi pemotretan)
-   ke satu nuansa hangat konsisten, tanpa menurunkan opacity elemen mana pun.
-   Dipindah dari body::after ke .app-frame::after: overlay kini hanya menutupi
-   kolom undangan (area polos kiri-kanan di desktop tidak ikut di-warm-up),
-   dan #preloader (z-index 9999, di dalam kolom) tampil di atasnya. */
 .app-frame::after {
   content: "";
   position: fixed; inset: 0;
-  /* Warna & opacity boleh di-override tema (theme.js, tab "Tampilan" admin) —
-     fallback inline = nilai asli, jadi tanpa tema tersimpan tampilan tetap
-     persis seperti semula. Mati/hidup lewat --overlay-global-opacity: 0
-     (pseudo-element tidak bisa dipilih querySelector langsung). */
   background: var(--overlay-global-color, var(--color-gold));
   mix-blend-mode: soft-light;
   opacity: var(--overlay-global-opacity, .4);
   pointer-events: none;
   z-index: 9990;
 }
-
 @media (prefers-reduced-motion: reduce) {
   .kenburns, .preloader-ring { animation: none !important; }
-  /* reveal.js sudah menandai semuanya .is-revealed saat reduced-motion; di sini
-     cukup matikan transisinya supaya benar-benar tanpa gerak. Transform sengaja
-     tidak dipaksa `none` — itu akan menghapus rotasi .event-label. */
   .reveal-ready [data-reveal] {
     opacity: 1 !important;
     transition: none !important;
   }
-  /* Item menu navigasi: tanpa animasi stagger, langsung tampil semua */
   .nav-menu-list button {
     animation: none !important;
     opacity: 1;
   }
 }
-
-/* ---------- Kedua Mempelai (slideshow besar 3/4 layar + info overlay) ---------- */
-/* Full-width, tanpa rounded, rapat ke ayat quran di atasnya (tanpa heading). */
+/* ---------- Kedua Mempelai (slideshow besar 3/4 layar + info  */
 .couple-solo.section {
   height: 100dvh;
   min-height: 0;
   padding: 0;
 }
-/* Bride & Groom: bg krem (bukan gelap) — saat foto meluncur masuk (reveal
-   enter-left/right), area yang tersingkap berwarna krem senada halaman lain. */
 #couple-bride.section,
 #couple-groom.section {
   background: var(--color-bg);
@@ -1634,9 +1092,6 @@ a { color: inherit; }
 }
 .couple-block { margin-bottom: 0; }
 .couple-block:last-child { margin-bottom: 0; }
-/* Bride & Groom masing-masing adalah satu snap point tepat setinggi viewport.
-   Reset padding section penting: slider juga memenuhi tinggi section, jadi
-   padding tambahan akan membuat titik snap bergeser lebih dari satu layar. */
 .couple-solo {
   display: flex;
   align-items: stretch;
@@ -1649,12 +1104,8 @@ a { color: inherit; }
   height: 100%;
 }
 .couple-solo .couple-slider {
-  max-height: none; /* section terpisah, jadi tidak lagi dibatasi tinggi slider lama */
+  max-height: none; 
 }
-/* Pembungkus yang meluncur masuk dari luar layar. Sengaja terpisah dari
-   .couple-slider (root Swiper) supaya Swiper tidak mengukur slide dalam keadaan
-   ter-transform, dan terpisah dari .couple-block supaya .couple-block bisa diam
-   di tempat sebagai pemicu IntersectionObserver-nya. */
 .couple-reveal { position: relative; }
 .couple-slider {
   position: relative;
@@ -1662,24 +1113,22 @@ a { color: inherit; }
   max-height: 720px;
   overflow: hidden;
 }
-.couple-slider .swiper-wrapper,
-.couple-slider .swiper-slide { height: 100%; }
-/* Clip per-SLIDE untuk slide yang TIDAK tampil: gambar yang di-zoom/pan
-   (transform: scale(var(--zoom)) di .couple-slide img) meluber keluar box
-   slide-nya sendiri — tanpa clip, slide berikutnya yang zoom-nya besar bisa
-   menimpa tepi kanan slide aktif (foto 4 zoom 1.25 menutupi kanan foto 3). */
-.couple-slider .swiper-slide { overflow: hidden; }
-/* Slide yang sedang tampil DIBEBASKAN dari clip (boleh meluber kanan-kiri
-   mengikuti pan/zoom admin, sesuai keinginan) dan dinaikkan z-index: gambar
-   slide aktif menutupi beberapa pixel pertama slide berikutnya, jadi foto
-   berikutnya tidak pernah terlihat mengintip di sisi kanan layar. */
+.couple-slider .swiper-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.2s ease;
+}
+.couple-slider .swiper-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
 .couple-slider .swiper-slide-active { overflow: visible; z-index: 2; }
 .couple-slide picture,
 .couple-slide img { width: 100%; height: 100%; display: block; }
 .couple-slide img { object-fit: cover; }
-
-/* Blur-fade band (resep standar): gelap pekat di bottom, makin ke atas makin
-   blur & transparan, ujung atas tidak bertekstur garis (mask arah sama). */
 .couple-fade {
   position: absolute;
   left: -2px; right: -2px; bottom: -2px;
@@ -1692,11 +1141,9 @@ a { color: inherit; }
   pointer-events: none;
   z-index: 2;
 }
-
 .couple-info {
   position: absolute;
   left: 0; right: 0; bottom: 2.8rem;
-  /* padding bawah naik sedikit — ruang untuk baris Instagram di bawah parents */
   padding: 2rem 1.5rem 1.6rem;
   text-align: center;
   z-index: 3;
@@ -1724,8 +1171,6 @@ a { color: inherit; }
   opacity: .85;
   margin: 0;
 }
-/* Baris Instagram mempelai — diisi main.js; disembunyikan kalau kosong.
-   Link ke profil (target _blank), digarisbawahi supaya jelas bisa diklik. */
 .couple-info__instagram {
   font-size: .78rem;
   line-height: 1.5;
@@ -1738,8 +1183,6 @@ a { color: inherit; }
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-/* Link ikon + handle, dipasang main.js (ganti prefix teks "Instagram:" jadi
-   ikon glyph inline supaya lebih ringkas & universal). */
 .couple-info__instagram a.couple-info__instagram-link {
   display: inline-flex;
   align-items: center;
@@ -1748,19 +1191,6 @@ a { color: inherit; }
 }
 .couple-info__instagram-link span { text-decoration: none; }
 .couple-info__instagram-link svg { flex: none; }
-
-/* ---------- Event (editorial: 1 panel, header tanggal besar + 2 blok acara,
-   TANPA foto/slider/card box) ---------- */
-/* Satu sistem garis (bagian 12): semua border/divider section event berasal
-   dari satu base warm brown, dibedakan hanya lewat opacity — bukan warna yang
-   berbeda-beda. */
-/* min-height (bukan height tetap): kalau kontennya kebetulan lebih tinggi
-   dari 1 layar di device tertentu (font besar/aksesibilitas, alamat sangat
-   panjang), section ini tetap boleh memanjang alih-alih memotong/overflow —
-   pola yang sama dengan .section-hero di section lain. */
-/* ---------- Event: capsule portrait ivory ----------
-   Satu bentuk capsule adalah pusat komposisi; tanpa frame bertingkat, arch,
-   diamond, atau ornamen lain supaya informasi acara tetap tenang dan formal. */
 .event-hero {
   --event-canvas: #f4eee3;
   --event-paper: #fffdf8;
@@ -1775,7 +1205,7 @@ a { color: inherit; }
   display: grid;
   place-items: center;
   padding: clamp(.6rem, 2dvh, 1.25rem);
-  background: url("../img/rsvp-bg.jpg") center / cover;
+  background: url("../../assets/img/rsvp-bg.webp") center / cover;
   color: var(--event-ink);
   text-align: center;
   scroll-snap-align: start;
@@ -1792,26 +1222,6 @@ a { color: inherit; }
   background: #ffffffcc;
   z-index: 2;
 }
-.event-floral { position: absolute; z-index: 1; display: block; height: auto; pointer-events: none; user-select: none; }
-.event-floral--top-left { top: -10px; left: -16px; z-index: 3; width: clamp(138px, 42vw, 190px); }
-.event-floral--top-left-hanging { top: clamp(112px, 31vw, 142px); left: -18px; z-index: 2; width: clamp(102px, 31vw, 138px); }
-.event-floral--bottom-right { right: -12px; bottom: -8px; width: clamp(100px, 30vw, 140px); }
-.event-floral--stem-right { top: 16dvh; right: -8px; z-index: 3; width: clamp(56px, 18vw, 78px); }
-.event-hero__capsule .event-floral--stem-left { left: -8px; bottom: 2dvh; z-index: 3; width: clamp(42px, 13vw, 58px); }
-/* Bunga Tanda Kasih — aset putih, letak mengikuti referensi capsule event:
-   rangkaian kiri atas (bunga utama + bunga tambahan + juntaian) menggantung
-   dari pojok kiri atas SECTION (di luar capsule), kanan bawah & kiri bawah
-   menempel pojok section, tangkai horizontal di kanan tengah, 1 aksen kecil
-   dalam capsule. */
-.gift-floral--top-left { top: -10px; left: -16px; z-index: 3; width: clamp(180px, 50vw, 240px); }
-.gift-floral--top-left-extra { top: clamp(90px, 26dvh, 140px); left: -14px; z-index: 0; width: clamp(100px, 30vw, 140px); }
-.gift-floral--juntaian { top: -8px; left: -10px; z-index: 0; width: clamp(84px, 26vw, 128px); }
-.gift-floral--bottom-left { left: -12px; bottom: -8px; width: clamp(120px, 34vw, 160px); }
-.gift-floral--stem-right { right: -10px; top: 14dvh; width: clamp(130px, 36vw, 180px); }
-.gift-capsule .gift-floral--small { left: 6px; bottom: 10px; width: clamp(50px, 14vw, 68px); }
-/* Semua bunga di halaman Tanda Kasih dibuat samar — opacity 0.25 supaya hanya
-   menjadi aksen halus, tidak menyaingi konten capsule. */
-#gift .event-floral { opacity: .25; }
 .event-hero__date { position: relative; z-index: 1; flex: 0 0 auto; margin-bottom: clamp(.65rem, 2.4dvh, 1.25rem); }
 .event-hero__day {
   margin: 0 0 clamp(.18rem, .8dvh, .38rem);
@@ -1846,7 +1256,6 @@ a { color: inherit; }
 .event-block:first-child .event-block__address { margin-right: 0; }
 .event-block:last-child .event-block__address { margin-left: 0; }
 .event-block:first-child .event-block__maps { margin-left: auto;
-  /* Tinggi sasaran sentuh: tanpa padding ini hanya ~21px. */
   padding: .4rem 0;
 }
 .event-block:last-child .event-block__maps { margin-right: auto; }
@@ -1879,12 +1288,10 @@ a { color: inherit; }
   .event-hero__date { margin-bottom: .25rem; }
   .event-hero__divider { margin: .25rem auto; }
 }
-
-/* ---------- Kartu Dresscode (kartu kecil 1/4 layar, border sama dengan event card) ---------- */
 .dresscode-card {
   width: min(96%, 720px);
-  margin: 0 auto 2.5rem; /* jarak normal ke foto quote di bawah */
-  height: 25vh; /* 1/4 layar */
+  margin: 0 auto 2.5rem; 
+  height: 25vh; 
   background: #ffffff;
   border-radius: 24px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .18);
@@ -1923,14 +1330,12 @@ a { color: inherit; }
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .2), inset 0 0 0 2px #fff;
 }
-
-/* ---------- Quote (bg gelap solid + teks quote — tanpa foto) ---------- */
 .quote-section {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1; /* persegi: 1:1 terhadap lebar layar */
+  aspect-ratio: 1 / 1; 
   overflow: hidden;
-  background: #14120f; /* gelap pekat — teks krem di tengah */
+  background: #14120f; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1945,13 +1350,9 @@ a { color: inherit; }
   line-height: 1.7;
   color: #f4eee3;
 }
-
-/* ---------- Quotes (bg gelap, satu kutipan statis antara Our Story & Galeri)
-   Tinggi persegi SAMA dengan section quote 1 (aspect-ratio 1/1), teks
-   center di tengah container. ---------- */
 .quotes-section {
-  aspect-ratio: 1 / 1; /* sama tinggi dengan #quote (persegi) */
-  background: #14120f; /* gelap pekat, teks krem di atasnya */
+  aspect-ratio: 1 / 1; 
+  background: #14120f; 
   color: #f4eee3;
   text-align: center;
   display: flex;
@@ -1974,12 +1375,6 @@ a { color: inherit; }
   line-height: 1.75;
   color: #f4eee3;
 }
-
-/* ---------- EB Garamond: cover, save the date, couple, quotes, story,
-   capsule gift, tombol gift, modal, form reservasi, dan footer ----------
-   Semua teks di area tersebut memakai EB Garamond (dimuat via Google Fonts
-   di index.html). Rule ini sengaja di AKHIR file dan lebih spesifik dari
-   rule asli tiap elemen, supaya menang tanpa !important. */
 #cover .eyebrow,
 .eyebrow-monogram,
 #cover .script-names,
@@ -2032,27 +1427,6 @@ a { color: inherit; }
 .gift-address {
   font-family: "EB Garamond", Georgia, serif;
 }
-
-/* ─── Reveal stagger enhancement ───
-   Per-elemen reveal dengan delay bertahap. --reveal-i dikali STEP_MS
-   oleh reveal.js. Di sini kita tambahkan aturan untuk elemen yang
-   belum memiliki data-reveal tapi perlu reveal default.
-
-   BUG (ditemukan 2026-08-10): #gallery-wrapper dan #love-story-list adalah
-   anak langsung .section TANPA data-reveal/data-reveal-group — disengaja,
-   reveal-nya dipasang PER FOTO oleh gallery.js/main.js (data-reveal di tiap
-   .gallery-item/.timeline-item), bukan sekaligus di wrapper-nya (lihat
-   komentar di index.html dekat #gallery-wrapper). Tapi selector catch-all
-   ini ikut menimpa opacity:0 ke WRAPPER itu sendiri, dan karena wrapper-nya
-   sendiri tidak pernah ditandai .is-revealed (reveal.js cuma meregister
-   elemen ber-data-reveal), wrapper-nya opacity:0 SELAMANYA — menyembunyikan
-   semua foto di dalamnya meski tiap foto sudah benar ter-reveal individual.
-   Fix: kecualikan kedua ID wrapper ini secara eksplisit. Kasus yang sama
-   menyusul: .gift-actions & .livestream-actions (wrapper polos di #gift /
-   #livestream — tombol di dalamnya punya data-reveal sendiri, wrapper-nya
-   tidak, jadi tanpa pengecualian ini tombol Kirim Hadiah / Live Streaming
-   tersembunyi selamanya) dan .event-hero__list (wrapper blok acara #event,
-   reveal dipasang per anaknya). */
 .reveal-ready .section > *:not([data-reveal]):not([data-reveal-group]):not(#gallery-wrapper):not(#love-story-list):not(.gift-actions):not(.livestream-actions):not(.event-hero__list):not(.event-hero__capsule):not(.gift-capsule):not(.event-floral) {
   opacity: 0;
   transform: translateY(18px);
@@ -2063,19 +1437,12 @@ a { color: inherit; }
   opacity: 1;
   transform: translateY(0);
 }
-
-/* Reduced motion: animasi tetap FADE, tapi tanpa transform */
 @media (prefers-reduced-motion: reduce) {
   .reveal-ready [data-reveal],
   .reveal-ready .section > *:not([data-reveal]) {
     transform: none !important;
   }
 }
-
-/* ---------- Capsule event: SAMA POLA dengan capsule gift ----------
-   Capsule sendiri zoom-in dulu (kecil -> ukuran asli, data-reveal="zoom" di
-   kontainernya), baru konten di dalamnya (tanggal, Akad, Resepsi) reveal
-   SETELAH zoom-nya kelar — delay 500ms, mirip gift-capsule. */
 #event .event-hero__capsule[data-reveal="zoom"] {
   transform: scale(.7);
   transition-duration: 900ms;
@@ -2083,17 +1450,6 @@ a { color: inherit; }
 #event .event-hero__capsule[data-reveal="zoom"].is-revealed {
   transform: scale(1);
 }
-
-/* ---------- Akad & Resepsi SATU BATCH masing-masing ----------
-   .event-block adalah data-reveal-group: semua elemen di dalamnya (judul,
-   jam, venue, alamat, tombol Maps) reveal BERSAMAAN begitu bloknya masuk
-   layar — bukan satu-satu berurutan. Variasi datang dari JENIS animasinya
-   (down/zoom/pop/fade/up di markup), bukan dari delay berjenjang. Durasi
-   dipercepat dari default 1.8s halaman supaya terasa tegas di capsule kecil
-   ini. Blok Resepsi menyusul ~180ms setelah Akad (bukan lewat --reveal-i)
-   supaya dua batch tetap terasa berurutan meski keduanya sudah di layar
-   bersamaan (capsule setinggi hampir 1 layar penuh). Delay dasar 500ms
-   supaya konten baru mulai muncul setelah capsule-nya selesai zoom-in. */
 #event .event-hero__capsule [data-reveal] {
   transition-duration: 950ms;
   transition-delay: 500ms;
@@ -2101,8 +1457,6 @@ a { color: inherit; }
 .event-hero__list .event-block:last-child [data-reveal] {
   transition-delay: 680ms;
 }
-/* Gerakan diperbesar dari default halaman (26px/22px/scale .9-1.07) — di
-   capsule kecil ini gerakan kecil nyaris tak terlihat. */
 #event .event-hero__capsule [data-reveal="down"] { transform: translateY(-34px); }
 #event .event-hero__capsule [data-reveal="down"].is-revealed { transform: translateY(0); }
 #event .event-hero__capsule [data-reveal="up"] { transform: translateY(34px); }
@@ -2111,3 +1465,7 @@ a { color: inherit; }
 #event .event-hero__capsule [data-reveal="zoom"].is-revealed { transform: scale(1); }
 #event .event-hero__capsule [data-reveal="pop"] { transform: scale(.76); }
 #event .event-hero__capsule [data-reveal="pop"].is-revealed { transform: scale(1); }
+#love-story, #gallery, #rsvp {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}

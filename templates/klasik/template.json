@@ -5,18 +5,11 @@
   "description": "Hangat, emas, timeless. Cover layar penuh, kartu akad & resepsi, linimasa cerita, galeri bertumpuk.",
   "assets": {
     "fonts": [
-      "https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&family=Cormorant+Garamond:wght@400&family=Italianno&display=swap"
+      "assets/fonts/eb-garamond/eb-garamond-400.woff2",
+      "assets/fonts/poppins/poppins-400.woff2"
     ],
-    "css": [
-      "https://unpkg.com/aos@2.3.4/dist/aos.css",
-      "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css",
-      "assets/fontawesome/css/fontawesome.min.css",
-      "assets/fontawesome/css/solid.min.css"
-    ],
+    "css": [],
     "js": [
-      "https://unpkg.com/aos@2.3.4/dist/aos.js",
-      "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js",
-      "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js",
       "assets/js/hero-slideshow.js",
       "assets/js/reveal.js",
       "assets/js/countdown.js",

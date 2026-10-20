@@ -6,11 +6,8 @@
  * memuat ?to=...) — petugas admin-qr tinggal memindai. QR digambar saat tombol
  * diklik, bukan saat halaman dibuka, supaya tidak ada kerja sia-sia.
  *
- * Library: qrcode-generator (UMD plain script, global `qrcode`, CDN jsdelivr,
- * komputasi lokal tanpa API pihak ketiga). Paket npm `qrcode` TIDAK dipakai —
- * ia tidak punya build browser (CommonJS mentah di lib/), sementara jalur
- * +esm-nya butuh type=module yang bertentangan dengan semua script lain di
- * halaman ini yang non-module. */
+ * Library: assets/js/vendor/qrcode-generator.js (dimuat secara lazy saat tombol
+ * QR pertama kali diklik, tanpa membebani jaringan di jalur kritis boot). */
 window.initQrCheckin = function () {
   const cfg = window.WEDDING_CONFIG;
   const btn = document.getElementById("btn-qr-checkin");
@@ -25,11 +22,30 @@ window.initQrCheckin = function () {
   const params = new URLSearchParams(location.search);
   if (!params.get(cfg.guestParam)) return;
 
+  let loadingQrPromise = null;
+  function ensureQrLibrary() {
+    if (typeof window.qrcode === "function") return Promise.resolve(window.qrcode);
+    if (loadingQrPromise) return loadingQrPromise;
+    loadingQrPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "assets/js/vendor/qrcode-generator.js";
+      s.onload = () => (typeof window.qrcode === "function" ? resolve(window.qrcode) : reject(new Error("qrcode missing")));
+      s.onerror = () => {
+        loadingQrPromise = null;
+        reject(new Error("Gagal memuat pustaka QR"));
+      };
+      document.head.appendChild(s);
+    });
+    return loadingQrPromise;
+  }
+
   // Baru muncul setelah amplop dibuka, sama seperti tombol musik — sebelum
   // itu belum ada gunanya ditampilkan (guest belum masuk ke undangannya).
   window.whenInvitationOpen(() => { btn.hidden = false; });
-  btn.addEventListener("click", () => {
-    if (!window.qrcode) {
+  btn.addEventListener("click", async () => {
+    try {
+      await ensureQrLibrary();
+    } catch (_) {
       window.showToast && window.showToast("Gagal memuat QR (cek koneksi)");
       return;
     }
@@ -41,9 +57,6 @@ window.initQrCheckin = function () {
       qr.make();
       const img = new Image();
       img.onload = () => {
-        // qrcode-generator menghasilkan PNG (data URL) — gambarkan ke kanvas.
-        // Kanvas di-CSS jadi lebar penuh wadah, resolusi internal 240px cukup
-        // tajam untuk dipindai.
         const px = 240;
         canvas.width = px;
         canvas.height = px;
@@ -60,9 +73,12 @@ window.initQrCheckin = function () {
     }
   });
 
-  modal.querySelector(".modal__close").addEventListener("click", () => {
-    modal.hidden = true;
-  });
+  const closeBtn = modal.querySelector(".modal__close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      modal.hidden = true;
+    });
+  }
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.hidden = true;
   });
