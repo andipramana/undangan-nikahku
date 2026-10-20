@@ -53,15 +53,18 @@ window.initGallery = async function () {
       const cls = window.GalleryLayout.shapeAt(i, photos);
       const row = window.GalleryLayout.rowAt(i, photos);
       const galleryRow = row + videoRowOffset;
-      const src = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
+      const rawSrc = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
+      const src = rawSrc && rawSrc.startsWith("assets/img/") ? rawSrc.replace(/\.(jpe?g|png)$/i, ".webp") : rawSrc;
+      const srcset = item.path && window.photoSrcset ? window.photoSrcset(item.path) : "";
+      const srcsetAttr = srcset ? ` srcset="${srcset}" sizes="(max-width: 480px) 100vw, 430px"` : "";
       const fx = item.focalX ?? 50;
       const fy = item.focalY ?? 50;
       const zoom = item.zoom ?? 1;
       return `
     <div class="gallery-item gallery-item--${cls}" style="grid-row:${galleryRow}" data-full="${src}" data-reveal="${motionFor(i)}">
       <picture>
-        <source srcset="${src}" type="image/webp">
-        <img src="${src}" alt="Momen ${i + 1}" loading="lazy"
+        <source srcset="${srcset || src}" type="image/webp">
+        <img src="${src}"${srcsetAttr} alt="Momen ${i + 1}" loading="lazy" decoding="async" width="430" height="430"
              style="--fx:${fx}%; --fy:${fy}%; --zoom:${zoom}">
       </picture>
     </div>`;

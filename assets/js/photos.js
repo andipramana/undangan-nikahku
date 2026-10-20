@@ -161,14 +161,17 @@ window.pauseAutoplayOffscreen = function (swiper, el) {
 window.buildPhotoSlide = function (item, cls) {
   const slide = document.createElement("div");
   slide.className = `swiper-slide ${cls}`;
-  const src = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
+  const rawSrc = item.path && !item.webp ? window.photoUrl(item.path) : item.webp || item.jpg;
+  const src = rawSrc && rawSrc.startsWith("assets/img/") ? rawSrc.replace(/\.(jpe?g|png)$/i, ".webp") : rawSrc;
+  const srcset = item.path && window.photoSrcset ? window.photoSrcset(item.path) : "";
+  const srcsetAttr = srcset ? ` srcset="${srcset}" sizes="(max-width: 480px) 100vw, 430px"` : "";
   const fx = item.focalX ?? 50;
   const fy = item.focalY ?? 50;
   const zoom = item.zoom ?? 1;
   slide.innerHTML = `
     <picture>
-      <source srcset="${src}" type="image/webp">
-      <img src="${src}" alt="${(item.alt || "").replace(/"/g, "&quot;")}" loading="lazy"
+      <source srcset="${srcset || src}" type="image/webp">
+      <img src="${src}"${srcsetAttr} alt="${(item.alt || "").replace(/"/g, "&quot;")}" loading="lazy" decoding="async" width="430" height="573"
            style="--fx:${fx}%; --fy:${fy}%; --zoom:${zoom}">
     </picture>`;
   return slide;

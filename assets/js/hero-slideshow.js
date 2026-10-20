@@ -12,14 +12,6 @@
  * sudah masuk, supaya foto pertama tetap bisa dilihat dulu. */
 window.initHeroSlideshows = async function () {
   const cfg = window.WEDDING_CONFIG;
-  // Satu foto tampil PENUH sebelum diganti: jeda 7 detik, transisi 3.2 detik.
-  // WAJIB SAMA PERSIS dengan durasi transition .hero-slide di assets/css/style.css
-  // (classic-elegance) — kalau angka ini lebih PENDEK dari transition CSS-nya,
-  // reset inline style di bawah (baris ~109-112) memotong animasi CSS yang
-  // masih berjalan: foto yang keluar snap ke posisi akhir sebelum benar-benar
-  // selesai bergeser, dan foto yang masuk belum tiba di posisinya — celah
-  // kosong sesaat di antara keduanya. Bug ini nyata terjadi 2026-08-11 saat
-  // durasi CSS dinaikkan (dulu 1.8s) tanpa ikut menaikkan angka ini.
   const interval = cfg.heroSlideInterval || 7000;
   const SLIDE_TRANSITION_MS = 3200;
 
@@ -42,21 +34,23 @@ window.initHeroSlideshows = async function () {
     slides.forEach((slide, i) => {
       const wrap = document.createElement("picture");
       wrap.className = "hero-slide" + (i === 0 ? " active" : "");
-      const src = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
+      const rawSrc = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
+      const src = rawSrc && rawSrc.startsWith("assets/img/") ? rawSrc.replace(/\.(jpe?g|png)$/i, ".webp") : rawSrc;
+      const srcset = slide.path && window.photoSrcset ? window.photoSrcset(slide.path) : "";
+      const srcsetAttr = srcset ? ` srcset="${srcset}" sizes="(max-width: 480px) 100vw, 430px"` : "";
       // --zoom di baca keyframe kenburns (scale dari --zoom ke --zoom*1.15)
       const fx = slide.focalX ?? 50;
       const fy = slide.focalY ?? 50;
       const zoom = slide.zoom ?? 1;
-      // Cuma foto cover PERTAMA yang boleh eager (itu satu-satunya yang tamu
-      // lihat sebelum sempat berbuat apa-apa — kandidat LCP). Sisanya (foto
-      // cover berikutnya yang baru tampil setelah beberapa detik, DAN seluruh
-      // opening/closing — di bawah lipatan/baru muncul setelah amplop dibuka)
-      // sengaja loading="lazy" supaya tidak rebutan bandwidth dengan foto
-      // cover di jaringan lambat/trafik tinggi — dulu SEMUA foto ini eager.
+      // Cuma foto cover PERTAMA yang boleh eager + fetchpriority=high + decoding=sync
+      // (kandidat LCP). Semua foto lainnya wajib loading="lazy" decoding="async".
       const eager = key === "cover" && i === 0;
+      const loadAttrs = eager
+        ? ' fetchpriority="high" loading="eager" decoding="sync"'
+        : ' loading="lazy" decoding="async"';
       wrap.innerHTML = `
-        <source srcset="${src}" type="image/webp">
-        <img class="kenburns" src="${src}" alt=""${eager ? "" : ' loading="lazy"'}
+        <source srcset="${srcset || src}" type="image/webp">
+        <img class="kenburns" src="${src}"${srcsetAttr} alt=""${loadAttrs} width="430" height="764"
              style="--fx:${fx}%; --fy:${fy}%; --zoom:${zoom}">
       `;
       container.insertBefore(wrap, overlay);
@@ -65,8 +59,6 @@ window.initHeroSlideshows = async function () {
     if (slides.length > 1) {
       const items = container.querySelectorAll(".hero-slide");
       let index = 0;
-      // Opening (Save The Date 1) berganti lebih cepat dari cover/closing —
-      // user minta jeda antar foto tidak kelamaan (interval 2.2s, first 1.5s).
       const cycleInterval = key === "opening"
         ? (cfg.heroSlideIntervalOpening || 2200)
         : interval;
@@ -74,10 +66,6 @@ window.initHeroSlideshows = async function () {
         ? (cfg.heroSlideTransitionOpening || 1200)
         : SLIDE_TRANSITION_MS;
 
-      // Slideshow yang tidak sedang dilihat tidak perlu berjalan. #closing ada
-      // jauh di bawah halaman, dan #cover tetap tinggal di DOM (position: fixed,
-      // digeser keluar layar) setelah undangan dibuka — keduanya kalau dibiarkan
-      // akan terus berganti slide + menjalankan Ken Burns sampai tab ditutup.
       let awake = key === "opening";
       let awakeSince = 0;
       const setAwake = (on) => {
@@ -94,7 +82,6 @@ window.initHeroSlideshows = async function () {
         ).observe(document.getElementById("closing"));
       } else if (key === "cover") {
         const coverEl = document.getElementById("cover");
-        // Cover jalan sejak awal, lalu berhenti begitu ia keluar layar.
         setAwake(true);
         if (coverEl) {
           coverEl.addEventListener("transitionend", () => {
@@ -107,11 +94,9 @@ window.initHeroSlideshows = async function () {
 
       function cycle() {
         if (!awake) {
-          setTimeout(cycle, 1000); // cek lagi nanti, jangan ganti slide dulu
+          setTimeout(cycle, 1000);
           return;
         }
-        // Baru saja terlihat lagi: biarkan foto yang sedang tampil dilihat penuh
-        // dulu, jangan langsung berganti begitu tamu sampai di section ini.
         const held = performance.now() - awakeSince;
         if (held < cycleInterval) {
           setTimeout(cycle, cycleInterval - held);
@@ -129,29 +114,19 @@ window.initHeroSlideshows = async function () {
           current.classList.remove("exiting");
           current.style.transition = "none";
           // eslint-disable-next-line no-unused-expressions
-          current.offsetHeight; // force reflow supaya reset posisi tidak animasi/terlihat
+          current.offsetHeight;
           current.style.transition = "";
         }, transitionMs);
 
         index = nextIndex;
-        // Jeda penuh dulu untuk melihat foto yang baru masuk, BARU transisi berikutnya
-        // (tidak pakai setInterval agar pergantian tidak pernah menumpuk).
         setTimeout(cycle, cycleInterval + transitionMs);
       }
 
       function start(firstDelay) {
-        // Foto pertama tampil dulu sebelum transisi pertama berjalan.
-        // Opening memakai jeda awal lebih pendek (lihat bawah) supaya foto
-        // cepat berganti setelah section direveal — jeda full `interval`
-        // terasa lama karena perhitungannya dimulai belakangan.
         setTimeout(cycle, firstDelay);
       }
 
       if (key === "opening") {
-        // Slideshow section 2 baru berjalan saat foto pertamanya sudah tampil
-        // (dipicu dari main.js lewat window.startOpeningSlideshow). Kalau main.js
-        // sudah minta start lebih dulu (fetch manifest masih jalan), langsung jalan.
-        // Foto pertama tampil dulu 1.5s sebelum berganti.
         const OPENING_FIRST_DELAY = 1500;
         window.startOpeningSlideshow = () => start(OPENING_FIRST_DELAY);
         if (window.__openingStartQueued) start(OPENING_FIRST_DELAY);
@@ -161,20 +136,14 @@ window.initHeroSlideshows = async function () {
     }
   });
 
-  // Save The Date 2: 1 foto statis, TANPA slideshow/Ken Burns — di-set
-  // sebagai inline background-image (CSS .section-hero--static-bg yang atur
-  // cover/center-nya). Folder sendiri ("std2", tab Foto admin) supaya
-  // fotonya tidak lagi numpang dari folder "opening" — admin bisa pilih foto
-  // berbeda dari Save The Date 1. Kalau folder "std2" masih kosong (tenant
-  // lama belum upload), fallback ke foto TERAKHIR folder "opening" (perilaku
-  // lama) supaya tidak ada section kosong.
   const std2Media = document.getElementById("save-the-date-2-media");
   if (std2Media) {
     const std2Slides = await window.getPhotos("std2");
     const slide = (std2Slides && std2Slides[0]) ||
       (openingSlides && openingSlides.length && openingSlides[openingSlides.length - 1]);
     if (slide) {
-      const src = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
+      const rawSrc = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
+      const src = rawSrc && rawSrc.startsWith("assets/img/") ? rawSrc.replace(/\.(jpe?g|png)$/i, ".webp") : rawSrc;
       std2Media.style.backgroundImage = `url("${src}")`;
     }
   }
