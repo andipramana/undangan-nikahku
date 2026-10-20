@@ -32,20 +32,29 @@ window.PanelPages["template"] = {
 
     function render() {
       outlet.innerHTML = `
-        <p class="p-hint">Pilih tampilan undangan. Template mengubah warna, font, transisi, dan urutan section. Data (teks, foto, tamu) tetap aman.</p>
+        <p class="p-hint">Pilih tampilan undangan. Setelan tampilan setiap template terpisah. Data undangan (nama, tanggal, acara, cerita) tetap terbawa.</p>
         <div style="display:grid;gap:1rem">
           ${KNOWN_TEMPLATES.map((t) => {
             const info = t;
             const active = t.id === activeId;
-            // Pita swatch: warna template sebagai identitas visual kartu,
-            // bukan tiga titik kecil. Hex datang dari data VISUAL_INFO.
             const stops = (info.colors || []).map((clr, i, arr) =>
               `${clr} ${(i / arr.length) * 100}% ${((i + 1) / arr.length) * 100}%`).join(", ");
+            const swatches = (info.colors || []).slice(0, 3).map((clr) =>
+              `<span aria-hidden="true" style="display:inline-block;width:16px;height:16px;border-radius:50%;background:${esc(clr)};border:1px solid rgba(0,0,0,.15)"></span>`
+            ).join("");
             return `
             <section class="p-card"${active ? ' style="border-color:var(--p-accent);box-shadow:0 0 0 3px var(--p-accent-wash)"' : ""}>
-              <div aria-hidden="true" style="height:10px;border-radius:999px;background:linear-gradient(90deg, ${stops});margin-bottom:.25rem"></div>
-              <h3 class="p-card__title">${esc(t.name)} ${active ? window.PanelUI.badge("Aktif", "ok") : ""}</h3>
-              <p class="p-card__desc">${esc(info.desc || "")}</p>
+              <div style="display:flex;gap:.9rem;align-items:flex-start">
+                <img src="templates/${esc(t.id)}/cover.jpg" alt="${esc(t.name)}" loading="lazy" width="72" height="90" style="width:72px;height:90px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#1a1210">
+                <div style="flex:1;min-width:0">
+                  <div aria-hidden="true" style="height:8px;border-radius:999px;background:linear-gradient(90deg, ${stops});margin-bottom:.4rem"></div>
+                  <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                    <h3 class="p-card__title" style="margin:0">${esc(t.name)} ${active ? window.PanelUI.badge("Aktif", "ok") : ""}</h3>
+                    <span style="display:inline-flex;gap:4px;margin-left:auto">${swatches}</span>
+                  </div>
+                  <p class="p-card__desc" style="margin-top:.3rem">${esc(info.desc || "")}</p>
+                </div>
+              </div>
               <div class="p-toolbar">
                 <button type="button" class="p-btn p-btn--primary" data-apply="${t.id}" ${active ? "disabled" : ""}>${active ? "Aktif" : "Pakai"}</button>
                 <button type="button" class="p-btn p-btn--ghost" data-preview="${t.id}">Preview</button>
@@ -60,14 +69,18 @@ window.PanelPages["template"] = {
 
     async function apply(id) {
       if (id === activeId) return;
-      // Ditulis ke templateId (kunci baru). `template` lama sengaja ikut
-      // diisi supaya tenant yang sempat dibuka versi kode lama tidak kosong.
       window.PanelStore.set("templateId", id);
       window.PanelStore.set("template", id);
       const { error } = await window.PanelStore.save(["templateId", "template"]);
       if (error) { toast("Gagal menyimpan template: " + error.message, true); return; }
       activeId = id;
-      toast("Template diterapkan. Buka ulang undangan untuk melihat hasilnya.");
+      if (window.PanelStore.loadManifest) {
+        await window.PanelStore.loadManifest(id);
+        if (window.PanelRouter && window.PanelRouter.registerChapters) {
+          window.PanelRouter.registerChapters(window.PanelStore.getManifest());
+        }
+      }
+      toast("Template diterapkan. Setelan tampilan setiap template terpisah; data undangan tetap terbawa.");
       render();
     }
     function preview(id) {

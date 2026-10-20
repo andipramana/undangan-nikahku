@@ -84,10 +84,28 @@ window.PanelPages["home"] = {
     function renderChapters(c, ph) {
       const wrap = outlet.querySelector("#home-chapters");
       if (!wrap) return;
-      wrap.innerHTML = CHAPTER_CHECKS.map((chk, i) => {
-        const def = window.PanelPages[chk.key];
-        // Query foto gagal → bab berbasis foto ditandai "—" (tidak diketahui),
-        // bukan salah melapor "belum".
+      const byKey = {};
+      CHAPTER_CHECKS.forEach((chk) => { byKey[chk.key] = chk; });
+      const manifest = window.PanelStore && window.PanelStore.getManifest && window.PanelStore.getManifest();
+      const sections = (manifest && manifest.editor && Array.isArray(manifest.editor.sections) && manifest.editor.sections.length)
+        ? manifest.editor.sections
+        : CHAPTER_CHECKS;
+      wrap.innerHTML = sections.map((sec, i) => {
+        const key = sec.key;
+        const chk = byKey[key] || {
+          key,
+          photo: Boolean(sec.photos && sec.photos.length && !(sec.fields && sec.fields.length)),
+          ready: (content, photos) => {
+            if (sec.fields && sec.fields.length) {
+              return sec.fields.some((f) => Boolean(window.PanelStore.get(f.path)));
+            }
+            if (sec.photos && sec.photos.length && photos) {
+              return sec.photos.some((p) => (photos[p.slot] || 0) > 0);
+            }
+            return false;
+          }
+        };
+        const def = window.PanelPages[key];
         const known = chk.ready(c, ph === null ? {} : ph);
         const unknown = !known && chk.photo && ph === null;
         const state = unknown
@@ -96,10 +114,11 @@ window.PanelPages["home"] = {
             ? `<span class="p-checkrow__state p-checkrow__state--done">Siap</span>`
             : `<span class="p-checkrow__state p-checkrow__state--todo">Belum</span>`;
         const no = String(i + 1).padStart(2, "0");
+        const label = (def && def.title) || sec.label || key;
         return `
-          <a class="p-checkrow" href="${router.hashHref(chk.key)}" data-nav-key="${chk.key}">
+          <a class="p-checkrow" href="${router.hashHref(key)}" data-nav-key="${key}">
             <span class="p-checkrow__num">${no}</span>
-            <span class="p-checkrow__name">${esc(def ? def.title : chk.key)}</span>
+            <span class="p-checkrow__name">${esc(label)}</span>
             ${state}
             <span class="p-checkrow__go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
           </a>`;

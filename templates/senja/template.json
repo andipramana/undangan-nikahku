@@ -1,0 +1,1074 @@
+{
+  "id": "senja",
+  "name": "Senja Golden Hour",
+  "version": 1,
+  "description": "Sinematik matahari terbenam dengan parallax 3 lapis, siluet perbukitan hangat, dan mask-wipe judul terikat scroll.",
+  "assets": {
+    "fonts": [
+      "assets/fonts/fraunces/fraunces-latin.woff2",
+      "assets/fonts/inter/inter-latin.woff2"
+    ],
+    "css": [],
+    "js": [
+      "assets/js/motion/scroll-scene.js",
+      "assets/js/motion/split-text.js",
+      "assets/js/motion/reveal.js",
+      "assets/js/motion/tilt.js",
+      "assets/js/motion/counter.js",
+      "assets/js/countdown.js",
+      "assets/js/audio-player.js",
+      "assets/js/gift.js",
+      "assets/js/rsvp.js",
+      "assets/js/livestream.js",
+      "assets/js/nav-menu.js",
+      "assets/js/qr-checkin.js",
+      "assets/js/theme.js",
+      "assets/js/visual-editor/registry.js",
+      "assets/js/visual-editor/guest-overrides.js"
+    ]
+  },
+  "theme": {
+    "--color-bg": "#1a1210",
+    "--color-dark": "#120c0a",
+    "--color-dark-2": "#241815",
+    "--color-gold": "#f4a259",
+    "--color-gold-soft": "#e76f51",
+    "--color-text": "#fdf4e3",
+    "--color-text-light": "#fdf4e3"
+  },
+  "editor": {
+    "sections": [
+      {
+        "key": "cover",
+        "label": "Cover & Sampul",
+        "icon": "image",
+        "cards": [
+          {
+            "name": "Cover",
+            "desc": "Foto layar penuh pertama bernuansa senja hangat."
+          },
+          {
+            "name": "Subcover",
+            "desc": "Kutipan senja antara cover dan adegan pembuka."
+          },
+          {
+            "name": "Kustom Senja",
+            "desc": "Teks ekstra penegas tema Golden Hour."
+          }
+        ],
+        "fields": [
+          {
+            "path": "subcover.enabled",
+            "type": "switch",
+            "label": "Tampilkan subcover",
+            "card": "Subcover"
+          },
+          {
+            "path": "subcover.quoteLine1",
+            "type": "text",
+            "label": "Quote baris 1",
+            "card": "Subcover"
+          },
+          {
+            "path": "subcover.quoteLine2",
+            "type": "text",
+            "label": "Quote baris 2",
+            "card": "Subcover"
+          },
+          {
+            "path": "extras.senjaSubtitle",
+            "type": "text",
+            "label": "Subjudul Senja",
+            "card": "Kustom Senja"
+          }
+        ],
+        "photos": [
+          {
+            "slot": "cover",
+            "label": "Foto cover",
+            "card": "Cover",
+            "ratio": "9/16",
+            "min": 1,
+            "max": 8
+          },
+          {
+            "slot": "subcover",
+            "label": "Foto subcover",
+            "card": "Subcover",
+            "ratio": "9/16",
+            "max": 5
+          }
+        ]
+      },
+      {
+        "key": "pembuka",
+        "label": "Pembuka & Ayat",
+        "icon": "quote",
+        "cards": [
+          {
+            "name": "Ayat pembuka",
+            "desc": "Kutipan suci atau doa restu pembuka undangan."
+          },
+          {
+            "name": "Foto Save the Date",
+            "desc": "Foto pembuka Save the Date bernuansa hangat."
+          }
+        ],
+        "fields": [
+          {
+            "path": "opening.arabicQuote",
+            "type": "textarea",
+            "label": "Teks Arab / Bismillah",
+            "card": "Ayat pembuka",
+            "rows": 2
+          },
+          {
+            "path": "opening.quote",
+            "type": "textarea",
+            "label": "Terjemahan / Doa",
+            "card": "Ayat pembuka",
+            "rows": 4
+          },
+          {
+            "path": "opening.source",
+            "type": "text",
+            "label": "Sumber kutipan",
+            "card": "Ayat pembuka"
+          }
+        ],
+        "photos": [
+          {
+            "slot": "opening",
+            "label": "Foto opening",
+            "card": "Foto Save the Date",
+            "ratio": "9/16",
+            "max": 8
+          },
+          {
+            "slot": "std2",
+            "label": "Foto Save the Date 2",
+            "card": "Foto Save the Date",
+            "ratio": "9/16",
+            "max": 5
+          }
+        ]
+      },
+      {
+        "key": "mempelai",
+        "label": "Mempelai",
+        "icon": "heart",
+        "cards": [
+          {
+            "name": "Mempelai wanita",
+            "desc": "Profil dan keluarga mempelai wanita."
+          },
+          {
+            "name": "Mempelai pria",
+            "desc": "Profil dan keluarga mempelai pria."
+          }
+        ],
+        "fields": [
+          {
+            "path": "couple.bride.name",
+            "type": "text",
+            "label": "Nama lengkap wanita",
+            "card": "Mempelai wanita",
+            "required": true
+          },
+          {
+            "path": "couple.bride.nickname",
+            "type": "text",
+            "label": "Panggilan wanita",
+            "card": "Mempelai wanita"
+          },
+          {
+            "path": "couple.bride.instagram",
+            "type": "text",
+            "label": "Instagram wanita",
+            "card": "Mempelai wanita"
+          },
+          {
+            "path": "couple.bride.father",
+            "type": "text",
+            "label": "Nama ayah wanita",
+            "card": "Mempelai wanita"
+          },
+          {
+            "path": "couple.bride.mother",
+            "type": "text",
+            "label": "Nama ibu wanita",
+            "card": "Mempelai wanita"
+          },
+          {
+            "path": "couple.groom.name",
+            "type": "text",
+            "label": "Nama lengkap pria",
+            "card": "Mempelai pria",
+            "required": true
+          },
+          {
+            "path": "couple.groom.nickname",
+            "type": "text",
+            "label": "Panggilan pria",
+            "card": "Mempelai pria"
+          },
+          {
+            "path": "couple.groom.instagram",
+            "type": "text",
+            "label": "Instagram pria",
+            "card": "Mempelai pria"
+          },
+          {
+            "path": "couple.groom.father",
+            "type": "text",
+            "label": "Nama ayah pria",
+            "card": "Mempelai pria"
+          },
+          {
+            "path": "couple.groom.mother",
+            "type": "text",
+            "label": "Nama ibu pria",
+            "card": "Mempelai pria"
+          }
+        ],
+        "photos": [
+          {
+            "slot": "bride",
+            "label": "Foto mempelai wanita",
+            "card": "Mempelai wanita",
+            "ratio": "3/4",
+            "max": 8
+          },
+          {
+            "slot": "groom",
+            "label": "Foto mempelai pria",
+            "card": "Mempelai pria",
+            "ratio": "3/4",
+            "max": 8
+          }
+        ]
+      },
+      {
+        "key": "acara",
+        "label": "Acara",
+        "icon": "calendar",
+        "cards": [
+          {
+            "name": "Tanggal & countdown",
+            "desc": "Hari, tanggal, dan hitung mundur momen bahagia."
+          },
+          {
+            "name": "Akad",
+            "desc": "Waktu dan lokasi akad nikah / pemberkatan."
+          },
+          {
+            "name": "Resepsi",
+            "desc": "Waktu dan lokasi perayaan resepsi."
+          },
+          {
+            "name": "Dresscode",
+            "desc": "Panduan busana tamu undangan."
+          }
+        ],
+        "fields": [
+          {
+            "path": "event.dateISO",
+            "type": "text",
+            "label": "Tanggal (ISO, yyyy-mm-dd)",
+            "card": "Tanggal & countdown"
+          },
+          {
+            "path": "event.dateLabel",
+            "type": "text",
+            "label": "Tanggal tampil",
+            "card": "Tanggal & countdown",
+            "required": true
+          },
+          {
+            "path": "event.dayLabel",
+            "type": "text",
+            "label": "Nama hari",
+            "card": "Tanggal & countdown"
+          },
+          {
+            "path": "event.countdownTarget",
+            "type": "text",
+            "label": "Target countdown (ISO + offset)",
+            "card": "Tanggal & countdown",
+            "required": true
+          },
+          {
+            "path": "event.akad.label",
+            "type": "text",
+            "label": "Label Akad",
+            "card": "Akad"
+          },
+          {
+            "path": "event.akad.start",
+            "type": "text",
+            "label": "Waktu Mulai Akad",
+            "card": "Akad"
+          },
+          {
+            "path": "event.akad.end",
+            "type": "text",
+            "label": "Waktu Selesai Akad",
+            "card": "Akad"
+          },
+          {
+            "path": "event.akad.venue.name",
+            "type": "text",
+            "label": "Nama Tempat Akad",
+            "card": "Akad"
+          },
+          {
+            "path": "event.akad.venue.address",
+            "type": "textarea",
+            "label": "Alamat Tempat Akad",
+            "card": "Akad",
+            "rows": 2
+          },
+          {
+            "path": "event.akad.venue.mapsUrl",
+            "type": "text",
+            "label": "URL Google Maps Akad",
+            "card": "Akad"
+          },
+          {
+            "path": "event.resepsi.label",
+            "type": "text",
+            "label": "Label Resepsi",
+            "card": "Resepsi"
+          },
+          {
+            "path": "event.resepsi.start",
+            "type": "text",
+            "label": "Waktu Mulai Resepsi",
+            "card": "Resepsi"
+          },
+          {
+            "path": "event.resepsi.end",
+            "type": "text",
+            "label": "Waktu Selesai Resepsi",
+            "card": "Resepsi"
+          },
+          {
+            "path": "event.resepsi.venue.name",
+            "type": "text",
+            "label": "Nama Tempat Resepsi",
+            "card": "Resepsi"
+          },
+          {
+            "path": "event.resepsi.venue.address",
+            "type": "textarea",
+            "label": "Alamat Tempat Resepsi",
+            "card": "Resepsi",
+            "rows": 2
+          },
+          {
+            "path": "event.resepsi.venue.mapsUrl",
+            "type": "text",
+            "label": "URL Google Maps Resepsi",
+            "card": "Resepsi"
+          },
+          {
+            "path": "dresscode.text",
+            "type": "textarea",
+            "label": "Petunjuk Dresscode",
+            "card": "Dresscode",
+            "rows": 3
+          },
+          {
+            "path": "dresscode.colors",
+            "type": "colorlist",
+            "label": "Palet Warna Pilihan",
+            "card": "Dresscode",
+            "newItem": "#f4a259"
+          }
+        ],
+        "photos": [
+          {
+            "slot": "event",
+            "label": "Foto suasana acara",
+            "ratio": "16/9",
+            "max": 8
+          }
+        ]
+      },
+      {
+        "key": "livestream",
+        "label": "Live Streaming",
+        "icon": "video",
+        "cards": [
+          {
+            "name": "Link siaran langsung",
+            "desc": "Tautan siaran langsung untuk tamu online."
+          }
+        ],
+        "fields": [
+          {
+            "path": "livestream.youtube",
+            "type": "text",
+            "label": "Link YouTube",
+            "card": "Link siaran langsung"
+          },
+          {
+            "path": "livestream.instagram",
+            "type": "text",
+            "label": "Link Instagram Live",
+            "card": "Link siaran langsung"
+          },
+          {
+            "path": "livestream.tiktok",
+            "type": "text",
+            "label": "Link TikTok Live",
+            "card": "Link siaran langsung"
+          }
+        ]
+      },
+      {
+        "key": "cerita",
+        "label": "Cerita Kami",
+        "icon": "story",
+        "cards": [
+          {
+            "name": "Love Story",
+            "desc": "Linimasa kisah perjalanan cinta mempelai."
+          }
+        ],
+        "fields": [
+          {
+            "path": "loveStory",
+            "type": "list",
+            "label": "Daftar Babak Cerita",
+            "card": "Love Story",
+            "item": [
+              {
+                "key": "date",
+                "label": "Waktu / Tahun",
+                "type": "text"
+              },
+              {
+                "key": "title",
+                "label": "Judul Babak",
+                "type": "text"
+              },
+              {
+                "key": "text",
+                "label": "Isi Cerita",
+                "type": "textarea",
+                "rows": 4
+              }
+            ],
+            "addLabel": "+ tambah babak cerita"
+          }
+        ],
+        "photos": [
+          {
+            "slot": "story",
+            "label": "Foto kenangan cerita",
+            "ratio": "4/5",
+            "max": 12
+          }
+        ]
+      },
+      {
+        "key": "galeri",
+        "label": "Galeri",
+        "icon": "image",
+        "cards": [
+          {
+            "name": "Video galeri",
+            "desc": "Video momen prewedding atau kenangan."
+          },
+          {
+            "name": "Foto galeri",
+            "desc": "Deretan potret prewedding berbingkai hangat."
+          },
+          {
+            "name": "Quote foto",
+            "desc": "Foto sorotan dengan kutipan penuh makna."
+          }
+        ],
+        "fields": [
+          {
+            "path": "galleryVideo.youtube",
+            "type": "text",
+            "label": "Video YouTube (opsional)",
+            "card": "Video galeri"
+          },
+          {
+            "path": "quotePhoto.quote",
+            "type": "textarea",
+            "label": "Kutipan foto sorotan",
+            "card": "Quote foto",
+            "rows": 3
+          }
+        ],
+        "photos": [
+          {
+            "slot": "gallery",
+            "label": "Foto galeri",
+            "card": "Foto galeri",
+            "ratio": "1/1",
+            "max": 40
+          },
+          {
+            "slot": "quote",
+            "label": "Foto quote sorotan",
+            "card": "Quote foto",
+            "ratio": "1/1",
+            "max": 3
+          }
+        ]
+      },
+      {
+        "key": "hadiah",
+        "label": "Hadiah",
+        "icon": "gift",
+        "cards": [
+          {
+            "name": "Rekening",
+            "desc": "Rekening bank atau dompet digital tanda kasih."
+          },
+          {
+            "name": "Kontak WhatsApp konfirmasi",
+            "desc": "Nomor konfirmasi pengiriman tanda kasih."
+          },
+          {
+            "name": "Alamat kado",
+            "desc": "Tujuan pengiriman bingkisan fisik."
+          }
+        ],
+        "fields": [
+          {
+            "path": "gift.accounts",
+            "type": "list",
+            "label": "Daftar Rekening",
+            "card": "Rekening",
+            "item": [
+              {
+                "key": "bank",
+                "label": "Bank / E-Wallet",
+                "type": "text"
+              },
+              {
+                "key": "number",
+                "label": "Nomor Rekening",
+                "type": "text"
+              },
+              {
+                "key": "holder",
+                "label": "Atas Nama",
+                "type": "text"
+              },
+              {
+                "key": "owner",
+                "label": "Pemilik",
+                "type": "select",
+                "options": [
+                  { "value": "", "label": "Tidak ikut" },
+                  { "value": "cpw", "label": "CPW (wanita)" },
+                  { "value": "cpp", "label": "CPP (pria)" }
+                ]
+              },
+              {
+                "key": "placeholder",
+                "label": "Sembunyikan nomor rekening",
+                "type": "switch"
+              },
+              {
+                "key": "template",
+                "label": "Format pesan WA konfirmasi",
+                "type": "textarea",
+                "rows": 3,
+                "placeholder": "Token: ${tamu} ${CPP} ${CPW} ${LABEL}"
+              }
+            ],
+            "addLabel": "+ tambah rekening"
+          },
+          {
+            "path": "gift.contactCPW",
+            "type": "text",
+            "label": "WhatsApp CPW (format 62...)",
+            "card": "Kontak WhatsApp konfirmasi"
+          },
+          {
+            "path": "gift.contactCPP",
+            "type": "text",
+            "label": "WhatsApp CPP (format 62...)",
+            "card": "Kontak WhatsApp konfirmasi"
+          },
+          {
+            "path": "gift.address.recipient",
+            "type": "text",
+            "label": "Nama Penerima Paket",
+            "card": "Alamat kado"
+          },
+          {
+            "path": "gift.address.phone",
+            "type": "text",
+            "label": "Nomor Telepon Penerima",
+            "card": "Alamat kado"
+          },
+          {
+            "path": "gift.address.detail",
+            "type": "text",
+            "label": "Alamat Lengkap Pengiriman",
+            "card": "Alamat kado"
+          },
+          {
+            "path": "gift.address.template",
+            "type": "textarea",
+            "label": "Format pesan konfirmasi kado",
+            "card": "Alamat kado",
+            "rows": 3
+          }
+        ],
+        "photos": [
+          {
+            "slot": "gift_item",
+            "label": "Rekomendasi bingkisan",
+            "ratio": "1/1",
+            "max": 12
+          }
+        ]
+      },
+      {
+        "key": "penutup",
+        "label": "Penutup",
+        "icon": "flag",
+        "cards": [
+          {
+            "name": "Closing statement default",
+            "desc": "Ungkapan terima kasih dan permohonan doa restu."
+          }
+        ],
+        "fields": [
+          {
+            "path": "closing.text",
+            "type": "textarea",
+            "label": "Teks Penutup",
+            "card": "Closing statement default",
+            "rows": 4
+          }
+        ],
+        "photos": [
+          {
+            "slot": "closing",
+            "label": "Foto penutup",
+            "ratio": "9/16",
+            "max": 8
+          }
+        ]
+      }
+    ],
+    "colors": [
+      {
+        "key": "bg",
+        "var": "--color-bg",
+        "label": "Latar senja",
+        "default": "#1a1210"
+      },
+      {
+        "key": "dark",
+        "var": "--color-dark",
+        "label": "Latar gelap siluet",
+        "default": "#120c0a"
+      },
+      {
+        "key": "dark2",
+        "var": "--color-dark-2",
+        "label": "Latar bukit malam",
+        "default": "#241815"
+      },
+      {
+        "key": "gold",
+        "var": "--color-gold",
+        "label": "Kuning emas senja",
+        "default": "#f4a259"
+      },
+      {
+        "key": "goldSoft",
+        "var": "--color-gold-soft",
+        "label": "Jingga hangat terbenam",
+        "default": "#e76f51"
+      },
+      {
+        "key": "text",
+        "var": "--color-text",
+        "label": "Warna teks utama",
+        "default": "#fdf4e3"
+      },
+      {
+        "key": "textLight",
+        "var": "--color-text-light",
+        "label": "Warna teks terang",
+        "default": "#fdf4e3"
+      }
+    ],
+    "overlays": [
+      {
+        "key": "global",
+        "label": "Golden hour global",
+        "default": "#f4a259",
+        "opacity": 0.35
+      },
+      {
+        "key": "flat",
+        "label": "Cover & pembuka",
+        "default": "#120c0a",
+        "opacity": 0.3
+      },
+      {
+        "key": "closing",
+        "label": "Closing & footer",
+        "default": "#120c0a",
+        "opacity": 0.75
+      },
+      {
+        "key": "quote",
+        "label": "Foto quote",
+        "default": "#241815",
+        "opacity": 0.6
+      }
+    ],
+    "presets": [
+      {
+        "id": "golden-hour",
+        "label": "Golden Hour (default)",
+        "colors": {
+          "bg": "#1a1210",
+          "dark": "#120c0a",
+          "dark2": "#241815",
+          "gold": "#f4a259",
+          "goldSoft": "#e76f51",
+          "text": "#fdf4e3",
+          "textLight": "#fdf4e3"
+        },
+        "overlayColors": {
+          "global": "#f4a259",
+          "flat": "#120c0a",
+          "closing": "#120c0a",
+          "quote": "#241815"
+        }
+      },
+      {
+        "id": "biru-senja",
+        "label": "Biru Senja",
+        "colors": {
+          "bg": "#0d1b2a",
+          "dark": "#070d14",
+          "dark2": "#1b263b",
+          "gold": "#e0a96d",
+          "goldSoft": "#c97a56",
+          "text": "#f0ede6",
+          "textLight": "#f0ede6"
+        },
+        "overlayColors": {
+          "global": "#e0a96d",
+          "flat": "#070d14",
+          "closing": "#070d14",
+          "quote": "#1b263b"
+        }
+      },
+      {
+        "id": "mawar-debu",
+        "label": "Mawar Debu",
+        "colors": {
+          "bg": "#23151b",
+          "dark": "#160c11",
+          "dark2": "#301c25",
+          "gold": "#d49a89",
+          "goldSoft": "#b26b75",
+          "text": "#fbeeed",
+          "textLight": "#fbeeed"
+        },
+        "overlayColors": {
+          "global": "#d49a89",
+          "flat": "#160c11",
+          "closing": "#160c11",
+          "quote": "#301c25"
+        }
+      }
+    ],
+    "typography": [
+      {
+        "id": "cover",
+        "label": "Cover",
+        "elements": [
+          {
+            "key": "cover-eyebrow",
+            "label": "Tulisan 'The Wedding Of'",
+            "selector": "#cover .eyebrow",
+            "sample": "THE WEDDING OF",
+            "family": "Inter",
+            "size": 13,
+            "weight": 500
+          },
+          {
+            "key": "cover-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-cover, .cover-names",
+            "sample": "{bride} & {groom}",
+            "family": "Fraunces",
+            "size": 48,
+            "weight": 500
+          },
+          {
+            "key": "cover-guest",
+            "label": "Sapaan & nama tamu",
+            "selector": "#guest-label, #guest-name, .guest-label, .guest-name",
+            "sample": "Kepada Yth. {tamu}",
+            "family": "Inter",
+            "size": 15,
+            "weight": 400
+          },
+          {
+            "key": "cover-button",
+            "label": "Tombol buka undangan",
+            "selector": "#btn-open, .btn-open",
+            "sample": "BUKA UNDANGAN",
+            "family": "Inter",
+            "size": 14,
+            "weight": 600
+          }
+        ]
+      },
+      {
+        "id": "opening",
+        "label": "Save the Date & Pembuka",
+        "elements": [
+          {
+            "key": "opening-eyebrow",
+            "label": "Eyebrow Save the Date",
+            "selector": "#opening .eyebrow",
+            "sample": "SAVE THE DATE",
+            "family": "Inter",
+            "size": 13,
+            "weight": 500
+          },
+          {
+            "key": "opening-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-opening",
+            "sample": "{bride} & {groom}",
+            "family": "Fraunces",
+            "size": 44,
+            "weight": 500
+          },
+          {
+            "key": "opening-date",
+            "label": "Tanggal acara",
+            "selector": "#event-date-label, .save-date",
+            "sample": "{tanggal}",
+            "family": "Inter",
+            "size": 16,
+            "weight": 500
+          },
+          {
+            "key": "opening-quote",
+            "label": "Quote pembuka",
+            "selector": "#wfl-quote, .opening-quote",
+            "sample": "{quote}",
+            "family": "Inter",
+            "size": 16,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "couple",
+        "label": "Mempelai",
+        "elements": [
+          {
+            "key": "couple-name",
+            "label": "Nama mempelai di kartu",
+            "selector": "#bride-name, #groom-name, .couple-info__name",
+            "sample": "{bridefull}",
+            "family": "Fraunces",
+            "size": 36,
+            "weight": 600
+          },
+          {
+            "key": "couple-label",
+            "label": "Label & keterangan keluarga",
+            "selector": "#bride-parents, #groom-parents, .couple-info__parents",
+            "sample": "Putri dari Bpk. {ayah} & Ibu {ibu}",
+            "family": "Inter",
+            "size": 14,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "event",
+        "label": "Acara & Dresscode",
+        "elements": [
+          {
+            "key": "event-label",
+            "label": "Label Akad / Resepsi",
+            "selector": ".event-block__title, .event-card__title",
+            "sample": "{akad}",
+            "family": "Fraunces",
+            "size": 22,
+            "weight": 600
+          },
+          {
+            "key": "event-date",
+            "label": "Detail tanggal",
+            "selector": ".event-date-highlight",
+            "sample": "{hari} · {tanggal}",
+            "family": "Fraunces",
+            "size": 28,
+            "weight": 500
+          },
+          {
+            "key": "event-venue",
+            "label": "Nama & alamat venue",
+            "selector": "#venue-name-akad, #venue-address-akad, #venue-name-resepsi, #venue-address-resepsi",
+            "sample": "{venue}",
+            "family": "Inter",
+            "size": 15,
+            "weight": 400
+          },
+          {
+            "key": "dresscode",
+            "label": "Dresscode",
+            "selector": ".dresscode-text, .dresscode-title",
+            "sample": "{dresscode}",
+            "family": "Inter",
+            "size": 15,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "story",
+        "label": "Cerita, Galeri & Quote",
+        "elements": [
+          {
+            "key": "story-title",
+            "label": "Judul Our Story",
+            "selector": "#love-story .section-title",
+            "sample": "Cerita Kami",
+            "family": "Fraunces",
+            "size": 32,
+            "weight": 600
+          },
+          {
+            "key": "story-content",
+            "label": "Judul & isi cerita",
+            "selector": ".story-item__title, .story-item__text",
+            "sample": "{cerita}",
+            "family": "Inter",
+            "size": 15,
+            "weight": 400
+          },
+          {
+            "key": "gallery-title",
+            "label": "Judul Galeri",
+            "selector": "#gallery .section-title",
+            "sample": "Galeri Foto",
+            "family": "Fraunces",
+            "size": 32,
+            "weight": 600
+          },
+          {
+            "key": "quote",
+            "label": "Quote foto",
+            "selector": ".quote-photo__text",
+            "sample": "{quotefoto}",
+            "family": "Inter",
+            "size": 18,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "gift",
+        "label": "Gift & RSVP",
+        "elements": [
+          {
+            "key": "gift-title",
+            "label": "Judul Gift",
+            "selector": "#gift .section-title",
+            "sample": "Tanda Kasih",
+            "family": "Fraunces",
+            "size": 32,
+            "weight": 600
+          },
+          {
+            "key": "gift-content",
+            "label": "Rekening & rekomendasi kado",
+            "selector": ".gift-account__bank, .gift-account__number, .gift-rec-card__name, .gift-rec-card__price",
+            "sample": "Wedding Gift",
+            "family": "Inter",
+            "size": 15,
+            "weight": 500
+          },
+          {
+            "key": "gift-button",
+            "label": "Tombol Gift",
+            "selector": "#gift .btn-primary, #gift .btn-outline, #gift .btn-gift-main",
+            "sample": "KIRIM HADIAH",
+            "family": "Inter",
+            "size": 14,
+            "weight": 600
+          },
+          {
+            "key": "rsvp-title",
+            "label": "Judul RSVP",
+            "selector": "#rsvp .section-title",
+            "sample": "Doa & Ucapan",
+            "family": "Fraunces",
+            "size": 32,
+            "weight": 600
+          },
+          {
+            "key": "rsvp-form",
+            "label": "Label, input & tombol RSVP",
+            "selector": "#rsvp-form label, #rsvp-form input, #rsvp-form textarea, .rsvp-pill, #rsvp-submit",
+            "sample": "Kirim Konfirmasi",
+            "family": "Inter",
+            "size": 14,
+            "weight": 500
+          },
+          {
+            "key": "wishes",
+            "label": "Daftar ucapan",
+            "selector": ".wish-card__name, .wish-card__message, .wishes-intro",
+            "sample": "Nadia · Semoga bahagia",
+            "family": "Inter",
+            "size": 14,
+            "weight": 400
+          }
+        ]
+      },
+      {
+        "id": "closing",
+        "label": "Closing & Footer",
+        "elements": [
+          {
+            "key": "closing-text",
+            "label": "Teks penutup",
+            "selector": "#closing-text, .closing-text",
+            "sample": "{closing}",
+            "family": "Inter",
+            "size": 16,
+            "weight": 400
+          },
+          {
+            "key": "closing-names",
+            "label": "Nama mempelai",
+            "selector": "#couple-names-closing",
+            "sample": "{bride} & {groom}",
+            "family": "Fraunces",
+            "size": 40,
+            "weight": 500
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -3,8 +3,22 @@ import path from "node:path";
 
 const dist = path.resolve("dist");
 const publicFiles = ["index.html", "home/index.html", "demo/index.html", "admin.html", "admin-qr.html", "wa.html", "register.html", "404.html", "CNAME", ".nojekyll"];
-const runtimeAssets = ["assets/img/favicon.png", "templates/klasik/style.css", "templates/klasik/markup.html", "templates/klasik/render.js", "templates/klasik/template.json", "templates/index.json", "assets/js/core/engine.js", "assets/css/panel.css", "assets/css/wa.css", "assets/css/landing.css", "assets/js/config.js", "assets/js/tenant.js", "assets/js/wa.js", "assets/js/register.js", "assets/js/landing-motion.js"];
+const runtimeAssets = ["assets/img/favicon.png", "templates/klasik/style.css", "templates/klasik/markup.html", "templates/klasik/render.js", "templates/klasik/template.json", "templates/index.json", "assets/fonts", "assets/js/motion", "assets/js/vendor", "assets/js/core/engine.js", "assets/css/panel.css", "assets/css/wa.css", "assets/css/landing.css", "assets/js/config.js", "assets/js/tenant.js", "assets/js/wa.js", "assets/js/register.js", "assets/js/landing-motion.js"];
 for (const file of [...publicFiles, ...runtimeAssets]) await access(path.join(dist, file));
+
+// Verifikasi katalog template dan seluruh berkas wajib tiap template di dist
+const catalogRaw = await readFile(path.join(dist, "templates/index.json"), "utf8");
+const catalog = JSON.parse(catalogRaw).templates || [];
+if (catalog.length === 0) throw new Error("Katalog dist/templates/index.json kosong.");
+for (const tpl of catalog) {
+  for (const reqFile of ["style.css", "markup.html", "render.js", "template.json"]) {
+    try {
+      await access(path.join(dist, "templates", tpl.id, reqFile));
+    } catch {
+      throw new Error(`Berkas template wajib hilang dari dist: dist/templates/${tpl.id}/${reqFile}`);
+    }
+  }
+}
 // assets/css/admin.css dihapus di R2 (docs/rencana-admin-v2-revisi.md) —
 // admin-qr.html dan register.html sekarang terang, memakai panel.css.
 for (const forbidden of ["supabase", "scripts", "docs", ".env.example", "package.json", "package-lock.json", "assets/css/admin.css"]) {

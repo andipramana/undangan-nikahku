@@ -1,0 +1,1474 @@
+/* ==========================================================================
+   Template: Senja Golden Hour
+   Theme: Warm Sunset Silhouette & 3-Layer Cinematic Parallax
+   ========================================================================== */
+
+/* 1. Deklarasi Font Lokal (Zero Google Fonts) */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../assets/fonts/fraunces/fraunces-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../assets/fonts/fraunces/fraunces-italic-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../../assets/fonts/inter/inter-latin.woff2') format('woff2');
+}
+
+/* 2. Reset, Root & Variabel Warna */
+:root {
+  --color-bg: #1a1210;
+  --color-dark: #120c0a;
+  --color-dark-2: #241815;
+  --color-gold: #f4a259;
+  --color-gold-soft: #e76f51;
+  --color-text: #fdf4e3;
+  --color-text-light: #fdf4e3;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius-arch: 160px 160px 18px 18px;
+  --radius-card: 18px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+}
+
+html {
+  background-color: var(--color-dark);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.no-scroll {
+  overflow: hidden;
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-dark);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* 3. Frame & Wadah Seluler */
+.senja-frame {
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  background-color: var(--color-bg);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.senja-frame::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  filter: url(#senja-grain);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 99;
+}
+
+.app-frame__scroll {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Kunci undangan sebelum dibuka */
+#invitation.is-locked .invitation-body {
+  display: none !important;
+}
+
+/* 4. Tipografi Khusus */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.senja-title {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-text);
+  margin: 6px 0 14px;
+  text-shadow: 0 2px 10px rgba(18, 12, 10, 0.6);
+}
+
+.senja-heading {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-gold);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--color-gold);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.section-desc {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text-light);
+  opacity: 0.85;
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 0 16px;
+}
+
+/* 5. Gimmick Interaktif: Parallax 3-Lapis & Tilt Cover */
+.senja-cover {
+  position: relative;
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px 24px 44px;
+  overflow: hidden;
+  background-color: var(--color-dark);
+}
+
+.senja-parallax-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.senja-layer--sky {
+  z-index: 1;
+}
+
+.senja-sky-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.senja-layer--hills {
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+}
+
+.senja-hills-svg {
+  width: 100%;
+  height: 52%;
+  display: block;
+}
+
+.senja-layer--photo {
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: -8%;
+}
+
+.senja-arch-frame {
+  width: 250px;
+  height: 350px;
+  border-radius: var(--radius-arch);
+  border: 2px solid var(--color-gold);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  background-color: var(--color-dark-2);
+}
+
+.senja-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.senja-arch-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(18, 12, 10, 0.05) 0%, rgba(18, 12, 10, 0.6) 100%);
+  pointer-events: none;
+}
+
+.senja-cover-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  margin-top: auto;
+}
+
+.senja-subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: var(--color-gold-soft);
+  margin-bottom: 16px;
+}
+
+.guest-card {
+  background: rgba(36, 24, 21, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(244, 162, 89, 0.35);
+  border-radius: 14px;
+  padding: 14px 20px;
+  margin: 0 auto 20px;
+  max-width: 320px;
+}
+
+.guest-label {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.guest-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-gold);
+}
+
+.btn-senja-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 210px;
+  min-height: 48px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-soft) 100%);
+  color: var(--color-dark);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(231, 111, 81, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-senja-open:active {
+  transform: scale(0.97);
+}
+
+/* 6. Section Umum & Content Visibility */
+.senja-section {
+  padding: 56px 20px;
+  position: relative;
+  background-color: var(--color-bg);
+}
+
+.senja-section:nth-of-type(even) {
+  background-color: var(--color-dark);
+}
+
+#event, #livestream, #love-story, #gallery, #gift, #rsvp, #closing {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 780px;
+}
+
+/* 7. Section Pembuka & Countdown */
+.senja-opening {
+  text-align: center;
+}
+
+.save-date {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-gold-soft);
+  margin-top: 6px;
+}
+
+.countdown-container {
+  margin: 28px 0;
+}
+
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 340px;
+  margin: 0 auto 20px;
+}
+
+.countdown-item {
+  background-color: var(--color-dark-2);
+  border: 1px solid rgba(244, 162, 89, 0.25);
+  border-radius: 12px;
+  padding: 12px 6px;
+  text-align: center;
+}
+
+.cd-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--color-gold);
+}
+
+.cd-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-light);
+  opacity: 0.7;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.btn-outline, .btn-calendar, .btn-maps {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 20px;
+  border: 1px solid var(--color-gold);
+  border-radius: 25px;
+  background: transparent;
+  color: var(--color-gold);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.btn-outline:active, .btn-calendar:active, .btn-maps:active {
+  background: var(--color-gold);
+  color: var(--color-dark);
+}
+
+.opening-quote-box {
+  margin: 32px auto 28px;
+  max-width: 350px;
+  padding: 20px;
+  background: rgba(36, 24, 21, 0.5);
+  border-left: 3px solid var(--color-gold);
+  border-radius: 4px 12px 12px 4px;
+  text-align: left;
+}
+
+.arabic-quote {
+  font-size: 20px;
+  line-height: 2;
+  text-align: center;
+  color: var(--color-gold);
+  margin-bottom: 12px;
+  direction: rtl;
+}
+
+.opening-quote {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--color-text);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.quote-source {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-gold-soft);
+  display: block;
+  text-align: right;
+}
+
+.opening-photo-frame {
+  width: 220px;
+  height: 310px;
+  margin: 24px auto 0;
+  border-radius: var(--radius-arch);
+  border: 2px solid var(--color-gold-soft);
+  overflow: hidden;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+.senja-arch-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 8. Section Mempelai */
+.senja-couple {
+  text-align: center;
+}
+
+.couple-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+.couple-card {
+  background-color: var(--color-dark-2);
+  border: 1px solid rgba(244, 162, 89, 0.2);
+  border-radius: var(--radius-card);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.couple-photo-wrapper {
+  width: 170px;
+  height: 226px;
+  border-radius: var(--radius-arch);
+  overflow: hidden;
+  border: 2px solid var(--color-gold);
+  margin-bottom: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.couple-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.couple-info__name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-bottom: 4px;
+}
+
+.couple-info__label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--color-gold-soft);
+  margin-bottom: 8px;
+}
+
+.couple-info__parents {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  opacity: 0.85;
+  margin-bottom: 16px;
+}
+
+.couple-ig {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 120px;
+  min-height: 44px;
+  padding: 8px 18px;
+  background-color: rgba(244, 162, 89, 0.12);
+  border: 1px solid var(--color-gold);
+  border-radius: 20px;
+  color: var(--color-gold);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.couple-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.couple-divider-amp {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--color-gold-soft);
+}
+
+/* 9. Section Acara */
+.senja-event {
+  text-align: center;
+}
+
+.event-date-highlight {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-gold);
+  margin-bottom: 24px;
+}
+
+.event-hero-photo {
+  max-width: 370px;
+  height: 200px;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  margin: 0 auto 30px;
+  border: 1px solid rgba(244, 162, 89, 0.3);
+}
+
+.event-hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.event-cards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 360px;
+  margin: 0 auto 28px;
+}
+
+.event-card {
+  background: var(--color-dark-2);
+  border: 1px solid rgba(244, 162, 89, 0.25);
+  border-radius: var(--radius-card);
+  padding: 24px 18px;
+  text-align: center;
+  position: relative;
+}
+
+.event-card__badge {
+  display: inline-block;
+  padding: 3px 12px;
+  background-color: var(--color-gold);
+  color: var(--color-dark);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.event-block__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.event-time {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-gold-soft);
+  margin-bottom: 12px;
+}
+
+.event-venue-info {
+  margin-bottom: 18px;
+}
+
+.event-block__venue {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.event-block__address {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.dresscode-block {
+  max-width: 350px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgba(36, 24, 21, 0.6);
+  border: 1px dashed rgba(244, 162, 89, 0.35);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.dresscode-title {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-bottom: 6px;
+}
+
+.dresscode-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  opacity: 0.85;
+  margin-bottom: 12px;
+}
+
+.dresscode-palette {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dresscode-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 10. Live Streaming */
+.senja-livestream {
+  text-align: center;
+}
+
+.livestream-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.btn-livestream {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  min-width: 44px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--color-gold-soft);
+}
+
+/* 11. Cerita Kami (Story Timeline) */
+.senja-story {
+  text-align: center;
+}
+
+.story-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 360px;
+  margin: 0 auto;
+  position: relative;
+  text-align: left;
+  padding-left: 24px;
+}
+
+.story-timeline::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 6px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-gold) 0%, var(--color-gold-soft) 100%);
+}
+
+.story-item {
+  position: relative;
+  background-color: var(--color-dark-2);
+  border-radius: 12px;
+  padding: 16px 18px;
+  border: 1px solid rgba(244, 162, 89, 0.2);
+}
+
+.story-item::before {
+  content: "";
+  position: absolute;
+  left: -23px;
+  top: 20px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--color-gold);
+  border: 2px solid var(--color-dark);
+}
+
+.story-item__date {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: 4px;
+}
+
+.story-item__title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.story-item__text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* 12. Galeri & Lightbox */
+.senja-gallery {
+  text-align: center;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  max-width: 370px;
+  margin: 0 auto 30px;
+}
+
+.gallery-item {
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: var(--color-dark-2);
+  border: 1px solid rgba(244, 162, 89, 0.2);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:active img {
+  transform: scale(1.04);
+}
+
+.quote-photo-card {
+  position: relative;
+  max-width: 350px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  border-radius: var(--radius-arch);
+  overflow: hidden;
+  border: 2px solid var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.quote-photo__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.quote-photo__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(36, 24, 21, 0.65);
+}
+
+.quote-photo__text {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--color-text);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(18, 12, 10, 0.95);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* 13. Hadiah / Tanda Kasih (Sangat Kontras & Terbaca) */
+.senja-gift {
+  text-align: center;
+}
+
+.gift-toggle-wrapper {
+  margin-bottom: 24px;
+}
+
+.btn-primary, .btn-gift-main, .btn-submit-rsvp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  min-width: 180px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-soft) 100%);
+  color: var(--color-dark);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gift-panel {
+  max-width: 370px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.gift-accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.gift-account {
+  background-color: var(--color-dark-2);
+  border: 1.5px solid var(--color-gold);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gift-account__bank {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.gift-account__number {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--color-text);
+  margin: 4px 0;
+  user-select: all;
+}
+
+.gift-account__holder {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  opacity: 0.85;
+}
+
+.gift-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  min-height: 44px;
+  padding: 8px 16px;
+  background-color: var(--color-gold);
+  color: var(--color-dark);
+  border: none;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gift-copy-btn:active {
+  background-color: var(--color-gold-soft);
+  color: #ffffff;
+}
+
+.gift-address-box {
+  background-color: var(--color-dark-2);
+  border: 1px solid rgba(244, 162, 89, 0.3);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gift-address__text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-light);
+}
+
+.gift-panel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-text, .btn-gift-hide {
+  background: transparent;
+  border: none;
+  color: var(--color-gold-soft);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+}
+
+/* 14. Modals (Hadiah, QR, Nav) */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 12, 10, 0.85);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal__dialog {
+  background-color: var(--color-dark-2);
+  border: 1.5px solid var(--color-gold);
+  border-radius: 18px;
+  padding: 28px 22px;
+  max-width: 360px;
+  width: 100%;
+  position: relative;
+  text-align: center;
+  color: var(--color-text);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+}
+
+.modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  font-size: 26px;
+  color: var(--color-gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal__dialog h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--color-gold);
+  margin-bottom: 8px;
+}
+
+.modal__dialog p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  opacity: 0.85;
+  margin-bottom: 18px;
+}
+
+.gift-recs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.gift-rec-card {
+  background-color: var(--color-bg);
+  border: 1px solid rgba(244, 162, 89, 0.2);
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.gift-rec-card__name {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.gift-rec-card__price {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-gold);
+}
+
+.nav-menu-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.nav-menu-list a {
+  display: block;
+  padding: 12px 18px;
+  background: var(--color-bg);
+  border: 1px solid rgba(244, 162, 89, 0.2);
+  border-radius: 12px;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav-menu-list a:active {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.qr-canvas {
+  margin: 10px auto;
+  display: block;
+  max-width: 200px;
+  border: 6px solid #ffffff;
+  border-radius: 8px;
+}
+
+/* 15. RSVP Form & Wishes */
+.senja-rsvp {
+  text-align: center;
+}
+
+.rsvp-form {
+  max-width: 360px;
+  margin: 0 auto 40px;
+  text-align: left;
+  background-color: var(--color-dark-2);
+  border: 1px solid rgba(244, 162, 89, 0.25);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-bottom: 6px;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background-color: var(--color-bg);
+  border: 1px solid rgba(244, 162, 89, 0.25);
+  border-radius: 10px;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-gold);
+}
+
+.rsvp-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.rsvp-pill {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 4px;
+  background-color: var(--color-bg);
+  border: 1px solid rgba(244, 162, 89, 0.3);
+  border-radius: 20px;
+  color: var(--color-text-light);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.rsvp-pill.is-active, .rsvp-pill[aria-pressed="true"] {
+  background-color: var(--color-gold);
+  color: var(--color-dark);
+  border-color: var(--color-gold);
+  font-weight: 700;
+}
+
+.btn-submit-rsvp {
+  width: 100%;
+}
+
+.rsvp-status {
+  margin-top: 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  text-align: center;
+  color: var(--color-gold);
+}
+
+.wishes-heading {
+  margin-bottom: 16px;
+}
+
+.wishes-intro {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.wishes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 360px;
+  margin: 0 auto 16px;
+  text-align: left;
+}
+
+.wish-card {
+  background-color: var(--color-dark-2);
+  border: 1px solid rgba(244, 162, 89, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.wish-card__name {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: 2px;
+}
+
+.wish-card__status {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--color-gold-soft);
+  margin-bottom: 6px;
+}
+
+.wish-card__message {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text-light);
+  line-height: 1.5;
+}
+
+.wishes-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* 16. Section Penutup & Footer */
+.senja-closing {
+  text-align: center;
+  padding: 64px 20px 48px;
+  background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-dark) 100%);
+}
+
+.senja-closing-wrapper {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.closing-text {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-style: italic;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin-bottom: 24px;
+}
+
+.closing-names {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--color-gold);
+  margin-bottom: 36px;
+}
+
+.site-footer {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--color-text-light);
+  opacity: 0.6;
+  border-top: 1px solid rgba(244, 162, 89, 0.2);
+  padding-top: 20px;
+}
+
+/* 17. Floating Controls (Audio, Nav, QR) */
+.audio-toggle, .btn-float-nav, .btn-float-qr {
+  position: fixed;
+  z-index: 100;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  background: rgba(36, 24, 21, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s ease;
+}
+
+.audio-toggle {
+  bottom: 24px;
+  left: 20px;
+}
+
+.btn-float-nav {
+  bottom: 24px;
+  right: 20px;
+}
+
+.btn-float-qr {
+  bottom: 76px;
+  right: 20px;
+}
+
+.audio-toggle-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.audio-toggle-icon .ico-play {
+  display: none;
+}
+
+.audio-toggle.is-paused .audio-toggle-icon .ico-play {
+  display: block;
+}
+
+.audio-toggle.is-paused .audio-toggle-icon .ico-pause {
+  display: none;
+}
+
+/* Sembunyikan kontrol melayang sebelum undangan dibuka */
+#invitation.is-locked ~ .audio-toggle,
+#invitation.is-locked ~ .btn-float-nav,
+#invitation.is-locked ~ .btn-float-qr {
+  display: none !important;
+}
+
+/* 18. Toast */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-dark-2);
+  color: var(--color-text);
+  border: 1px solid var(--color-gold);
+  border-radius: 20px;
+  padding: 10px 22px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 2000;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* 19. Kontrak Mesin Reveal (Wajib .reveal-ready [data-reveal]) */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reveal-ready [data-reveal="up"] {
+  transform: translate3d(0, 32px, 0);
+}
+
+.reveal-ready [data-reveal="slide-left"] {
+  transform: translate3d(-32px, 0, 0);
+}
+
+.reveal-ready [data-reveal="slide-right"] {
+  transform: translate3d(32px, 0, 0);
+}
+
+.reveal-ready [data-reveal="mask-wipe"] {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+}
+
+.reveal-ready [data-reveal="fade"] {
+  transform: none;
+}
+
+/* State revealed */
+.reveal-ready [data-reveal].is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.reveal-ready [data-reveal="mask-wipe"].is-revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+/* 20. Aksesibilitas: Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal-ready [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+
+  .senja-parallax-layer {
+    transform: none !important;
+  }
+}

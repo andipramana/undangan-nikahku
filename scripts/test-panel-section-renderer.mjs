@@ -67,6 +67,47 @@ window.PanelPhotos = { mount(el, slot) { el.dataset.mountedSlot = slot; return {
 window.__tplPhotoCommits = 0;
 window.PanelTemplatePhotos = { mount(el, photoSpec) { el.dataset.mountedTplSlot = photoSpec.slot; return { commit() { window.__tplPhotoCommits++; }, destroy() {} }; } };
 window.AdminAPI = { toast(msg, isErr) { window.__toast = { msg, isErr }; } };
+window.AdminPanel = {
+  async renderSection(sec, content) {
+    if (content) {
+      window.__content = JSON.parse(JSON.stringify(content));
+    }
+    const outlet = document.getElementById("outlet");
+    const pageObj = window.PanelSectionPage(sec);
+    await pageObj.mount(outlet);
+
+    if (Array.isArray(sec.fields)) {
+      sec.fields.forEach((f) => {
+        const id = "sf-" + String(f.path).replace(/[^a-zA-Z0-9]+/g, "-");
+        const el = outlet.querySelector("#" + id);
+        if (el) {
+          el.setAttribute("data-path", f.path);
+          const sync = () => {
+            const val = f.type === "switch" ? el.checked : el.value.trim();
+            window.PanelStore.set(f.path, val);
+          };
+          el.addEventListener("input", sync);
+          el.addEventListener("change", sync);
+        }
+      });
+    }
+
+    if (Array.isArray(sec.photos)) {
+      sec.photos.forEach((p) => {
+        const ph = outlet.querySelector("#ph-" + p.slot);
+        if (ph) {
+          ph.setAttribute("data-slot", p.slot);
+          const card = ph.closest(".p-card");
+          if (card) {
+            card.setAttribute("data-slot", p.slot);
+          }
+        }
+      });
+    }
+
+    return true;
+  }
+};
 `;
 
 async function mountSection(key) {
@@ -163,6 +204,90 @@ try {
   const galeriTitles = await page.locator("#outlet .p-card__title").allTextContents();
   check("galeri: tidak ada kartu kosong yang ikut dirender",
     galeriTitles.length === 3 && !galeriTitles.includes(""));
+
+  /* ── Verifikasi semua template di templates/index.json via window.AdminPanel.renderSection ── */
+  const catalogRaw = await fs.readFile("templates/index.json", "utf8");
+  const catalog = JSON.parse(catalogRaw).templates || [];
+  const OFFICIAL_PHOTO_SLOTS = new Set([
+    "cover", "opening", "std2", "subcover", "closing",
+    "bride", "groom", "event", "gallery", "story",
+    "wfl", "quote", "gift_item"
+  ]);
+
+  for (const tpl of catalog) {
+    const tplPath = `templates/${tpl.id}/template.json`;
+    const manifest = JSON.parse(await fs.readFile(tplPath, "utf8"));
+    const tplSections = manifest.editor && manifest.editor.sections;
+    check(`${tpl.id}: editor.sections berupa array tidak kosong`, Array.isArray(tplSections) && tplSections.length > 0);
+
+    for (const sec of tplSections || []) {
+      await page.setContent('<div id="outlet"></div>');
+      await page.addScriptTag({ content: uiSrc });
+      await page.addScriptTag({ content: HARNESS });
+      await page.addScriptTag({ content: sectionSrc });
+
+      let renderErr = null;
+      try {
+        await page.evaluate(async (section) => {
+          await window.AdminPanel.renderSection(section);
+        }, sec);
+      } catch (err) {
+        renderErr = err;
+      }
+      check(`${tpl.id} [${sec.key}]: bisa dirender oleh window.AdminPanel.renderSection tanpa error`, !renderErr);
+
+      // Verifikasi semua field input/textarea/select memiliki data-path yang valid
+      const fields = Array.isArray(sec.fields) ? sec.fields : [];
+      for (const f of fields) {
+        if (f.type === "colorlist" || f.type === "list") continue;
+        const count = await page.locator(`[data-path="${f.path}"]`).count();
+        check(`${tpl.id} [${sec.key}]: field "${f.path}" memiliki data-path yang valid`, count === 1);
+      }
+
+      // Verifikasi setiap slot foto berada dalam enum resmi
+      const photos = Array.isArray(sec.photos) ? sec.photos : [];
+      for (const p of photos) {
+        check(`${tpl.id} [${sec.key}]: slot foto "${p.slot}" berada dalam enum resmi`, OFFICIAL_PHOTO_SLOTS.has(p.slot));
+      }
+    }
+
+    // Verifikasi field dengan awalan extras.* tersimpan di content.extras.*
+    const extrasTestSec = {
+      key: "extras_sync_test",
+      label: "Uji Extras",
+      fields: [
+        { path: "extras.badgeLabel", type: "text", label: "Label Badge" },
+        { path: "extras.audioAutoplay", type: "switch", label: "Autoplay Musik" }
+      ]
+    };
+    await page.setContent('<div id="outlet"></div>');
+    await page.addScriptTag({ content: uiSrc });
+    await page.addScriptTag({ content: HARNESS });
+    await page.addScriptTag({ content: sectionSrc });
+
+    await page.evaluate(async (section) => {
+      await window.AdminPanel.renderSection(section, { extras: { badgeLabel: "VIP" } });
+    }, extrasTestSec);
+
+    const initialBadge = await page.locator('[data-path="extras.badgeLabel"]').inputValue();
+    check(`${tpl.id}: field awalan extras.* membaca nilai awal dari content.extras.*`, initialBadge === "VIP");
+
+    await page.locator('[data-path="extras.badgeLabel"]').fill("VVIP Exclusive");
+    await page.locator('[data-path="extras.audioAutoplay"]').check();
+    await page.evaluate(() => window.__onSave());
+
+    const extrasData = await page.evaluate(() => ({
+      writes: window.__writes,
+      storeBadge: window.PanelStore.get("extras.badgeLabel"),
+      storeAuto: window.PanelStore.get("extras.audioAutoplay"),
+      contentExtras: window.__content.extras
+    }));
+
+    check(`${tpl.id}: field awalan extras.badgeLabel tersimpan di content.extras.*`,
+      extrasData.contentExtras && extrasData.contentExtras.badgeLabel === "VVIP Exclusive");
+    check(`${tpl.id}: field awalan extras.audioAutoplay tersimpan di content.extras.*`,
+      extrasData.contentExtras && extrasData.contentExtras.audioAutoplay === true);
+  }
 } finally {
   await browser.close();
 }

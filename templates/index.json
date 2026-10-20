@@ -10,6 +10,16 @@
         "#c9a668",
         "#f7f3ea"
       ]
+    },
+    {
+      "id": "senja",
+      "name": "Senja Golden Hour",
+      "desc": "Sinematik matahari terbenam dengan parallax 3 lapis, siluet perbukitan hangat, dan mask-wipe judul terikat scroll.",
+      "colors": [
+        "#1a1210",
+        "#f4a259",
+        "#e76f51"
+      ]
     }
   ]
 }

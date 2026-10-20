@@ -1,4 +1,4 @@
-import { cp, mkdir, access, writeFile, readdir, rm } from "node:fs/promises";
+import { cp, mkdir, access, writeFile, readdir, rm, readFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
@@ -53,11 +53,24 @@ const required = [
   "assets/js/panel/router.js",
   "assets/js/panel/pages/home.js",
   "assets/js/register.js",
+  "templates/index.json",
+  "assets/fonts",
+  "assets/js/motion",
+  "assets/js/vendor",
   "templates/klasik/template.json",
   "templates/klasik/markup.html",
   "templates/klasik/style.css",
   "templates/klasik/render.js"
 ];
+
+const tplIndexRaw = await readFile(path.join(root, "templates/index.json"), "utf8");
+const tplCatalog = JSON.parse(tplIndexRaw).templates || [];
+for (const tpl of tplCatalog) {
+  for (const f of ["template.json", "markup.html", "style.css", "render.js"]) {
+    const rel = `templates/${tpl.id}/${f}`;
+    if (!required.includes(rel)) required.push(rel);
+  }
+}
 for (const file of required) {
   try { await access(path.join(dist, file)); }
   catch { throw new Error(`Build Pages tidak lengkap: ${file}`); }
