@@ -246,21 +246,14 @@
   function setupCalendarLink(cfg) {
     const link = document.getElementById("btn-add-calendar");
     if (!link) return;
-    const start = new Date(cfg.event.countdownTarget);
-    const end = new Date(start.getTime() + 6 * 60 * 60 * 1000);
-    const fmt = (d) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-    // Kalender menggabung akad & resepsi jadi satu agenda — pakai venue AKAD
-    // sebagai wakilnya; data lama tanpa venue per-event di-fallback ke
-    // event.venue tunggal (backward compat, lihat loop venue di atas).
-    const venue = (cfg.event.akad && cfg.event.akad.venue) || cfg.event.venue;
-    const params = new URLSearchParams({
-      action: "TEMPLATE",
-      text: `Pernikahan ${cfg.couple.bride.nickname} & ${cfg.couple.groom.nickname}`,
-      dates: `${fmt(start)}/${fmt(end)}`,
-      details: `${cfg.event.akad.label} & ${cfg.event.resepsi.label} di ${venue.name}`,
-      location: venue.address
-    });
-    link.href = `https://calendar.google.com/calendar/render?${params.toString()}`;
+    // Client baru belum mengisi tanggal (countdownTarget kosong): jangan
+    // melempar — itu menggagalkan render() dan menjatuhkan seluruh template
+    // ke layar rusak. Tanpa tanggal, tombol kalender disembunyikan saja.
+    // Logika URL-nya satu sumber di core (WeddingCore.fmt.calendarUrl).
+    const url = window.WeddingCore.fmt.calendarUrl(cfg);
+    if (!url) { link.hidden = true; return; }
+    link.hidden = false;
+    link.href = url;
   }
 
   function setupOpenButton() {

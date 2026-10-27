@@ -27,7 +27,9 @@ window.initCountdown = function () {
 
   function compute() {
     const target = new Date(window.WEDDING_CONFIG.event.countdownTarget).getTime();
-    let diff = Math.max(0, target - Date.now());
+    // Tanggal belum diisi (client baru) → target NaN; Math.max(0, NaN) tetap
+    // NaN dan layar menampilkan teks "NaN". Anggap sudah lewat: 00 semua.
+    let diff = Number.isFinite(target) ? Math.max(0, target - Date.now()) : 0;
     const days = Math.floor(diff / 86400000);
     diff -= days * 86400000;
     const hours = Math.floor(diff / 3600000);
