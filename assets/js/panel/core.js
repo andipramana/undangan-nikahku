@@ -141,10 +141,33 @@
     return access;
   }
 
+  /** Nama tenant untuk teks yang tampil SEBELUM data undangannya dimuat (layar
+   * login, header, judul tab). Diturunkan dari slug, mis. "julia-dan-kevin" →
+   * "Julia & Kevin". Tenant `root` adalah undangan asli Mita & Andi. Dulu teks
+   * ini di-hardcode "Mita & Andi" di HTML, jadi admin client lain melihat nama
+   * pasangan orang lain di tab dan layar login. */
+  function tenantName() {
+    const slug = tenant.slug || "root";
+    if (slug === "root") return "Mita & Andi";
+    return slug.split("-").filter(Boolean)
+      .map((w) => (w === "dan" ? "&" : w.charAt(0).toUpperCase() + w.slice(1)))
+      .join(" ");
+  }
+
+  function applyTenantLabels() {
+    const name = tenantName();
+    document.querySelectorAll("[data-tenant-label]").forEach((el) => { el.textContent = el.dataset.tenantLabel === "wedding" ? `${name} — The Wedding` : name; });
+    const base = document.documentElement.dataset.titleBase;
+    if (base) document.title = `${base} — ${name}`;
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", applyTenantLabels);
+  else applyTenantLabels();
+
   window.AdminAPI = {
     sb,
     query,
     tenant,
+    tenantName,
     requireTenantAccess,
     // URL publik foto di bucket 'photos' (path selalu slug/folder/file).
     photoUrl: (path) => sb.storage.from("photos").getPublicUrl(path).data.publicUrl,
