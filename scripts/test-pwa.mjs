@@ -21,6 +21,16 @@ function check(label, pass, detail) {
 }
 
 /* ── A. statis ──────────────────────────────────────────────────────────── */
+{
+  const html = await fs.readFile("index.html", "utf8");
+  const tenantAt = html.indexOf('<script src="assets/js/tenant.js"></script>');
+  const pwaAt = html.indexOf('<script src="assets/js/pwa.js"></script>');
+  check("index.html (tamu): pwa.js dimuat SETELAH tenant.js", tenantAt > 0 && pwaAt > tenantAt);
+  check("index.html (tamu): theme-color gelap senada cover", /<meta name="theme-color" content="#14120f">/i.test(html));
+  check("index.html (tamu): apple-touch-icon ikon undangan (bukan ikon panel)", /rel="apple-touch-icon" href="assets\/icons\/inv-apple-touch-icon\.png"/.test(html));
+  check("index.html (tamu): apple-mobile-web-app-capable", /name="apple-mobile-web-app-capable" content="yes"/.test(html));
+  check("index.html (tamu): tidak ada <link rel=\"manifest\"> statis", !/<link rel="manifest"/.test(html));
+}
 const PAGES = ["admin.html", "admin-qr.html", "wa.html"];
 for (const page of PAGES) {
   const html = await fs.readFile(page, "utf8");
@@ -38,7 +48,7 @@ async function pngSize(file) {
   const b = await fs.readFile(file);
   return b.readUInt32BE(16) + "x" + b.readUInt32BE(20);
 }
-for (const [file, size] of [["icon-192.png", "192x192"], ["icon-512.png", "512x512"], ["icon-maskable-512.png", "512x512"], ["apple-touch-icon.png", "180x180"]]) {
+for (const [file, size] of [["icon-192.png", "192x192"], ["icon-512.png", "512x512"], ["icon-maskable-512.png", "512x512"], ["apple-touch-icon.png", "180x180"], ["inv-192.png", "192x192"], ["inv-512.png", "512x512"], ["inv-maskable-512.png", "512x512"], ["inv-apple-touch-icon.png", "180x180"]]) {
   let got = "tidak ada";
   try { got = await pngSize(`assets/icons/${file}`); } catch (_) { /* dilaporkan di bawah */ }
   check(`ikon ${file} berukuran ${size}`, got === size, got);
@@ -182,6 +192,63 @@ await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { t
   const base = resp.err ? null : await page.evaluate(() => document.documentElement.dataset.titleBase);
   check("sw: offline — panel yang pernah dibuka tetap terbuka dari cache", !resp.err && resp.status() === 200 && base === "Admin", resp.err || `${resp.status()} ${base}`);
   await ctx.setOffline(false);
+}
+
+/* ── D. kelayakan pasang menurut Chromium sendiri ─────────────────────────
+ * Page.getInstallabilityErrors adalah daftar alasan resmi Chrome menolak
+ * menampilkan "Instal aplikasi". Kosong = layak dipasang. */
+async function installability(urlPath, label) {
+  const pg = await ctx.newPage();
+  await pg.route((u) => !u.hostname.includes("localhost") && !u.hostname.includes("127.0.0.1"), (r) => r.abort());
+  await pg.goto(`${BASE}${urlPath}`, { waitUntil: "load" });
+  await pg.waitForSelector('link[rel="manifest"]', { state: "attached", timeout: 8000 }).catch(() => {});
+  await pg.evaluate(() => navigator.serviceWorker.ready).catch(() => {});
+  await pg.waitForTimeout(800);
+  const cdp = await ctx.newCDPSession(pg);
+  await cdp.send("Page.enable");
+  const { installabilityErrors } = await cdp.send("Page.getInstallabilityErrors");
+  const info = await pg.evaluate(async () => {
+    const link = document.querySelector('link[rel="manifest"]');
+    return { path: location.pathname + location.search, manifest: link ? await (await fetch(link.href)).json() : null };
+  });
+  await pg.close();
+  return { errors: installabilityErrors.map((e) => e.errorId + (e.errorArguments && e.errorArguments.length ? " " + JSON.stringify(e.errorArguments) : "")), info, label };
+}
+
+for (const [urlPath, label] of [
+  ["/julia-dan-kevin/admin/", "panel admin"],
+  ["/julia-dan-kevin/?to=Calon%20Pengantin", "undangan tamu"]
+]) {
+  const r = await installability(urlPath, label);
+  check(`PWA ${label}: Chromium menyatakan layak dipasang`, r.errors.length === 0, `${r.errors.join(" | ")} (halaman ${r.info.path})`);
+  if (label === "undangan tamu") {
+    const m = r.info.manifest;
+    check("PWA undangan tamu: manifest ada", !!m, "manifest null");
+    if (m) {
+      check("PWA undangan tamu: start_url = jalur tenant + sapaan ?to=", /\/julia-dan-kevin\/\?to=Calon\+Pengantin$/.test(m.start_url), m.start_url);
+      check("PWA undangan tamu: ikon undangan (emas), bukan ikon panel", m.icons.every((i) => /\/assets\/icons\/inv-/.test(i.src)), JSON.stringify(m.icons.map((i) => i.src)));
+      check("PWA undangan tamu: tanpa parameter pratinjau/rute internal", !/template=|preview=|__tenant_route/.test(m.start_url), m.start_url);
+    }
+  }
+}
+
+{
+  // Tamu yang baru pertama datang: SW belum ada saat halaman dimuat. Setelah SW
+  // aktif (clients.claim), Chromium harus menyatakan layak — kalau tidak, tombol
+  // "Instal" tak muncul di kunjungan itu.
+  const fresh = await browser.newContext();
+  const pg = await fresh.newPage();
+  await pg.route((u) => !u.hostname.includes("localhost") && !u.hostname.includes("127.0.0.1"), (r) => r.abort());
+  await pg.goto(`${BASE}/julia-dan-kevin/?to=Calon%20Pengantin`, { waitUntil: "load" });
+  const ready = await pg.evaluate(async () => !!(await Promise.race([navigator.serviceWorker.ready, new Promise((r) => setTimeout(() => r(null), 8000))])));
+  await pg.waitForTimeout(1000);
+  const cdp = await fresh.newCDPSession(pg);
+  await cdp.send("Page.enable");
+  const { installabilityErrors } = await cdp.send("Page.getInstallabilityErrors");
+  check("PWA undangan tamu (kunjungan PERTAMA): SW terdaftar dari halaman tamu", ready);
+  check("PWA undangan tamu (kunjungan PERTAMA): layak dipasang setelah SW aktif", installabilityErrors.length === 0,
+    installabilityErrors.map((e) => e.errorId).join(" | "));
+  await fresh.close();
 }
 
 await ctx.close();

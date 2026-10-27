@@ -24,6 +24,13 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
+<!-- PWA: undangan bisa dipasang ke layar utama & terbuka layar penuh. Manifest
+     dibangun per-tenant oleh assets/js/pwa.js; meta apple-* untuk iOS Safari. -->
+<meta name="theme-color" content="#14120f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/icons/inv-apple-touch-icon.png">
 
 <!-- CSS kritis preloader di-INLINE, bukan file terpisah: preloader harus
      sudah terlihat SEBELUM satu pun aset template selesai diunduh. Kalau
@@ -86,6 +93,7 @@
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/tenant.js"></script>
+<script src="assets/js/pwa.js"></script>
 <script src="assets/js/photos.js"></script>
 <script src="assets/js/gallery-layout.js"></script>
 <script src="assets/js/supabase-client.js"></script>
