@@ -160,7 +160,9 @@
   /** URL publik foto di bucket 'photos'. */
   window.photoUrl = function (path) {
     if (!path) return "";
-    if (/^(https?:|data:|blob:|assets\/|templates\/)/.test(path)) return path;
+    // templates/default/* BUKAN berkas situs: itu objek Storage hasil salinan
+    // snapshot (foto & audio client baru). Hanya templates/<id>/ lain yang lokal.
+    if (/^(https?:|data:|blob:|assets\/|templates\/(?!default\/))/.test(path)) return path;
     if (sb && sb.storage) return sb.storage.from("photos").getPublicUrl(path).data.publicUrl;
     if (cfg && cfg.url) return `${cfg.url}/storage/v1/object/public/photos/${path}`;
     return path;
@@ -169,7 +171,7 @@
   /** Srcset responsif untuk foto di Supabase Storage (transformasi lebar 480, 768, 1200).
    *  Untuk path lokal di assets/, kembalikan string kosong agar memakai src langsung. */
   window.photoSrcset = function (path) {
-    if (!path || /^(https?:|data:|blob:|assets\/|templates\/)/.test(path)) return "";
+    if (!path || /^(https?:|data:|blob:|assets\/|templates\/(?!default\/))/.test(path)) return "";
     const base = window.photoUrl(path);
     if (!base || !base.includes("/storage/v1/object/public/")) return "";
     const sep = base.includes("?") ? "&" : "?";

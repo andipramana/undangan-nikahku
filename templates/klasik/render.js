@@ -113,6 +113,13 @@
     fillCoupleNames(document.getElementById("couple-names-opening"));
     fillCoupleNames(document.getElementById("couple-names-closing"));
 
+    // Monogram di eyebrow cover & pembuka: huruf pertama nama panggilan
+    // (mempelai wanita = --m, pria = --a). Dulu "M" dan "A" tertulis mati di
+    // markup.html sehingga semua client menampilkan inisial Mita & Andi.
+    const initialOf = (p) => (String((p && (p.nickname || p.name)) || "").trim().charAt(0) || "").toUpperCase();
+    document.querySelectorAll(".eyebrow-monogram--m").forEach((el) => { el.textContent = initialOf(cfg.couple.bride); });
+    document.querySelectorAll(".eyebrow-monogram--a").forEach((el) => { el.textContent = initialOf(cfg.couple.groom); });
+
     setupCalendarLink(cfg);
 
     // Kartu event: tanggal (Selasa / 25 / Agustus / 2026 / jam) + venue +

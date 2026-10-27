@@ -56,7 +56,8 @@ const FRESH_TENANT = `
 (() => {
   const cfg = window.WEDDING_CONFIG;
   const blank = (nick) => ({ name: nick, nickname: nick, instagram: "", father: "", mother: "", photo: "" });
-  cfg.couple = { ...cfg.couple, bride: blank("Mempelai Wanita"), groom: blank("Mempelai Pria") };
+  // Nama sudah diisi client tapi tanggal belum — inisial monogram harus J & K, bukan M & A bawaan markup.
+  cfg.couple = { ...cfg.couple, bride: blank("Julia Haniva"), groom: blank("Kevin Alfaro") };
   cfg.gift = { accounts: [], contactCPP: "", contactCPW: "", address: { recipient: "", phone: "", detail: "" }, note: "" };
   const emptyEvent = (label) => ({ label, start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } });
   cfg.event = { ...cfg.event, dateISO: "", dateLabel: "", dayLabel: "", countdownTarget: "",
@@ -113,13 +114,18 @@ for (const id of folders) {
         return { error: String((err && err.stack) || err) };
       }
       try { tpl.destroy(); } catch (err) { return { error: "destroy(): " + String(err) }; }
-      return { error: null, text: root.innerText };
+      const mono = (sel) => [...root.querySelectorAll(sel)].map((e) => e.textContent.trim());
+      return { error: null, text: root.innerText, monoM: mono(".eyebrow-monogram--m"), monoA: mono(".eyebrow-monogram--a") };
     }, id);
 
     check(`${id}: client baru (data kosong) merender tanpa exception`, !result.error, result.error);
     check(`${id}: client baru: tidak ada teks "NaN" / "Invalid Date" di layar`,
       !result.error && !/NaN|Invalid Date/.test(result.text || ""),
       (result.text || "").match(/.{0,30}(NaN|Invalid Date).{0,30}/)?.[0]);
+    // Template tanpa monogram (tidak ada elemennya) dilewati; yang punya wajib ikut nama.
+    check(`${id}: monogram mengikuti huruf depan nama mempelai`,
+      !result.error && result.monoM.every((t) => t === "J") && result.monoA.every((t) => t === "K"),
+      `M=${(result.monoM || []).join(",")} A=${(result.monoA || []).join(",")}`);
     check(`${id}: client baru: tidak ada pageerror`, pageErrors.length === 0, pageErrors.join(" | "));
   } catch (err) {
     check(`${id}: harness client baru berjalan`, false, String(err));

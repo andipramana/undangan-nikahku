@@ -136,6 +136,13 @@ Deno.serve(async (req) => {
     content.gift = { accounts: [], contactCPP: "", contactCPW: "", address: { recipient: "", phone: "", detail: "" }, note: "" };
     content.event = { ...(content.event || {}), dateISO: "", dateLabel: "", dayLabel: "", countdownTarget: "", akad: { label: "Akad Nikah", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } }, resepsi: { label: "Resepsi", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } } };
     content.loveStory = []; content.guestGreetings = [];
+    // Override Editor Visual berisi TEKS milik root ("Mita & Andi", "Made with by Mita &
+    // Iyow") dan guest-overrides.js menimpa nama client dengan itu di halaman tamu.
+    // Dibuang di tingkat akar dan di tiap blok per-template; tema/font ikut disalin.
+    delete content.visualEditor;
+    if (content.templates && typeof content.templates === "object") {
+      for (const block of Object.values(content.templates as Record<string, any>)) if (block && typeof block === "object") delete block.visualEditor;
+    }
     return content;
   };
   const copyObject = async (from: string, to: string) => {
