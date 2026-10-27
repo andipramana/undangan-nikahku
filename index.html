@@ -53,10 +53,13 @@
   (function () {
     try {
       var sp = new URLSearchParams(location.search);
-      var route = sp.get("__tenant_route") || location.pathname || "/";
+      // Buang query/hash dari route 404.html ("/slug?to=X") sebelum mengambil slug.
+      var route = (sp.get("__tenant_route") || location.pathname || "/").split(/[?#]/)[0];
+      var rq = (sp.get("__tenant_route") || "").split("#")[0];
+      var tpl = sp.get("template") || new URLSearchParams(rq.indexOf("?") >= 0 ? rq.slice(rq.indexOf("?")) : "").get("template");
       var seg = route.replace(/^\/+|\/+$/g, "").split("/")[0] || "root";
       var slug = (seg === "admin" || seg === "admin-qr" || seg === "wa" || seg === "home" || seg === "register" || seg === "index.html") ? "root" : seg;
-      var id = (sp.get("template") || localStorage.getItem("wedding_template_id_" + slug) || "klasik").replace(/\/+$/, "");
+      var id = (tpl || localStorage.getItem("wedding_template_id_" + slug) || "klasik").replace(/\/+$/, "");
       if (id === "classic-elegance") id = "klasik";
       var base = "templates/" + encodeURIComponent(id) + "/";
       var lCss = document.createElement("link");

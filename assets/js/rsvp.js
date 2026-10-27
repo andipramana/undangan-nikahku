@@ -103,6 +103,9 @@ window.initRsvp = function () {
 
   async function loadWishes(page = wishesPage) {
     if (!window.sb) return;
+    // Daftar ucapan HARUS dibatasi ke undangan ini. Tanpa id, jangan query sama
+    // sekali — query tanpa filter mengembalikan ucapan semua tenant.
+    if (!(window.TenantContext && window.TenantContext.invitationId)) return;
     // Snapshot sebelum request: jika tamu submit/ganti halaman sementara
     // request ini masih berjalan, respons lama tidak boleh menimpa yang baru.
     const requestVersion = wishesVersion;
@@ -134,7 +137,7 @@ window.initRsvp = function () {
       return;
     }
 
-    if (!window.sb) {
+    if (!window.sb || !(window.TenantContext && window.TenantContext.invitationId)) {
       statusEl.textContent = "Gagal terhubung ke server. Coba lagi nanti.";
       return;
     }

@@ -70,9 +70,12 @@
             return builder;
           },
           eq(col, val) {
-            if (val !== undefined && val !== null) {
-              state.filters.push(`${encodeURIComponent(col)}=eq.${encodeURIComponent(val)}`);
-            }
+            // JANGAN membuang filter kalau nilainya null/undefined. Itu mengubah
+            // "ucapan undangan ini" menjadi "ucapan SEMUA undangan": policy RLS
+            // wishes mengizinkan baca publik, jadi seluruh ucapan tenant lain ikut
+            // terkirim. supabase-js asli mengirim `eq.null` dan server menolaknya
+            // (400, uuid tidak valid) — perilaku gagal-aman itu yang dipertahankan.
+            state.filters.push(`${encodeURIComponent(col)}=eq.${encodeURIComponent(val)}`);
             return builder;
           },
           order(col, opts = {}) {
@@ -218,7 +221,13 @@
       console.warn("Supabase tidak merespons — pakai cadangan tersimpan.", err);
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const cached = JSON.parse(raw);
+          // Tanpa ini TenantContext.invitationId tetap kosong dan modul yang
+          // menyaring per-undangan (rsvp.js: daftar ucapan) kehilangan scope-nya.
+          tenant.setInvitation(cached && cached.invitation);
+          return cached;
+        }
       } catch (_) {}
       return null;
     }
