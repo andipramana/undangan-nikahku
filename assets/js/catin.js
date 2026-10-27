@@ -358,7 +358,7 @@
       ${row("Warna", p.theme ? p.theme.label : "")}
     </div>
     <label class="field" style="margin-top:14px"><span class="check"><input type="checkbox" data-p="agree"${state.agree ? " checked" : ""}>
-      <span>Data ini benar, dan aku setuju dengan syarat &amp; ketentuan WillCome.</span></span></label>`;
+      <span>Data ini benar, dan aku setuju dengan <button type="button" class="linkbtn inline" data-open-terms>syarat &amp; ketentuan WillCome</button>.</span></span></label>`;
   }
 
   /* Langkah yang boleh dilewati: isinya dilipat (tertutup) supaya yang tak mau mengisi
@@ -560,6 +560,12 @@
     save(); render();
   });
 
+  document.addEventListener("click", (e) => {
+    const dlg = $("terms");
+    if (!dlg) return;
+    if (e.target.closest("[data-open-terms]")) { e.preventDefault(); dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", ""); return; }
+    if (e.target.closest("[data-close-terms]") || e.target === dlg) { dlg.close ? dlg.close() : dlg.removeAttribute("open"); }
+  });
   $("back").addEventListener("click", () => { if (mode === "edit" && step === 0) cancelEdit(); else go(step - 1); });
   $("viewEdit").addEventListener("click", startEdit);
   $("viewNew").addEventListener("click", () => { mode = "new"; state = defaultState(); step = 0; restore(); show("app"); render(); });

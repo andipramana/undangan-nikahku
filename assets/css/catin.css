@@ -118,6 +118,23 @@ details.opt[open]>summary{border-bottom:2px dotted var(--line)}
 .btn.glow{font-size:19px;padding:15px 30px;box-shadow:0 4px 0 var(--coral-d),0 0 0 5px rgba(242,125,114,.22);animation:glow 1.8s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:0 4px 0 var(--coral-d),0 0 0 4px rgba(242,125,114,.2)}50%{box-shadow:0 4px 0 var(--coral-d),0 0 0 11px rgba(242,125,114,.1)}}
 @media (prefers-reduced-motion:reduce){.btn.glow{animation:none}}
+.foot__ask{font-family:'Fredoka',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin-bottom:8px}
+.foot__links{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.foot__links a{text-decoration:none;color:#fff;border-radius:99px;padding:9px 16px;font-weight:800;font-size:13px;min-height:40px;display:inline-flex;align-items:center}
+.foot__links .wa{background:#25a560;box-shadow:0 3px 0 #1b7f48}.foot__links .ig{background:#c2417a;box-shadow:0 3px 0 #962f5c}
+.foot__brand{margin-top:12px;color:#a8978f;font-size:12px;font-weight:800}
+.foot__terms{margin-top:12px}
+.linkbtn{font:inherit;font-family:'Fredoka',sans-serif;font-weight:500;font-size:14px;background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px 10px;min-height:40px}
+.linkbtn.inline{font-family:'Nunito',sans-serif;font-weight:800;font-size:inherit;color:var(--coral-d);padding:0;min-height:0}
+dialog#terms{margin:auto;border:0;border-radius:26px;padding:0;max-width:min(520px,92vw);width:100%;background:#fff;color:var(--ink);box-shadow:0 20px 60px rgba(59,47,47,.35)}
+dialog#terms::backdrop{background:rgba(59,47,47,.55)}
+.terms__box{padding:20px 18px 18px;max-height:84vh;overflow:auto}
+.terms__box h2{font-family:'Fredoka',sans-serif;font-weight:600;font-size:22px;margin-bottom:12px}
+.terms__box ol{list-style:none;counter-reset:t;display:grid;gap:8px;margin-bottom:14px}
+.terms__box li{counter-increment:t;background:var(--cream);border-radius:16px;padding:10px 14px 10px 42px;position:relative;font-weight:700;font-size:14px;line-height:1.4}
+.terms__box li::before{content:counter(t);position:absolute;left:11px;top:9px;width:22px;height:22px;border-radius:50%;background:var(--lav);display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px}
+.terms__box li b{font-family:'Fredoka',sans-serif;font-weight:600}
+.terms__box .btn{width:100%}
 .foot{text-align:center;color:#a8978f;font-size:12px;font-weight:800;margin-top:18px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

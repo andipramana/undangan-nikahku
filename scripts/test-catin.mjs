@@ -330,6 +330,40 @@ const stepTitle = (page) => page.locator("#step h2").innerText();
   await ctx.close();
 }
 
+{
+  // Syarat & Ketentuan: footer dan kalimat persetujuan membukanya
+  const { ctx, page } = await openForm();
+  check("footer: tombol Syarat & Ketentuan ada", await page.locator(".foot [data-open-terms]").isVisible());
+  check("S&K: tertutup secara bawaan", await page.locator("#terms").isHidden());
+  await page.click(".foot [data-open-terms]");
+  const terms = await page.locator("#terms").innerText();
+  check("S&K dari footer: terbuka dengan 7 butir", await page.locator("#terms li").count() === 7);
+  check("S&K: memuat 'Aktif selamanya' dan 'Terkunci setelah hari H'", /Aktif selamanya/.test(terms) && /Terkunci setelah hari H/.test(terms));
+  check("S&K: isinya SAMA dengan halaman S&K di brosur PDF (sumber: tulisan butir)", ["Aktif selamanya", "Terkunci setelah hari H", "Isi tanggung jawabmu", "Jaga akunmu", "Data tamu", "Konten terlarang", "Perubahan"].every((t) => terms.includes(t)));
+  await page.click("[data-close-terms]");
+  check("S&K: tombol Mengerti menutup", await page.locator("#terms").isHidden());
+  await page.click(".foot [data-open-terms]"); await page.keyboard.press("Escape");
+  check("S&K: tombol Esc menutup", await page.locator("#terms").isHidden());
+  await ctx.close();
+}
+{
+  // dari kalimat persetujuan: membuka S&K TANPA mencentang kotak / kehilangan isian
+  const { ctx, page } = await openForm();
+  await page.evaluate(() => {
+    const F = window.CatinForm; const s = F.defaultState();
+    s.contact = { name: "Julia", wa: "08123456789", email: "j@mail.com" };
+    localStorage.setItem("catin_draft_v1", JSON.stringify({ step: 6, state: s }));
+  });
+  await page.reload({ waitUntil: "load" });
+  check("persetujuan: ada tautan ke syarat & ketentuan", await page.locator('.summary ~ .field [data-open-terms], label [data-open-terms]').first().isVisible());
+  await page.locator("label [data-open-terms]").click();
+  check("persetujuan: tautan membuka S&K", await page.locator("#terms").isVisible());
+  await page.click("[data-close-terms]");
+  check("persetujuan: membuka S&K TIDAK mencentang kotak setuju", (await page.isChecked('[data-p="agree"]')) === false);
+  check("persetujuan: isian tidak hilang", (await page.evaluate(() => JSON.parse(localStorage.getItem("catin_draft_v1")).state.contact.name)) === "Julia");
+  await ctx.close();
+}
+
 /* ── D. membaca ulang & mengubah draft ──────────────────────────────────── */
 const manifest = JSON.parse(await fs.readFile("templates/klasik/template.json", "utf8"));
 const realPreset = manifest.editor.presets[2];
@@ -514,6 +548,11 @@ const pdfHead = (await fs.readFile("assets/docs/Undangan-Digital-WillCome.pdf"))
 check("catin: ada tombol unduh PDF brosur (hero dan layar sukses)", (html.match(/assets\/docs\/Undangan-Digital-WillCome\.pdf/g) || []).length === 2);
 check("brosur PDF ada di situs dan benar-benar PDF", pdfHead === "%PDF-", pdfHead);
 check("brosur PDF tidak kegedean (<= 4 MB)", (await fs.stat("assets/docs/Undangan-Digital-WillCome.pdf")).size <= 4 * 1024 * 1024);
+check("footer: WhatsApp Andi bisa diklik ke nomor yang benar", /href="https:\/\/wa\.me\/6287843267115"/.test(html) && /0878-4326-7115/.test(html));
+check("footer: Instagram @a.iyow bisa diklik", /href="https:\/\/instagram\.com\/a\.iyow"/.test(html) && /@a\.iyow/.test(html));
+check("footer: tautan luar dibuka di tab baru tanpa membocorkan opener", (html.match(/target="_blank" rel="noopener"/g) || []).length >= 2);
+const pdfBytes = (await fs.readFile("assets/docs/Undangan-Digital-WillCome.pdf")).toString("latin1");
+check("brosur PDF: tautan WhatsApp & Instagram tertanam (bisa diklik)", pdfBytes.includes("wa.me/6287843267115") && pdfBytes.includes("instagram.com/a.iyow"));
 check("build: catin/index.html ikut ke dist", /"catin\/index\.html"/.test(build));
 check("test dist: catin/index.html diwajibkan", /catin\/index\.html/.test(distTest));
 check("provisioning: 'catin' dicadangkan, bukan slug tenant", /slug === "catin"/.test(fn));
