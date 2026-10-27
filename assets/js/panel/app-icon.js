@@ -88,23 +88,106 @@
       throw new Error(`Gambar terlalu kecil (${bmp.width}×${bmp.height}). Minimal ${MIN_SIDE}×${MIN_SIDE}, idealnya 512×512 atau lebih.`);
     }
 
-    const bg = cornerColor(bmp);
-    const any = (n) => { const c = canvas(n); drawCover(c.getContext("2d"), bmp, n, 1); return c; };
+    const out = await compose((ctx, n, inset) => drawCover(ctx, bmp, n, inset), cornerColor(bmp));
+    bmp.close && bmp.close();
+    return out;
+  }
+
+  /** Empat ukuran dari satu fungsi gambar. `draw(ctx, n, inset)` melukis ke
+   * kanvas n×n memakai `inset` (bagian sisi yang dipakai; 1 = penuh). */
+  async function compose(draw, bg) {
+    const any = (n) => { const c = canvas(n); draw(c.getContext("2d"), n, 1); return c; };
 
     const maskable = canvas(512);
-    { const ctx = maskable.getContext("2d"); ctx.fillStyle = bg; ctx.fillRect(0, 0, 512, 512); drawCover(ctx, bmp, 512, SAFE_ZONE); }
+    { const ctx = maskable.getContext("2d"); ctx.fillStyle = bg; ctx.fillRect(0, 0, 512, 512); draw(ctx, 512, SAFE_ZONE); }
 
     const apple = canvas(180);
-    { const ctx = apple.getContext("2d"); ctx.fillStyle = bg; ctx.fillRect(0, 0, 180, 180); drawCover(ctx, bmp, 180, 1); }
+    { const ctx = apple.getContext("2d"); ctx.fillStyle = bg; ctx.fillRect(0, 0, 180, 180); draw(ctx, 180, 1); }
 
-    const out = {
+    return {
       "icon-192.png": await toBlob(any(192)),
       "icon-512.png": await toBlob(any(512)),
       "icon-maskable-512.png": await toBlob(maskable),
       "apple-touch-icon.png": await toBlob(apple)
     };
-    bmp.close && bmp.close();
-    return out;
+  }
+
+  /* ── Ikon monogram dari inisial (templat: assets/icons/monogram-template.svg) ──
+     Desain ada di satu berkas SVG yang bisa diedit; di sini hanya dua huruf yang
+     diganti. SVG dirender sebagai gambar, dan gambar semacam itu TIDAK bisa
+     memuat font dari berkas lain — jadi fontnya disematkan (data URL) supaya
+     huruf tampil sama di semua perangkat, bukan "Georgia kalau ada". */
+  const TEMPLATE_URL = "assets/icons/monogram-template.svg";
+  const FONT_URL = "assets/fonts/eb-garamond/eb-garamond-600.woff2";
+  let templateP = null;
+  let fontP = null;
+
+  function templateText() {
+    return (templateP = templateP || fetch(TEMPLATE_URL).then((r) => {
+      if (!r.ok) throw new Error("Templat ikon tidak ditemukan.");
+      return r.text();
+    }));
+  }
+  function fontBase64() {
+    return (fontP = fontP || fetch(FONT_URL).then((r) => {
+      if (!r.ok) throw new Error("Font ikon tidak ditemukan.");
+      return r.arrayBuffer();
+    }).then((buf) => {
+      let bin = "";
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      return btoa(bin);
+    }));
+  }
+
+  /** Huruf pertama (huruf/angka) sebuah nama, kapital; null kalau tak ada. */
+  function firstLetter(name) {
+    const m = String(name || "").trim().match(/[\p{L}\p{N}]/u);
+    return m ? m[0].toLocaleUpperCase("id") : null;
+  }
+  const PLACEHOLDER = /^Mempelai (Pria|Wanita)$/i;
+
+  /** Huruf ikon bawaan: huruf depan nama panggilan CPP lalu CPW, mis. "AM"
+   * untuk Andi & Mita. null kalau salah satu nama belum diisi (masih bawaan
+   * "Mempelai Pria/Wanita") — ikon netral lebih baik daripada huruf "MM". */
+  function deriveLetters(content) {
+    const c = content || (window.PanelStore && window.PanelStore.getContent()) || {};
+    const pick = (p) => {
+      const nm = String((p && (p.nickname || p.name)) || "").trim();
+      return !nm || PLACEHOLDER.test(nm) ? null : firstLetter(nm);
+    };
+    const groom = pick(c.couple && c.couple.groom);
+    const bride = pick(c.couple && c.couple.bride);
+    return groom && bride ? groom + bride : null;
+  }
+
+  /** Dua huruf → empat berkas ikon. Melempar Error kalau huruf tak valid. */
+  async function buildMonogramSet(letters) {
+    const chars = Array.from(String(letters || ""));
+    if (chars.length !== 2 || !chars.every((ch) => /[\p{L}\p{N}]/u.test(ch))) {
+      throw new Error("Isi satu huruf untuk CPP dan satu huruf untuk CPW.");
+    }
+    const [svgText, font] = await Promise.all([templateText(), fontBase64()]);
+    const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
+    const texts = doc.querySelectorAll("text");
+    if (texts.length < 2) throw new Error("Templat ikon tidak valid.");
+    texts[0].textContent = chars[0].toLocaleUpperCase("id");
+    texts[1].textContent = chars[1].toLocaleUpperCase("id");
+    texts[0].parentNode.setAttribute("font-family", "'WC Serif', serif");
+    const style = doc.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = "@font-face{font-family:'WC Serif';font-weight:700;src:url(data:font/woff2;base64," + font + ") format('woff2')}";
+    doc.documentElement.insertBefore(style, doc.documentElement.firstChild);
+
+    const img = new Image();
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(new XMLSerializer().serializeToString(doc));
+    await img.decode();
+    const bgEl = doc.querySelector("rect");
+    const bg = (bgEl && bgEl.getAttribute("fill")) || "#ffffff";
+    return compose((ctx, n, inset) => {
+      const size = n * inset;
+      const off = (n - size) / 2;
+      ctx.drawImage(img, off, off, size, size);
+    }, bg);
   }
 
   function dir() { return `${window.AdminAPI.tenant.slug}/icons`; }
@@ -127,5 +210,31 @@
     try { await window.AdminAPI.sb.storage.from("photos").remove(FILES.map((n) => `${dir()}/${n}`)); } catch (_) { /* abaikan */ }
   }
 
-  window.PanelAppIcon = { buildSet, upload, removeAll, FILES, MIN_SIDE, MAX_BYTES };
+  /** Jaga ikon bawaan tetap sesuai nama. Dipanggil saat panel dibuka dan setiap
+   * kali data mempelai tersimpan. Hanya menyentuh ikon yang kita buat sendiri
+   * (source "auto") dan belum diatur manual (custom); ikon unggahan client atau
+   * hurufnya yang sudah diubah tangan tidak pernah ditimpa. Gagal diam-diam:
+   * ini perawatan latar belakang, bukan aksi yang diminta pengguna. */
+  let syncing = false;
+  async function syncAuto() {
+    if (syncing || !window.PanelStore || !window.AdminAPI || !window.AdminAPI.tenant.invitationId) return;
+    const letters = deriveLetters();
+    if (!letters) return;
+    const cur = window.PanelStore.getContent().appIcon;
+    if (cur && (cur.source === "upload" || cur.custom)) return;
+    if (cur && cur.source === "auto" && cur.letters === letters) return;
+    syncing = true;
+    try {
+      const set = await buildMonogramSet(letters);
+      const up = await upload(set);
+      if (up.error) throw up.error;
+      window.PanelStore.set("appIcon", { path: up.path, version: up.version, source: "auto", letters, custom: false });
+      const { error } = await window.PanelStore.save(["appIcon"]);
+      if (error) throw error;
+    } catch (err) {
+      console.warn("Ikon otomatis dari inisial tidak dibuat:", err && err.message ? err.message : err);
+    } finally { syncing = false; }
+  }
+
+  window.PanelAppIcon = { buildSet, buildMonogramSet, deriveLetters, firstLetter, syncAuto, upload, removeAll, FILES, MIN_SIDE, MAX_BYTES };
 })();

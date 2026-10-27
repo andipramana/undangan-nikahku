@@ -57,7 +57,7 @@ for (const [file, size] of [["icon-192.png", "192x192"], ["icon-512.png", "512x5
 const swSrc = await fs.readFile("sw.js", "utf8");
 const sandboxSelf = { addEventListener() {}, location: { origin: "https://x.test" } };
 new Function("self", swSrc)(sandboxSelf);
-const { adminShellFor, fromPanelPage } = sandboxSelf.WC_SW;
+const { adminShellFor, guestShellFor, fromPanelPage } = sandboxSelf.WC_SW;
 const routes = [
   ["/julia-dan-kevin/admin/", "/admin.html"], ["/julia-dan-kevin/admin", "/admin.html"],
   ["/julia-dan-kevin/admin-qr/", "/admin-qr.html"], ["/julia-dan-kevin/wa/", "/wa.html"],
@@ -68,8 +68,22 @@ const routes = [
   ["/julia-dan-kevin/admin/extra", null], ["/register.html", null]
 ];
 for (const [p, want] of routes) check(`sw: ${p} → ${want}`, adminShellFor(p) === want, String(adminShellFor(p)));
+// Undangan tamu: dicegat HANYA bila diminta aplikasi terpasang (?source=pwa).
+for (const [p, q, want] of [
+  ["/julia-dan-kevin/", "?source=pwa", "/index.html"],
+  ["/julia-dan-kevin/", "?to=Calon+Pengantin&source=pwa", "/index.html"],
+  ["/julia-dan-kevin", "?source=pwa", "/index.html"],
+  // tamu biasa: TIDAK dicegat
+  ["/julia-dan-kevin/", "", null], ["/julia-dan-kevin/", "?to=Putri", null], ["/julia-dan-kevin/", "?source=lain", null],
+  // bukan slug undangan:
+  ["/home/", "?source=pwa", null], ["/demo/", "?source=pwa", null], ["/assets/", "?source=pwa", null],
+  ["/templates/", "?source=pwa", null], ["/", "?source=pwa", null], ["/julia-dan-kevin/foo/", "?source=pwa", null],
+  ["/index.html", "?source=pwa", null]
+]) check(`sw tamu: ${p}${q} → ${want}`, guestShellFor(p, q) === want, String(guestShellFor(p, q)));
 check("sw: sub-resource dari halaman panel dikenali",
   fromPanelPage({ referrer: "https://x.test/julia-dan-kevin/admin/" }) && fromPanelPage({ referrer: "https://x.test/admin.html" }));
+check("sw: sub-resource dari aplikasi undangan terpasang (?source=pwa) dikenali",
+  fromPanelPage({ referrer: "https://x.test/julia-dan-kevin/?to=Putri&source=pwa" }));
 check("sw: sub-resource dari halaman TAMU tidak dikenali",
   !fromPanelPage({ referrer: "https://x.test/julia-dan-kevin/" }) && !fromPanelPage({ referrer: "" }));
 check("sw: tidak pernah mencegat lintas-origin", /url\.origin !== self\.location\.origin\) return/.test(swSrc));
@@ -199,6 +213,24 @@ await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { t
   check("sw: /julia-dan-kevin/admin-qr/ → cangkang check-in", resp.status() === 200 && base === "Check-in", `${resp.status()} ${base}`);
 }
 {
+  // Aplikasi undangan TERPASANG: start_url memuat ?source=pwa. Harus dijawab langsung
+  // 200 di jalur cantiknya — kalau jatuh ke 404.html → /index.html, halaman keluar
+  // dari cakupan aplikasi dan Chrome menampilkan bar URL (layar tidak penuh).
+  const resp = await page.goto(`${BASE}/julia-dan-kevin/?to=Calon%20Pengantin&source=pwa`, { waitUntil: "load" });
+  check("sw: start_url aplikasi undangan dijawab 200 (bukan 404 GitHub Pages)", resp.status() === 200, String(resp.status()));
+  const info = await page.evaluate(() => ({
+    path: location.pathname, search: location.search,
+    slug: window.TenantContext && window.TenantContext.slug,
+    surface: window.TenantContext && window.TenantContext.surface,
+    to: new URLSearchParams(location.search).get("to"),
+    hasRoute: location.search.includes("__tenant_route")
+  }));
+  check("sw: aplikasi undangan TETAP di jalur cantik (tidak keluar cakupan ke /index.html)", info.path === "/julia-dan-kevin/", info.path);
+  check("sw: tanpa belokan __tenant_route", !info.hasRoute, info.search);
+  check("sw: tenant & surface terbaca dari jalur (julia-dan-kevin / invitation)", info.slug === "julia-dan-kevin" && info.surface === "invitation", `${info.slug}/${info.surface}`);
+  check("sw: sapaan ?to= selamat (tanpa '/' menempel)", info.to === "Calon Pengantin", JSON.stringify(info.to));
+}
+{
   // Halaman TAMU tidak boleh dicegat: respons pertamanya harus tetap 404 GitHub Pages.
   const resp = await page.goto(`${BASE}/julia-dan-kevin/`, { waitUntil: "commit" });
   check("sw: halaman tamu /julia-dan-kevin/ TIDAK dicegat (tetap alur 404.html)", resp.status() === 404, String(resp.status()));
@@ -210,6 +242,9 @@ await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { t
   const resp = await page.goto(`${BASE}/julia-dan-kevin/admin/`, { waitUntil: "load" }).catch((e) => ({ err: String(e) }));
   const base = resp.err ? null : await page.evaluate(() => document.documentElement.dataset.titleBase);
   check("sw: offline — panel yang pernah dibuka tetap terbuka dari cache", !resp.err && resp.status() === 200 && base === "Admin", resp.err || `${resp.status()} ${base}`);
+  const guestOff = await page.goto(`${BASE}/julia-dan-kevin/?to=Calon%20Pengantin&source=pwa`, { waitUntil: "load" }).catch((e) => ({ err: String(e) }));
+  const guestSlug = guestOff.err ? null : await page.evaluate(() => window.TenantContext && window.TenantContext.slug);
+  check("sw: offline — aplikasi undangan yang pernah dibuka tetap terbuka dari cache", !guestOff.err && guestOff.status() === 200 && guestSlug === "julia-dan-kevin", guestOff.err || `${guestOff.status()} ${guestSlug}`);
   await ctx.setOffline(false);
 }
 
@@ -244,7 +279,7 @@ for (const [urlPath, label] of [
     const m = r.info.manifest;
     check("PWA undangan tamu: manifest ada", !!m, "manifest null");
     if (m) {
-      check("PWA undangan tamu: start_url = jalur tenant + sapaan ?to=", /\/julia-dan-kevin\/\?to=Calon\+Pengantin$/.test(m.start_url), m.start_url);
+      check("PWA undangan tamu: start_url = jalur tenant + sapaan ?to= + penanda source=pwa", /\/julia-dan-kevin\/\?to=Calon\+Pengantin&source=pwa$/.test(m.start_url), m.start_url);
       check("PWA undangan tamu: ikon undangan (emas), bukan ikon panel", m.icons.every((i) => /\/assets\/icons\/inv-/.test(i.src)), JSON.stringify(m.icons.map((i) => i.src)));
       check("PWA undangan tamu: tanpa parameter pratinjau/rute internal", !/template=|preview=|__tenant_route/.test(m.start_url), m.start_url);
     }

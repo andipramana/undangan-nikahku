@@ -14,6 +14,13 @@
  * 2. Jaringan dulu, cache hanya cadangan saat offline. Deploy baru langsung
  *    terbawa begitu online — tidak ada "versi lama nyangkut".
  *
+ * 3. Undangan tamu — HANYA kalau diminta aplikasi terpasang (start_url memuat
+ *    ?source=pwa). Alamat /<slug>/ di GitHub Pages adalah 404 yang dibelokkan ke
+ *    /index.html?__tenant_route=…; /index.html berada DI LUAR cakupan aplikasi,
+ *    sehingga Chrome menampilkan bar URL dan layar tidak penuh. Di sini
+ *    /<slug>/ dijawab langsung dengan index.html (200, tetap di dalam cakupan).
+ *    Kunjungan tamu biasa (tanpa ?source=pwa) sama sekali tidak dicegat.
+ *
  * Request lintas-origin (Supabase, CDN) tidak pernah dicegat.
  */
 "use strict";
@@ -27,12 +34,25 @@ function adminShellFor(pathname) {
   return m ? SHELLS[m[1]] : null;
 }
 
-/** Sub-resource yang diminta halaman panel (bukan halaman tamu). */
+// Folder/berkas nyata di akar situs — bukan slug undangan.
+const RESERVED = new Set(["home", "demo", "admin", "admin-qr", "wa", "assets", "templates"]);
+
+/** "/julia-dan-kevin/?source=pwa" → "/index.html". Tanpa penanda aplikasi → null. */
+function guestShellFor(pathname, search) {
+  const m = /^\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/.exec(pathname || "");
+  if (!m || RESERVED.has(m[1])) return null;
+  return new URLSearchParams(search || "").get("source") === "pwa" ? "/index.html" : null;
+}
+
+/** Sub-resource yang diminta halaman PANEL atau aplikasi undangan terpasang
+ * (?source=pwa) — bukan halaman tamu biasa. Tanpa ini aplikasi terbuka offline
+ * tetapi skripnya tidak ada, jadi layarnya kosong. */
 function fromPanelPage(request) {
   if (!request.referrer) return false;
   try {
-    const path = new URL(request.referrer).pathname;
-    return !!adminShellFor(path) || /^\/(admin|admin-qr|wa)\.html$/.test(path);
+    const ref = new URL(request.referrer);
+    return !!adminShellFor(ref.pathname) || !!guestShellFor(ref.pathname, ref.search)
+      || /^\/(admin|admin-qr|wa)\.html$/.test(ref.pathname);
   } catch (_) { return false; }
 }
 
@@ -68,8 +88,8 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
-    const shell = adminShellFor(url.pathname);
-    if (!shell) return;                       // halaman tamu & lainnya: tidak disentuh
+    const shell = adminShellFor(url.pathname) || guestShellFor(url.pathname, url.search);
+    if (!shell) return;                       // tamu biasa & lainnya: tidak disentuh
     event.respondWith(networkFirst(new Request(shell, { headers: request.headers }), shell));
     return;
   }
@@ -80,4 +100,4 @@ self.addEventListener("fetch", (event) => {
 });
 
 // Dipakai test (Node) untuk menguji pemetaan jalur tanpa browser.
-self.WC_SW = { adminShellFor, fromPanelPage };
+self.WC_SW = { adminShellFor, guestShellFor, fromPanelPage };

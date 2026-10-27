@@ -182,6 +182,9 @@
       "Penyimpanan konten"
     );
     if (!error) content = fresh; // resync cache lokal dengan hasil merge di DB
+    // Nama mempelai berubah → ikon bawaan (huruf depan CPP+CPW) ikut menyesuaikan.
+    // keys tidak memuat "couple" saat ikon sendiri yang disimpan, jadi tidak berulang.
+    if (!error && keys.includes("couple") && window.PanelAppIcon) window.PanelAppIcon.syncAuto();
     return { error };
   }
 

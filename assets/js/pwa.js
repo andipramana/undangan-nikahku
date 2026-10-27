@@ -46,15 +46,17 @@
 
   // Alamat awal aplikasi terpasang. Untuk tamu, sapaan personal (?to=Nama)
   // ikut terbawa supaya aplikasi terbuka dengan nama tamunya; parameter
-  // pratinjau (template, preview) tidak. tenant.js sudah memulihkan query asli
+  // pratinjau (template, preview) tidak; source=pwa ditambahkan. tenant.js sudah memulihkan query asli
   // saat boot, jadi location.search di sini benar.
   function startPathFor() {
     const base = tenant.path(surface);                             // "/julia-dan-kevin/admin/" | "/julia-dan-kevin/"
     if (!isGuest) return base;
     const params = new URLSearchParams(location.search);
-    ["template", "preview", "__tenant_route"].forEach((k) => params.delete(k));
-    const q = params.toString();
-    return q ? `${base}?${q}` : base;
+    ["template", "preview", "__tenant_route", "source"].forEach((k) => params.delete(k));
+    // source=pwa: penanda untuk sw.js agar /<slug>/ dijawab langsung (200) dan
+    // aplikasi tidak keluar cakupan lewat 404.html → /index.html (bar URL muncul).
+    params.set("source", "pwa");
+    return `${base}?${params.toString()}`;
   }
   const startPath = startPathFor();
   const idPath = tenant.path(surface);                              // identitas aplikasi tanpa query

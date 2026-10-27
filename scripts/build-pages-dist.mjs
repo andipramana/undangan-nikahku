@@ -38,6 +38,7 @@ const required = [
   "assets/icons/icon-maskable-512.png",
   "assets/icons/apple-touch-icon.png",
   "assets/icons/inv-192.png",
+  "assets/icons/monogram-template.svg",
   "assets/icons/inv-512.png",
   "assets/icons/inv-maskable-512.png",
   "assets/icons/inv-apple-touch-icon.png",

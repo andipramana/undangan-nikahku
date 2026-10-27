@@ -534,6 +534,8 @@
       e.returnValue = "";
     });
     mount(resolveKey());
+    // Ikon bawaan undangan mengikuti huruf depan nama CPP & CPW (latar belakang).
+    if (window.PanelAppIcon) window.PanelAppIcon.syncAuto();
   }
 
   window.PanelRouter = {
