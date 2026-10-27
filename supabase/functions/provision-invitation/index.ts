@@ -217,7 +217,16 @@ Deno.serve(async (req) => {
   const slug = clean(body.slug).toLowerCase();
   if (slug === "root" || slug === "demo") return fail("Slug ini dicadangkan untuk template sistem");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return fail("Slug hanya huruf kecil, angka, dan tanda hubung");
-  for (const field of ["adminEmail", "adminPassword", "qrEmail", "qrPassword"]) if (!clean(body[field])) return fail(`Field ${field} wajib diisi`);
+  for (const field of ["adminEmail", "adminPassword"]) if (!clean(body[field])) return fail(`Field ${field} wajib diisi`);
+  // Satu orang boleh memegang undangan sekaligus QR check-in. Auth Supabase
+  // hanya mengizinkan satu akun per email dan invitation_members hanya satu
+  // peran per user, jadi kalau email QR kosong atau sama dengan email admin,
+  // cukup satu akun `admin` — halaman admin-qr tidak membatasi peran dan RLS
+  // check-in memakai can_access_invitation (admin + admin_qr).
+  const adminEmail = clean(body.adminEmail);
+  const qrEmail = clean(body.qrEmail);
+  const separateQr = qrEmail !== "" && qrEmail.toLowerCase() !== adminEmail.toLowerCase();
+  if (separateQr && !clean(body.qrPassword)) return fail("Field qrPassword wajib diisi");
   const templateId = clean(body.templateId) || "klasik";
   if (!/^[a-z0-9-]+$/.test(templateId)) return fail("Template tidak valid");
   const { data: created, error: invitationError } = await admin.from("invitations").insert({ slug, display_name: clean(body.displayName || slug) }).select("id,slug").single();
@@ -233,8 +242,8 @@ Deno.serve(async (req) => {
     if (memberError) throw new Error(memberError.message);
   };
   try {
-    await createAccount(clean(body.adminEmail), String(body.adminPassword), "admin");
-    await createAccount(clean(body.qrEmail), String(body.qrPassword), "admin_qr");
+    await createAccount(adminEmail, String(body.adminPassword), "admin");
+    if (separateQr) await createAccount(qrEmail, String(body.qrPassword), "admin_qr");
     await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
     const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://willcome.my.id/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
