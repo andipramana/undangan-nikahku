@@ -107,7 +107,7 @@ async function manifestFor(slug, surface) {
   const { json: m, appleTitle } = await manifestFor("julia-dan-kevin", "admin");
   check("manifest admin: ada", !!m);
   check("manifest admin: start_url absolut ke jalur cantik tenant", m.start_url === `${ORIGIN}/julia-dan-kevin/admin/`, m.start_url);
-  check("manifest admin: scope = akar tenant", m.scope === `${ORIGIN}/julia-dan-kevin/`, m.scope);
+  check("manifest admin: scope = jalur admin saja (bukan akar tenant)", m.scope === `${ORIGIN}/julia-dan-kevin/admin/`, m.scope);
   check("manifest admin: start_url berada di dalam scope", m.start_url.startsWith(m.scope));
   check("manifest admin: nama memuat nama pasangan dari slug", /Julia & Kevin/.test(m.name) && /WillCome/.test(m.name), m.name);
   check("manifest admin: short_name WillCome", m.short_name === "WillCome", m.short_name);
@@ -118,13 +118,32 @@ async function manifestFor(slug, surface) {
   check("iOS: judul layar utama diisi", appleTitle === "WillCome", String(appleTitle));
 }
 {
+  // Regresi "aplikasi ini sudah terinstal": scope admin yang membungkus halaman
+  // undangan membuat Chrome menolak memasang undangan. Cakupan admin, check-in
+  // dan WA wajib saling lepas, dan tak satu pun boleh membungkus undangan.
+  const apps = {};
+  for (const [surface, key] of [["admin", "admin"], ["admin-qr", "qr"], ["wa", "wa"], ["invitation", "guest"]]) {
+    apps[key] = (await manifestFor("julia-dan-kevin", surface)).json;
+  }
+  const inScope = (app, other) => other.start_url.startsWith(app.scope);
+  for (const a of ["admin", "qr", "wa"]) {
+    for (const b of ["admin", "qr", "wa", "guest"]) {
+      if (a === b) continue;
+      check(`scope ${a} TIDAK membungkus start_url ${b}`, !inScope(apps[a], apps[b]), `${apps[a].scope} ⊃ ${apps[b].start_url}`);
+    }
+  }
+  check("scope undangan membungkus undangannya sendiri", inScope(apps.guest, apps.guest), apps.guest.scope);
+  const ids = Object.values(apps).map((a) => a.id);
+  check("id keempat aplikasi berbeda semua", new Set(ids).size === 4, ids.join(" | "));
+}
+{
   const { json: q } = await manifestFor("julia-dan-kevin", "admin-qr");
   check("manifest check-in: start_url ke admin-qr, id berbeda dari admin", q.start_url === `${ORIGIN}/julia-dan-kevin/admin-qr/` && q.id !== `${ORIGIN}/julia-dan-kevin/admin/`, q.start_url);
   check("manifest check-in: short_name Check-in", q.short_name === "Check-in", q.short_name);
   const { json: w } = await manifestFor("julia-dan-kevin", "wa");
   check("manifest WA: start_url ke wa", w.start_url === `${ORIGIN}/julia-dan-kevin/wa/`, w.start_url);
   const { json: r } = await manifestFor("root", "admin");
-  check("manifest root: start_url /admin/, scope /", r.start_url === `${ORIGIN}/admin/` && r.scope === `${ORIGIN}/`, `${r.start_url} ${r.scope}`);
+  check("manifest root: start_url /admin/, scope /admin/", r.start_url === `${ORIGIN}/admin/` && r.scope === `${ORIGIN}/admin/`, `${r.start_url} ${r.scope}`);
 }
 
 /* ── C. service worker sungguhan (localhost) ────────────────────────────── */

@@ -58,9 +58,15 @@
   }
   const startPath = startPathFor();
   const idPath = tenant.path(surface);                              // identitas aplikasi tanpa query
-  // Scope = akar tenant supaya pindah antar panel (admin ↔ check-in ↔ WA) dan
-  // ke undangannya sendiri tidak keluar dari aplikasi. Root: "/".
-  const scopePath = tenant.slug === "root" ? "/" : `/${tenant.slug}/`;
+  // Scope = jalur aplikasi itu SENDIRI, bukan akar tenant. Dulu admin memakai
+  // /julia-dan-kevin/ sehingga halaman undangan (/julia-dan-kevin/) ikut masuk
+  // wilayah aplikasi admin yang sudah terpasang, dan Chrome menjawab "aplikasi
+  // sudah terinstal" saat undangan mau dipasang. Dengan scope sempit admin,
+  // check-in, WA, dan undangan saling lepas — masing-masing bisa dipasang.
+  // Konsekuensinya: tautan dari admin ke check-in/WA keluar dari jendela
+  // aplikasi (tetap terbuka, dengan bar kecil). Urutan pasang yang aman:
+  // panel dulu, undangan terakhir (scope undangan membungkus jalur panel).
+  const scopePath = idPath;
 
   function buildManifest() {
     // Tamu: nama = judul halaman ("Julia & Kevin — The Wedding") begitu data
