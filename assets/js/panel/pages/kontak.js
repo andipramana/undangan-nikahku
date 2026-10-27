@@ -30,7 +30,7 @@ window.PanelPages["kontak"] = {
       <div class="p-modal" id="kt-list-modal" hidden>
         <div class="p-modal__panel">
           <div class="p-modal__header"><h3 id="kt-list-modal-title">Daftar baru</h3><button type="button" class="p-modal__close" id="kt-list-modal-close" aria-label="Tutup">&times;</button></div>
-          <label class="p-field"><span>Nama daftar</span><input class="p-input" id="kt-list-name" placeholder="mis. Kontak Mita"></label>
+          <label class="p-field"><span>Nama daftar</span><input class="p-input" id="kt-list-name" placeholder="mis. Kontak Keluarga"></label>
           <!-- PIN opsional per daftar — modul bersama PanelListPin
                (list-pin.js): kosong = tidak memakai/mengubah PIN. -->
           ${window.PanelListPin.fieldHtml("kt-list-pin")}

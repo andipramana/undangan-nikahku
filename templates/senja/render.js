@@ -44,8 +44,8 @@
       // 1. Data Mempelai
       const bride = (data.couple && data.couple.bride) || {};
       const groom = (data.couple && data.couple.groom) || {};
-      const brideNick = bride.nickname || bride.name || "Fitri";
-      const groomNick = groom.nickname || groom.name || "Andi";
+      const brideNick = bride.nickname || bride.name || "Mempelai Wanita";
+      const groomNick = groom.nickname || groom.name || "Mempelai Pria";
       const brideFull = bride.name || brideNick;
       const groomFull = groom.name || groomNick;
       const coupleNames = brideNick + " & " + groomNick;

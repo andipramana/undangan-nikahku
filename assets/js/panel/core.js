@@ -143,12 +143,12 @@
 
   /** Nama tenant untuk teks yang tampil SEBELUM data undangannya dimuat (layar
    * login, header, judul tab). Diturunkan dari slug, mis. "julia-dan-kevin" →
-   * "Julia & Kevin". Tenant `root` adalah undangan asli Mita & Andi. Dulu teks
+   * "Julia & Kevin". Tenant `root` memakai nama netral; nama pasangannya diambil dari data. Dulu teks
    * ini di-hardcode "Mita & Andi" di HTML, jadi admin client lain melihat nama
    * pasangan orang lain di tab dan layar login. */
   function tenantName() {
     const slug = tenant.slug || "root";
-    if (slug === "root") return "Mita & Andi";
+    if (slug === "root") return "Undangan Utama";
     return slug.split("-").filter(Boolean)
       .map((w) => (w === "dan" ? "&" : w.charAt(0).toUpperCase() + w.slice(1)))
       .join(" ");

@@ -45,9 +45,9 @@ window.PanelPages["font"] = {
      * manifest ({bride}, {tanggal}, …) diganti di sini; teks tanpa token
      * dipakai apa adanya. */
     const TOKENS = () => ({
-      "{bride}": get("couple.bride.nickname", get("couple.bride.name", "Mita")),
-      "{groom}": get("couple.groom.nickname", get("couple.groom.name", "Andi")),
-      "{bridefull}": get("couple.bride.name", "Mita Pratama"),
+      "{bride}": get("couple.bride.nickname", get("couple.bride.name", "Sinta")),
+      "{groom}": get("couple.groom.nickname", get("couple.groom.name", "Raka")),
+      "{bridefull}": get("couple.bride.name", "Sinta Maharani"),
       "{ayah}": get("couple.bride.father", "Budi"),
       "{ibu}": get("couple.bride.mother", "Sri"),
       "{tamu}": get("defaultGuestName", "Bapak/Ibu/Saudara/i"),
