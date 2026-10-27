@@ -141,6 +141,8 @@
     const cfg = window.WEDDING_CONFIG;
 
     applyMeta(cfg);
+    // Ikon tab & ikon saat dipasang ke layar utama: unggahan client (content.appIcon).
+    if (window.WeddingPwa) window.WeddingPwa.setAppIcon(cfg.appIcon);
 
     // ?template= (pratinjau dari admin) menang atas pilihan tersimpan tenant.
     // Kalau content.templateId menunjuk template yang sudah tidak ada di

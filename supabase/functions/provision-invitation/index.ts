@@ -136,6 +136,8 @@ Deno.serve(async (req) => {
     content.gift = { accounts: [], contactCPP: "", contactCPW: "", address: { recipient: "", phone: "", detail: "" }, note: "" };
     content.event = { ...(content.event || {}), dateISO: "", dateLabel: "", dayLabel: "", countdownTarget: "", akad: { label: "Akad Nikah", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } }, resepsi: { label: "Resepsi", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } } };
     content.loveStory = []; content.guestGreetings = [];
+    // Ikon unggahan menunjuk berkas Storage milik root (<slug>/icons/); client baru harus memulai dari ikon bawaan.
+    delete content.appIcon;
     // Editor Visual root membawa dua hal: penyesuaian TAMPILAN (posisi, gaya,
     // tombol, overlay) yang justru harus ikut karena root adalah patokan desain
     // client baru, dan override TEKS yang berisi copy milik root ("Mita & Andi",

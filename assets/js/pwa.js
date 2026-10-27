@@ -68,7 +68,40 @@
   // panel dulu, undangan terakhir (scope undangan membungkus jalur panel).
   const scopePath = idPath;
 
+  // Ikon unggahan client (content.appIcon = { path, version }), diisi main.js lewat
+  // WeddingPwa.setAppIcon setelah data tenant tiba. null = ikon bawaan.
+  let appIcon = null;
+
+  /** URL ikon yang dipakai sekarang. Unggahan client berada di Storage publik
+   * (URL absolut — server WebAPK mengunduh dari URL-nya); versi di query
+   * membuang cache saat client mengganti ikon. */
+  function iconUrls() {
+    if (isGuest && appIcon && typeof window.photoUrl === "function") {
+      const u = (name) => `${window.photoUrl(appIcon.path + "/" + name)}?v=${encodeURIComponent(appIcon.version)}`;
+      return { i192: u("icon-192.png"), i512: u("icon-512.png"), maskable: u("icon-maskable-512.png"), apple: u("apple-touch-icon.png") };
+    }
+    const base = `${origin}/assets/icons/`;
+    return {
+      i192: `${base}${ICON_PREFIX}-192.png`, i512: `${base}${ICON_PREFIX}-512.png`,
+      maskable: `${base}${ICON_PREFIX}-maskable-512.png`,
+      apple: `${base}${isGuest ? "inv-apple-touch-icon" : "apple-touch-icon"}.png`
+    };
+  }
+
+  /** Ikon tab & layar utama iOS pada halaman tamu. Tanpa unggahan, tenant selain
+   * root memakai ikon netral — favicon statis di index.html adalah segel milik
+   * root dan tidak boleh tampil di undangan client lain. */
+  function applyPageIcons() {
+    if (!isGuest) return;
+    const set = iconUrls();
+    const fav = document.querySelector('link[rel="icon"]');
+    if (fav && (appIcon || tenant.slug !== "root")) { fav.type = "image/png"; fav.href = set.i192; }
+    const apple = document.querySelector('link[rel="apple-touch-icon"]');
+    if (apple) apple.href = set.apple;
+  }
+
   function buildManifest() {
+    const icons = iconUrls();
     // Tamu: nama = judul halaman ("Julia & Kevin — The Wedding") begitu data
     // tenant sudah dimuat; sebelum itu cukup nama dari slug.
     const pageTitle = (document.title || "").trim();
@@ -90,9 +123,9 @@
       background_color: COLOR,
       theme_color: COLOR,
       icons: [
-        { src: `${origin}/assets/icons/${ICON_PREFIX}-192.png`, sizes: "192x192", type: "image/png", purpose: "any" },
-        { src: `${origin}/assets/icons/${ICON_PREFIX}-512.png`, sizes: "512x512", type: "image/png", purpose: "any" },
-        { src: `${origin}/assets/icons/${ICON_PREFIX}-maskable-512.png`, sizes: "512x512", type: "image/png", purpose: "maskable" }
+        { src: icons.i192, sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: icons.i512, sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: icons.maskable, sizes: "512x512", type: "image/png", purpose: "maskable" }
       ]
     };
   }
@@ -110,6 +143,16 @@
     } catch (_) { /* tanpa manifest, halaman tetap berfungsi normal */ }
   }
   installManifest();
+  applyPageIcons();
+
+  /** Dipanggil main.js begitu data tenant tiba. */
+  window.WeddingPwa = {
+    setAppIcon(value) {
+      appIcon = value && value.path && value.version ? value : null;
+      applyPageIcons();
+      installManifest();
+    }
+  };
 
   // Judul undangan baru diisi main.js setelah data tenant tiba; bangun ulang
   // manifest supaya nama aplikasi memakai nama pasangan yang sebenarnya.

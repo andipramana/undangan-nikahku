@@ -55,6 +55,7 @@ const required = [
   "assets/js/admin/wa-blast.js",
   "assets/js/admin/admin-qr.js",
   "assets/js/panel/core.js",
+  "assets/js/panel/app-icon.js",
   "assets/js/panel/router.js",
   "assets/js/panel/pages/home.js",
   "assets/js/register.js",
