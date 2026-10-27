@@ -136,12 +136,19 @@ Deno.serve(async (req) => {
     content.gift = { accounts: [], contactCPP: "", contactCPW: "", address: { recipient: "", phone: "", detail: "" }, note: "" };
     content.event = { ...(content.event || {}), dateISO: "", dateLabel: "", dayLabel: "", countdownTarget: "", akad: { label: "Akad Nikah", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } }, resepsi: { label: "Resepsi", start: "", end: "", venue: { name: "", address: "", mapsUrl: "" } } };
     content.loveStory = []; content.guestGreetings = [];
-    // Override Editor Visual berisi TEKS milik root ("Mita & Andi", "Made with by Mita &
-    // Iyow") dan guest-overrides.js menimpa nama client dengan itu di halaman tamu.
-    // Dibuang di tingkat akar dan di tiap blok per-template; tema/font ikut disalin.
-    delete content.visualEditor;
+    // Editor Visual root membawa dua hal: penyesuaian TAMPILAN (posisi, gaya,
+    // tombol, overlay) yang justru harus ikut karena root adalah patokan desain
+    // client baru, dan override TEKS yang berisi copy milik root ("Mita & Andi",
+    // "Made with by Mita & Iyow") — guest-overrides.js menimpakannya ke nama
+    // client di halaman tamu. Hanya yang kedua dibuang, di akar dan di tiap blok
+    // per-template.
+    const stripCopyOverrides = (ve: any) => {
+      if (!ve || typeof ve !== "object" || !ve.elements || typeof ve.elements !== "object") return;
+      for (const el of Object.values(ve.elements as Record<string, any>)) if (el && typeof el === "object") delete el.text;
+    };
+    stripCopyOverrides(content.visualEditor);
     if (content.templates && typeof content.templates === "object") {
-      for (const block of Object.values(content.templates as Record<string, any>)) if (block && typeof block === "object") delete block.visualEditor;
+      for (const block of Object.values(content.templates as Record<string, any>)) if (block && typeof block === "object") stripCopyOverrides(block.visualEditor);
     }
     return content;
   };

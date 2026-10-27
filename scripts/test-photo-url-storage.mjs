@@ -7,8 +7,9 @@
  * willcome.my.id/templates/default/photos/065.webp (404) untuk setiap client
  * baru. Berkas lokal template lain (`templates/klasik/cover.jpg`) tetap lokal.
  *
- * Juga mengunci: provisioning tidak boleh menyalin Editor Visual milik root
- * (teks "Mita & Andi" ditimpakan ke halaman tamu client baru).
+ * Juga mengunci: provisioning membuang override TEKS Editor Visual root
+ * ("Mita & Andi" ditimpakan ke halaman tamu client baru) tetapi mempertahankan
+ * penyesuaian tampilannya, karena root adalah patokan desain client baru.
  */
 import fs from "node:fs/promises";
 import { chromium } from "@playwright/test";
@@ -49,7 +50,9 @@ check("berkas lokal template lain tetap lokal", out.localCover === "templates/kl
 check("assets/ tetap lokal", out.localAsset === "assets/img/foto_cover/01.webp", out.localAsset);
 check("foto tenant biasa dibaca dari Storage", /\/storage\/v1\/object\/public\/photos\/julia-dan-kevin\/cover\/1\.webp$/.test(out.tenantFoto), out.tenantFoto);
 
-check("provisioning: Editor Visual root tidak disalin ke client baru",
-  /delete content\.visualEditor/.test(fn) && /delete block\.visualEditor/.test(fn));
+check("provisioning: override TEKS Editor Visual root dibuang (akar & per-template)",
+  /delete el\.text/.test(fn) && /stripCopyOverrides\(content\.visualEditor\)/.test(fn) && /stripCopyOverrides\(block\.visualEditor\)/.test(fn));
+check("provisioning: penyesuaian tampilan root TIDAK dibuang (root = patokan desain)",
+  !/delete content\.visualEditor/.test(fn) && !/delete block\.visualEditor/.test(fn));
 
 process.exit(failed ? 1 : 0);
