@@ -104,6 +104,20 @@ input::placeholder,textarea::placeholder{color:#c4b4ac;font-weight:600}
 .vgroup dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;font-size:14px}
 .vgroup dt{font-weight:800;color:var(--soft)}.vgroup dd{font-weight:700;word-break:break-word}
 .ok{background:#eef9f3;border-radius:16px;padding:10px 14px;font-weight:800;font-size:14px;margin-bottom:12px}
+.skip{display:grid;gap:2px;background:linear-gradient(135deg,#fff3c9,#ffe0d4);border:2px solid var(--coral);border-radius:20px;padding:12px 16px;margin-bottom:12px;box-shadow:0 3px 0 rgba(242,125,114,.3)}
+.skip b{font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;color:var(--coral-d)}
+.skip span{font-weight:800;font-size:14px;color:var(--ink)}
+.skip em{font-style:normal;background:var(--coral);color:#fff;border-radius:99px;padding:1px 9px;font-family:'Fredoka',sans-serif;font-weight:500}
+details.opt{background:var(--cream);border:2px dashed var(--line);border-radius:20px;overflow:hidden}
+details.opt[open]{border-style:solid;border-color:var(--butter);background:#fff}
+details.opt>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;min-height:52px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px}
+details.opt>summary::-webkit-details-marker{display:none}
+details.opt>summary i{font-style:normal;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;color:var(--soft);background:#fff;border-radius:99px;padding:4px 12px;flex:none;box-shadow:0 0 0 2px var(--line)}
+details.opt[open]>summary{border-bottom:2px dotted var(--line)}
+.optbody{padding:14px 14px 4px}
+.btn.glow{font-size:19px;padding:15px 30px;box-shadow:0 4px 0 var(--coral-d),0 0 0 5px rgba(242,125,114,.22);animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 4px 0 var(--coral-d),0 0 0 4px rgba(242,125,114,.2)}50%{box-shadow:0 4px 0 var(--coral-d),0 0 0 11px rgba(242,125,114,.1)}}
+@media (prefers-reduced-motion:reduce){.btn.glow{animation:none}}
 .foot{text-align:center;color:#a8978f;font-size:12px;font-weight:800;margin-top:18px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

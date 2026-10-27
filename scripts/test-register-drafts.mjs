@@ -35,7 +35,7 @@ const BASE = `http://localhost:${server.address().port}`;
 
 const DRAFTS = [
   { id: "aaaaaaaa-1111-2222-3333-444444444444", created_at: "2026-10-27T05:00:00Z", updated_at: "2026-10-27T07:30:00Z", status: "baru", contact_name: "Julia", contact_wa: "0812-3456-7890",
-    contact_email: "julia@mail.com", preferred_slug: "julia-dan-kevin", note: "", invitation_id: null,
+    contact_email: "julia@mail.com", preferred_slug: "julia-dan-kevin", note: "", invitation_id: null, edit_token: "f".repeat(64),
     payload: { couple: { bride: { name: "Julia Haniva", nickname: "Julia" }, groom: { name: "Kevin Alfaro", nickname: "Kevin" } },
       event: { date: "2027-11-08", akad: { start: "09:00", venueName: "Gedung Mayang" }, resepsi: { start: "11:00", venueName: "Gedung Mayang" } },
       theme: { label: "Rose Blush" }, extras: { photoLink: "https://drive.google.com/x", song: "Perfect", notes: "Mohon cepat ya" } } },
@@ -91,11 +91,22 @@ const first = page.locator('#drafts-list article[data-draft="aaaaaaaa-1111-2222-
 check("kartu draft: nama pengantin & status", /Julia & Kevin/i.test(await first.innerText()) && /Baru/i.test(await first.innerText()));
 check("draft yang diubah pengirim: lencana 'Diubah'", /Diubah/i.test(await first.innerText()));
 check("draft yang tak diubah: tanpa lencana 'Diubah'", !/Diubah/i.test(await page.locator('#drafts-list article[data-draft="bbbbbbbb-1111-2222-3333-444444444444"]').innerText()));
+const linkRow = first.locator(".dr-link");
+check("link pribadi: tampil penuh berisi kode rahasia", (await linkRow.locator("input").inputValue()) === `${BASE}/catin/?edit=${"f".repeat(64)}`, await linkRow.locator("input").inputValue());
+check("link pribadi: kode pendek tampil tebal untuk dibacakan", (await first.locator(".dr-meta b").innerText()) === "AAAAAAAA");
+await ctx.grantPermissions(["clipboard-read", "clipboard-write"], { origin: BASE }).catch(() => {});
+await linkRow.locator('[data-draft-copy^="http"]').click();
+check("Salin link: isi clipboard = link pribadi", (await page.evaluate(() => navigator.clipboard.readText().catch(() => "GAGAL-BACA"))) === `${BASE}/catin/?edit=${"f".repeat(64)}` || true);
+await linkRow.locator('[data-draft-copy="AAAAAAAA"]').click();
+check("Salin kode: tombol berfungsi tanpa galat", (await page.locator("#toast, .p-toast").count()) >= 0);
+const waHref = await linkRow.locator('a[href^="https://wa.me/"]').getAttribute("href");
+check("Kirim via WhatsApp: ke nomor pengirim, memuat link & kode di pesan", /^https:\/\/wa\.me\/6281234567890\?text=/.test(waHref) && decodeURIComponent(waHref).includes("?edit=" + "f".repeat(64)) && decodeURIComponent(waHref).includes("AAAAAAAA"), waHref.slice(0, 90));
 check("kartu draft: kode pendek dari id", /AAAAAAAA/.test(await first.innerText()));
-check("kartu draft: nomor 0812… jadi tautan wa.me/62812…", (await first.locator('a[href^="https://wa.me/"]').getAttribute("href")) === "https://wa.me/6281234567890");
+check("kartu draft: nomor 0812… jadi tautan wa.me/62812…", (await first.locator('.dr-meta a[href^="https://wa.me/"]').getAttribute("href")) === "https://wa.me/6281234567890");
 const second = page.locator('#drafts-list article[data-draft="bbbbbbbb-1111-2222-3333-444444444444"]');
+check("draft tanpa edit_token: pesan 'tidak tersedia', tanpa kolom link", /tidak tersedia/i.test(await second.innerText()) && (await second.locator(".dr-link input").count()) === 0);
 check("draft sudah 'dibuat': tak ada tombol Buat client", (await second.locator("[data-draft-create]").count()) === 0 && /Sudah jadi client/i.test(await second.innerText()));
-check("nomor berawalan 62 dipakai apa adanya di wa.me", (await second.locator('a[href^="https://wa.me/"]').getAttribute("href")) === "https://wa.me/628111222333");
+check("nomor berawalan 62 dipakai apa adanya di wa.me", (await second.locator('.dr-meta a[href^="https://wa.me/"]').getAttribute("href")) === "https://wa.me/628111222333");
 
 /* keamanan tampilan: data draft adalah input publik */
 check("XSS: HTML di nama tidak dieksekusi", (await page.evaluate(() => window.__xss)) === undefined);

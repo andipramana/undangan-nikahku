@@ -174,20 +174,32 @@ const stepTitle = (page) => page.locator("#step h2").innerText();
   await next(page);
   check("langkah 3 lengkap: lanjut ke 'Cerita kalian'", (await stepTitle(page)) === "Cerita kalian");
 
+  check("cerita: langkah ini ditandai boleh dilewati", /boleh dilewati/i.test(await page.locator(".skip").innerText()));
+  check("cerita: terlipat secara bawaan (kolom tak terlihat)", (await page.locator('details[data-opt="cerita"]').getAttribute("open")) === null && await page.locator('[data-act="add-story"]').isHidden());
+  check("cerita: tombol Lanjut menonjol selama terlipat", await page.locator("#next.glow").count() === 1);
+  await page.click('details[data-opt="cerita"] summary');
+  check("cerita: diketuk → terbuka & kolom terlihat", await page.locator('[data-act="add-story"]').isVisible());
+  const glowOff = await page.waitForFunction(() => !document.querySelector("#next.glow"), null, { timeout: 2000 }).then(() => true, () => false);
+  check("cerita: terbuka → sorotan tombol Lanjut mati (event toggle tiba sesaat kemudian)", glowOff);
   await page.click('[data-act="add-story"]');
   await fill(page, "stories.0.date", "2022"); await fill(page, "stories.0.title", "Awal perkenalan"); await fill(page, "stories.0.text", "Dipertemukan teman.");
   check("cerita: bisa ditambah", (await page.locator(".item").count()) === 1);
   await page.click('[data-act="add-story"]'); await page.click('[data-act="del-story"][data-i="1"]');
   check("cerita: bisa dihapus", (await page.locator(".item").count()) === 1);
+  check("cerita: tetap terbuka setelah tampilan dirender ulang (tambah/hapus)", (await page.locator('details[data-opt="cerita"]').getAttribute("open")) !== null);
   await next(page);
   check("langkah 4 → 'Tanda kasih'", (await stepTitle(page)) === "Tanda kasih");
 
+  check("kasih: terlipat secara bawaan", (await page.locator('details[data-opt="kasih"]').getAttribute("open")) === null && await page.locator('[data-p="gifts.0.bank"]').isHidden());
+  await page.click('details[data-opt="kasih"] summary');
   await fill(page, "gifts.0.bank", "BCA"); await fill(page, "gifts.0.number", "1234567890"); await fill(page, "gifts.0.holder", "Julia Haniva");
   await page.selectOption('[data-p="gifts.0.owner"]', "cpw");
   await fill(page, "giftAddress.recipient", "Julia"); await fill(page, "giftAddress.phone", "0812"); await fill(page, "giftAddress.detail", "Jl. Mawar 1");
   await next(page);
   check("langkah 5 → 'Tampilan'", (await stepTitle(page)) === "Tampilan");
 
+  check("tampilan: terlipat secara bawaan", (await page.locator('details[data-opt="tampilan"]').getAttribute("open")) === null);
+  await page.click('details[data-opt="tampilan"] summary');
   await page.waitForSelector(".sw", { timeout: 8000 });
   const nPresets = await page.locator(".sw").count();
   check("tampilan: 12 paduan warna dari template klasik", nPresets === 12, String(nPresets));
@@ -274,6 +286,49 @@ const stepTitle = (page) => page.locator("#step h2").innerText();
   await ctx.close();
 }
 
+
+{
+  // jalan pintas: ketiga langkah opsional dilewati hanya dengan menekan Lanjut
+  const { ctx, page, calls, errors } = await openForm();
+  await page.evaluate(() => {
+    const F = window.CatinForm; const s = F.defaultState();
+    s.contact = { name: "Julia", wa: "08123456789", email: "j@mail.com" };
+    s.groom.name = "Kevin"; s.groom.nickname = "Kevin"; s.bride.name = "Julia"; s.bride.nickname = "Julia";
+    s.date = "2027-11-08"; s.akad = Object.assign(s.akad, { start: "09:00", venueName: "G", address: "A" }); s.resepsi.start = "11:00";
+    s.gifts = [{ bank: "", number: "", holder: "", owner: "cpp" }];
+    localStorage.setItem("catin_draft_v1", JSON.stringify({ step: 3, state: s }));
+  });
+  await page.reload({ waitUntil: "load" });
+  for (const [id, title] of [["cerita", "Cerita kalian"], ["kasih", "Tanda kasih"], ["tampilan", "Tampilan"]]) {
+    check(`lewati ${id}: langkah '${title}' tampil dengan catatan & lipatan tertutup`, (await stepTitle(page)) === title && await page.locator(".skip").isVisible() && (await page.locator(`details[data-opt="${id}"]`).getAttribute("open")) === null);
+    check(`lewati ${id}: tombol Lanjut menonjol`, await page.locator("#next.glow").count() === 1);
+    await next(page);
+  }
+  check("melewati ketiganya: sampai 'Cek & kirim' tanpa galat", (await stepTitle(page)) === "Cek & kirim" && (await page.locator(".field.bad").count()) === 0);
+  check("di langkah wajib/terakhir: tombol tidak menyala", await page.locator("#next.glow").count() === 0);
+  await page.check('[data-p="agree"]'); await next(page);
+  await page.waitForSelector("#done:not([hidden])", { timeout: 8000 });
+  const p = JSON.parse(calls[0].body).p_payload;
+  check("terkirim tanpa cerita/rekening/warna (bukan data kosong yang dikarang)", p.loveStory.length === 0 && p.gift.accounts.length === 0 && p.theme === null);
+  check("melewati: tidak ada galat JavaScript", errors.length === 0, errors.join(" | "));
+  await ctx.close();
+}
+{
+  // terisi sebagian lalu terlipat/terbuka: galat memaksa lipatan terbuka; data yang ada membuka otomatis
+  const { ctx, page } = await openForm();
+  await page.evaluate(() => {
+    const F = window.CatinForm; const s = F.defaultState();
+    s.stories = [{ date: "2022", title: "", text: "tanpa judul" }];
+    localStorage.setItem("catin_draft_v1", JSON.stringify({ step: 3, state: s }));
+  });
+  await page.reload({ waitUntil: "load" });
+  check("ada isian tersimpan → lipatan terbuka otomatis (tidak menyembunyikan datamu)", (await page.locator('details[data-opt="cerita"]').getAttribute("open")) !== null);
+  await page.click('details[data-opt="cerita"] summary');          // tutup
+  check("bisa ditutup lagi oleh pengguna", (await page.locator('details[data-opt="cerita"]').getAttribute("open")) === null);
+  await next(page);
+  check("galat di dalam lipatan tertutup: lipatan dibuka & kolom bermasalah terlihat", (await page.locator('details[data-opt="cerita"]').getAttribute("open")) !== null && (await page.locator(".field.bad").count()) === 1 && await page.locator('[data-p="stories.0.title"]').isVisible());
+  await ctx.close();
+}
 
 /* ── D. membaca ulang & mengubah draft ──────────────────────────────────── */
 const manifest = JSON.parse(await fs.readFile("templates/klasik/template.json", "utf8"));

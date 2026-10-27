@@ -327,13 +327,26 @@ Sandi: ${loginPassword}`);
         const wa = waLink(d.contact_wa);
         const edited = d.updated_at && new Date(d.updated_at) - new Date(d.created_at) > 5000;   // diubah pengirim setelah dikirim
         const e = p.extras || {};
+        const code = String(d.id).replace(/-/g, "").slice(0, 8).toUpperCase();
+        const priv = d.edit_token ? `${location.origin}/catin/?edit=${d.edit_token}` : "";
+        const waMsg = wa && priv ? `${wa}?text=${encodeURIComponent(`Halo ${d.contact_name}, ini link pribadimu untuk melihat/mengubah data undangan (kode ${code}):
+${priv}`)}` : "";
         const link = (u) => (/^https?:\/\//i.test(u || "") ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u || "—"));
         return `<article class="cl-row" data-draft="${esc(d.id)}">
           <div class="cl-top"><span class="cl-name">${esc(bride)} &amp; ${esc(groom)}</span><span>${edited ? `<span class="p-badge p-badge--info" title="Calon pengantin mengubah datanya setelah mengirim">Diubah ${esc(when(d.updated_at))}</span> ` : ""}<span class="p-badge p-badge--${tone}">${esc(label)}</span></span></div>
           <div class="dr-meta">
-            <span>Dikirim ${esc(when(d.created_at))} · kode ${esc(String(d.id).replace(/-/g, "").slice(0, 8).toUpperCase())}</span>
+            <span>Dikirim ${esc(when(d.created_at))} · kode <b>${esc(code)}</b></span>
             <span>${esc(d.contact_name)} · ${wa ? `<a href="${esc(wa)}" target="_blank" rel="noopener">${esc(d.contact_wa)} (WhatsApp)</a>` : esc(d.contact_wa)} · ${esc(d.contact_email)}</span>
             <span>Tanggal ${esc(p.event?.date || "—")} · link <code>/${esc(d.preferred_slug || "—")}/</code></span>
+          </div>
+          <div class="dr-link">
+            <b>Link pribadi pengirim</b>
+            ${priv ? `<div class="dr-link__row"><input class="p-input" type="text" readonly value="${esc(priv)}" aria-label="Link pribadi ${esc(code)}">
+              <button type="button" class="p-btn p-btn--tiny" data-draft-copy="${esc(priv)}">Salin link</button>
+              <button type="button" class="p-btn p-btn--tiny" data-draft-copy="${esc(code)}">Salin kode</button>
+              ${waMsg ? `<a class="p-btn p-btn--tiny" href="${esc(waMsg)}" target="_blank" rel="noopener">Kirim via WhatsApp</a>` : ""}</div>
+              <span class="p-hint">Untuk pengirim yang lupa. Link ini membuka (dan bisa mengubah) datanya — kirim hanya ke dia.</span>`
+              : `<span class="p-hint">Link tidak tersedia untuk draft ini.</span>`}
           </div>
           <details class="dr-det"><summary>Detail</summary><dl>
             <dt>Akad</dt><dd>${esc(p.event?.akad?.start || "—")} · ${esc(p.event?.akad?.venueName || "—")}</dd>
@@ -391,6 +404,13 @@ Sandi: ${loginPassword}`);
     const draft = currentDrafts.find((d) => d.id === row.dataset.draft);
     if (!draft) return;
     try {
+      if (button.hasAttribute("data-draft-copy")) {
+        const text = button.dataset.draftCopy;
+        try { await navigator.clipboard.writeText(text); }
+        catch (_) { const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+        api.toast("Tersalin ✓", false);
+        return;
+      }
       if (button.hasAttribute("data-draft-create")) {
         openClientModalFromDraft(draft);
       } else if (button.dataset.draftStatus) {

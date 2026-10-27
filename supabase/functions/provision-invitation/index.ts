@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
 
   if (action === "list_drafts") {
     const { data, error } = await admin.from("client_drafts")
-      .select("id,created_at,updated_at,status,contact_name,contact_wa,contact_email,preferred_slug,payload,note,invitation_id")
+      .select("id,created_at,updated_at,status,contact_name,contact_wa,contact_email,preferred_slug,payload,note,invitation_id,edit_token")
       .order("created_at", { ascending: false }).limit(200);
     if (error) return fail(error.message);
     return new Response(JSON.stringify({ drafts: data || [] }), { headers });

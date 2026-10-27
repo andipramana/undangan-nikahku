@@ -361,17 +361,56 @@
       <span>Data ini benar, dan aku setuju dengan syarat &amp; ketentuan WillCome.</span></span></label>`;
   }
 
+  /* Langkah yang boleh dilewati: isinya dilipat (tertutup) supaya yang tak mau mengisi
+     cukup menekan Lanjut. Terbuka otomatis bila sudah ada isinya (mis. mengubah draft)
+     atau bila ada isian yang perlu diperbaiki. */
+  const OPTIONAL = {
+    cerita: { title: "Mau menceritakan perjalanan kalian?", skip: "" },
+    kasih: { title: "Mau menambahkan rekening & alamat kado?", skip: "" },
+    tampilan: { title: "Mau memilih warna, foto, dan lagu?", skip: "Warna & lainnya bisa diatur nanti." }
+  };
+  const openOpt = new Set();
+  function hasData(id) {
+    if (id === "cerita") return state.stories.length > 0;
+    if (id === "kasih") return state.gifts.some((g) => t(g.bank) || t(g.number) || t(g.holder)) || !!(t(state.giftAddress.recipient) || t(state.giftAddress.phone) || t(state.giftAddress.detail));
+    if (id === "tampilan") return !!(state.presetId || t(state.photoLink) || t(state.livestream) || t(state.song) || t(state.notes));
+    return false;
+  }
+  function wrapOptional(id, inner) {
+    const o = OPTIONAL[id];
+    if (!o) return inner;
+    if (hasData(id)) openOpt.add(id);
+    const open = openOpt.has(id);
+    return `<div class="skip" role="note"><b>✨ Langkah ini boleh dilewati</b><span>Langsung tekan <em>Lanjut</em> kalau tidak mau mengisi. ${o.skip}</span></div>
+      <details class="opt" data-opt="${id}"${open ? " open" : ""}><summary><span>${o.title}</span><i aria-hidden="true">${open ? "Tutup" : "Ketuk untuk mengisi"}</i></summary>
+      <div class="optbody">${inner}</div></details>`;
+  }
+
   function render() {
     const s = STEPS[step];
     $("progress").innerHTML = STEPS.map((_, i) => `<li class="${i < step ? "on" : i === step ? "now" : ""}"></li>`).join("");
-    $("step").innerHTML = `<div class="stephead"><div class="e">${s.e}</div><div><h2>${s.t}</h2><p>Langkah ${step + 1} dari ${STEPS.length} · ${s.d}</p></div></div>${stepHtml(s.id)}`;
+    $("step").innerHTML = `<div class="stephead"><div class="e">${s.e}</div><div><h2>${s.t}</h2><p>Langkah ${step + 1} dari ${STEPS.length} · ${s.d}</p></div></div>${wrapOptional(s.id, stepHtml(s.id))}`;
     $("back").hidden = step === 0 && mode !== "edit";
     $("back").textContent = step === 0 && mode === "edit" ? "Batal" : "Kembali";
     $("next").textContent = step === STEPS.length - 1 ? (mode === "edit" ? "Simpan perubahan 💾" : "Kirim 🚀") : "Lanjut";
     $("next").disabled = submitting;
+    syncGlow();
     showError("");
     if (s.id === "tampilan" && !presets) loadPresets();
   }
+  /** Tombol Lanjut menonjol selama langkah opsional masih tertutup (jalan pintas yang disarankan). */
+  function syncGlow() {
+    const det = document.querySelector("details.opt");
+    const skipping = !!det && !det.open && step < STEPS.length - 1;
+    $("next").classList.toggle("glow", skipping);
+  }
+  document.addEventListener("toggle", (e) => {
+    const d = e.target;
+    if (!d.matches || !d.matches("details.opt")) return;
+    d.open ? openOpt.add(d.dataset.opt) : openOpt.delete(d.dataset.opt);
+    const hint = d.querySelector("summary i"); if (hint) hint.textContent = d.open ? "Tutup" : "Ketuk untuk mengisi";
+    syncGlow();
+  }, true);
   function showError(msg) { const el = $("error"); el.textContent = msg; el.hidden = !msg; }
   function markBad(errors) {
     document.querySelectorAll(".field.bad").forEach((el) => { el.classList.remove("bad"); const m = el.querySelector(".msg"); if (m) m.remove(); });
@@ -380,6 +419,8 @@
       const el = document.querySelector(`[data-p="${er.path}"]`);
       const box = el && el.closest(".field");
       if (!box) return;
+      const fold = el.closest("details.opt");
+      if (fold && !fold.open) fold.open = true;     // isian yang salah tidak boleh tersembunyi
       box.classList.add("bad");
       box.insertAdjacentHTML("beforeend", `<span class="msg">${esc(er.msg)}</span>`);
       first = first || el;

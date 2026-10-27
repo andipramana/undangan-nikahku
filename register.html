@@ -9,6 +9,10 @@
 /* Kartu satu client dalam daftar utama. */
 .cl-row { display: grid; gap: var(--p-2); padding: var(--p-3); border: 1px solid var(--p-hairline); border-radius: var(--p-r-md); background: var(--p-row); }
 .dr-meta { display: grid; gap: 2px; font-size: 13px; color: var(--p-ink-2); }
+.dr-link { display: grid; gap: 6px; background: var(--p-sunken, #f1f2f4); border-radius: 12px; padding: 10px 12px; }
+.dr-link > b { font-size: 13px; }
+.dr-link__row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.dr-link__row input { flex: 1 1 220px; min-width: 0; font-size: 12px; }
 .dr-det { font-size: 13px; color: var(--p-ink-2); }
 .dr-det summary { cursor: pointer; font-weight: 600; color: var(--p-ink); }
 .dr-det dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 8px 0 0; }
