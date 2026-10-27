@@ -26,6 +26,73 @@
   font-display: swap;
   src: url("../../assets/fonts/poppins/poppins-500.woff2") format("woff2");
 }
+/* Dilengkapi: self-host awal hanya membawa EB Garamond 400 dan Poppins 400/500, padahal
+   URL Google Fonts lama juga memuat Italianno (tulisan "the" di Save The Date),
+   Alegreya Sans (label), Cormorant Garamond (kartu acara), dan bobot tebal Poppins/
+   EB Garamond. Tanpa itu "the" jatuh ke font cursive sistem dan teks tebal jadi faux-bold. */
+@font-face {
+  font-family: 'Italianno';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/italianno/italianno-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/alegreya-sans/alegreya-sans-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../../assets/fonts/alegreya-sans/alegreya-sans-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Alegreya Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../../assets/fonts/alegreya-sans/alegreya-sans-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/cormorant-garamond/cormorant-garamond-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../../assets/fonts/eb-garamond/eb-garamond-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'EB Garamond';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../../assets/fonts/eb-garamond/eb-garamond-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../../assets/fonts/poppins/poppins-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../../assets/fonts/poppins/poppins-700.woff2") format("woff2");
+}
 :root {
   --color-bg: #f4eee3;
   --color-dark: #14120f;
