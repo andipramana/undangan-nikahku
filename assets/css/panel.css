@@ -632,7 +632,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--p-accent); }
    ------------------------------------------------------------------------- */
 .p-savebar {
   position: fixed; z-index: 30;
-  left: 50%; bottom: calc(14px + env(safe-area-inset-bottom));
+  left: 50%; bottom: calc(14px + env(safe-area-inset-bottom) + var(--p-kb, 0px));
   transform: translateX(-50%);
   display: flex; align-items: center; gap: var(--p-3);
   padding: 8px 8px 8px 18px;

@@ -370,6 +370,27 @@
     dirtySave = onSave || null;
     const bar = $("p-savebar");
     if (bar) bar.hidden = !isDirty;
+    if (isDirty) liftSaveBar();
+  }
+
+  /** Bar Simpan menempel di bawah layar, dan bar itu baru muncul begitu
+   * pengguna mengetik — artinya tepat saat keyboard HP terbuka. Keyboard
+   * menutupi elemen fixed-bottom (layout viewport tidak ikut mengecil di
+   * sebagian browser), jadi di HP tombol Simpan tak pernah terlihat padahal di
+   * desktop muncul. visualViewport memberi tinggi area yang benar-benar
+   * terlihat; selisihnya dipakai sebagai --p-kb (lihat .p-savebar di CSS).
+   * Browser yang sudah mengecilkan layout viewport (interactive-widget=
+   * resizes-content di <meta viewport>) menghasilkan selisih 0, tidak ganda. */
+  function liftSaveBar() {
+    const bar = $("p-savebar");
+    const vv = window.visualViewport;
+    if (!bar || !vv) return;
+    const hidden = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    bar.style.setProperty("--p-kb", hidden + "px");
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", liftSaveBar);
+    window.visualViewport.addEventListener("scroll", liftSaveBar);
   }
   function clearDirty() { setDirty(false, null); }
 
@@ -420,6 +441,7 @@
     if (menu) menu.open = false;
     closeSidebar(); // di HP: tutup drawer setelah memilih tujuan
     renderStage(def, key);
+    setDocTitle(def);
     updateActiveNav(key);
     const outlet = $("p-outlet-inner");
     outlet.innerHTML = "";
@@ -430,7 +452,29 @@
       console.error(err);
       outlet.innerHTML = `<div class="p-warning p-warning--danger">Gagal memuat halaman: ${window.PanelUI.esc(err.message || err)}</div>`;
     }
+    // Data undangan baru pasti ada setelah mount() — perbarui dengan nama
+    // pasangan yang sebenarnya (sebelumnya nama diturunkan dari slug).
+    if (currentKey === key) setDocTitle(def);
     refreshPublishStatus();
+  }
+
+  /** Judul tab per menu: "Cerita — Julia & Kevin · Admin". Dulu <title>
+   * di-hardcode "Admin — Mita & Andi" untuk SEMUA tenant dan semua menu, jadi
+   * admin client lain melihat nama pasangan orang lain dan tab-tab yang
+   * dibuka berdampingan tak bisa dibedakan. Nama dari nama panggilan mempelai
+   * kalau sudah diisi client; kalau masih bawaan provisioning ("Mempelai
+   * Wanita/Pria") atau kosong, jatuh ke nama turunan slug. */
+  function setDocTitle(def) {
+    const api = window.AdminAPI;
+    let name = (api && api.tenantName && api.tenantName()) || "";
+    try {
+      const pick = (side) => String(window.PanelStore.get(`couple.${side}.nickname`, "") || window.PanelStore.get(`couple.${side}.name`, "") || "").trim();
+      const bride = pick("bride");
+      const groom = pick("groom");
+      const placeholder = /^Mempelai (Wanita|Pria)$/i;
+      if (bride && groom && !placeholder.test(bride) && !placeholder.test(groom)) name = `${bride} & ${groom}`;
+    } catch (_) { /* store belum siap — pakai nama dari slug */ }
+    document.title = [def.title, name].filter(Boolean).join(" — ") + " · Admin";
   }
 
   /** Sabuk pengaman untuk bug <base href="/"> di atas: kalau href tetap saja

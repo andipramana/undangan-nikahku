@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-title-base="Admin">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
 <base href="/">
 <!-- noindex: halaman ini bukan untuk dicari mesin — yang menjaganya adalah
      Supabase Auth + RLS, bukan "bersembunyi", tapi tidak ada alasan untuk
      menampilkannya di hasil pencarian. -->
 <meta name="robots" content="noindex">
-<title>Admin — Mita &amp; Andi</title>
+<title>Admin — Nikahku</title>
 <link rel="icon" href="assets/img/favicon.png" type="image/png">
 <!-- Tipografi panel: Geist (UI) + Geist Mono (kicker/label/angka). Fallback
      sistem sudah lengkap di panel.css kalau Google Fonts tak terjangkau. -->
@@ -27,7 +27,7 @@
       <span class="p-brand__text"><span class="p-brand__name">Nikahku</span><span class="p-brand__sub">Panel Admin</span></span>
     </div>
     <h1>Masuk ke panel.</h1>
-    <p class="p-hint">Mita &amp; Andi — The Wedding</p>
+    <p class="p-hint" data-tenant-label="wedding">The Wedding</p>
     <label>
       Email admin
       <input class="p-input" type="email" id="login-username" autocomplete="username" required>
