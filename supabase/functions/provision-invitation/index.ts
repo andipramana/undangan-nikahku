@@ -31,6 +31,109 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch { return fail("Payload tidak valid"); }
   const action = clean(body.action || "create");
 
+  /* ── Draft dari halaman publik /catin ────────────────────────────────────
+     Calon pengantin mengisi form tanpa login; hasilnya baris client_drafts
+     (migration 0029). Di sini root owner melihatnya, dan `create` dengan
+     draftId menerapkan isinya ke client baru supaya tidak diketik ulang.
+     Isi draft adalah INPUT PUBLIK yang tidak tepercaya: setiap nilai dipotong,
+     dicek bentuknya, dan hanya ditulis ke key yang memang dikenal. */
+  const DRAFT_STATUS = ["baru", "diproses", "dibuat", "ditolak"];
+  const MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+  const DAYS = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const str = (v: unknown, n: number) => String(v ?? "").trim().slice(0, n);
+  const dotTime = (v: unknown) => { const m = /^(\d{1,2}):(\d{2})/.exec(String(v ?? "").trim()); return m ? `${m[1].padStart(2, "0")}.${m[2]}` : ""; };
+
+  const applyDraft = async (invitationId: string, draft: { id: string; payload: any }) => {
+    const p = (draft.payload && typeof draft.payload === "object") ? draft.payload : {};
+    const { data: row, error: readError } = await admin.from("site_content").select("content").eq("invitation_id", invitationId).eq("id", 1).single();
+    if (readError || !row) throw new Error("Konten client belum siap untuk diisi dari draft");
+    const content = structuredClone(row.content) as Record<string, any>;
+
+    const person = (src: any, base: any) => ({
+      ...(base || {}),
+      name: str(src?.name, 80) || base?.name || "", nickname: str(src?.nickname, 30) || base?.nickname || "",
+      father: str(src?.father, 80), mother: str(src?.mother, 80),
+      childOrder: str(src?.childOrder, 20), instagram: str(src?.instagram, 40).replace(/^@+/, "")
+    });
+    content.couple = { ...(content.couple || {}), groom: person(p.couple?.groom, content.couple?.groom), bride: person(p.couple?.bride, content.couple?.bride) };
+    const bride = content.couple.bride, groom = content.couple.groom;
+    content.siteTitle = `${bride.nickname || bride.name} & ${groom.nickname || groom.name} — The Wedding`;
+
+    // Acara: label tanggal dihitung di sini dari tanggal ISO, bukan dipercaya dari klien.
+    const ev = p.event || {};
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ev.date ?? ""));
+    if (m) {
+      const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+      const probe = new Date(Date.UTC(y, mo - 1, d));
+      if (mo >= 1 && mo <= 12 && probe.getUTCMonth() === mo - 1 && probe.getUTCDate() === d) {
+        const akadStart = dotTime(ev.akad?.start);
+        const venue = (v: any) => ({ name: str(v?.venueName, 120), address: str(v?.address, 300), mapsUrl: str(v?.mapsUrl, 300) });
+        const akadV = venue(ev.akad);
+        const resV = ev.resepsi?.sameVenue ? akadV : venue(ev.resepsi);
+        content.event = {
+          ...(content.event || {}),
+          dateISO: String(ev.date), dateLabel: `${String(d).padStart(2, "0")} ${MONTHS[mo - 1]} ${y}`, dayLabel: DAYS[probe.getUTCDay()],
+          countdownTarget: akadStart ? `${String(ev.date)}T${akadStart.replace(".", ":")}:00+07:00` : "",
+          akad: { label: "Akad Nikah", start: akadStart, end: dotTime(ev.akad?.end), venue: akadV },
+          resepsi: { label: "Resepsi", start: dotTime(ev.resepsi?.start), end: dotTime(ev.resepsi?.end), venue: resV }
+        };
+      }
+    }
+
+    if (Array.isArray(p.loveStory)) {
+      content.loveStory = p.loveStory.slice(0, 4).map((x: any) => ({ date: str(x?.date, 40), title: str(x?.title, 80), text: str(x?.text, 400) })).filter((x: any) => x.title);
+    }
+    const accounts = Array.isArray(p.gift?.accounts) ? p.gift.accounts.slice(0, 4)
+      .map((a: any) => ({ bank: str(a?.bank, 40), number: str(a?.number, 40), holder: str(a?.holder, 80), owner: a?.owner === "cpw" ? "cpw" : "cpp" }))
+      .filter((a: any) => a.bank && a.number && a.holder) : [];
+    content.gift = { ...(content.gift || {}), accounts,
+      address: { recipient: str(p.gift?.address?.recipient, 80), phone: str(p.gift?.address?.phone, 30), detail: str(p.gift?.address?.detail, 300) } };
+    content.livestream = { ...(content.livestream || {}), youtube: str(p.livestream?.youtube, 200) };
+
+    // Warna pilihan: peta key→hex dari preset template. Hanya key sederhana & hex 6 digit yang diterima.
+    const colors: Record<string, string> = {};
+    for (const [k, v] of Object.entries((p.theme?.colors && typeof p.theme.colors === "object") ? p.theme.colors : {}).slice(0, 20)) {
+      if (/^[a-zA-Z0-9_]{1,32}$/.test(k) && /^#[0-9a-fA-F]{6}$/.test(String(v))) colors[k] = String(v);
+    }
+    if (Object.keys(colors).length) {
+      const tid = str(content.templateId, 40) || "klasik";
+      content.templates = (content.templates && typeof content.templates === "object") ? content.templates : {};
+      const block = content.templates[tid] || {};
+      content.templates[tid] = { ...block, theme: { ...(block.theme || {}), colors: { ...(block.theme?.colors || {}), ...colors } } };
+    }
+
+    const { error: writeError } = await admin.from("site_content").update({ content, updated_at: new Date().toISOString() }).eq("invitation_id", invitationId).eq("id", 1);
+    if (writeError) throw new Error(writeError.message);
+    const { error: markError } = await admin.from("client_drafts").update({ status: "dibuat", invitation_id: invitationId }).eq("id", draft.id);
+    if (markError) throw new Error(markError.message);
+  };
+
+  if (action === "list_drafts") {
+    const { data, error } = await admin.from("client_drafts")
+      .select("id,created_at,updated_at,status,contact_name,contact_wa,contact_email,preferred_slug,payload,note,invitation_id")
+      .order("created_at", { ascending: false }).limit(200);
+    if (error) return fail(error.message);
+    return new Response(JSON.stringify({ drafts: data || [] }), { headers });
+  }
+  if (action === "update_draft") {
+    const id = clean(body.draftId), status = clean(body.status);
+    if (!id) return fail("Draft tidak valid");
+    const patch: Record<string, unknown> = {};
+    if (status) { if (!DRAFT_STATUS.includes(status)) return fail("Status tidak dikenal"); patch.status = status; }
+    if (body.note !== undefined) patch.note = str(body.note, 500);
+    if (!Object.keys(patch).length) return fail("Tidak ada yang diubah");
+    const { error } = await admin.from("client_drafts").update(patch).eq("id", id);
+    if (error) return fail(error.message);
+    return new Response(JSON.stringify({ ok: true }), { headers });
+  }
+  if (action === "delete_draft") {
+    const id = clean(body.draftId);
+    if (!id) return fail("Draft tidak valid");
+    const { error } = await admin.from("client_drafts").delete().eq("id", id);
+    if (error) return fail(error.message);
+    return new Response(JSON.stringify({ deleted: true }), { headers });
+  }
+
   if (action === "list") {
     const { data: invitations, error } = await admin.from("invitations").select("id,slug,display_name,is_active,created_at").neq("slug", "root").order("created_at", { ascending: false });
     if (error) return fail(error.message);
@@ -222,7 +325,7 @@ Deno.serve(async (req) => {
   // sungguhan (dua tab admin, dsb.) tetap aman lewat itu.
   if (action === "check_slug") {
     const slug = clean(body.slug).toLowerCase();
-    if (slug === "root" || slug === "demo" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    if (slug === "root" || slug === "demo" || slug === "catin" || slug === "home" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
       return new Response(JSON.stringify({ available: false, reason: "invalid" }), { headers });
     }
     const { data } = await admin.from("invitations").select("id").eq("slug", slug).maybeSingle();
@@ -231,7 +334,7 @@ Deno.serve(async (req) => {
 
   if (action !== "create") return fail("Aksi tidak dikenal");
   const slug = clean(body.slug).toLowerCase();
-  if (slug === "root" || slug === "demo") return fail("Slug ini dicadangkan untuk template sistem");
+  if (slug === "root" || slug === "demo" || slug === "catin" || slug === "home") return fail("Slug ini dicadangkan untuk halaman sistem");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return fail("Slug hanya huruf kecil, angka, dan tanda hubung");
   for (const field of ["adminEmail", "adminPassword"]) if (!clean(body[field])) return fail(`Field ${field} wajib diisi`);
   // Satu orang boleh memegang undangan sekaligus QR check-in. Auth Supabase
@@ -244,6 +347,15 @@ Deno.serve(async (req) => {
   const separateQr = qrEmail !== "" && qrEmail.toLowerCase() !== adminEmail.toLowerCase();
   if (separateQr && !clean(body.qrPassword)) return fail("Field qrPassword wajib diisi");
   const templateId = clean(body.templateId) || "klasik";
+  // Draft dari /catin (opsional): dipastikan ada & belum dipakai SEBELUM apa pun dibuat.
+  const draftId = clean(body.draftId);
+  let draft: { id: string; payload: any } | null = null;
+  if (draftId) {
+    const { data: d } = await admin.from("client_drafts").select("id,status,payload").eq("id", draftId).maybeSingle();
+    if (!d) return fail("Draft tidak ditemukan", 404);
+    if (d.status === "dibuat") return fail("Draft ini sudah dipakai membuat client");
+    draft = { id: d.id, payload: d.payload };
+  }
   if (!/^[a-z0-9-]+$/.test(templateId)) return fail("Template tidak valid");
   const { data: created, error: invitationError } = await admin.from("invitations").insert({ slug, display_name: clean(body.displayName || slug) }).select("id,slug").single();
   if (invitationError) return fail(invitationError.code === "23505" ? "Slug sudah dipakai" : invitationError.message);
@@ -261,6 +373,7 @@ Deno.serve(async (req) => {
     await createAccount(adminEmail, String(body.adminPassword), "admin");
     if (separateQr) await createAccount(qrEmail, String(body.qrPassword), "admin_qr");
     await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
+    if (draft) await applyDraft(invitationId, draft);
     const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://willcome.my.id/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
   return new Response(JSON.stringify({ invitation: created, urls: { invitation: `/${slug}/`, admin: `/${slug}/admin/`, adminQr: `/${slug}/admin-qr/` } }), { headers });

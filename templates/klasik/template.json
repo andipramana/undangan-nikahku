@@ -170,6 +170,13 @@
             "card": "Mempelai wanita"
           },
           {
+            "path": "couple.bride.childOrder",
+            "type": "text",
+            "label": "Anak ke- (mis. pertama, kedua, bungsu)",
+            "card": "Mempelai wanita",
+            "placeholder": "pertama"
+          },
+          {
             "path": "couple.groom.name",
             "type": "text",
             "label": "Nama lengkap",
@@ -199,6 +206,13 @@
             "type": "text",
             "label": "Nama ibu",
             "card": "Mempelai pria"
+          },
+          {
+            "path": "couple.groom.childOrder",
+            "type": "text",
+            "label": "Anak ke- (mis. pertama, kedua, bungsu)",
+            "card": "Mempelai pria",
+            "placeholder": "pertama"
           }
         ],
         "photos": [

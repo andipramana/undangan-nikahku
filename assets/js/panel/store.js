@@ -63,6 +63,12 @@
       if (typeof g.label !== "string") g.label = "";
       if (typeof g.closing !== "string") g.closing = "";
     });
+    // Urutan anak: data lama tak punya field-nya dan klasik menampilkan "ketiga"/"pertama" (tulisan
+    // lama). Ditanam eksplisit supaya menyimpan bab Mempelai tidak diam-diam mengubah tampilannya.
+    if (isPlainObject(c.couple)) {
+      if (isPlainObject(c.couple.bride) && c.couple.bride.childOrder === undefined) c.couple.bride.childOrder = "ketiga";
+      if (isPlainObject(c.couple.groom) && c.couple.groom.childOrder === undefined) c.couple.groom.childOrder = "pertama";
+    }
     if (!isPlainObject(c.event)) c.event = {};
     ["akad", "resepsi"].forEach((key) => {
       if (!isPlainObject(c.event[key])) c.event[key] = {};

@@ -4,7 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const dist = path.join(root, "dist");
 const rootFiles = ["index.html", "admin.html", "admin-qr.html", "wa.html", "register.html", "404.html", "sw.js", "CNAME"];
-const routedFiles = ["home/index.html", "demo/index.html"];
+const routedFiles = ["home/index.html", "demo/index.html", "catin/index.html"];
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
@@ -33,6 +33,9 @@ const required = [
   ...routedFiles,
   ".nojekyll",
   "assets/img/favicon.png",
+  "assets/css/catin.css",
+  "assets/js/catin.js",
+  "assets/fonts/catin",
   "assets/icons/icon-192.png",
   "assets/icons/icon-512.png",
   "assets/icons/icon-maskable-512.png",

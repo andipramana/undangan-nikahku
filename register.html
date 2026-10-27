@@ -8,6 +8,11 @@
 .rd-advanced { margin-top: var(--p-4); }
 /* Kartu satu client dalam daftar utama. */
 .cl-row { display: grid; gap: var(--p-2); padding: var(--p-3); border: 1px solid var(--p-hairline); border-radius: var(--p-r-md); background: var(--p-row); }
+.dr-meta { display: grid; gap: 2px; font-size: 13px; color: var(--p-ink-2); }
+.dr-det { font-size: 13px; color: var(--p-ink-2); }
+.dr-det summary { cursor: pointer; font-weight: 600; color: var(--p-ink); }
+.dr-det dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 8px 0 0; }
+.dr-det dt { font-weight: 600; } .dr-det dd { margin: 0; word-break: break-word; }
 .cl-top { display: flex; align-items: center; justify-content: space-between; gap: var(--p-2); min-width: 0; }
 .cl-name { font-weight: 650; letter-spacing: -.01em; min-width: 0; overflow-wrap: anywhere; }
 .cl-meta { font-size: 12px; color: var(--p-ink-2); overflow-wrap: anywhere; }
@@ -70,6 +75,18 @@ form.p-modal__panel { display: grid; gap: var(--p-3); }
       <button type="button" id="btn-logout" class="p-btn p-btn--ghost">Keluar</button>
     </div>
   </header>
+
+  <!-- DRAFT MASUK — data dari halaman publik /catin -->
+  <section class="p-card" aria-label="Draft masuk">
+    <div class="rd-toolbar">
+      <div>
+        <h2 class="p-card__title">Draft masuk <span class="p-badge p-badge--accent" id="drafts-count" hidden></span></h2>
+        <p class="p-hint">Data yang dikirim calon pengantin lewat <code>/catin</code>. Tekan “Buat client” untuk membuat undangan langsung dari draft — tidak perlu mengetik ulang.</p>
+      </div>
+      <button type="button" id="drafts-refresh" class="p-btn p-btn--ghost p-btn--tiny">Muat ulang</button>
+    </div>
+    <div id="drafts-list"></div>
+  </section>
 
   <!-- DAFTAR CLIENT — tampilan utama dashboard -->
   <section class="p-card" aria-label="Daftar client">

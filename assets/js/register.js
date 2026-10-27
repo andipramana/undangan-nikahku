@@ -254,8 +254,11 @@
     const submit = $("submit");
     submit.disabled = true;
     try {
+      const fromDraft = pendingDraftId;
+      const loginPassword = $("admin-password").value;
+      const loginEmail = get("admin-email");
       await invoke({
-        action: "create", slug, displayName,
+        action: "create", slug, displayName, draftId: fromDraft || undefined,
         templateId: $("template-id").value,
         brideName: get("bride-name"), groomName: get("groom-name"),
         adminEmail: get("admin-email"), adminPassword: $("admin-password").value,
@@ -263,16 +266,149 @@
       });
       closeClientModal();
       form.reset();
+      resetDraftMode();
       updateTemplateHint();
       $("slug-hint").textContent = "";
       api.toast(`Client "${displayName}" berhasil dibuat.`, false);
       await loadClients();
+      if (fromDraft) {
+        await loadDrafts();
+        // Info login untuk dikirim ke client — sandi hanya terlihat sekarang (tidak disimpan di mana pun).
+        window.prompt("Salin info login ini untuk client (sandi tidak bisa dilihat lagi):",
+          `Undangan: https://willcome.my.id/${slug}/
+Panel admin: https://willcome.my.id/${slug}/admin/
+Email: ${loginEmail}
+Sandi: ${loginPassword}`);
+      }
     } catch (err) {
       api.toast(err.message || "Gagal membuat undangan.", true);
     } finally {
       submit.disabled = false;
     }
   });
+
+  /* ---------- Draft masuk (dari /catin) ---------- */
+  const draftsList = $("drafts-list");
+  let currentDrafts = [];
+  let pendingDraftId = null;       // draft yang sedang dijadikan client lewat modal
+
+  const STATUS = { baru: ["Baru", "accent"], diproses: ["Diproses", "warn"], dibuat: ["Sudah jadi client", "ok"], ditolak: ["Ditolak", "danger"] };
+  const waLink = (raw) => {
+    const d = String(raw || "").replace(/[^0-9]/g, "");
+    if (!d) return "";
+    return "https://wa.me/" + (d.startsWith("62") ? d : d.startsWith("0") ? "62" + d.slice(1) : d);
+  };
+  const randomPassword = () => {
+    const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const buf = new Uint32Array(12);
+    crypto.getRandomValues(buf);
+    return Array.from(buf, (n) => chars[n % chars.length]).join("");
+  };
+  const when = (iso) => new Date(iso).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+
+  async function loadDrafts() {
+    draftsList.innerHTML = "<p class='p-muted'>Memuat draft…</p>";
+    try {
+      const { drafts } = await invoke({ action: "list_drafts" });
+      currentDrafts = drafts || [];
+      const fresh = currentDrafts.filter((d) => d.status === "baru").length;
+      const badge = $("drafts-count");
+      badge.hidden = !fresh;
+      badge.textContent = fresh + " baru";
+      if (!currentDrafts.length) {
+        draftsList.innerHTML = "<p class='p-empty'>Belum ada draft. Bagikan link <code>willcome.my.id/catin</code> ke calon pengantin.</p>";
+        return;
+      }
+      draftsList.innerHTML = currentDrafts.map((d) => {
+        const p = d.payload || {};
+        const bride = p.couple?.bride?.nickname || p.couple?.bride?.name || "—";
+        const groom = p.couple?.groom?.nickname || p.couple?.groom?.name || "—";
+        const [label, tone] = STATUS[d.status] || [d.status, "info"];
+        const wa = waLink(d.contact_wa);
+        const edited = d.updated_at && new Date(d.updated_at) - new Date(d.created_at) > 5000;   // diubah pengirim setelah dikirim
+        const e = p.extras || {};
+        const link = (u) => (/^https?:\/\//i.test(u || "") ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u || "—"));
+        return `<article class="cl-row" data-draft="${esc(d.id)}">
+          <div class="cl-top"><span class="cl-name">${esc(bride)} &amp; ${esc(groom)}</span><span>${edited ? `<span class="p-badge p-badge--info" title="Calon pengantin mengubah datanya setelah mengirim">Diubah ${esc(when(d.updated_at))}</span> ` : ""}<span class="p-badge p-badge--${tone}">${esc(label)}</span></span></div>
+          <div class="dr-meta">
+            <span>Dikirim ${esc(when(d.created_at))} · kode ${esc(String(d.id).replace(/-/g, "").slice(0, 8).toUpperCase())}</span>
+            <span>${esc(d.contact_name)} · ${wa ? `<a href="${esc(wa)}" target="_blank" rel="noopener">${esc(d.contact_wa)} (WhatsApp)</a>` : esc(d.contact_wa)} · ${esc(d.contact_email)}</span>
+            <span>Tanggal ${esc(p.event?.date || "—")} · link <code>/${esc(d.preferred_slug || "—")}/</code></span>
+          </div>
+          <details class="dr-det"><summary>Detail</summary><dl>
+            <dt>Akad</dt><dd>${esc(p.event?.akad?.start || "—")} · ${esc(p.event?.akad?.venueName || "—")}</dd>
+            <dt>Resepsi</dt><dd>${esc(p.event?.resepsi?.start || "—")} · ${esc(p.event?.resepsi?.venueName || "—")}</dd>
+            <dt>Warna</dt><dd>${esc(p.theme?.label || "—")}</dd>
+            <dt>Foto</dt><dd>${link(e.photoLink)}</dd>
+            <dt>Lagu</dt><dd>${esc(e.song || "—")}</dd>
+            <dt>Catatan</dt><dd>${esc(e.notes || "—")}</dd>
+          </dl></details>
+          <div class="cl-actions">
+            ${d.status !== "dibuat" ? `<button type="button" class="p-btn p-btn--tiny p-btn--primary" data-draft-create>Buat client</button>` : ""}
+            ${d.status === "baru" ? `<button type="button" class="p-btn p-btn--tiny" data-draft-status="diproses">Tandai diproses</button>` : ""}
+            ${d.status !== "dibuat" && d.status !== "ditolak" ? `<button type="button" class="p-btn p-btn--tiny" data-draft-status="ditolak">Tolak</button>` : ""}
+            <button type="button" class="p-btn p-btn--tiny p-btn--danger" data-draft-delete>Hapus</button>
+          </div>
+        </article>`;
+      }).join("");
+    } catch (err) {
+      draftsList.innerHTML = `<p class='p-empty'>Gagal memuat draft: ${esc(err.message || err)}</p>`;
+    }
+  }
+
+  /** Isi modal "Buat client" dari sebuah draft. Password dibuat acak & ditampilkan
+   * (bukan titik-titik) supaya bisa dicatat sebelum disimpan. */
+  function openClientModalFromDraft(draft) {
+    const p = draft.payload || {};
+    const nick = (x) => x?.nickname || x?.name || "";
+    pendingDraftId = draft.id;
+    $("client-modal-title").textContent = "Buat client dari draft";
+    $("slug").value = draft.preferred_slug || "";
+    $("display-name").value = `${nick(p.couple?.bride)} & ${nick(p.couple?.groom)}`.trim();
+    $("bride-name").value = p.couple?.bride?.name || "";
+    $("groom-name").value = p.couple?.groom?.name || "";
+    $("admin-email").value = draft.contact_email || "";
+    $("admin-password").type = "text";
+    $("admin-password").value = randomPassword();
+    $("qr-email").value = ""; $("qr-password").value = "";
+    clientModal.hidden = false;
+    $("slug").dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  function resetDraftMode() {
+    pendingDraftId = null;
+    $("client-modal-title").textContent = "Buat client baru";
+    $("admin-password").type = "password";
+  }
+  // Menutup modal (tombol ×, klik di luar, atau selesai) selalu mengembalikan mode normal.
+  $("client-modal-close").addEventListener("click", resetDraftMode);
+  clientModal.addEventListener("click", (e) => { if (e.target === clientModal) resetDraftMode(); });
+  $("client-new-open").addEventListener("click", resetDraftMode);
+
+  draftsList.addEventListener("click", async (event) => {
+    const button = event.target.closest("button");
+    const row = event.target.closest("[data-draft]");
+    if (!button || !row) return;
+    const draft = currentDrafts.find((d) => d.id === row.dataset.draft);
+    if (!draft) return;
+    try {
+      if (button.hasAttribute("data-draft-create")) {
+        openClientModalFromDraft(draft);
+      } else if (button.dataset.draftStatus) {
+        button.disabled = true;
+        await invoke({ action: "update_draft", draftId: draft.id, status: button.dataset.draftStatus });
+        await loadDrafts();
+      } else if (button.hasAttribute("data-draft-delete")) {
+        if (!confirm("Hapus draft ini permanen? Client yang sudah dibuat darinya tidak ikut terhapus.")) return;
+        button.disabled = true;
+        await invoke({ action: "delete_draft", draftId: draft.id });
+        await loadDrafts();
+      }
+    } catch (err) {
+      api.toast(err.message || "Aksi gagal.", true);
+      button.disabled = false;
+    }
+  });
+  $("drafts-refresh").addEventListener("click", loadDrafts);
 
   /* ---------- Tools lanjutan ---------- */
   $("capture-default").addEventListener("click", async () => {
@@ -303,6 +439,6 @@
   /* ---------- Gerbang login (core.js) ---------- */
   window.AdminShared.initAdminAuth({
     allowedRoles: ["root_owner"],
-    onSignedIn: loadClients
+    onSignedIn: () => { loadClients(); loadDrafts(); }
   });
 })();

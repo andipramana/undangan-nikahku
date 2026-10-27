@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<base href="/">
+<title>Kirim Data Undangan — WillCome</title>
+<meta name="description" content="Isi data pernikahanmu sekali saja. Kami buatkan undangan digitalnya.">
+<!-- Form publik: bukan untuk dicari mesin pencari. Yang menjaga datanya adalah
+     validasi + batas laju di database (RPC submit_client_draft), bukan "bersembunyi". -->
+<meta name="robots" content="noindex">
+<!-- Link pribadi (?edit=…) memuat kode rahasia: jangan bocor lewat header Referer. -->
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#ffe9a8">
+<link rel="icon" href="assets/icons/inv-192.png" type="image/png">
+<link rel="preload" href="assets/fonts/catin/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/catin/nunito.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/catin.css">
+</head>
+<body>
+<div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<main class="wrap">
+  <header class="hero" id="hero">
+    <div class="rings" aria-hidden="true"><i></i><i></i></div>
+    <p class="brand">WillCome Digital Invitation</p>
+    <h1>Isi datamu,<br>kami yang urus!</h1>
+    <p class="sub">Cukup sekali. Nanti kami buatkan undangan digitalnya dari data ini.</p>
+    <a class="pdf" href="assets/docs/Undangan-Digital-WillCome.pdf" download>📄 Unduh brosur (PDF)</a>
+  </header>
+
+  <div class="again" id="again" hidden>
+    <span>Kamu sudah pernah mengirim data.</span>
+    <button type="button" class="btn small" id="againOpen">Lihat &amp; ubah datamu</button>
+  </div>
+
+  <section class="card" id="app" aria-live="polite">
+    <ol class="progress" id="progress" aria-label="Langkah"></ol>
+    <form id="form" novalidate autocomplete="on">
+      <div id="step"></div>
+      <!-- Kolom jebakan untuk bot: manusia tidak melihatnya. -->
+      <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" id="hp" tabindex="-1" autocomplete="off"></label></div>
+    </form>
+    <p class="error" id="error" role="alert" hidden></p>
+    <div class="nav" id="nav">
+      <button type="button" class="btn ghost" id="back">Kembali</button>
+      <button type="button" class="btn" id="next">Lanjut</button>
+    </div>
+  </section>
+
+  <section class="card done" id="done" hidden>
+    <div class="party" aria-hidden="true">🎉</div>
+    <h2>Terima kasih!</h2>
+    <p>Datamu sudah kami terima. Kami akan menghubungimu lewat WhatsApp.</p>
+    <p class="code">Kode kamu <b id="code">—</b></p>
+    <div class="linkbox">
+      <b>Link pribadimu</b>
+      <p class="small">Pakai link ini untuk melihat atau mengubah datamu. Simpan, dan jangan dibagikan ke orang lain.</p>
+      <div class="row"><input type="text" id="privLink" readonly aria-label="Link pribadi"><button type="button" class="btn small" id="copyLink">Salin</button></div>
+    </div>
+    <button type="button" class="btn ghost" id="doneView" style="margin-top:12px">Lihat data yang kukirim</button>
+    <a class="pdf" href="assets/docs/Undangan-Digital-WillCome.pdf" download>📄 Sambil menunggu, baca brosurnya</a>
+  </section>
+
+  <section class="card view" id="view" hidden>
+    <div id="viewHead"></div>
+    <div id="viewBody"></div>
+    <div class="nav" id="viewNav">
+      <button type="button" class="btn ghost" id="viewNew">Kirim data baru</button>
+      <button type="button" class="btn" id="viewEdit">Ubah data</button>
+    </div>
+    <p class="small" id="viewNote" style="margin-top:10px"></p>
+  </section>
+
+  <p class="foot">WillCome Digital Invitation</p>
+</main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/catin.js"></script>
+</body>
+</html>

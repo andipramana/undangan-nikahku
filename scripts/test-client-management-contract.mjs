@@ -18,7 +18,8 @@ const checks = [
   // harus memakai fallback slug "root" bawaan core.js.
   ['tanpa tenant.js (slug root dari fallback core.js)', !html.includes('assets/js/tenant.js')],
   ['hanya role root_owner yang lolos gerbang', /allowedRoles:\s*\[\s*"root_owner"\s*\]/.test(js)],
-  ['daftar client dimuat tepat setelah login', /onSignedIn:\s*loadClients/.test(js)],
+  // Daftar client dimuat begitu login selesai (dan draft /catin dimuat berdampingan).
+  ['daftar client dimuat tepat setelah login', /onSignedIn:\s*(loadClients|\(\)\s*=>\s*\{[^}]*loadClients\(\))/.test(js)],
   ['komponen login terang dari panel.css', css.includes('.p-login-card') && css.includes('.p-login-error')],
 
   // ---- Daftar client = tampilan utama; create = alur sekunder ----

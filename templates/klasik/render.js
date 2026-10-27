@@ -68,12 +68,20 @@
     // "Putri ketiga dari" satu baris, "Bapak X & Ibu Y" baris berikutnya
     // (bukan tidak kepanjangan satu baris) — <br> perlu innerHTML, nama ortu
     // di-escape (esc()) karena field ini bisa diedit admin.
+    // Urutan anak ("ketiga", "pertama", "bungsu", …) dulu ditulis mati di sini, jadi
+    // SEMUA client tertulis "putri ketiga / putra pertama". Kini diisi lewat
+    // couple.*.childOrder. Data lama yang belum punya field-nya (undefined) tetap
+    // memakai tulisan lama supaya undangan yang sudah tayang tidak berubah; "" = tanpa urutan.
+    const childLine = (who, person, legacy) => {
+      const ord = person.childOrder === undefined ? legacy : String(person.childOrder || "").trim();
+      return `${who}${ord ? " " + esc(ord) : ""} dari`;
+    };
     document.getElementById("bride-parents").innerHTML =
-      `Putri ketiga dari<br>Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
+      `${childLine("Putri", cfg.couple.bride, "ketiga")}<br>Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
 
     document.getElementById("groom-name").textContent = cfg.couple.groom.name;
     document.getElementById("groom-parents").innerHTML =
-      `Putra pertama dari<br>Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
+      `${childLine("Putra", cfg.couple.groom, "pertama")}<br>Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
 
     // Baris Instagram mempelai — tampil hanya kalau handle diisi di
     // config/Supabase (couple.*.instagram); kalau kosong, elemen disembunyikan.

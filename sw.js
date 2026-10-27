@@ -35,7 +35,7 @@ function adminShellFor(pathname) {
 }
 
 // Folder/berkas nyata di akar situs — bukan slug undangan.
-const RESERVED = new Set(["home", "demo", "admin", "admin-qr", "wa", "assets", "templates"]);
+const RESERVED = new Set(["home", "demo", "catin", "admin", "admin-qr", "wa", "assets", "templates"]);
 
 /** "/julia-dan-kevin/?source=pwa" → "/index.html". Tanpa penanda aplikasi → null. */
 function guestShellFor(pathname, search) {

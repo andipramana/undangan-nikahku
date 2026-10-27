@@ -1,6 +1,6 @@
 # undangan-nikahku
 
-Undangan pernikahan digital — HTML + CSS + vanilla JS (tanpa framework/bundler), backend Supabase. Multi-tenant (`/<slug>/`) dengan beberapa template pilihan. Harga perkenalan **Rp99.000** (coret Rp499.000).
+Undangan pernikahan digital — HTML + CSS + vanilla JS (tanpa framework/bundler), backend Supabase. Multi-tenant (`/<slug>/`) dengan beberapa template pilihan. Harga perkenalan **Rp199.000** (coret Rp499.000).
 
 ## Fitur untuk pembeli
 
