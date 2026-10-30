@@ -28,17 +28,58 @@ window.initCoupleSliders = async function () {
     const slides = Array.from(el.querySelectorAll(".couple-slide"));
     if (!wrapper || slides.length <= 1) return null;
 
-    let index = 0;
+    const count = slides.length;
+    // Loop sungguhan: klon foto terakhir di depan dan foto pertama di belakang.
+    // Dari foto terakhir slider terus maju ke klon foto pertama (searah), lalu
+    // posisinya dikembalikan ke foto asli TANPA transisi — tidak pernah memutar
+    // mundur melewati semua foto.
+    const cloneOf = (node) => {
+      const c = node.cloneNode(true);
+      c.setAttribute("aria-hidden", "true");
+      c.dataset.clone = "1";
+      c.classList.remove("swiper-slide-active");
+      return c;
+    };
+    wrapper.insertBefore(cloneOf(slides[count - 1]), wrapper.firstChild);
+    wrapper.appendChild(cloneOf(slides[0]));
+
+    let index = 0;       // posisi saat ini: -1 (klon terakhir) … count (klon pertama)
     let timer = null;
+    let jumpTimer = null;
     const delay = (opts && opts.delay) || 2500;
     const reverse = Boolean(opts && opts.reverseDirection);
     const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    function goTo(nextIdx) {
-      index = ((nextIdx % slides.length) + slides.length) % slides.length;
-      slides.forEach((s, i) => s.classList.toggle("swiper-slide-active", i === index));
-      wrapper.style.transform = `translate3d(${-index * 100}%, 0, 0)`;
+    function place(pos, animate) {
+      wrapper.style.transition = animate ? "" : "none";
+      wrapper.style.transform = `translate3d(${-(pos + 1) * 100}%, 0, 0)`;
+      if (!animate) void wrapper.offsetWidth;   // terapkan posisi dulu sebelum transisi dinyalakan lagi
+      if (!animate) wrapper.style.transition = "";
     }
+
+    // Mendarat di klon → pindah diam-diam ke foto asli yang kembar.
+    function settle() {
+      clearTimeout(jumpTimer);
+      jumpTimer = null;
+      if (index === count || index === -1) {
+        index = index === count ? 0 : count - 1;
+        place(index, false);
+      }
+    }
+
+    function goTo(nextIdx) {
+      settle();                                   // geseran cepat beruntun: selesaikan lompatan yang tertunda
+      index = Math.max(-1, Math.min(count, nextIdx));
+      const real = ((index % count) + count) % count;
+      slides.forEach((sl, i) => sl.classList.toggle("swiper-slide-active", i === real));
+      place(index, true);
+      if (index === count || index === -1) jumpTimer = setTimeout(settle, 1300);
+    }
+
+    wrapper.addEventListener("transitionend", (e) => {
+      if (e.target === wrapper) settle();
+    });
+    place(0, false);
 
     function step() {
       goTo(reverse ? index - 1 : index + 1);
@@ -57,6 +98,7 @@ window.initCoupleSliders = async function () {
       }
     };
 
+    el.style.touchAction = "pan-y";   // geser horizontal untuk slider, vertikal tetap scroll halaman
     let startX = null;
     el.addEventListener("pointerdown", (e) => {
       startX = e.clientX;
@@ -67,6 +109,7 @@ window.initCoupleSliders = async function () {
       startX = null;
       if (Math.abs(dx) > 40) {
         goTo(dx < 0 ? index + 1 : index - 1);
+        if (timer) { clearInterval(timer); timer = setInterval(step, delay); }   // beri tamu waktu melihat foto
       }
     }, { passive: true });
 
