@@ -677,7 +677,7 @@ a { color: inherit; }
   display: grid;
   place-items: center;
   padding: clamp(.6rem, 2dvh, 1.25rem);
-  background: url("../../assets/img/rsvp-bg.webp") center / cover;
+  background: var(--section-bg, url("../../assets/img/rsvp-bg.webp")) center / cover;
   scroll-snap-align: start;
 }
 .gift-capsule {
@@ -1272,7 +1272,7 @@ a { color: inherit; }
   display: grid;
   place-items: center;
   padding: clamp(.6rem, 2dvh, 1.25rem);
-  background: url("../../assets/img/rsvp-bg.webp") center / cover;
+  background: var(--section-bg, url("../../assets/img/rsvp-bg.webp")) center / cover;
   color: var(--event-ink);
   text-align: center;
   scroll-snap-align: start;

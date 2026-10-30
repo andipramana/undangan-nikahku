@@ -28,7 +28,7 @@ function check(label, pass, detail) {
 const OFFICIAL_PHOTO_SLOTS = new Set([
   "cover", "opening", "std2", "subcover", "closing",
   "bride", "groom", "event", "gallery", "story",
-  "wfl", "quote", "gift_item"
+  "wfl", "quote", "gift_item", "event_bg", "gift_bg"
 ]);
 
 const DEFAULT_CONTENT = {

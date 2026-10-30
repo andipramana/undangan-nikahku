@@ -159,9 +159,9 @@ try {
   /* ── Bab Acara: banyak kartu + editor daftar warna ───────────────────── */
   await mountSection("acara");
   const acaraTitles = await page.locator("#outlet .p-card__title").allTextContents();
-  check("acara: kartu berurut Tanggal → Akad → Resepsi → Dresscode → Foto",
+  check("acara: kartu berurut Tanggal → Akad → Resepsi → Dresscode → Foto → Latar",
     JSON.stringify(acaraTitles) === JSON.stringify(
-      ["Tanggal & countdown", "Akad", "Resepsi", "Dresscode", "Foto slider event"]));
+      ["Tanggal & countdown", "Akad", "Resepsi", "Dresscode", "Foto slider event", "Latar section Acara"]));
   check("acara: dresscode punya dua baris warna dari content",
     await page.locator("#outlet input[type=color]").count() === 2);
 
@@ -211,7 +211,7 @@ try {
   const OFFICIAL_PHOTO_SLOTS = new Set([
     "cover", "opening", "std2", "subcover", "closing",
     "bride", "groom", "event", "gallery", "story",
-    "wfl", "quote", "gift_item"
+    "wfl", "quote", "gift_item", "event_bg", "gift_bg"
   ]);
 
   for (const tpl of catalog) {

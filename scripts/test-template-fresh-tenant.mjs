@@ -33,7 +33,7 @@ const [configJs, contextJs, tplPhotosJs, behaviorsJs, photosJs, galleryLayoutJs,
 
 const PHOTO_PAYLOAD = {};
 for (const slot of ["cover", "subcover", "opening", "std2", "bride", "groom",
-                    "event", "story", "gallery", "quote", "closing", "gift_item"]) {
+                    "event", "story", "gallery", "quote", "closing", "gift_item", "event_bg", "gift_bg"]) {
   PHOTO_PAYLOAD[slot] = [1, 2, 3].map((n) => ({
     id: `${slot}-${n}`, path: `${slot}/${n}.webp`, alt: `${slot} ${n}`,
     focalX: 50, focalY: 45, zoom: 1

@@ -212,6 +212,16 @@
       qText.textContent = cfg.quotePhoto.quote;
     }
 
+    // Latar section Acara & Tanda Kasih: foto folder event_bg / gift_bg bila ada,
+    // kalau tidak CSS memakai latar bawaan (--section-bg tidak diisi).
+    for (const [folder, id] of [["event_bg", "event"], ["gift_bg", "gift"]]) {
+      const bgSec = document.getElementById(id);
+      const bgPhoto = (await window.getPhotos(folder) || [])[0];
+      if (bgSec && bgPhoto && bgPhoto.path) {
+        bgSec.style.setProperty("--section-bg", `url("${window.photoUrl(bgPhoto.path)}")`);
+      }
+    }
+
     // Tiap babak cerita masuk bergantian dari kanan lalu kiri — terasa seperti
     // langkah bergantian menyusuri perjalanan, bukan daftar yang naik seragam.
     //

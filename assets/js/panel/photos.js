@@ -21,7 +21,8 @@
     story: 960,
     wfl: 560,
     quote: 1280,
-    gift_item: 800
+    gift_item: 800,
+    event_bg: 1280, gift_bg: 1280
   };
   const FOLDER_RATIO = {
     cover: 9 / 19.5, opening: 9 / 19.5, std2: 9 / 19.5, subcover: 9 / 19.5, closing: 9 / 19.5,
@@ -31,7 +32,8 @@
     gallery: 16 / 10,
     quote: 1,
     story: 16 / 10,
-    gift_item: 1
+    gift_item: 1,
+    event_bg: 9 / 16, gift_bg: 9 / 16
   };
   const HERO_FOLDERS = new Set(["cover", "opening", "std2", "closing", "subcover"]);
   const LOOP_FOLDERS = new Set(["bride", "groom", "event", "wfl"]);

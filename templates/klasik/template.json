@@ -358,6 +358,13 @@
             "label": "Foto slider event",
             "ratio": "16/9",
             "max": 8
+          },
+          {
+            "slot": "event_bg",
+            "label": "Latar section Acara",
+            "cardDesc": "Foto latar di belakang kartu Acara. Kosongkan = latar bawaan.",
+            "ratio": "9/16",
+            "max": 1
           }
         ]
       },
@@ -585,6 +592,13 @@
             "cardDesc": "Nama, harga, dan link tiap rekomendasi diedit langsung pada kartu fotonya di bawah - foto ke-1 berpasangan dengan rekomendasi ke-1, dst.",
             "ratio": "1/1",
             "max": 12
+          },
+          {
+            "slot": "gift_bg",
+            "label": "Latar section Tanda Kasih",
+            "cardDesc": "Foto latar di belakang kartu Tanda Kasih. Kosongkan = latar bawaan.",
+            "ratio": "9/16",
+            "max": 1
           }
         ]
       },
