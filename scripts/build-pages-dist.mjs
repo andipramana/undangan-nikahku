@@ -4,7 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const dist = path.join(root, "dist");
 const rootFiles = ["index.html", "admin.html", "admin-qr.html", "wa.html", "register.html", "404.html", "sw.js", "CNAME"];
-const routedFiles = ["home/index.html", "demo/index.html", "catin/index.html"];
+const routedFiles = ["home/index.html", "demo/index.html", "catin/index.html", "uput-dan-dany/index.html"];
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });

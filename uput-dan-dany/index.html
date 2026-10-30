@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Pretty tenant paths (/siti-dan-ujang/) tetap memakai satu cangkang statis ini.
+     Semua aset di-root ke situs GitHub Pages, bukan ke slug-nya. -->
+<base href="/">
+<title>Undangan Pernikahan Uput &amp; Dany</title>
+<meta name="description" content="Dengan penuh syukur, kami mengundang Anda di hari bahagia kami, 8 November 2026.">
+<!-- Open Graph: crawler WhatsApp/FB/LINE butuh URL ABSOLUT (bukan relative)
+     supaya link preview (banner) muncul. Judul/deskripsi diperbarui
+     bootstrapper begitu data tenant tiba; nilai di sini cuma cadangan untuk
+     crawler yang tidak menjalankan JS. Kalau gambar/URL diganti, WA masih
+     menyimpan cache lama — kirim ulang link dengan ?v=2, atau purge via
+     developers.facebook.com/tools/debug/ogobject/ -->
+<meta property="og:site_name" content="Undangan Pernikahan Uput &amp; Dany">
+<meta property="og:url" content="https://willcome.my.id/uput-dan-dany/">
+<meta property="og:title" content="Undangan Pernikahan Uput &amp; Dany">
+<meta property="og:description" content="Dengan penuh syukur, kami mengundang Anda di hari bahagia kami, 8 November 2026.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://willcome.my.id/assets/img/social/og-uput-dan-dany.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<!-- PWA: undangan bisa dipasang ke layar utama & terbuka layar penuh. Manifest
+     dibangun per-tenant oleh assets/js/pwa.js; meta apple-* untuk iOS Safari. -->
+<meta name="theme-color" content="#14120f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/icons/inv-apple-touch-icon.png">
+
+<!-- CSS kritis preloader di-INLINE, bukan file terpisah: preloader harus
+     sudah terlihat SEBELUM satu pun aset template selesai diunduh. Kalau
+     gayanya ikut di style template, tamu melihat layar putih kosong dulu
+     selama CSS template masih dalam perjalanan. Warnanya sengaja netral —
+     template yang menentukan warna sebenarnya lewat --color-bg. -->
+<style>
+  html, body { margin: 0; padding: 0; }
+  #preloader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--color-bg, #f7f3ea);
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .6s ease, visibility .6s ease;
+  }
+  #preloader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  #preloader .preloader-ring {
+    width: 48px; height: 48px;
+    border: 2px solid var(--color-gold-soft, #e6d7b3);
+    border-top-color: var(--color-gold, #c9a668);
+    border-radius: 50%;
+    animation: shell-spin 1s linear infinite;
+  }
+  @keyframes shell-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { #preloader .preloader-ring { animation: none; } }
+</style>
+<script>
+  (function () {
+    try {
+      var sp = new URLSearchParams(location.search);
+      // Buang query/hash dari route 404.html ("/slug?to=X") sebelum mengambil slug.
+      var route = (sp.get("__tenant_route") || location.pathname || "/").split(/[?#]/)[0];
+      var rq = (sp.get("__tenant_route") || "").split("#")[0];
+      var tpl = sp.get("template") || new URLSearchParams(rq.indexOf("?") >= 0 ? rq.slice(rq.indexOf("?")) : "").get("template");
+      var seg = route.replace(/^\/+|\/+$/g, "").split("/")[0] || "root";
+      var slug = (seg === "admin" || seg === "admin-qr" || seg === "wa" || seg === "home" || seg === "register" || seg === "index.html") ? "root" : seg;
+      var id = (tpl || localStorage.getItem("wedding_template_id_" + slug) || "klasik").replace(/\/+$/, "");
+      if (id === "classic-elegance") id = "klasik";
+      var base = "templates/" + encodeURIComponent(id) + "/";
+      var lCss = document.createElement("link");
+      lCss.rel = "preload"; lCss.as = "style"; lCss.href = base + "style.css";
+      var lHtml = document.createElement("link");
+      lHtml.rel = "preload"; lHtml.as = "fetch"; lHtml.crossOrigin = "anonymous"; lHtml.href = base + "markup.html";
+      document.head.appendChild(lCss);
+      document.head.appendChild(lHtml);
+    } catch (_) {}
+  })();
+</script>
+</head>
+<body>
+
+<div id="preloader" aria-hidden="true">
+  <div class="preloader-ring"></div>
+</div>
+
+<!-- Seluruh tampilan undangan dirender ke sini oleh template aktif
+     (templates/<id>/markup.html + render.js). Cangkang ini sengaja kosong:
+     tiap template memiliki markup-nya sendiri, jadi urutan/posisi section,
+     layout, dan transisi benar-benar bisa berbeda antar template. -->
+<div id="inv-root"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/tenant.js"></script>
+<script src="assets/js/pwa.js"></script>
+<script src="assets/js/photos.js"></script>
+<script src="assets/js/gallery-layout.js"></script>
+<script src="assets/js/supabase-client.js"></script>
+<script src="assets/js/core/context.js"></script>
+<script src="assets/js/core/template-photos.js"></script>
+<script src="assets/js/core/behaviors.js"></script>
+<script src="assets/js/core/engine.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
