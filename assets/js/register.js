@@ -260,6 +260,7 @@
       await invoke({
         action: "create", slug, displayName, draftId: fromDraft || undefined,
         templateId: $("template-id").value,
+        cloneFrom: get("clone-from") || undefined,
         brideName: get("bride-name"), groomName: get("groom-name"),
         adminEmail: get("admin-email"), adminPassword: $("admin-password").value,
         qrEmail: get("qr-email"), qrPassword: $("qr-password").value

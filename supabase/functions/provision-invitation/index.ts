@@ -287,6 +287,36 @@ Deno.serve(async (req) => {
       if (photoError) throw new Error(photoError.message);
     }
   };
+  // "Salin gaya dari client lain": menerima slug atau URL undangan (willcome.my.id/<slug>/?to=..).
+  // Hanya GAYA yang ikut (warna, font, penyesuaian tampilan per template) — nama, tanggal,
+  // foto, dan teks tidak, supaya data client sumber tidak bocor ke client baru.
+  const slugFromInput = (raw: string) => {
+    let s = raw.trim();
+    if (!s) return "";
+    if (/^[a-z0-9-]+$/i.test(s)) return s.toLowerCase();   // slug polos
+    try { s = new URL(/^[a-z]+:\/\//i.test(s) ? s : `https://${s}`).pathname; } catch (_) { /* bukan URL: anggap slug */ }
+    return (s.split("/").filter(Boolean)[0] || "").toLowerCase();
+  };
+  const loadStyleSource = async (slug: string) => {
+    const { data: inv } = await admin.from("invitations").select("id").eq("slug", slug).maybeSingle();
+    if (!inv) return null;
+    const { data: row } = await admin.from("site_content").select("content").eq("invitation_id", inv.id).eq("id", 1).maybeSingle();
+    return row?.content ? sanitizeContent(row.content as Record<string, unknown>) : null;
+  };
+  const applyStyle = async (toInvitationId: string, source: Record<string, any>) => {
+    const { data: row, error } = await admin.from("site_content").select("content").eq("invitation_id", toInvitationId).eq("id", 1).single();
+    if (error || !row) throw new Error(error?.message || "Konten client baru tidak ditemukan");
+    const dest = row.content as Record<string, any>;
+    for (const key of ["theme", "typography", "visualEditor"]) if (source[key] !== undefined) dest[key] = source[key];
+    dest.templates = dest.templates && typeof dest.templates === "object" ? dest.templates : {};
+    for (const [id, block] of Object.entries((source.templates || {}) as Record<string, any>)) {
+      if (!block || typeof block !== "object") continue;
+      const target = (dest.templates[id] = dest.templates[id] && typeof dest.templates[id] === "object" ? dest.templates[id] : {});
+      for (const key of ["theme", "typography", "visualEditor"]) if (block[key] !== undefined) target[key] = block[key];
+    }
+    const { error: saveError } = await admin.from("site_content").update({ content: dest }).eq("invitation_id", toInvitationId).eq("id", 1);
+    if (saveError) throw new Error(saveError.message);
+  };
   // Captures root once into an independent static template. Assets are physically
   // copied under templates/default so later root edits/deletions cannot affect it.
   if (action === "capture_default_template") {
@@ -357,6 +387,14 @@ Deno.serve(async (req) => {
     draft = { id: d.id, payload: d.payload };
   }
   if (!/^[a-z0-9-]+$/.test(templateId)) return fail("Template tidak valid");
+  // Gaya dari client lain (opsional) — dipastikan ada SEBELUM apa pun dibuat.
+  const styleSlug = slugFromInput(clean(body.cloneFrom));
+  let styleSource: Record<string, any> | null = null;
+  if (styleSlug) {
+    if (styleSlug === slug) return fail("Sumber gaya tidak boleh client yang sama");
+    styleSource = await loadStyleSource(styleSlug);
+    if (!styleSource) return fail(`Client "${styleSlug}" tidak ditemukan`, 404);
+  }
   const { data: created, error: invitationError } = await admin.from("invitations").insert({ slug, display_name: clean(body.displayName || slug) }).select("id,slug").single();
   if (invitationError) return fail(invitationError.code === "23505" ? "Slug sudah dipakai" : invitationError.message);
   const invitationId = created.id;
@@ -373,6 +411,7 @@ Deno.serve(async (req) => {
     await createAccount(adminEmail, String(body.adminPassword), "admin");
     if (separateQr) await createAccount(qrEmail, String(body.qrPassword), "admin_qr");
     await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
+    if (styleSource) await applyStyle(invitationId, styleSource);   // sebelum draft, supaya warna pilihan client menang
     if (draft) await applyDraft(invitationId, draft);
     const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://willcome.my.id/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
