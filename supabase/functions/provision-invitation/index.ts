@@ -287,9 +287,10 @@ Deno.serve(async (req) => {
       if (photoError) throw new Error(photoError.message);
     }
   };
-  // "Salin gaya dari client lain": menerima slug atau URL undangan (willcome.my.id/<slug>/?to=..).
-  // Hanya GAYA yang ikut (warna, font, penyesuaian tampilan per template) — nama, tanggal,
-  // foto, dan teks tidak, supaya data client sumber tidak bocor ke client baru.
+  // "Clone dari client lain": menerima slug atau URL undangan (willcome.my.id/<slug>/?to=..).
+  // SEMUA ikut disalin (teks, tanggal, rekening, cerita, setelan template, foto + audio),
+  // kecuali yang memang diisi di form pembuatan client: nama mempelai, email, sandi.
+  // Data per-orang di bawah nama itu (orang tua, Instagram) dikosongkan karena milik mempelai lama.
   const slugFromInput = (raw: string) => {
     let s = raw.trim();
     if (!s) return "";
@@ -297,25 +298,48 @@ Deno.serve(async (req) => {
     try { s = new URL(/^[a-z]+:\/\//i.test(s) ? s : `https://${s}`).pathname; } catch (_) { /* bukan URL: anggap slug */ }
     return (s.split("/").filter(Boolean)[0] || "").toLowerCase();
   };
-  const loadStyleSource = async (slug: string) => {
+  const buildCloneContent = (raw: Record<string, unknown>, displayName: string, brideName: string, groomName: string) => {
+    const content = structuredClone(raw) as Record<string, any>;
+    content.couple = { ...(content.couple || {}), bride: blankPerson(brideName), groom: blankPerson(groomName) };
+    content.siteTitle = `${displayName} — The Wedding`;
+    delete content.appIcon;   // ikon unggahan milik client sumber; client baru mulai dari ikon otomatis
+    return content;
+  };
+  const cloneExt = (path: string, fallback: string) => path.split(".").pop()?.replace(/[^a-z0-9]/gi, "") || fallback;
+  const loadCloneSource = async (slug: string) => {
     const { data: inv } = await admin.from("invitations").select("id").eq("slug", slug).maybeSingle();
     if (!inv) return null;
     const { data: row } = await admin.from("site_content").select("content").eq("invitation_id", inv.id).eq("id", 1).maybeSingle();
-    return row?.content ? sanitizeContent(row.content as Record<string, unknown>) : null;
+    if (!row?.content) return null;
+    return { id: inv.id as string, content: row.content as Record<string, unknown> };
   };
-  const applyStyle = async (toInvitationId: string, source: Record<string, any>) => {
-    const { data: row, error } = await admin.from("site_content").select("content").eq("invitation_id", toInvitationId).eq("id", 1).single();
-    if (error || !row) throw new Error(error?.message || "Konten client baru tidak ditemukan");
-    const dest = row.content as Record<string, any>;
-    for (const key of ["theme", "typography", "visualEditor"]) if (source[key] !== undefined) dest[key] = source[key];
-    dest.templates = dest.templates && typeof dest.templates === "object" ? dest.templates : {};
-    for (const [id, block] of Object.entries((source.templates || {}) as Record<string, any>)) {
-      if (!block || typeof block !== "object") continue;
-      const target = (dest.templates[id] = dest.templates[id] && typeof dest.templates[id] === "object" ? dest.templates[id] : {});
-      for (const key of ["theme", "typography", "visualEditor"]) if (block[key] !== undefined) target[key] = block[key];
+  const cloneUploaded: string[] = [];
+  const applyClone = async (src: { id: string; content: Record<string, unknown> }, toInvitationId: string, toSlug: string, displayName: string, brideName: string, groomName: string) => {
+    const content = buildCloneContent(src.content, displayName, brideName, groomName);
+    if (content.audio?.path) {
+      const audioPath = `${toSlug}/audio/backsound.${cloneExt(String(content.audio.path), "mp3")}`;
+      await copyObject(String(content.audio.path), audioPath); cloneUploaded.push(audioPath);
+      content.audio.path = audioPath; content.audio.src = "";
     }
-    const { error: saveError } = await admin.from("site_content").update({ content: dest }).eq("invitation_id", toInvitationId).eq("id", 1);
-    if (saveError) throw new Error(saveError.message);
+    const { data: photos, error: photoError } = await admin.from("photos").select("folder,storage_path,sort_order,focal_x,focal_y,zoom,alt,width,height,gallery_layout,gallery_row").eq("invitation_id", src.id).order("folder").order("sort_order").order("id");
+    if (photoError) throw new Error(photoError.message);
+    const copied: Record<string, unknown>[] = [];
+    const list = photos || [];
+    for (let i = 0; i < list.length; i += 6) {
+      await Promise.all(list.slice(i, i + 6).map(async (photo) => {
+        const path = `${toSlug}/${photo.folder}/${crypto.randomUUID()}.${cloneExt(photo.storage_path, "webp")}`;
+        await copyObject(photo.storage_path, path); cloneUploaded.push(path);
+        copied.push({ ...photo, storage_path: path, invitation_id: toInvitationId });
+      }));
+    }
+    const { error: contentError } = await admin.from("site_content").upsert({ invitation_id: toInvitationId, id: 1, content }, { onConflict: "invitation_id,id" });
+    if (contentError) throw new Error(contentError.message);
+    const { error: removeError } = await admin.from("photos").delete().eq("invitation_id", toInvitationId);
+    if (removeError) throw new Error(removeError.message);
+    if (copied.length) {
+      const { error: insertError } = await admin.from("photos").insert(copied);
+      if (insertError) throw new Error(insertError.message);
+    }
   };
   // Captures root once into an independent static template. Assets are physically
   // copied under templates/default so later root edits/deletions cannot affect it.
@@ -387,19 +411,19 @@ Deno.serve(async (req) => {
     draft = { id: d.id, payload: d.payload };
   }
   if (!/^[a-z0-9-]+$/.test(templateId)) return fail("Template tidak valid");
-  // Gaya dari client lain (opsional) — dipastikan ada SEBELUM apa pun dibuat.
-  const styleSlug = slugFromInput(clean(body.cloneFrom));
-  let styleSource: Record<string, any> | null = null;
-  if (styleSlug) {
-    if (styleSlug === slug) return fail("Sumber gaya tidak boleh client yang sama");
-    styleSource = await loadStyleSource(styleSlug);
-    if (!styleSource) return fail(`Client "${styleSlug}" tidak ditemukan`, 404);
+  // Clone dari client lain (opsional) — dipastikan ada SEBELUM apa pun dibuat.
+  const cloneSlug = slugFromInput(clean(body.cloneFrom));
+  let cloneSource: { id: string; content: Record<string, unknown> } | null = null;
+  if (cloneSlug) {
+    if (cloneSlug === slug) return fail("Sumber clone tidak boleh client yang sama");
+    cloneSource = await loadCloneSource(cloneSlug);
+    if (!cloneSource) return fail(`Client "${cloneSlug}" tidak ditemukan`, 404);
   }
   const { data: created, error: invitationError } = await admin.from("invitations").insert({ slug, display_name: clean(body.displayName || slug) }).select("id,slug").single();
   if (invitationError) return fail(invitationError.code === "23505" ? "Slug sudah dipakai" : invitationError.message);
   const invitationId = created.id;
   const createdUsers: string[] = [];
-  const rollback = async () => { await admin.from("invitations").delete().eq("id", invitationId); for (const userId of createdUsers) await admin.auth.admin.deleteUser(userId); };
+  const rollback = async () => { await admin.from("invitations").delete().eq("id", invitationId); if (cloneUploaded.length) await admin.storage.from("photos").remove(cloneUploaded); for (const userId of createdUsers) await admin.auth.admin.deleteUser(userId); };
   const createAccount = async (email: string, password: string, role: "admin" | "admin_qr") => {
     const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
     if (error || !data.user) throw new Error(error?.message || "Gagal membuat akun");
@@ -410,8 +434,8 @@ Deno.serve(async (req) => {
   try {
     await createAccount(adminEmail, String(body.adminPassword), "admin");
     if (separateQr) await createAccount(qrEmail, String(body.qrPassword), "admin_qr");
-    await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
-    if (styleSource) await applyStyle(invitationId, styleSource);   // sebelum draft, supaya warna pilihan client menang
+    if (cloneSource) await applyClone(cloneSource, invitationId, slug, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"));
+    else await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
     if (draft) await applyDraft(invitationId, draft);
     const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://willcome.my.id/${slug}/` }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }

@@ -163,7 +163,7 @@ async function run(p, contentOverride, opts) {
 /* ── kabel: create + aksi admin ── */
 check("create: draft diperiksa SEBELUM apa pun dibuat (tolak yang sudah dipakai)", /d\.status === "dibuat"\) return fail/.test(src));
 check("create: applyDraft dipanggil di dalam blok try (kegagalan → rollback)", /await applyTemplate\([^\n]*\n(?:[^\n]*applyStyle[^\n]*\n)?\s*if \(draft\) await applyDraft/.test(src));
-check("create: gaya client sumber diterapkan SEBELUM draft (warna pilihan client menang)", /if \(styleSource\) await applyStyle[^\n]*\n\s*if \(draft\) await applyDraft/.test(src));
+check("create: clone client sumber diterapkan SEBELUM draft (isian client menang)", src.indexOf("if (cloneSource) await applyClone") > 0 && src.indexOf("if (cloneSource) await applyClone") < src.indexOf("if (draft) await applyDraft"));
 check("aksi list_drafts / update_draft / delete_draft ada", ["list_drafts", "update_draft", "delete_draft"].every((a) => src.includes(`action === "${a}"`)));
 check("aksi draft berada SETELAH gerbang root_owner", src.indexOf('app_metadata?.role !== "root_owner"') < src.indexOf('action === "list_drafts"'));
 

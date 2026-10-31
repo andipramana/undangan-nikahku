@@ -1,5 +1,6 @@
-/** "Salin gaya dari client lain" (provision-invitation): parsing slug/URL dan penyalinan
- *  HANYA gaya (theme/typography/visualEditor). Kode diambil langsung dari index.ts. */
+/** "Clone dari client lain" (provision-invitation): parsing slug/URL dan isi konten hasil
+ *  clone. Kode diambil langsung dari index.ts. Yang dijaga: SEMUA ikut kecuali nama
+ *  mempelai (dan data per-orang di bawahnya), ikon unggahan milik sumber, dan judul situs. */
 import fs from "node:fs/promises";
 import { stripTypeScriptTypes } from "node:module";
 
@@ -11,25 +12,11 @@ const check = (label, pass, detail) => {
 
 const src = await fs.readFile("supabase/functions/provision-invitation/index.ts", "utf8");
 const a = src.indexOf("const slugFromInput");
-const b = src.indexOf("const loadStyleSource");
-const c = src.indexOf("const applyStyle");
-const d = src.indexOf("// Captures root once");
-check("potongan kode ditemukan", a > 0 && b > a && c > b && d > c);
-const js = stripTypeScriptTypes(src.slice(a, b) + src.slice(c, d));
-const build = new Function("admin", `${js}\nreturn { slugFromInput, applyStyle };`);
-
-let stored;
-const admin = {
-  from() {
-    const q = {
-      select() { return q; }, eq() { return q; },
-      single: async () => ({ data: { content: structuredClone(stored) }, error: null }),
-      update(patch) { q.patch = patch; return { eq: () => ({ eq: async () => { stored = q.patch.content; return { error: null }; } }) }; },
-    };
-    return q;
-  },
-};
-const { slugFromInput, applyStyle } = build(admin);
+const b = src.indexOf("const loadCloneSource");
+check("potongan kode ditemukan", a > 0 && b > a);
+const js = stripTypeScriptTypes(src.slice(a, b));
+const blank = 'const blankPerson = (name) => ({ name, nickname: name, father: "", mother: "", instagram: "" });';
+const { slugFromInput, buildCloneContent } = new Function(`${blank}\n${js}\nreturn { slugFromInput, buildCloneContent };`)();
 
 for (const [input, want] of [
   ["julia-dan-kevin", "julia-dan-kevin"],
@@ -39,27 +26,29 @@ for (const [input, want] of [
   ["", ""],
 ]) check(`slugFromInput(${JSON.stringify(input)}) = ${JSON.stringify(want)}`, slugFromInput(input) === want, slugFromInput(input));
 
-stored = {
-  couple: { bride: { name: "Siti" } },
-  templates: { klasik: { theme: { colors: { bg: "#fff" } }, photos: { cover: [1] }, extras: { badgeLabel: "BARU" } } },
+const source = {
+  templateId: "klasik",
+  couple: { bride: { name: "Sumber W", nickname: "SW", father: "Ayah", mother: "Ibu", instagram: "@sw" }, groom: { name: "Sumber P" }, extra: "tetap" },
+  siteTitle: "Sumber — The Wedding",
+  appIcon: { path: "sumber/icons/a.png", custom: true },
+  event: { dateISO: "2026-11-08", dateLabel: "08 November 2026", akad: { venue: { name: "Gedung X" } } },
+  gift: { accounts: [{ bank: "BCA", number: "123" }] },
+  loveStory: [{ title: "Bertemu" }],
+  guestGreetings: [{ label: "Keluarga" }],
+  audio: { path: "sumber/audio/a.mp3" },
+  templates: { klasik: { theme: { colors: { bg: "#123456" } }, photos: { cover: [1] }, visualEditor: { elements: { a: { text: "Teks sumber" } } } } },
 };
-await applyStyle("new-id", {
-  couple: { bride: { name: "Sumber" } },
-  siteTitle: "Sumber",
-  theme: { x: 1 }, typography: { font: "Y" },
-  templates: {
-    klasik: { theme: { colors: { bg: "#123456" } }, typography: { heading: "Z" }, visualEditor: { elements: { a: { color: "red" } } }, photos: { cover: [9] }, extras: { badgeLabel: "SUMBER" } },
-    lain: { theme: { colors: { bg: "#000" } } },
-  },
-});
-check("warna template disalin", stored.templates.klasik.theme.colors.bg === "#123456");
-check("typography & visualEditor template disalin", stored.templates.klasik.typography.heading === "Z" && stored.templates.klasik.visualEditor.elements.a.color === "red");
-check("blok template lain ikut dibuat", stored.templates.lain?.theme?.colors?.bg === "#000");
-check("theme/typography akar disalin", stored.theme?.x === 1 && stored.typography?.font === "Y");
-check("nama client baru tidak tertimpa", stored.couple.bride.name === "Siti");
-check("judul situs sumber tidak ikut", stored.siteTitle === undefined);
-check("foto per-template tidak ikut", JSON.stringify(stored.templates.klasik.photos) === JSON.stringify({ cover: [1] }));
-check("extras (teks) tidak ikut", stored.templates.klasik.extras.badgeLabel === "BARU");
+const snap = JSON.stringify(source);
+const out = buildCloneContent(source, "Baru & Baru", "Putri", "Dany");
+check("sumber tidak dimutasi", JSON.stringify(source) === snap);
+check("nama mempelai diganti isian form", out.couple.bride.name === "Putri" && out.couple.groom.name === "Dany");
+check("orang tua & Instagram mempelai lama dikosongkan", out.couple.bride.father === "" && out.couple.bride.instagram === "");
+check("judul situs mengikuti nama client baru", out.siteTitle === "Baru & Baru — The Wedding");
+check("ikon unggahan sumber tidak ikut", out.appIcon === undefined);
+check("tanggal & lokasi acara ikut", out.event.dateISO === "2026-11-08" && out.event.akad.venue.name === "Gedung X");
+check("rekening, cerita, sapaan ikut", out.gift.accounts[0].bank === "BCA" && out.loveStory.length === 1 && out.guestGreetings.length === 1);
+check("setelan template + override teks Editor Visual ikut", out.templates.klasik.theme.colors.bg === "#123456" && out.templates.klasik.visualEditor.elements.a.text === "Teks sumber");
+check("templateId & field lain ikut", out.templateId === "klasik" && out.couple.extra === "tetap");
 
-if (failed) { console.error("\nFAIL: clone style"); process.exit(1); }
-console.log("\nSemua pemeriksaan salin-gaya LULUS.");
+if (failed) { console.error("\nFAIL: clone"); process.exit(1); }
+console.log("\nSemua pemeriksaan clone LULUS.");
