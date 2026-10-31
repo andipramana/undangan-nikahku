@@ -720,19 +720,19 @@
         "id": "strawberry-matcha",
         "label": "Strawberry Matcha",
         "colors": {
-          "bg": "#fbf1ee",
-          "dark": "#1f2a1c",
-          "dark2": "#2a3626",
-          "gold": "#df6178",
-          "goldSoft": "#f4c3cb",
-          "text": "#27301f",
-          "textLight": "#fbf1ee"
+          "bg": "#fff6f0",
+          "dark": "#3e5a2e",
+          "dark2": "#2f4623",
+          "gold": "#ec6b7e",
+          "goldSoft": "#f4a6b0",
+          "text": "#574b45",
+          "textLight": "#fff6f0"
         },
         "overlayColors": {
-          "global": "#8fa66a",
-          "flat": "#1f2a1c",
-          "closing": "#1f2a1c",
-          "quote": "#2a3626"
+          "global": "#6e9450",
+          "flat": "#2f4623",
+          "closing": "#2f4623",
+          "quote": "#3e5a2e"
         }
       },
       {
