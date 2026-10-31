@@ -202,7 +202,7 @@ const stepTitle = (page) => page.locator("#step h2").innerText();
   await page.click('details[data-opt="tampilan"] summary');
   await page.waitForSelector(".sw", { timeout: 8000 });
   const nPresets = await page.locator(".sw").count();
-  check("tampilan: 12 paduan warna dari template klasik", nPresets === 12, String(nPresets));
+  check("tampilan: semua paduan warna dari template klasik tampil (13)", nPresets === 13, String(nPresets));
   await page.locator(".sw").nth(1).click();
   check("tampilan: paduan terpilih bertanda", (await page.locator('.sw[aria-pressed="true"]').count()) === 1);
   await fill(page, "photoLink", "https://drive.google.com/drive/folders/abc");

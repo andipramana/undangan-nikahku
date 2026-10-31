@@ -717,6 +717,25 @@
         }
       },
       {
+        "id": "strawberry-matcha",
+        "label": "Strawberry Matcha",
+        "colors": {
+          "bg": "#fbf1ee",
+          "dark": "#1f2a1c",
+          "dark2": "#2a3626",
+          "gold": "#df6178",
+          "goldSoft": "#f4c3cb",
+          "text": "#27301f",
+          "textLight": "#fbf1ee"
+        },
+        "overlayColors": {
+          "global": "#8fa66a",
+          "flat": "#1f2a1c",
+          "closing": "#1f2a1c",
+          "quote": "#2a3626"
+        }
+      },
+      {
         "id": "mocha-bloom",
         "label": "Mocha & Bloom",
         "colors": {
