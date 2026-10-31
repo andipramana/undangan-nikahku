@@ -720,7 +720,7 @@
         "id": "strawberry-matcha",
         "label": "Strawberry Matcha",
         "colors": {
-          "bg": "#fff6f0",
+          "bg": "#f9e3e0",
           "dark": "#3e5a2e",
           "dark2": "#2f4623",
           "gold": "#ec6b7e",
@@ -729,7 +729,7 @@
           "textLight": "#fff6f0"
         },
         "overlayColors": {
-          "global": "#6e9450",
+          "global": "#ec6b7e",
           "flat": "#2f4623",
           "closing": "#2f4623",
           "quote": "#3e5a2e"
