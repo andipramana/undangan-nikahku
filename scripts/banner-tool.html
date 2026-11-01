@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banner WhatsApp — WillCome</title>
+<style>
+  :root { --bg:#faf6f1; --ink:#2b2620; --mut:#7a6f66; --line:#e3d9cf; --acc:#3e5a2e; --bad:#b3261e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--ink); }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; } p.sub { margin: 0 0 20px; color: var(--mut); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px; }
+  label { display:block; font-weight:600; margin: 12px 0 4px; } label:first-child { margin-top:0; }
+  input[type=text], select, textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font:inherit; background:#fff; }
+  textarea { min-height: 64px; resize: vertical; }
+  .hint { color: var(--mut); font-size: 13px; margin: 4px 0 0; }
+  #stage { position:relative; width:100%; aspect-ratio: 1200 / 630; background:#ddd; border-radius:10px; overflow:hidden; touch-action:none; cursor:grab; }
+  #stage.empty { display:grid; place-items:center; color:var(--mut); cursor:default; }
+  #stage canvas { width:100%; height:100%; display:block; }
+  .row { display:flex; gap:12px; align-items:center; margin-top:10px; }
+  .row input[type=range] { flex:1; }
+  button { font:inherit; font-weight:700; border:0; border-radius:10px; padding:12px 18px; cursor:pointer; background:var(--acc); color:#fff; }
+  button.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  #msg { margin-top: 12px; white-space: pre-wrap; font-size: 14px; }
+  #msg.err { color: var(--bad); } #msg.ok { color: var(--acc); }
+  .wa { display:grid; grid-template-columns: 1fr; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#f0f0f0; max-width:360px; }
+  .wa img { width:100%; display:block; aspect-ratio:1200/630; object-fit:cover; background:#ccc; }
+  .wa div { padding: 8px 10px; background:#e7f3df; } .wa b { display:block; } .wa small { color:#555; display:block; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Banner WhatsApp</h1>
+  <p class="sub">Ubah banner preview link undangan tiap client. Hasilnya langsung di-commit dan di-push ke GitHub.</p>
+
+  <div class="card">
+    <label for="slug">Client (slug)</label>
+    <input id="slug" type="text" list="slugs" placeholder="mis. anny-dan-idris" autocomplete="off" spellcheck="false">
+    <datalist id="slugs"></datalist>
+    <p class="hint">Pilih dari daftar client yang sudah punya banner, atau ketik slug client baru. Banner client lain tidak tersentuh.</p>
+
+    <label for="title">Judul</label>
+    <input id="title" type="text" placeholder="Undangan Pernikahan Anny &amp; Idris">
+    <label for="desc">Deskripsi</label>
+    <textarea id="desc" placeholder="Dengan penuh syukur, kami mengundang Anda di hari bahagia kami, 15 Desember 2026."></textarea>
+  </div>
+
+  <div class="card">
+    <label for="file">Foto</label>
+    <input id="file" type="file" accept="image/*">
+    <p class="hint">Geser foto untuk mengatur posisi, geser slider (atau scroll mouse) untuk zoom. Frame ini persis ukuran banner WhatsApp (1200×630, rasio 1,91:1).</p>
+    <div id="stage" class="empty" style="margin-top:10px">Pilih foto dulu</div>
+    <div class="row"><span>Zoom</span><input id="zoom" type="range" min="1" max="4" step="0.01" value="1" disabled></div>
+  </div>
+
+  <div class="card">
+    <b>Contoh tampilan di WhatsApp</b>
+    <div class="wa" style="margin-top:8px"><img id="pimg" alt=""><div><b id="ptitle">Judul</b><small id="pdesc">Deskripsi</small><small>willcome.my.id</small></div></div>
+  </div>
+
+  <button id="save" disabled>Simpan &amp; push ke GitHub</button>
+  <button id="clear" class="ghost" type="button">Reset</button>
+  <div id="msg"></div>
+</main>
+
+<script>
+const OUT_W = 1200, OUT_H = 630;
+const $ = (id) => document.getElementById(id);
+const stage = $("stage"), zoomEl = $("zoom");
+let img = null, scale = 1, minScale = 1, ox = 0, oy = 0, canvas = null;
+
+const say = (t, cls) => { const m = $("msg"); m.textContent = t || ""; m.className = cls || ""; };
+
+function fit() { // skala minimum supaya foto menutupi frame, lalu jaga agar tidak keluar frame
+  minScale = Math.max(OUT_W / img.width, OUT_H / img.height);
+  scale = Math.max(scale, minScale);
+  ox = Math.min(0, Math.max(OUT_W - img.width * scale, ox));
+  oy = Math.min(0, Math.max(OUT_H - img.height * scale, oy));
+}
+function draw() {
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ddd"; ctx.fillRect(0, 0, OUT_W, OUT_H);
+  ctx.drawImage(img, ox, oy, img.width * scale, img.height * scale);
+  $("pimg").src = canvas.toDataURL("image/jpeg", 0.6);
+}
+function setZoomFromScale() { zoomEl.value = String(scale / minScale); }
+function zoomTo(z, cx = OUT_W / 2, cy = OUT_H / 2) { // zoom ke titik (cx,cy) frame
+  const next = Math.max(minScale, Math.min(minScale * 4, minScale * z));
+  const k = next / scale;
+  ox = cx - (cx - ox) * k; oy = cy - (cy - oy) * k; scale = next;
+  fit(); draw(); setZoomFromScale();
+}
+
+$("file").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const url = URL.createObjectURL(f);
+  const im = new Image();
+  im.onload = () => {
+    img = im; scale = 0; minScale = Math.max(OUT_W / im.width, OUT_H / im.height); scale = minScale;
+    ox = (OUT_W - im.width * scale) / 2; oy = (OUT_H - im.height * scale) / 3; // sedikit ke atas: wajah biasanya di sepertiga atas
+    fit();
+    stage.className = ""; stage.textContent = "";
+    canvas = document.createElement("canvas"); canvas.width = OUT_W; canvas.height = OUT_H; stage.appendChild(canvas);
+    zoomEl.disabled = false; zoomEl.value = "1";
+    bindDrag(); draw(); updateSave(); say("");
+  };
+  im.onerror = () => say("Berkas bukan gambar yang bisa dibaca.", "err");
+  im.src = url;
+});
+
+function bindDrag() {
+  let drag = null;
+  const rect = () => stage.getBoundingClientRect();
+  const k = () => OUT_W / rect().width;
+  stage.onpointerdown = (e) => { drag = { x: e.clientX, y: e.clientY, ox, oy }; stage.setPointerCapture(e.pointerId); stage.style.cursor = "grabbing"; };
+  stage.onpointermove = (e) => { if (!drag) return; ox = drag.ox + (e.clientX - drag.x) * k(); oy = drag.oy + (e.clientY - drag.y) * k(); fit(); draw(); };
+  stage.onpointerup = stage.onpointercancel = () => { drag = null; stage.style.cursor = "grab"; };
+  stage.onwheel = (e) => { e.preventDefault(); const r = rect(); zoomTo((scale / minScale) * (e.deltaY < 0 ? 1.08 : 0.92), (e.clientX - r.left) * k(), (e.clientY - r.top) * k()); };
+}
+zoomEl.addEventListener("input", () => img && zoomTo(parseFloat(zoomEl.value)));
+
+function updatePreviewText() { $("ptitle").textContent = $("title").value || "Judul"; $("pdesc").textContent = $("desc").value || "Deskripsi"; }
+function updateSave() { $("save").disabled = !(img && /^[a-z0-9]+(-[a-z0-9]+)*$/.test($("slug").value.trim()) && $("title").value.trim() && $("desc").value.trim()); }
+["slug", "title", "desc"].forEach((id) => $(id).addEventListener("input", () => { updatePreviewText(); updateSave(); }));
+
+// Isi judul/deskripsi dari slug (bisa diubah), dan dari data client yang sudah ada.
+let known = {};
+fetch("/api/pages").then((r) => r.json()).then((list) => {
+  known = Object.fromEntries(list.map((p) => [p.slug, p]));
+  $("slugs").innerHTML = list.map((p) => `<option value="${p.slug}">`).join("");
+});
+$("slug").addEventListener("change", () => {
+  const s = $("slug").value.trim().toLowerCase(); $("slug").value = s;
+  const p = known[s];
+  if (p) { $("title").value = p.title || ""; $("desc").value = p.description || ""; }
+  else if (!$("title").value) {
+    const names = s.split("-dan-").map((x) => x.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" "));
+    if (names.length === 2) $("title").value = `Undangan Pernikahan ${names[0]} & ${names[1]}`;
+  }
+  updatePreviewText(); updateSave();
+});
+
+$("clear").addEventListener("click", () => location.reload());
+
+$("save").addEventListener("click", async () => {
+  $("save").disabled = true; say("Menyimpan & push ke GitHub… (bisa 10–30 detik)");
+  try {
+    const body = { slug: $("slug").value.trim(), title: $("title").value.trim(), description: $("desc").value.trim(), image: canvas.toDataURL("image/jpeg", 0.85) };
+    const res = await fetch("/api/save", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const out = await res.json();
+    if (!res.ok) throw new Error(out.error || "Gagal");
+    say(`Selesai.\n${out.message}\n\nLink: ${out.url}\nBanner baru aktif sekitar 1–2 menit setelah GitHub Pages selesai deploy.\nKalau link ini pernah dikirim di WhatsApp, kirim ulang dengan ?v=${out.version} di ujungnya.`, "ok");
+  } catch (e) { say(e.message, "err"); }
+  updateSave();
+});
+updatePreviewText();
+</script>
+</body>
+</html>
