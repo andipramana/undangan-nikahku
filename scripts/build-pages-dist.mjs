@@ -4,7 +4,9 @@ import path from "node:path";
 const root = process.cwd();
 const dist = path.join(root, "dist");
 const rootFiles = ["index.html", "admin.html", "admin-qr.html", "wa.html", "register.html", "404.html", "sw.js", "CNAME"];
-const routedFiles = ["home/index.html", "demo/index.html", "catin/index.html", "uput-dan-dany/index.html"];
+// Halaman share per client (banner WhatsApp) — daftar slug di scripts/share-pages.json.
+const sharePages = JSON.parse(await readFile(path.join(root, "scripts/share-pages.json"), "utf8"));
+const routedFiles = ["home/index.html", "demo/index.html", "catin/index.html", ...sharePages.map((slug) => `${slug}/index.html`)];
 
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });

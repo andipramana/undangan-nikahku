@@ -552,7 +552,8 @@ check("footer: WhatsApp Andi bisa diklik ke nomor yang benar", /href="https:\/\/
 check("footer: Instagram @a.iyow bisa diklik", /href="https:\/\/instagram\.com\/a\.iyow"/.test(html) && /@a\.iyow/.test(html));
 check("footer: tautan luar dibuka di tab baru tanpa membocorkan opener", (html.match(/target="_blank" rel="noopener"/g) || []).length >= 2);
 const pdfBytes = (await fs.readFile("assets/docs/Undangan-Digital-WillCome.pdf")).toString("latin1");
-check("brosur PDF: tautan WhatsApp & Instagram tertanam (bisa diklik)", pdfBytes.includes("wa.me/6287843267115") && pdfBytes.includes("instagram.com/a.iyow"));
+check("footer: Instagram @willcome.id bisa diklik", /href="https:\/\/instagram\.com\/willcome\.id"/.test(html) && /@willcome\.id/.test(html));
+check("brosur PDF: tautan WhatsApp & Instagram tertanam (bisa diklik)", pdfBytes.includes("wa.me/6287843267115") && pdfBytes.includes("instagram.com/a.iyow") && pdfBytes.includes("instagram.com/willcome.id"));
 check("build: catin/index.html ikut ke dist", /"catin\/index\.html"/.test(build));
 check("test dist: catin/index.html diwajibkan", /catin\/index\.html/.test(distTest));
 check("provisioning: 'catin' dicadangkan, bukan slug tenant", /slug === "catin"/.test(fn));

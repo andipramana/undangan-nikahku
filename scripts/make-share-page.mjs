@@ -27,4 +27,7 @@ swap(/<meta property="og:description" content="[^"]*">/, `<meta property="og:des
 swap(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${origin}/assets/img/social/${image}">`);
 await mkdir(slug, { recursive: true });
 await writeFile(`${slug}/index.html`, html);
+const listFile = "scripts/share-pages.json";
+const list = JSON.parse(await readFile(listFile, "utf8"));
+if (!list.includes(slug)) await writeFile(listFile, JSON.stringify([...list, slug]) + "\n");
 console.log(`ok: ${slug}/index.html`);
