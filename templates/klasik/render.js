@@ -65,6 +65,7 @@
     document.getElementById("wfl-source").textContent = `— ${cfg.opening.source} —`;
 
     document.getElementById("bride-name").textContent = cfg.couple.bride.name;
+    markLongName("bride-name");
     // "Putri ketiga dari" satu baris, "Bapak X & Ibu Y" baris berikutnya
     // (bukan tidak kepanjangan satu baris) — <br> perlu innerHTML, nama ortu
     // di-escape (esc()) karena field ini bisa diedit admin.
@@ -80,6 +81,7 @@
       `${childLine("Putri", cfg.couple.bride, "ketiga")}<br>Bapak ${esc(cfg.couple.bride.father)} &amp; Ibu ${esc(cfg.couple.bride.mother)}`;
 
     document.getElementById("groom-name").textContent = cfg.couple.groom.name;
+    markLongName("groom-name");
     document.getElementById("groom-parents").innerHTML =
       `${childLine("Putra", cfg.couple.groom, "pertama")}<br>Bapak ${esc(cfg.couple.groom.father)} &amp; Ibu ${esc(cfg.couple.groom.mother)}`;
 
@@ -271,6 +273,15 @@
 
     // Jalankan paling akhir: teks closing dan elemen dinamis sudah tersedia.
     if (window.applyVisualEditorOverrides) window.applyVisualEditorOverrides(cfg);
+  }
+
+  // Nama lengkap panjang (mis. "Nur Fitriani Juaningsih") dikecilkan agar tidak pecah dua baris.
+  function markLongName(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const n = (el.textContent || "").trim().length;
+    el.classList.toggle("couple-info__name--long", n > 14 && n <= 20);
+    el.classList.toggle("couple-info__name--xlong", n > 20);
   }
 
   function setupCalendarLink(cfg) {
