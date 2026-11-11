@@ -30,6 +30,13 @@ window.initGallery = async function () {
   function motionFor(i) {
     const cur = window.GalleryLayout.shapeAt(i, photos);
     if (cur === "full") return "pop";
+    // Baris berisi 3 foto atau lebih (mis. 3 x 1/3): semuanya masuk dari arah yang sama,
+    // bukan tengah/kanan ke kanan dan kiri ke kiri yang terlihat tidak rapi.
+    const GL = window.GalleryLayout;
+    const row = GL.rowAt(i, photos);
+    let inRow = 0;
+    for (let j = 0; j < photos.length; j++) if (GL.rowAt(j, photos) === row) inRow++;
+    if (inRow >= 3) return "slide-left";
     const prev = window.GalleryLayout.shapeAt(i - 1, photos);
     const SPAN = window.GalleryLayout.SPAN;
     return SPAN[cur] + SPAN[prev] === 12 ? "slide-right" : "slide-left";

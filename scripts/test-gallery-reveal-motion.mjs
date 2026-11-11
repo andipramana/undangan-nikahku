@@ -56,6 +56,16 @@ try {
     throw new Error(`Arah reveal salah. Didapat: ${JSON.stringify(motions)}, harusnya: ${JSON.stringify(expected)}`);
   }
 
+  // Tiga foto 1/3 dalam satu baris: semuanya satu arah.
+  await page.evaluate(async () => {
+    window.getPhotos = async () => [1, 2, 3].map((n) => ({ galleryLayout: "third", path: n + ".webp" }));
+    document.getElementById("gallery-wrapper").innerHTML = "";
+    window.initGallery();
+  });
+  await page.waitForFunction(() => document.querySelectorAll(".gallery-item").length === 3);
+  const three = await page.locator(".gallery-item").evaluateAll((els) => els.map((el) => el.dataset.reveal));
+  if (new Set(three).size !== 1 || three[0] !== "slide-left") throw new Error(`Baris 3 foto harus satu arah: ${JSON.stringify(three)}`);
+
   console.log("PASS: arah reveal third/twothirds benar berdasarkan posisi aslinya, bukan jenis bentuknya (termasuk urutan kebalik).");
 } finally {
   await browser.close();
