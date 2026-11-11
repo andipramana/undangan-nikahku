@@ -53,6 +53,13 @@
         ],
         "fields": [
           {
+            "path": "cover.eyebrow",
+            "type": "text",
+            "label": "Tulisan di atas nama",
+            "card": "Cover",
+            "placeholder": "The Wedding Of"
+          },
+          {
             "path": "subcover.enabled",
             "type": "switch",
             "label": "Tampilkan section Subcover",

@@ -121,6 +121,11 @@
     fillCoupleNames(document.getElementById("couple-names-opening"));
     fillCoupleNames(document.getElementById("couple-names-closing"));
 
+    // Tulisan kecil di atas nama (cover & Save The Date). Kosong = bawaan "The Wedding Of"
+    // dari markup; client bisa menggantinya di Cover & Sampul (mis. "Hari Bahagia").
+    const eyebrowText = String((cfg.cover && cfg.cover.eyebrow) || "").trim();
+    if (eyebrowText) document.querySelectorAll(".eyebrow-wrap .eyebrow").forEach((el) => { el.textContent = eyebrowText; });
+
     // Monogram di eyebrow cover & pembuka: huruf pertama nama panggilan
     // (mempelai wanita = --m, pria = --a). Dulu "M" dan "A" tertulis mati di
     // markup.html sehingga semua client menampilkan inisial Mita & Andi.
