@@ -177,7 +177,7 @@ async function guest(slug, surface) {
   const g = await guest("julia-dan-kevin", "admin");
   await g.page.evaluate(() => window.WeddingPwa.setAppIcon({ path: "julia-dan-kevin/icons", version: 9 }));
   const r = await g.read();
-  check("panel TIDAK memakai ikon unggahan undangan (tetap ikon panel)", r.icons.every((s) => /\/assets\/icons\/icon-/.test(s)), r.icons.join(" | "));
+  check("panel memakai ikon unggahan/inisial client (bukan segel root)", r.icons.every((s) => /\/julia-dan-kevin\/icons\/icon-/.test(s)) && /\/julia-dan-kevin\/icons\/icon-192\.png/.test(r.fav), r.icons.join(" | ") + " | " + r.fav);
   await g.ctx.close();
 }
 

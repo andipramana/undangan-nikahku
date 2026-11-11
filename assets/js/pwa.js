@@ -78,8 +78,10 @@
    * (URL absolut — server WebAPK mengunduh dari URL-nya); versi di query
    * membuang cache saat client mengganti ikon. */
   function iconUrls() {
-    if (isGuest && appIcon && typeof window.photoUrl === "function") {
-      const u = (name) => `${window.photoUrl(appIcon.path + "/" + name)}?v=${encodeURIComponent(appIcon.version)}`;
+    // Halaman panel tidak memuat window.photoUrl milik undangan; pakai versi AdminAPI.
+    const photoUrl = window.photoUrl || (window.AdminAPI && window.AdminAPI.photoUrl);
+    if (appIcon && typeof photoUrl === "function") {
+      const u = (name) => `${photoUrl(appIcon.path + "/" + name)}?v=${encodeURIComponent(appIcon.version)}`;
       return { i192: u("icon-192.png"), i512: u("icon-512.png"), maskable: u("icon-maskable-512.png"), apple: u("apple-touch-icon.png") };
     }
     const base = `${origin}/assets/icons/`;
@@ -94,12 +96,12 @@
    * root memakai ikon netral — favicon statis di index.html adalah segel milik
    * root dan tidak boleh tampil di undangan client lain. */
   function applyPageIcons() {
-    if (!isGuest) return;
     const set = iconUrls();
     const fav = document.querySelector('link[rel="icon"]');
+    // favicon.png statis = segel milik root; panel client lain tidak boleh memakainya.
     if (fav && (appIcon || tenant.slug !== "root")) { fav.type = "image/png"; fav.href = set.i192; }
     const apple = document.querySelector('link[rel="apple-touch-icon"]');
-    if (apple) apple.href = set.apple;
+    if (apple && (isGuest || appIcon)) apple.href = set.apple;
   }
 
   function buildManifest() {

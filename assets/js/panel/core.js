@@ -127,6 +127,14 @@
 
   const tenant = window.TenantContext || { slug: "root", invitationId: null, setInvitation() {} };
 
+  /** Ikon aplikasi/favicon panel mengikuti inisial client (content.appIcon), bukan segel root. */
+  function applyAppIcon(invitationId) {
+    if (!window.WeddingPwa) return;
+    Promise.resolve(sb.from("site_content").select("appIcon:content->appIcon").eq("invitation_id", invitationId).eq("id", 1).maybeSingle())
+      .then(({ data }) => { if (data && data.appIcon) window.WeddingPwa.setAppIcon(data.appIcon); })
+      .catch(() => {});
+  }
+
   async function requireTenantAccess(allowedRoles) {
     const { data, error } = await query(
       sb.rpc("get_my_invitation_access", { p_slug: tenant.slug }),
