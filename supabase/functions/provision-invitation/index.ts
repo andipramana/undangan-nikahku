@@ -11,6 +11,49 @@ const headers = {
 const fail = (message: string, status = 400) => new Response(JSON.stringify({ error: message }), { status, headers });
 const clean = (value: unknown) => String(value || "").trim();
 
+/* Template pesan WhatsApp bawaan client, disusun dari data acara di site_content —
+   supaya admin client tidak jatuh ke teks bawaan panel yang berisi tanggal & venue
+   milik root. Token ${namaCPW}/${namaCPP}/${CPW}/${CPP}/${link} sengaja dibiarkan
+   literal: panel WA menggantinya saat tombol Kirim ditekan. Mengembalikan "" bila
+   data acara belum lengkap (tanggal atau venue kosong) — panel lalu memakai bawaannya. */
+const MONTHS_ID = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const buildWaTemplate = (content: Record<string, any>): string => {
+  const ev = content?.event || {};
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ev.dateISO || ""));
+  if (!m) return "";
+  const date = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  const dateLine = `${DAYS_ID[date.getUTCDay()]}, ${Number(m[3])} ${MONTHS_ID[Number(m[2]) - 1]} ${m[1]}`;
+  const time = (s: any, e: any) => { const a = String(s || "").trim(), b = String(e || "").trim(); return a ? (b ? `${a} - ${b} WIB` : `${a} WIB`) : ""; };
+  const venueOf = (x: any) => ({ name: String(x?.venue?.name || "").trim(), address: String(x?.venue?.address || "").trim() });
+  const akad = venueOf(ev.akad), resepsi = venueOf(ev.resepsi);
+  const akadTime = time(ev.akad?.start, ev.akad?.end), resTime = time(ev.resepsi?.start, ev.resepsi?.end);
+  if (!akad.name && !resepsi.name) return "";
+  const same = akad.name === resepsi.name && akad.address === resepsi.address;
+  const place = (v: { name: string; address: string }) => [v.name && `📍 ${v.name}`, v.address].filter(Boolean).join("\n");
+  const lines: string[] = [`🗓️ ${dateLine}`];
+  if (akadTime) lines.push(`🕐 Akad Nikah: ${akadTime}`);
+  if (resTime) lines.push(`🕐 Resepsi: ${resTime}`);
+  if (same || !resepsi.name) lines.push(place(akad.name ? akad : resepsi));
+  else {
+    if (akad.name) lines.push(`Akad Nikah\n${place(akad)}`);
+    lines.push(`Resepsi\n${place(resepsi)}`);
+  }
+  return [
+    "Assalamu'alaikum warahmatullahi wabarakatuh.",
+    "Dengan memohon rahmat dan ridho Allah SWT, kami mengundang Bapak/Ibu/Saudara/i untuk hadir pada pernikahan kami:",
+    "*${namaCPW} & ${namaCPP}*",
+    lines.join("\n"),
+    "Klik link undangan berikut:",
+    "${link}",
+    "Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila berkenan hadir dan memberikan doa restu.",
+    "Atas perhatian serta doa baik yang diberikan, kami sampaikan terima kasih.",
+    "Mohon konfirmasi kehadiran melalui form RSVP pada undangan.",
+    "Wassalamu'alaikum warahmatullahi wabarakatuh.",
+    "Kami yang berbahagia,\n🤍 ${CPW} & ${CPP}"
+  ].join("\n\n");
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (req.method !== "POST") return fail("Method tidak diizinkan", 405);
@@ -49,10 +92,17 @@ Deno.serve(async (req) => {
     if (readError || !row) throw new Error("Konten client belum siap untuk diisi dari draft");
     const content = structuredClone(row.content) as Record<string, any>;
 
+    // Pengisi form sering mengetik nama orang tua dengan CAPSLOCK ("ACHMAD RACHMAT"). Nama yang
+    // SELURUHNYA huruf besar dirapikan jadi huruf awal kapital; campuran (mis. "Bapak H. Dedi") tidak disentuh.
+    const tidy = (value: string) => {
+      const v = value.trim();
+      if (!/[A-Z]/.test(v) || v !== v.toUpperCase()) return v;
+      return v.toLowerCase().replace(/(^|[\s.'-])([a-z])/g, (_m, sep, ch) => sep + ch.toUpperCase());
+    };
     const person = (src: any, base: any) => ({
       ...(base || {}),
-      name: str(src?.name, 80) || base?.name || "", nickname: str(src?.nickname, 30) || base?.nickname || "",
-      father: str(src?.father, 80), mother: str(src?.mother, 80),
+      name: tidy(str(src?.name, 80)) || base?.name || "", nickname: str(src?.nickname, 30) || base?.nickname || "",
+      father: tidy(str(src?.father, 80)), mother: tidy(str(src?.mother, 80)),
       childOrder: str(src?.childOrder, 20), instagram: str(src?.instagram, 40).replace(/^@+/, "")
     });
     content.couple = { ...(content.couple || {}), groom: person(p.couple?.groom, content.couple?.groom), bride: person(p.couple?.bride, content.couple?.bride) };
@@ -437,7 +487,14 @@ Deno.serve(async (req) => {
     if (cloneSource) await applyClone(cloneSource, invitationId, slug, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"));
     else await applyTemplate(invitationId, clean(body.displayName || slug), clean(body.brideName || "Mempelai Wanita"), clean(body.groomName || "Mempelai Pria"), templateId);
     if (draft) await applyDraft(invitationId, draft);
-    const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://willcome.my.id/${slug}/` }); if (settingError) throw new Error(settingError.message);
+    // Template WA disusun dari data acara hanya bila data asli sudah ada (draft atau klon);
+    // client kosong tetap memakai bawaan panel sampai datanya diisi.
+    let waTemplate = "";
+    if (draft || cloneSource) {
+      const { data: finalRow } = await admin.from("site_content").select("content").eq("invitation_id", invitationId).eq("id", 1).maybeSingle();
+      if (finalRow?.content) waTemplate = buildWaTemplate(finalRow.content as Record<string, any>);
+    }
+    const { error: settingError } = await admin.from("wa_settings").insert({ invitation_id: invitationId, id: 1, invitation_link: `https://willcome.my.id/${slug}/`, ...(waTemplate ? { default_template: waTemplate } : {}) }); if (settingError) throw new Error(settingError.message);
   } catch (error) { await rollback(); return fail(error instanceof Error ? error.message : "Provisioning gagal"); }
   return new Response(JSON.stringify({ invitation: created, urls: { invitation: `/${slug}/`, admin: `/${slug}/admin/`, adminQr: `/${slug}/admin-qr/` } }), { headers });
 });
