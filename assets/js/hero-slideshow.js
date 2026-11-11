@@ -145,6 +145,10 @@ window.initHeroSlideshows = async function () {
       const rawSrc = slide.path && !slide.webp ? window.photoUrl(slide.path) : slide.webp || slide.jpg;
       const src = rawSrc && rawSrc.startsWith("assets/img/") ? rawSrc.replace(/\.(jpe?g|png)$/i, ".webp") : rawSrc;
       std2Media.style.backgroundImage = `url("${src}")`;
+      // Posisi & zoom yang diatur admin (sebelumnya diabaikan).
+      std2Media.style.setProperty("--fx", `${slide.focalX ?? 50}%`);
+      std2Media.style.setProperty("--fy", `${slide.focalY ?? 50}%`);
+      std2Media.style.setProperty("--zoom", String(slide.zoom ?? 1));
     }
   }
 };

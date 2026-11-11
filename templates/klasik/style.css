@@ -217,7 +217,13 @@ a { color: inherit; }
 }
 .section-hero--short { min-height: 90dvh; }
 #closing { scroll-snap-align: none; }
-.section-hero--static-bg .hero-media { background-size: cover; background-position: center; }
+.section-hero--static-bg .hero-media {
+  background-size: cover;
+  /* Posisi & zoom dari admin (foto std2): diisi hero-slideshow.js lewat --fx/--fy/--zoom. */
+  background-position: var(--fx, 50%) var(--fy, 50%);
+  transform-origin: var(--fx, 50%) var(--fy, 50%);
+  transform: scale(var(--zoom, 1));
+}
 .hero-media { position: absolute; inset: 0; overflow: hidden; }
 .hero-media img {
   width: 100%; height: 100%;
